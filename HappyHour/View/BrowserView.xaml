@@ -1,0 +1,54 @@
+﻿<UserControl x:Class="HappyHour.View.BrowserView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:cefSharp="clr-namespace:CefSharp.Wpf;assembly=CefSharp.Wpf"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="2">
+                <Button Style="{DynamicResource ModernButtonStyle2}"
+                        Command="{Binding CmdBackward}">
+                    <Path Stretch="Uniform"
+                        Data="{Binding Source={StaticResource ArrowLeftIcon}, Path=Data}"
+                        Fill="{Binding Path=Foreground, RelativeSource=
+                            {RelativeSource AncestorType={x:Type Button}}}" />
+                </Button>
+                 <Button Style="{DynamicResource ModernButtonStyle2}"
+                        Command="{Binding CmdForward}">
+                    <Path Stretch="Uniform"
+                        Data="{Binding Source={StaticResource ArrowRightIcon}, Path=Data}"
+                        Fill="{Binding Path=Foreground, RelativeSource=
+                            {RelativeSource AncestorType={x:Type Button}}}" />
+                </Button>
+                 <Button Style="{DynamicResource ModernButtonStyle2}"
+                         Command="{Binding CmdReloadUrl}">
+                    <Path Stretch="Uniform"
+                        Data="{Binding Source={StaticResource RefreshIcon}, Path=Data}"
+                        Fill="{Binding Path=Foreground, RelativeSource=
+                            {RelativeSource AncestorType={x:Type Button}}}" />
+                </Button>
+            </StackPanel>
+            <TextBox Grid.Column="1" KeyUp="TextBox_KeyEnterUpdate"
+                     Text="{Binding Address}"/>
+        </Grid>
+        <cefSharp:ChromiumWebBrowser x:Name="browser" Grid.Row="1"
+            WebBrowser="{Binding WebBrowser, Mode=OneWayToSource}"
+            Title="{Binding Title, Mode=OneWayToSource}"
+            Address="{Binding Address, Mode=TwoWay}"
+            UseLayoutRounding="True"
+            RenderOptions.BitmapScalingMode="NearestNeighbor">
+        </cefSharp:ChromiumWebBrowser>            
+    </Grid>
+</UserControl>

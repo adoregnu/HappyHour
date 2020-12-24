@@ -1,0 +1,21 @@
+﻿<UserControl x:Class="HappyHour.View.TextView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:ae="http://icsharpcode.net/sharpdevelop/avalonedit"
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:behavior="clr-namespace:HappyHour.View.Behavior"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Border BorderBrush="#FFA6CCF2" BorderThickness="1">
+        <ae:TextEditor Document="{Binding Document, UpdateSourceTrigger=PropertyChanged}"
+                           IsReadOnly="True" FontFamily="Courier New"
+                           ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                           ScrollViewer.VerticalScrollBarVisibility="Auto">
+            <i:Interaction.Behaviors>
+                <behavior:AvalonEditBehavior/>
+            </i:Interaction.Behaviors>
+        </ae:TextEditor>
+    </Border>
+</UserControl>

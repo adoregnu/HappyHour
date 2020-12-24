@@ -1,0 +1,79 @@
+﻿<UserControl x:Class="HappyHour.View.SpiderView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:cefSharp="clr-namespace:CefSharp.Wpf;assembly=CefSharp.Wpf"
+             xmlns:conv="clr-namespace:HappyHour.Converter"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <conv:BoardTypeVisibilityConverter x:Key="BoardVisibilityConverter"/>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="center">
+            <ComboBox ItemsSource="{Binding Spiders}" Width="150"
+                         SelectedItem="{Binding SelectedSpider}"/>
+
+            <Button Style="{DynamicResource ModernButtonStyle2}"
+                    Command="{Binding CmdReloadUrl}">
+                <Path Stretch="Uniform"
+                    Data="{Binding Source={StaticResource RefreshIcon}, Path=Data}"
+                    Fill="{Binding Path=Foreground, RelativeSource=
+                        {RelativeSource AncestorType={x:Type Button}}}" />
+            </Button>
+            <Button Style="{DynamicResource ModernButtonStyle2}"
+                    Command="{Binding CmdBack}">
+                <Path Stretch="Uniform"
+                    Data="{Binding Source={StaticResource ArrowLeftIcon}, Path=Data}"
+                    Fill="{Binding Path=Foreground, RelativeSource=
+                        {RelativeSource AncestorType={x:Type Button}}}" />
+            </Button>
+            <StackPanel Orientation="Horizontal" Visibility="{Binding SelectedSpider,
+                    Converter={StaticResource BoardVisibilityConverter},
+                    ConverterParameter=sehuatang}">
+                <ComboBox Margin="5,0,0,0" ItemsSource="{Binding Boards}" Width="100"
+                          SelectedItem="{Binding SelectedBoard}"/>
+                <TextBox Text="{Binding NumPage}" Width="50" Margin="5,0,0,0"/>
+                <CheckBox IsChecked="{Binding StopOnExistingId}" VerticalAlignment="Center">
+                    <TextBlock Text="Stop on existing Id"/>
+                </CheckBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Visibility="{Binding SelectedSpider,
+                    Converter={StaticResource BoardVisibilityConverter},
+                    ConverterParameter=others}">
+                <TextBlock Margin="5,0,0,0" Text="Product ID:" VerticalAlignment="Center"/>
+                <TextBox Text="{Binding Pid}" Width="80" Margin="5,0,0,0"/>
+            </StackPanel>
+            <Button Style="{DynamicResource ModernButtonStyle2}"
+                    Command="{Binding CmdStart}" Margin="5,0,0,0">
+                <Path Stretch="Uniform"
+                    Data="{Binding Source={StaticResource SearchStartIcon}, Path=Data}"
+                    Fill="{Binding Path=Foreground, RelativeSource=
+                        {RelativeSource AncestorType={x:Type Button}}}" />
+            </Button>
+            <Button Style="{DynamicResource ModernButtonStyle2}"
+                    Command="{Binding CmdStop}">
+                <Path Stretch="Uniform"
+                    Data="{Binding Source={StaticResource SearchStopIcon}, Path=Data}"
+                    Fill="{Binding Path=Foreground, RelativeSource=
+                        {RelativeSource AncestorType={x:Type Button}}}" />
+            </Button>
+<!--
+            <Button Content="Start" Command="{Binding CmdStart}" Margin="5,0,0,0"/>
+            <Button Content="Stop" Command="{Binding CmdStop}" Margin="5,0,0,0"/>
+-->
+        </StackPanel>
+        <cefSharp:ChromiumWebBrowser x:Name="browser" Grid.Row="1"
+            WebBrowser="{Binding WebBrowser, Mode=OneWayToSource}"
+            Title="{Binding Title, Mode=OneWayToSource}"
+            Address="{Binding Address, Mode=TwoWay}"
+            UseLayoutRounding="True"
+            RenderOptions.BitmapScalingMode="NearestNeighbor">
+        </cefSharp:ChromiumWebBrowser>
+    </Grid>
+</UserControl>

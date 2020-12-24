@@ -1,0 +1,89 @@
+﻿<Window x:Class="HappyHour.View.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:md="https://github.com/fantasticfiasco/mvvm-dialogs"
+        xmlns:cmd="http://www.galasoft.ch/mvvmlight"
+        xmlns:view="clr-namespace:HappyHour.View"
+        mc:Ignorable="d"
+        md:DialogServiceViews.IsRegistered="True"
+        Title="Scrapper" Height="1000" Width="2000"
+        DataContext="{Binding Source={StaticResource Locator}, Path=MainWindow}">
+    <!--
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="PreviewKeyDown">
+            <cmd:EventToCommand
+                Command="{Binding KeyDownCommand}"
+                PassEventArgsToCommand="True" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+-->
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
+        <ToolBar>
+            <Button Style="{DynamicResource ModernButtonStyle3}"
+                    Command="{Binding CmdFileToFolder}">
+                <Path Stretch="Uniform"
+                    Data="{Binding Source={StaticResource FileMoveIcon}, Path=Data}"
+                    Fill="{Binding Path=Foreground, RelativeSource=
+                        {RelativeSource AncestorType={x:Type Button}}}" />
+                <Button.ToolTip>
+                    <TextBlock Text="Move Media files to folder of it's name"/>
+                </Button.ToolTip>
+            </Button>
+
+            <Button Style="{DynamicResource ModernButtonStyle3}"
+                    Command="{Binding CmdActorEdtor}" Margin="2,0,0,0">
+                <Path Stretch="Uniform"
+                    Data="{Binding Source={StaticResource PeopleSearchIcon}, Path=Data}"
+                    Fill="{Binding Path=Foreground, RelativeSource=
+                        {RelativeSource AncestorType={x:Type Button}}}" />
+                <Button.ToolTip>
+                    <TextBlock Text="View Actors by order of alphabet"/>
+                </Button.ToolTip>
+            </Button>
+<!--
+            <ToggleButton
+                Style="{DynamicResource ModernToggleButtonStyle2}"
+                IsChecked="{Binding SpiderEnabled, Mode=TwoWay}"
+                ToolTip="Enable Spider">
+                <Path Stretch="Uniform"
+                      Data="{Binding Source={StaticResource SpiderIcon}, Path=Data}"
+                      Fill="{Binding Path=Foreground, RelativeSource=
+                        {RelativeSource AncestorType={x:Type ToggleButton}}}"/>
+            </ToggleButton>
+
+            <ToggleButton
+                Style="{DynamicResource ModernToggleButtonStyle2}"
+                IsChecked="{Binding NasEnabled, Mode=TwoWay}"
+                ToolTip="Enable Spider">
+                <Path Stretch="Uniform"
+                      Data="{Binding Source={StaticResource NasIcon}, Path=Data}"
+                      Fill="{Binding Path=Foreground, RelativeSource=
+                        {RelativeSource AncestorType={x:Type ToggleButton}}}"/>
+            </ToggleButton>
+-->
+        </ToolBar>
+        <view:DockView Grid.Row="1" x:Name="Dock"/>
+        <StatusBar  Grid.Row="2">
+            <StatusBarItem>
+                <TextBlock Text="{Binding Status, Mode=OneWay}"/>
+            </StatusBarItem>
+            <!--
+            <StatusBarItem HorizontalAlignment="Right">
+                <Grid>
+                    <ProgressBar Width="200" Name="pbStatus" Minimum="0" Maximum="100"
+                                 Value="{Binding CurrProgress, Mode=OneWay}"/>
+                    <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
+                        Text="{Binding ElementName=pbStatus, Path=Value, StringFormat={}{0:0}%}"/>
+                </Grid>
+            </StatusBarItem>
+-->
+        </StatusBar>
+    </Grid>
+</Window>

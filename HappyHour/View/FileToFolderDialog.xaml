@@ -1,0 +1,57 @@
+﻿<Window x:Class="HappyHour.View.FileToFolderDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:HappyHour.ViewModel"
+        xmlns:lm="clr-namespace:Itenso.Windows.Controls.ListViewLayout;assembly=Itenso.Windows.Controls.ListViewLayout"
+        mc:Ignorable="d"
+        WindowStartupLocation="CenterOwner"
+        Title="FileToFolderDialog" Height="450" Width="600"
+        d:DataContext="{d:DesignInstance {x:Type local:FileToFolderViewModel}}">
+    <Window.Resources>
+        <DataTemplate x:Key="SourceTemplate">
+            <TextBlock Text="{Binding SourceName}" TextAlignment="Right"/>
+        </DataTemplate>        
+        <DataTemplate x:Key="TargetTemplate">
+            <TextBox Text="{Binding TargetPath, Mode=TwoWay}"/>
+        </DataTemplate>        
+    </Window.Resources>
+    <DockPanel VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+        <Grid DockPanel.Dock="Top">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="Path :" Margin="5,5,0,5"/>
+            <TextBox Grid.Column="1" Text="{Binding MediaPath, Mode=TwoWay}" Margin="5"/>
+            <TextBlock Grid.Column="2" Text="File Pattern :" Margin="5,5,0,5"/>
+            <TextBox Grid.Column="3" Text="{Binding Pattern, Mode=TwoWay}" Margin="5"/>
+        </Grid>
+        <StackPanel DockPanel.Dock="Right">
+            <Button Margin="5,0,5,0" Command="{Binding CmdPreview}">Preview</Button> 
+            <Button Margin="5,5,5,0" Command="{Binding CmdRename}">Rename</Button> 
+            <Button Margin="5,5,5,0" IsCancel="True">Close</Button> 
+        </StackPanel>
+        <ListView Margin="5,0,0,5" ItemsSource="{Binding Files}"
+                  lm:ListViewLayoutManager.Enabled="true">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    <Setter Property="BorderBrush" Value="LightGray" />
+                    <Setter Property="BorderThickness" Value="0,0,0,1" />
+                </Style>
+            </ListView.ItemContainerStyle>
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="File" lm:ProportionalColumn.Width="1"
+                            CellTemplate="{StaticResource SourceTemplate}"/>
+                    <GridViewColumn Header="ToFolder" lm:ProportionalColumn.Width="1"
+                            CellTemplate="{StaticResource TargetTemplate}"/>
+                </GridView>
+            </ListView.View>
+        </ListView>
+    </DockPanel>
+</Window>

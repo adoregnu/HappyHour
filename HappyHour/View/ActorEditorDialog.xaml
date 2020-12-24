@@ -1,0 +1,199 @@
+﻿<Window x:Class="HappyHour.View.ActorEditorDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+        xmlns:bh="clr-namespace:HappyHour.View.Behavior"
+        xmlns:md="https://github.com/fantasticfiasco/mvvm-dialogs"
+        xmlns:converter="clr-namespace:HappyHour.Converter"
+        mc:Ignorable="d"
+        WindowStartupLocation="CenterOwner"
+        md:DialogServiceViews.IsRegistered="True"
+        Title="View Actors" Height="600" Width="1060">
+    <Window.Resources>
+        <converter:SelectedItem2Visibility x:Key="SelectedCount2Visibility"/>
+
+        <ControlTemplate x:Key="_controlTpl" TargetType="ListBoxItem">
+            <Border Name="_Border" Padding="2" SnapsToDevicePixels="true"
+                    Width="128" Height="128">
+                <Image HorizontalAlignment="Center"
+                       Source="{Binding ., Converter={StaticResource PathToImageConverter}}"/>
+            </Border>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsSelected" Value="true">
+                    <Setter TargetName="_Border" Property="Background" Value="Blue"/>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+        <ContextMenu x:Key="_actorListCMenu">
+            <MenuItem
+                Header="Merge Actors"
+                CommandParameter="{Binding PlacementTarget.Tag.SelectedItems,
+                    RelativeSource={RelativeSource FindAncestor,
+                    AncestorType=ContextMenu}}"
+                Command="{Binding PlacementTarget.Tag.DataContext.CmdMergeActors,
+                    RelativeSource={RelativeSource FindAncestor,
+                    AncestorType=ContextMenu}}"/>
+            <MenuItem
+                Header="Delete"
+                Command="{Binding PlacementTarget.Tag.DataContext.CmdDeleteActor,
+                    RelativeSource={RelativeSource FindAncestor,
+                    AncestorType=ContextMenu}}"/>
+            <MenuItem
+                Header="Change Pciture"
+                Command="{Binding PlacementTarget.Tag.DataContext.CmdChangePicture,
+                    RelativeSource={RelativeSource FindAncestor,
+                    AncestorType=ContextMenu}}"/>
+        </ContextMenu>
+        <ContextMenu x:Key="_namesOfActorCMenu">
+            <MenuItem
+                Header="Delete"
+                Command="{Binding PlacementTarget.Tag.CmdDelNameOfActor,
+                    RelativeSource={RelativeSource FindAncestor,
+                    AncestorType=ContextMenu}}" />
+        </ContextMenu>
+    </Window.Resources>
+    <DockPanel>
+        <Grid DockPanel.Dock="Top" Margin="5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="165"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="Picture : " VerticalAlignment="Center"/>
+            <TextBox Grid.Column="1" Text="{Binding PicturePath}"/>
+            <Button Grid.Column="2" Margin="5,0,5,0"
+                    Style="{StaticResource ModernButtonStyle2}"
+                    Command="{Binding CmdBrowsePicture}">
+                <Path Stretch="Uniform"
+                      Data="{Binding Source={StaticResource ImgSearchIcon}, Path=Data}"
+                      Fill="{Binding Path=Foreground, RelativeSource=
+                            {RelativeSource AncestorType={x:Type Button}}}"/>
+                <Button.ToolTip>
+                    <TextBlock Text="Browse picture"/>
+                </Button.ToolTip>
+            </Button>
+            <TextBlock Grid.Column="3" Text="Name : " Margin="5,0,0,0"
+                       VerticalAlignment="Center"/>
+            <TextBox Grid.Column="4" Text="{Binding ActorName}"/>
+            <Button Grid.Column="5" Margin="5,0,0,0"
+                    Style="{StaticResource ModernButtonStyle2}"
+                    Command="{Binding CmdAddNewActor}">
+                <Path Stretch="Uniform"
+                      Data="{Binding Source={StaticResource AddPersonIcon}, Path=Data}"
+                      Fill="{Binding Path=Foreground, RelativeSource=
+                            {RelativeSource AncestorType={x:Type Button}}}"/>
+                <Button.ToolTip>
+                    <TextBlock Text="Add New Actor"/>
+                </Button.ToolTip>
+            </Button>
+        </Grid>
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal"
+                    HorizontalAlignment="Center">
+            <Button Content="Save" Margin="0,0,5,5" Padding="2"
+                    Command="{Binding CmdSave}"/>
+            <Button Content="Close" Margin="0,0,5,5" Padding="2"
+                    IsCancel="True"  Click="Close"/>
+        </StackPanel>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Grid Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <WrapPanel Grid.Row="0" Orientation="Horizontal"
+                           HorizontalAlignment="Center">
+                    <ItemsControl Grid.Row="1" ItemsSource="{Binding ActorInitials}">
+                        <ItemsControl.ItemsPanel>
+                            <!-- specify the panel that is the container for your items -->
+                            <ItemsPanelTemplate>
+                                <UniformGrid Rows="1"  HorizontalAlignment="Left" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <!-- specify the template used to render each item -->
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <ToggleButton
+                                    Margin="5,0,0,5"
+                                    Content="{Binding Initial}"
+                                    IsChecked="{Binding IsChecked}">
+                                </ToggleButton>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </WrapPanel>
+
+                 <ListBox Margin="5,0,0,5" Grid.Row="1"
+                    SelectionMode="Extended" x:Name="_actorListbox"
+                    ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                    ItemsPanel="{StaticResource ImagePanelTemplate}"
+                    ItemsSource="{Binding Actors}"
+                    SelectedItem="{Binding SelectedActor}">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="MouseDoubleClick">
+                            <i:InvokeCommandAction Command="{Binding CmdDoubleClick}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                    <i:Interaction.Behaviors>
+                        <bh:ListboxBehavior/>
+                    </i:Interaction.Behaviors>
+                    <ListBox.Resources>
+                        <Style TargetType="{x:Type ListBoxItem}">
+                            <Setter Property="Tag"
+                                    Value="{Binding ElementName=_actorListbox}"/>
+                            <Setter Property="ContextMenu"
+                                    Value="{StaticResource _actorListCMenu}"/>
+                            <Setter Property="Template"
+                                    Value="{StaticResource _controlTpl}"/>
+                        </Style>
+                    </ListBox.Resources>
+                </ListBox>
+            </Grid>
+            <DockPanel Grid.Column="1" Width="200">
+                <DockPanel DockPanel.Dock="Top">
+                    <DockPanel DockPanel.Dock="Top" Margin="5,0,5,5">
+                        <Button DockPanel.Dock="Right" Margin="5,0,0,0"
+                                Style="{StaticResource ModernButtonStyle2}"
+                                Command="{Binding CmdAddNewName}">
+                            <Path Stretch="Uniform"
+                                  Data="{Binding Source={StaticResource AddTextIcon}, Path=Data}"
+                                  Fill="{Binding Path=Foreground, RelativeSource=
+                                        {RelativeSource AncestorType={x:Type Button}}}"/>
+                            <Button.ToolTip>
+                                <TextBlock Text="Append Actor Name"/>
+                            </Button.ToolTip>
+                        </Button>
+                        <TextBox Text="{Binding NewName}"/>
+                    </DockPanel>
+                    <ListBox  Height="100" Margin="5,0,5,0" x:Name="_namesOfActor"
+                              ItemsSource="{Binding NamesOfActor}"
+                              SelectedItem="{Binding SelectedNameOfActor}">
+                        <ListBox.Resources>
+                            <Style TargetType="{x:Type ListBoxItem}">
+                                <Setter Property="Tag"
+                                    Value="{Binding ElementName=_namesOfActor,
+                                        Path=DataContext}"/>
+                                <Setter Property="ContextMenu"
+                                    Value="{StaticResource _namesOfActorCMenu}"/>
+                            </Style>
+                        </ListBox.Resources>
+                    </ListBox>
+                </DockPanel>
+                <ListBox ItemsSource="{Binding Actors}" Margin="5"
+                         SelectedItem="{Binding SelectedActor}">
+                    <i:Interaction.Behaviors>
+                        <bh:ListboxBehavior/>
+                    </i:Interaction.Behaviors>
+                </ListBox>
+            </DockPanel>
+        </Grid>
+    </DockPanel>
+</Window>
