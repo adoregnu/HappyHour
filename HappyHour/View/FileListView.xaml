@@ -1,0 +1,51 @@
+﻿<UserControl x:Class="HappyHour.View.FileListView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:lm="clr-namespace:Itenso.Windows.Controls.ListViewLayout;assembly=Itenso.Windows.Controls.ListViewLayout"
+             xmlns:conv="clr-namespace:HappyHour.Converter"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="400">
+    <UserControl.Resources>
+        <conv:FileSystemInfoToSizeConverter x:Key="SizeConverter"/>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBox Grid.Column="0" Margin="0,2,2,2" Text="{Binding CurrPath}"/>
+            <Button Grid.Column="1" Content="Up" Margin="0,2,0,2"/>
+        </Grid>
+            <ListView Grid.Row="1" lm:ListViewLayoutManager.Enabled="True"
+                      ItemsSource="{Binding FileList}"
+                      SelectedItem="{Binding SelectedFile}">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="FontFamily" Value="Courier New" />
+                    </Style>
+                </ListView.ItemContainerStyle>
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn
+                            Header="Name" Width="Auto"
+                            DisplayMemberBinding="{Binding Name}"/>
+                        <GridViewColumn
+                            Header="Date modified" Width="Auto"
+                            DisplayMemberBinding="{Binding LastWriteTime,
+                                StringFormat='{}{0:MM/dd/yyyy hh:mm:ss}'}"/>
+                        <GridViewColumn
+                            Header="Size" Width="Auto"
+                            DisplayMemberBinding="{Binding .,
+                                Converter={StaticResource SizeConverter}}"/>
+                    </GridView> 
+                </ListView.View>
+            </ListView>
+    </Grid>
+</UserControl>

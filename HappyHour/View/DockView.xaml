@@ -1,0 +1,94 @@
+﻿<UserControl x:Class="HappyHour.View.DockView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:ad="https://github.com/Dirkster99/AvalonDock"
+             xmlns:view="clr-namespace:HappyHour.View"
+             xmlns:pane="clr-namespace:HappyHour.View.Pane"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <ad:DockingManager
+        AllowMixedOrientation="True" x:Name="dockManager"
+        DocumentsSource="{Binding Docs}"
+        AnchorablesSource="{Binding Anchors}">
+
+        <ad:DockingManager.Theme>
+            <ad:Vs2013BlueTheme/>
+        </ad:DockingManager.Theme>
+
+        <ad:DockingManager.LayoutItemTemplateSelector>
+            <pane:PanesTemplateSelector>
+                <pane:PanesTemplateSelector.TextViewTemplate>
+                    <DataTemplate>
+                        <view:TextView></view:TextView>
+                    </DataTemplate>
+                </pane:PanesTemplateSelector.TextViewTemplate>
+
+                <pane:PanesTemplateSelector.FileViewTemplate>
+                    <DataTemplate>
+                        <view:FileListView></view:FileListView>
+                    </DataTemplate>
+                </pane:PanesTemplateSelector.FileViewTemplate>
+<!--
+                <pane:PanesTemplateSelector.BrowserViewTemplate>
+                    <DataTemplate>
+                        <view:BrowserView></view:BrowserView>
+                    </DataTemplate>
+                </pane:PanesTemplateSelector.BrowserViewTemplate>
+
+                <pane:PanesTemplateSelector.MediaViewTemplate>
+                    <DataTemplate>
+                        <view:MediaView></view:MediaView>
+                    </DataTemplate>
+                </pane:PanesTemplateSelector.MediaViewTemplate>
+
+                <pane:PanesTemplateSelector.AvDbViewTemplate>
+                    <DataTemplate>
+                        <view:AvDbView></view:AvDbView>
+                    </DataTemplate>
+                </pane:PanesTemplateSelector.AvDbViewTemplate>
+-->
+            </pane:PanesTemplateSelector>
+        </ad:DockingManager.LayoutItemTemplateSelector>
+
+        <ad:DockingManager.LayoutUpdateStrategy>
+            <pane:LayoutUpdateStrategy />
+        </ad:DockingManager.LayoutUpdateStrategy>
+
+        <ad:LayoutRoot x:Name="_layoutRoot">
+            <ad:LayoutPanel Orientation="Vertical">
+                <ad:LayoutPanel Orientation="Horizontal">
+                    <ad:LayoutAnchorablePane DockWidth="300" Name="left"/>
+                    <ad:LayoutDocumentPane x:Name="center"/>
+                </ad:LayoutPanel>
+                <ad:LayoutAnchorablePane DockHeight="150" Name="bottom"/>
+            </ad:LayoutPanel>
+        </ad:LayoutRoot>
+
+        <ad:DockingManager.LayoutItemContainerStyleSelector>
+            <pane:PanesStyleSelector>
+                <pane:PanesStyleSelector.DocStyle>
+                    <Style TargetType="{x:Type ad:LayoutItem}">
+                        <Setter Property="Title" Value="{Binding Model.Title}"/>
+                        <Setter Property="CanClose" Value="False"/>
+                        <Setter Property="CanFloat" Value="False"/>
+                        <Setter Property="IsSelected" Value="{Binding Model.IsSelected, Mode=TwoWay}"/>
+                        <!--
+                        <Setter Property="ContentId" Value="{Binding ContentId}"/>
+                        <Setter Property="IconSource" Value="{Binding Model.IconSource}"/>
+                        -->
+                    </Style>
+                </pane:PanesStyleSelector.DocStyle>
+                <pane:PanesStyleSelector.AnchorStyle>
+                    <Style TargetType="{x:Type ad:LayoutItem}">
+                        <Setter Property="Title" Value="{Binding Model.Title}"/>
+                        <!--<Setter Property="IconSource" Value="{Binding Model.IconSource}"/>-->
+                        <Setter Property="CanClose" Value="False"/>
+                    </Style>
+                </pane:PanesStyleSelector.AnchorStyle>
+
+            </pane:PanesStyleSelector>
+        </ad:DockingManager.LayoutItemContainerStyleSelector>
+    </ad:DockingManager>
+</UserControl>
