@@ -73,12 +73,14 @@ namespace HappyHour.ViewModel
 #endif
         readonly IDialogService _dialogService;
         readonly FileListViewModel _fileListMv;
+        readonly MediaListViewModel _mediaListMv;
 
         public MainViewModel(IDialogService dialogService)
         {
             // Order of VieModel creation is important.
 
             _fileListMv = new FileListViewModel();
+            _mediaListMv = new MediaListViewModel { FileList = _fileListMv };
 
             Anchors.Add(_fileListMv);
             Anchors.Add(new DebugLogViewModel());
@@ -86,7 +88,7 @@ namespace HappyHour.ViewModel
             Anchors.Add(new ConsoleLogViewModel());
 
             //Docs.Add(new AvDbViewModel());
-            Docs.Add(new MediaListViewModel { FileList = _fileListMv });
+            Docs.Add(_mediaListMv);
             Docs.Add(new PlayerViewModel());
             Docs.Add(new BrowserViewModel());
             Docs.Add(new SpiderViewModel());
@@ -134,7 +136,11 @@ namespace HappyHour.ViewModel
 
         void OnActorEditor()
         { 
-            var dialog = new ActorEditorViewModel(_dialogService);
+            var dialog = new ActorEditorViewModel
+            {
+                MediaList = _mediaListMv,
+                DialogService = _dialogService
+            };
             _dialogService.Show<ActorEditorDialog>(this, dialog);
         }
 #if false

@@ -88,12 +88,13 @@ namespace HappyHour.ViewModel
                 new SpiderSehuatang(this),
                 new SpiderR18(this),
                 new SpiderJavlibrary(this),
+                new SpiderJavmoive(this),
                 new SpiderDmm(this),
                 new SpiderMgstage(this),
                 new SpiderAVE(this),
                 new SpiderJavDb(this),
-                //new SpiderJavfree(this)
-                new SpiderJavmoive(this)
+                new SpiderJavfree(this),
+                new SpiderPornav(this),
             };
             _selectedSpider = Spiders[0];
             Title = Address = _selectedSpider.URL;
@@ -148,7 +149,14 @@ namespace HappyHour.ViewModel
 
             if (SelectedSpider is SpiderSehuatang || !manualSearch)
                 _bStarted = true;
-            SelectedSpider.Navigate(mitem);
+            if (mitem != null)
+            {
+                SelectedSpider.Navigate(mitem);
+            }
+            else
+            {
+                Log.Print("Media is not selected!");
+            }
         }
 
         public void StopScrapping(MediaItem mitem, bool forceStop = false)

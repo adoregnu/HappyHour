@@ -28,7 +28,7 @@ namespace HappyHour.Spider
                 Browser.StopScrapping(Media);
                 return;
             }
-            var regex = new Regex($@"/{Media.Pid.ToLower()}");
+            var regex = new Regex($@"{Media.Pid.ToLower()}");
             string exactUrl = null;
             foreach (string url in list)
             {
@@ -71,7 +71,6 @@ namespace HappyHour.Spider
                         OnMultiResult);
                     break;
                 case 1:
-                    //Browser.StopScrapping(Media);
                     ParsePage(new ItemJavfree(this)
                     {
                         NumItemsToScrap = xpathDic.Count

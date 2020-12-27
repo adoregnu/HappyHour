@@ -15,7 +15,7 @@ namespace HappyHour.Spider
 {
     class SpiderJavDb : SpiderBase
     {
-        Dictionary<string, string> _xpathDic;
+        readonly Dictionary<string, string> _xpathDic;
         public SpiderJavDb(SpiderViewModel browser) : base(browser)
         { 
             Name = "JavDB";

@@ -164,7 +164,7 @@ namespace HappyHour.ViewModel
                 .OrderBy(n => n.Name)
                 .ToList();
             AllActors = names.Select(n => n.Actor).Distinct();
-            RaisePropertyChanged("AllActors");
+            RaisePropertyChanged(nameof(AllActors));
         }
     }
 }

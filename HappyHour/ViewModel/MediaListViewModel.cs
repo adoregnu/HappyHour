@@ -33,7 +33,7 @@ namespace HappyHour.ViewModel
     { 
         excluded, downloaded, scrap
     }
-    class MediaListViewModel : Pane
+    class MediaListViewModel : Pane, IMediaList
     {
         static readonly SerialQueue _serialQueue = new SerialQueue();
 
@@ -138,7 +138,7 @@ namespace HappyHour.ViewModel
             }
         }
 
-        public void ClearMedia()
+        void ClearMedia()
         {
             IsBrowsing = true;
             MediaList.Clear();
@@ -159,6 +159,17 @@ namespace HappyHour.ViewModel
             IsBrowsing = false; 
         }
 
+        public void Replace(IEnumerable<string> paths)
+        {
+            IsBrowsing = false;
+            MediaList.Clear();
+            foreach (var path in paths)
+            {
+                InsertMedia(path);
+            }
+            IsBrowsing = true;
+        }
+
         void UpdateMediaList(string path, bool bRecursive = false, int level = 0)
         {
             try
@@ -166,7 +177,7 @@ namespace HappyHour.ViewModel
                 var dirs = Directory.GetDirectories(path);
                 if (dirs.Length == 0 || dirs[0].EndsWith(".actors"))
                 {
-                    InsertMedia(path);
+                    InsertMediaAsync(path);
                 }
                 else if (bRecursive || level < 1)
                 {
@@ -197,26 +208,32 @@ namespace HappyHour.ViewModel
             return null;
         }
 
-        public void InsertMedia(string path)
+        void InsertMediaAsync(string path)
         {
             UiServices.Invoke(delegate
             {
-                var item = GetMedia(path);
-                if (item == null) return;
-
-                int idx = -1;
-                if (item.IsImage)
-                {
-                    idx = MediaList.FindItem(item, i => i.DownloadDt);
-                }
-                //MediaList.InsertInPlace(item, i => i.DownloadDt);
-                if (idx >= 0)
-                    MediaList.Insert(idx, item);
-                else
-                    MediaList.Add(item);
+                InsertMedia(path);
             }, true);
             //Thread.Sleep(10);
         }
+
+        void InsertMedia(string path)
+        {
+            var item = GetMedia(path);
+            if (item == null) return;
+
+            int idx = -1;
+            if (item.IsImage)
+            {
+                idx = MediaList.FindItem(item, i => i.DownloadDt);
+            }
+            //MediaList.InsertInPlace(item, i => i.DownloadDt);
+            if (idx >= 0)
+                MediaList.Insert(idx, item);
+            else
+                MediaList.Add(item);
+        }
+
         void OnMoveItem(object param)
         {
             if (!(param is IList<object> items) || items.Count == 0)
@@ -315,7 +332,7 @@ namespace HappyHour.ViewModel
                 try
                 {
                     var torrent = Path.GetFileName(item.Torrent);
-                    File.Copy(item.Torrent, App.GConf["general"]["path"] + torrent);
+                    File.Copy(item.Torrent, App.GConf["general"]["torrent_path"] + torrent);
                     File.Create($"{dir}\\.{type}").Dispose();
                     MediaList.Remove(item);
                     Log.Print($"Makrk downloaded {item.Torrent}");

@@ -65,9 +65,9 @@ namespace HappyHour.Model
             set
             {
                 Set(ref _avItem, value);
-                RaisePropertyChanged("Info");
-                RaisePropertyChanged("Actors");
-                RaisePropertyChanged("BgImagePath");
+                RaisePropertyChanged(nameof(Info));
+                RaisePropertyChanged(nameof(Actors));
+                RaisePropertyChanged(nameof(BgImagePath));
             }
         }
 
@@ -207,9 +207,10 @@ namespace HappyHour.Model
         public void ReloadAvItem()
         {
             AvItem = App.DbContext.Items
-                .Include("Studio")
-                .Include("Genres")
-                .Include("Actors")
+                .Include(i => i.Studio)
+                .Include(i => i.Genres)
+                .Include(i => i.Actors)
+                    .ThenInclude(a => a.Names)
                 .FirstOrDefault(i => i.Pid == Pid);
         }
 

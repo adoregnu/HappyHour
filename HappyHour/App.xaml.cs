@@ -98,7 +98,7 @@ namespace HappyHour
             {
                 GConf.Sections.AddSection("general");
                 var general = GConf["general"];
-                general.AddKey("path", @"s:\");
+                general.AddKey("torrent_path", @"z:\");
                 general.AddKey("data_path", @"d:\tmp\");
                 general.AddKey("last_path", @"d:\tmp\");
                 general.AddKey("nas_url", "http://192.168.0.37:5000/");

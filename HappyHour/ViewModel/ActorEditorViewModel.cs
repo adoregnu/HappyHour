@@ -7,6 +7,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
+using Microsoft.EntityFrameworkCore;
+
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Messaging;
@@ -15,7 +17,7 @@ using MvvmDialogs;
 using MvvmDialogs.FrameworkDialogs.OpenFile;
 
 using HappyHour.Model;
-using Microsoft.EntityFrameworkCore;
+using HappyHour.Interfaces;
 
 namespace HappyHour.ViewModel
 {
@@ -36,7 +38,7 @@ namespace HappyHour.ViewModel
         public void UnCheck()
         {
             _isChecked = false; 
-            RaisePropertyChanged("IsChecked");
+            RaisePropertyChanged(nameof(IsChecked));
         }
     }
 
@@ -116,6 +118,9 @@ namespace HappyHour.ViewModel
             set => Set(ref _picturePath, value);
         }
 
+        public IMediaList MediaList { get; set; }
+        public IDialogService DialogService { get; set; }
+
         public ICommand CmdAddNewActor { get; private set; }
         public ICommand CmdDeleteActor { get; private set; }
         public ICommand CmdChangePicture { get; private set; }
@@ -126,11 +131,8 @@ namespace HappyHour.ViewModel
         public ICommand CmdDelNameOfActor { get; private set; }
         public ICommand CmdSave { get; private set; }
 
-        readonly IDialogService _dialogService;
-
-        public ActorEditorViewModel(IDialogService dlgSvc)
+        public ActorEditorViewModel()
         {
-            _dialogService = dlgSvc;
             CmdBrowsePicture = new RelayCommand(() => PicturePath = ChoosePicture());
             CmdAddNewActor = new RelayCommand(() => OnAddNewActor());
             CmdDeleteActor = new RelayCommand(() => OnDeleteActor());
@@ -172,7 +174,7 @@ namespace HappyHour.ViewModel
                 Filter = "Image files (*.png, *.jpg)|*.png;*.jpg|All files (*.*)|*.*"
             };
 
-            bool? success = _dialogService.ShowOpenFileDialog(this, settings);
+            bool? success = DialogService.ShowOpenFileDialog(this, settings);
             if (success != true)
                 return null;
 
@@ -261,7 +263,7 @@ namespace HappyHour.ViewModel
             try
             {
                 App.DbContext.SaveChanges();
-                RaisePropertyChanged("SelectedActor");
+                RaisePropertyChanged(nameof(SelectedActor));
                 NewName = "";
                 NamesOfActor.Clear();
                 NamesOfActor.Concat(_actor.Names);
@@ -286,7 +288,8 @@ namespace HappyHour.ViewModel
                 if (isSelected)
                 {
                     names = App.DbContext.ActorNames
-                        .Include("Actor")
+                        .Include(name => name.Actor)
+                            .ThenInclude(actor => actor.Items)
                         .OrderBy(n => n.Name)
                         .ToList();
                     Actors = new ObservableCollection<AvActor>(
@@ -301,7 +304,8 @@ namespace HappyHour.ViewModel
 
             string searcStr = $"{p}%";
             names = App.DbContext.ActorNames
-                .Include("Actor")
+                .Include(name => name.Actor)
+                    .ThenInclude(actor => actor.Items)
                 .Where(n => EF.Functions.Like(n.Name, searcStr))
                 .OrderBy(n => n.Name)
                 .ToList();
@@ -327,8 +331,15 @@ namespace HappyHour.ViewModel
 
         void OnDoubleClicked()
         {
-            MessengerInstance.Send(new NotificationMessage<AvActor>(
-                SelectedActor, "ActorDoubleClicked"));
+            //MessengerInstance.Send(new NotificationMessage<AvActor>(
+            //    SelectedActor, "ActorDoubleClicked"));
+            var movies = new List<string>();
+            foreach (var item in SelectedActor.Items.ToList())
+            {
+                movies.Add(item.Path);
+            }
+            if (MediaList != null)
+                MediaList.Replace(movies);
         }
 
         void OnMergeActors(object p)
