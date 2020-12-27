@@ -115,7 +115,7 @@ namespace HappyHour.ViewModel
         void OnPaneEnabled<VMType>(bool enabled)
         {
             if (enabled)
-            {
+        {
                 Docs.Add((Pane)Activator.CreateInstance(typeof(VMType)));
             }
             else
@@ -124,7 +124,7 @@ namespace HappyHour.ViewModel
                 if (spiderMv != null)
                     Docs.Remove(spiderMv);
             }
-        }
+            }
 #endif
         void OnFileToFolder()
         {

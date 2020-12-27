@@ -3,7 +3,7 @@
 
 using Unosquare.FFME.ClosedCaptions;
 
-namespace PlayerView.Converter
+namespace HappyHour.Converter
 {
     using System;
     using System.Globalization;

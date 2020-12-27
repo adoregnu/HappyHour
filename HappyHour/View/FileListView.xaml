@@ -55,7 +55,7 @@
                     <i:CallMethodAction MethodName="OnMouseDoubleClicked" TargetObject="{Binding}"/>
                 </i:EventTrigger>
             </i:Interaction.Triggers>
-            <ListView.ItemContainerStyle>
+                <ListView.ItemContainerStyle>
                     <Style TargetType="ListViewItem">
                         <Setter Property="FontFamily" Value="Courier New" />
                     </Style>

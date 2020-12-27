@@ -71,6 +71,7 @@ namespace HappyHour.ViewModel
         public FileListViewModel()
         {
             Title = "Files";
+            CurrPath = "c:\\Works";
             FileList = new ObservableCollection<FileSystemInfo>();
             Drives = new ObservableCollection<DriveInfo>();
             CmdUpDir = new RelayCommand(() => UpDir());
@@ -122,7 +123,7 @@ namespace HappyHour.ViewModel
             if (CurrDirInfo.Parent != null)
             {
                 CurrDirInfo = CurrDirInfo.Parent;
-            }
+        }
         }
 
         void ChangeDir(bool bManual = false)
@@ -175,7 +176,7 @@ namespace HappyHour.ViewModel
         }
 
         void OnRefreshTimerExpired(object sender, EventArgs e)
-        {
+        { 
             _refreshTimer.Stop();
             UiServices.Invoke(delegate { PopulateFiles(); }, true);
         }

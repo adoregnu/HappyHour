@@ -30,6 +30,8 @@ namespace HappyHour
     public partial class App : Application
     {
         public static string CurrentPath { get; set; }
+        public static string DataPath { get; set; }
+        public static string JavPath { get; set; }
         public static string LocalAppData { get; set; }
         public static AvDbContext DbContext { get; set; }
         public static IniData GConf { get; private set; }

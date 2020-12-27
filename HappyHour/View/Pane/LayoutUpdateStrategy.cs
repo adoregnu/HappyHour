@@ -23,7 +23,7 @@ namespace HappyHour.View.Pane
                             .FirstOrDefault(d => d.Name == "bottom");
             }
             else if (anchorableToShow.Content is FileListViewModel)
-            {
+            { 
                 pane = layout.Descendents().OfType<LayoutAnchorablePane>()
                             .FirstOrDefault(d => d.Name == "left");
             }
@@ -72,9 +72,10 @@ namespace HappyHour.View.Pane
                     parentDocumentGroup.Orientation = Orientation.Horizontal;
                     var indexOfParentPane = parentDocumentGroup.IndexOfChild(parentDocumentPane);
                     parentDocumentGroup.InsertChildAt(indexOfParentPane + 1,
-                        new LayoutDocumentPane(anchorableShown) {
-                            DockWidth = new GridLength(1.5, GridUnitType.Star)
-                        });
+                            new LayoutDocumentPane(anchorableShown)
+                            {
+                                DockWidth = new GridLength(1.5, GridUnitType.Star)
+                            });
 
                 }
                 else

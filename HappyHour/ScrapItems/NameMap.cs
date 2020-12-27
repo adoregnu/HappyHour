@@ -30,6 +30,7 @@ namespace HappyHour.ScrapItems
                 { "Crystal Eizou", "Crystal Eizo"},
                 { "Deeps", "Deep's"},
                 { "Kyandei", "Candy"},
+                { "MAX-A", "Max A"},
                 { "Das !", "Das"},
                 { "Bi", "Chijo Heaven"},
             };

@@ -25,7 +25,7 @@ namespace HappyHour.Spider
             _xpathDic = new Dictionary<string, string>
             {
                 { "cover", XPath("//div[@class='movie-cover']/img/@src") },
-                { "title", XPath("//div[@class='mdm-info']/h/text()") },
+                { "title", XPath("//div[@class='mdm-info']/h1/text()") },
                 { "date", XPath("//div[@class='mdm-info']//tr[2]/td[2]/text()") },
                 { "studio", XPath("//div[@class='mdm-info']//tr[5]/td[2]//text()") },
                 { "actor", XPath("//td[@class='list-actress']/a/text()") },

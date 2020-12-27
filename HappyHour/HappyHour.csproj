@@ -71,6 +71,8 @@
   <ItemGroup>
     <Folder Include="Model\" />
     <Folder Include="Extension\" />
+    <Folder Include="Resources\" />
+    <Folder Include="Utils\" />
     <Folder Include="CefHandler\" />
     <Folder Include="View\Behavior\" />
     <Folder Include="View\Pane\" />
