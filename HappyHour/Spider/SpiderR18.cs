@@ -109,7 +109,7 @@ namespace HappyHour.Spider
                 case 1:
                     _item = new ItemR18(this)
                     {
-                        NumItemsToScrap = _xpathDic.Count
+                        NumItemsToScrap = _xpathDic.Count,
                     };
                     ParsePage(_item, _xpathDic);
                     _state = 2;

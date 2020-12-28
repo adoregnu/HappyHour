@@ -124,7 +124,8 @@ namespace HappyHour.ScrapItems
 
                 var url = m.Groups[2].Value;
                 var file = $"{_actorPicturePath}\\{url.Split('/').Last()}";
-                if (File.Exists(file)) continue;
+                if (!OverwriteImage && File.Exists(file))
+                    continue;
 
                 var name = m.Groups[1].Value.Trim();
                 //Log.Print($"ParseActorThumb: name:{name}, url:{url}");
@@ -142,7 +143,8 @@ namespace HappyHour.ScrapItems
         void ParseCover(string name, string url)
         {
             var ext = url.Split('.').Last();
-            if (File.Exists($"{PosterPath}.{ext}")) return;
+            if (!OverwriteImage && File.Exists($"{PosterPath}.{ext}"))
+                return;
 
             if (_downloadUrls.TryAdd(url, name))
             {

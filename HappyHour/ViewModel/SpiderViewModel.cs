@@ -149,14 +149,13 @@ namespace HappyHour.ViewModel
 
             if (SelectedSpider is SpiderSehuatang || !manualSearch)
                 _bStarted = true;
-            if (mitem != null)
+
+            if (SelectedSpider is not SpiderSehuatang && mitem == null)
             {
-                SelectedSpider.Navigate(mitem);
+                Log.Print("MediaItem is not selected!");
+                return;
             }
-            else
-            {
-                Log.Print("Media is not selected!");
-            }
+            SelectedSpider.Navigate(mitem);
         }
 
         public void StopScrapping(MediaItem mitem, bool forceStop = false)

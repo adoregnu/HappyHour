@@ -108,10 +108,10 @@ namespace HappyHour.ViewModel
             Log.Print($"Num loading :{++_numLoading}, isMain {e.Frame.IsMain}");
             if (e.Frame.IsMain)
             { 
-                WebBrowser.ExecuteScriptAsync(App.ReadResource("NasLogin.js"));
+                //WebBrowser.ExecuteScriptAsync(App.ReadResource("NasLogin.js"));
             }
-            //if (_numLoading == 4)
-            //    WebBrowser.ExecuteScriptAsync(App.ReadResource("NasLogin.js"));
+            if (_numLoading == 4)
+                WebBrowser.ExecuteScriptAsync(App.ReadResource("NasLogin.js"));
         }
     }
 }

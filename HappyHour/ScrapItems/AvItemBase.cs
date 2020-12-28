@@ -4,15 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
 
+using Microsoft.EntityFrameworkCore;
 
 using CefSharp;
 using HtmlAgilityPack;
 
 using HappyHour.Model;
 using HappyHour.Spider;
-using System.ComponentModel.DataAnnotations;
-using Microsoft.EntityFrameworkCore;
 
 namespace HappyHour.ScrapItems
 {
@@ -29,6 +29,8 @@ namespace HappyHour.ScrapItems
             get => $"{_spider.Media.MediaFolder}\\{_spider.Media.Pid}_poster";
         }
 
+        public bool OverwriteImage { set; get; } = false;
+
         public AvItemBase(SpiderBase spider) : base(spider)
         { 
             _avItem = new AvItem
@@ -38,6 +40,9 @@ namespace HappyHour.ScrapItems
                 IsCensored = true,
             };
             _context = App.DbContext;
+
+            if (bool.TryParse(App.GConf["spider"]["overwrite_image"], out bool bOverwrite))
+                OverwriteImage = bOverwrite;
         }
 
         protected override void OnDownloadUpdated(object sender, DownloadItem e)

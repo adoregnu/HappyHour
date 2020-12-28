@@ -125,7 +125,7 @@ namespace HappyHour.ViewModel
                     break;
                 }
                 case WatcherChangeTypes.Created:
-                    AddMedia(e.FullPath);
+                    //AddMedia(e.FullPath);
                     break;
                 case WatcherChangeTypes.Renamed:
                 {

@@ -151,11 +151,11 @@ namespace HappyHour.Spider
             }
             else
             {
-                if (!string.IsNullOrEmpty(path))
-                    MessengerInstance.Send(new NotificationMessage<string>(
-                        path, "mediaAdded"));
-                else
-                    Log.Print(" Continue next Item!");
+                //if (!string.IsNullOrEmpty(path))
+                //    MessengerInstance.Send(new NotificationMessage<string>(
+                //        path, "mediaAdded"));
+                //else
+                //    Log.Print(" Continue next Item!");
                 MoveArticle(null);
             }
         }
