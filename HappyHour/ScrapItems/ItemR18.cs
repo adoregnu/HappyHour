@@ -71,7 +71,7 @@ namespace HappyHour.ScrapItems
                     m.Groups[2].Value,
                     m.Groups[3].Value);
 
-                _avItem.ReleaseDate = DateTime.ParseExact(newdate, "MMM d yyyy", enUS);
+                _avItem.DateReleased = DateTime.ParseExact(newdate, "MMM d yyyy", enUS);
             }
             catch (Exception ex)
             {

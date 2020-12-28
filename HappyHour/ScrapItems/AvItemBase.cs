@@ -203,7 +203,15 @@ namespace HappyHour.ScrapItems
                     .Include("Series")
                     .FirstOrDefault(i => i.Pid == _avItem.Pid);
 
-                if (item != null) _avItem = item;
+                if (item != null)
+                {
+                    _avItem = item;
+                    _avItem.DateModifed = DateTime.Now;
+                }
+                else
+                {
+                    _avItem.DateAdded = _avItem.DateModifed = DateTime.Now;
+                }
 
                 if (item == null || (_series != null && item.Series == null))
                     _avItem.Series = _series;

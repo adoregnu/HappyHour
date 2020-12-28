@@ -67,7 +67,7 @@ namespace HappyHour.ScrapItems
 
         void ParseDate(string date)
         {
-            _avItem.ReleaseDate = DateTime.ParseExact(
+            _avItem.DateReleased = DateTime.ParseExact(
                 date.Trim(), "yyyy-MM-dd", enUS);
         }
 

@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HappyHour.Migrations
 {
     [DbContext(typeof(AvDbContext))]
-    [Migration("20201225005628_AvDb")]
+    [Migration("20201228144633_AvDb")]
     partial class AvDb
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -101,6 +101,15 @@ namespace HappyHour.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<DateTime>("DateAdded")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("DateModifed")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("DateReleased")
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("IsCensored")
                         .HasColumnType("INTEGER");
 
@@ -125,9 +134,6 @@ namespace HappyHour.Migrations
 
                     b.Property<float>("Rating")
                         .HasColumnType("REAL");
-
-                    b.Property<DateTime>("ReleaseDate")
-                        .HasColumnType("TEXT");
 
                     b.Property<int?>("SeriesId")
                         .HasColumnType("INTEGER");

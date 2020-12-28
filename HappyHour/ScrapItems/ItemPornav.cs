@@ -52,7 +52,7 @@ namespace HappyHour.ScrapItems
                     if (m.Success)
                     {
                         //Log.Print(m.Groups[1].Value);
-                        _avItem.ReleaseDate = DateTime.ParseExact(
+                        _avItem.DateReleased = DateTime.ParseExact(
                             m.Groups[1].Value.Trim(), "yyyy/MM/dd", enUS);
                         date = true;
                     }

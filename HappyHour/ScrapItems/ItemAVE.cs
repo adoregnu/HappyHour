@@ -84,7 +84,7 @@ namespace HappyHour.ScrapItems
                     var m = Regex.Match(node.InnerText, @"[\d/]+");
                     if (m.Success)
                     {
-                        _avItem.ReleaseDate = DateTime.ParseExact(
+                        _avItem.DateReleased = DateTime.ParseExact(
                             m.Value, "M/d/yyyy", enUS);
                     }
                 }

@@ -110,7 +110,9 @@ namespace HappyHour.Model
 
         public bool IsCensored { get; set; }
         public string LeakedPid { get; set; }
-        public DateTime ReleaseDate { get; set; }
+        public DateTime DateReleased { get; set; }
+        public DateTime DateAdded { get; set; }
+        public DateTime DateModifed { get; set; }
         public AvStudio Studio { get; set; }
         public AvSeries Series { get; set; }
 

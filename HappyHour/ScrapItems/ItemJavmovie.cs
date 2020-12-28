@@ -53,7 +53,7 @@ namespace HappyHour.ScrapItems
                     var m = Regex.Match(items[0] as string, @"[\d\-]+");
                     if (m.Success)
                     {
-                        _avItem.ReleaseDate = DateTime.ParseExact(
+                        _avItem.DateReleased = DateTime.ParseExact(
                             m.Value, "yyyy-MM-dd", enUS);
                     }
                 }
