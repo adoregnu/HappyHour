@@ -101,7 +101,7 @@ namespace HappyHour
                 general.AddKey("torrent_path", @"z:\");
                 general.AddKey("data_path", @"d:\tmp\");
                 general.AddKey("last_path", @"d:\tmp\");
-                general.AddKey("nas_url", "http://192.168.0.37:5000/");
+                general.AddKey("nas_url", "https://bsyoo.me:5001/");
             }
         }
 
@@ -128,10 +128,9 @@ namespace HappyHour
                 // http://magpcss.org/ceforum/viewtopic.php?f=6&t=14095
                 settings.CefCommandLineArgs.Add("enable-begin-frame-scheduling");
                 //settings.CefCommandLineArgs.Add("disable-image-loading");
-
             }
             settings.CefCommandLineArgs.Add("enable-experimental-web-platform-features");
-
+            settings.CefCommandLineArgs.Add("ignore-certificate-errors");
             //The location where cache data will be stored on disk. If empty an in-memory cache will be used for some features and a temporary disk cache for others.
             //HTML5 databases such as localStorage will only persist across sessions if a cache path is specified. 
             settings.CachePath = LocalAppData + "CEF\\cache";

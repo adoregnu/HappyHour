@@ -69,7 +69,8 @@ namespace HappyHour.ViewModel
             {
                 MessengerInstance.Send(new CefStatusMsg(e, "log"));
             };
-            WebBrowser.LoadingStateChanged += OnStateChanged;
+            //WebBrowser.LoadingStateChanged += OnStateChanged;
+            WebBrowser.FrameLoadEnd += OnFrameLoaded;
             Address = _nasUrl;
         }
 
@@ -89,15 +90,28 @@ namespace HappyHour.ViewModel
                     break;
             }
         }
-
+#if false
         void OnStateChanged(object sender, LoadingStateChangedEventArgs e)
         {
             if (!e.IsLoading && Address == _nasUrl && _numLoading < 2)
             {
-                //Log.Print($"Num loading :{_numLoading}");
+                Log.Print($"Num loading :{_numLoading}");
                 WebBrowser.ExecuteScriptAsync(App.ReadResource("NasLogin.js"));
                 _numLoading++;
             }
+        }
+#endif
+        void OnFrameLoaded(object sender, FrameLoadEndEventArgs e)
+        {
+            if (Address != _nasUrl) return;
+
+            Log.Print($"Num loading :{++_numLoading}, isMain {e.Frame.IsMain}");
+            if (e.Frame.IsMain)
+            { 
+                WebBrowser.ExecuteScriptAsync(App.ReadResource("NasLogin.js"));
+            }
+            //if (_numLoading == 4)
+            //    WebBrowser.ExecuteScriptAsync(App.ReadResource("NasLogin.js"));
         }
     }
 }

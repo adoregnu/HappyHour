@@ -71,7 +71,6 @@ namespace HappyHour.ViewModel
         public FileListViewModel()
         {
             Title = "Files";
-            CurrPath = "c:\\Works";
             FileList = new ObservableCollection<FileSystemInfo>();
             Drives = new ObservableCollection<DriveInfo>();
             CmdUpDir = new RelayCommand(() => UpDir());
@@ -88,8 +87,8 @@ namespace HappyHour.ViewModel
 
             _currDrive = Drives.FirstOrDefault(
                 d => d.Name.StartsWith(driveName, StringComparison.OrdinalIgnoreCase));
-            if (_currDrive != null)
-                CurrDirInfo = new DirectoryInfo(lastDir);
+            if (_currDrive == null) lastDir = "c:\\";
+            CurrDirInfo = new DirectoryInfo(lastDir);
 
             _refreshTimer = new DispatcherTimer {
                 Interval = TimeSpan.FromMilliseconds(200),
