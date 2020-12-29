@@ -22,10 +22,13 @@ namespace HappyHour.Extension
         /// </summary>
         public static void InsertInPlace<TItem, TKey>(
             this ObservableCollection<TItem> collection,
-            TItem itemToAdd, Func<TItem, TKey> keyGetter)
+            TItem itemToAdd, Func<TItem, TKey> keyGetter, bool isAccending = false)
         {
             int index = collection.BinarySearch(
-                keyGetter(itemToAdd), Comparer<TKey>.Default, keyGetter);
+                keyGetter(itemToAdd),
+                Comparer<TKey>.Default,
+                keyGetter,
+                isAccending);
             collection.Insert(index, itemToAdd);
         }
 
@@ -41,7 +44,8 @@ namespace HappyHour.Extension
             this IList<TItem> collection,
             TKey keyToFind,
             IComparer<TKey> comparer,
-            Func<TItem, TKey> keyGetter)
+            Func<TItem, TKey> keyGetter,
+            bool isAccending = false)
         {
             if (collection == null)
             {
@@ -60,7 +64,8 @@ namespace HappyHour.Extension
                 {
                     return middle;
                 }
-                else if (comparisonResult > 0)
+                //else if (comparisonResult > 0)
+                else if (isAccending ? (comparisonResult <= 0) : (comparisonResult >= 0))
                 {
                     upper = middle - 1;
                 }
@@ -72,7 +77,6 @@ namespace HappyHour.Extension
 
             // If we cannot find the item, return the item below it, so the new item will be inserted next.
             return lower;
-            //return upper < 0 ? 0 : upper;
         }
 
         public static bool IsNullOrEmpty<TItem>(this IList<TItem> list)

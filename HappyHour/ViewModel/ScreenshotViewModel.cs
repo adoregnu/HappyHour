@@ -26,7 +26,10 @@ namespace HappyHour.ViewModel
                 this, (msg) =>
                 {
                     if (msg.Notification != "mediaSelected") return;
-                    ScreenshotList =  msg.Content.Screenshots;
+                    if (msg.Content != null)
+                        ScreenshotList = msg.Content.Screenshots;
+                    else
+                        ScreenshotList = null;
                 });
         }
     }

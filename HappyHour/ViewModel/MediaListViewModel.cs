@@ -39,6 +39,8 @@ namespace HappyHour.ViewModel
 
         MediaItem _selectedMedia = null;
         bool _isBrowsing = false;
+        bool _sortByDateReleased = true;
+        bool _sortByDateAdded = false;
         IFileList _fileList;
 
         public MediaItem SelectedMedia
@@ -62,9 +64,35 @@ namespace HappyHour.ViewModel
 
         public ObservableCollection<MediaItem> MediaList { get; private set; }
         public SpiderEnum SpiderList { get; private set; }
-        public bool SearchSubFolder { get; set; } = false;
-        public bool SorByDateReleased { get; set; } = true;
-        public bool SorByDateAdded { get; set; } = false;
+        public bool SearchSubFolder { get; set; }
+        public bool SorByDateReleased
+        {
+            get => _sortByDateReleased;
+            set
+            {
+                Set(ref _sortByDateReleased, value);
+                if (value)
+                {
+                    MediaItem.OrderType = OrderType.ByDateReleased;
+                    SorByDateAdded = !value;
+                    SortMedia();
+                }
+            }
+        }
+        public bool SorByDateAdded
+        {
+            get => _sortByDateAdded;
+            set
+            {
+                Set(ref _sortByDateAdded, value);
+                if (value)
+                {
+                    MediaItem.OrderType = OrderType.ByDateAdded;
+                    SorByDateReleased = !value;
+                    SortMedia();
+                }
+            }
+        }
 
         public IFileList FileList
         {
@@ -107,6 +135,8 @@ namespace HappyHour.ViewModel
 
             MessengerInstance.Register<NotificationMessage<SpiderEnum>>(this,
                 (msg) => SpiderList = msg.Content.Where(i => i.Name != "sehuatang"));
+
+            //PropertyChanged += OnPropertyChanged
         }
 
         void OnDirChanged(object sender, DirectoryInfo msg)
@@ -140,6 +170,19 @@ namespace HappyHour.ViewModel
                     break;
                 }
             }
+        }
+
+        void SortMedia()
+        {
+            var tmp = MediaList.ToList();
+            IsBrowsing = true;
+            MediaList.Clear();
+            foreach (var m in tmp)
+            {
+                //MediaList.Add(m);
+                MediaList.InsertInPlace(m, i => i.DateTime);
+            }
+            IsBrowsing = false;
         }
 
         void ClearMedia()
@@ -226,16 +269,7 @@ namespace HappyHour.ViewModel
             var item = GetMedia(path);
             if (item == null) return;
 
-            int idx = -1;
-            if (item.IsImage)
-            {
-                idx = MediaList.FindItem(item, i => i.DateTime);
-            }
-            //MediaList.InsertInPlace(item, i => i.DownloadDt);
-            if (idx >= 0)
-                MediaList.Insert(idx, item);
-            else
-                MediaList.Add(item);
+            MediaList.InsertInPlace(item, i => i.DateTime);
         }
 
         void OnMoveItem(object param)

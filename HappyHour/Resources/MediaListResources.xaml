@@ -35,9 +35,10 @@
                 </Image.ToolTip>
             </Image>
             <StackPanel VerticalAlignment="Bottom" Background="Black"
-                        Opacity="0.70">
+                        Opacity="0.60">
                 <TextBlock Text="{Binding MediaName}" Foreground="White"
-                           Height="60" Margin="15,0,15,0" FontWeight="SemiBold"/>
+                           Height="60" Margin="15,0,15,0" TextAlignment="Center"
+                           FontWeight="SemiBold"/>
             </StackPanel>
         </Grid>
     </ControlTemplate>

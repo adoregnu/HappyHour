@@ -12,6 +12,7 @@ namespace HappyHour.Model
 {
     public enum OrderType { 
         ByDateReleased,
+        ByDateAdded,
         ByDateUpdated,
         ByDateDownload,
     };
@@ -19,7 +20,7 @@ namespace HappyHour.Model
     {
         string _bgImagePath;
         DateTime _dateDownloaded;
-        public static OrderType OrderType { get; set; }
+        public static OrderType OrderType { get; set; } = OrderType.ByDateReleased;
 
         public DateTime DateTime
         {
@@ -29,10 +30,10 @@ namespace HappyHour.Model
                     return _dateDownloaded;
                 else if (OrderType == OrderType.ByDateReleased)
                     return _avItem.DateReleased;
-                else if (OrderType == OrderType.ByDateUpdated)
+                else if (OrderType == OrderType.ByDateAdded)
+                    return _avItem.DateAdded;
+                else // OrderType.ByDateUpdated
                     return _avItem.DateModifed;
-                else
-                    return _dateDownloaded;
             }
         }
 
@@ -222,7 +223,7 @@ namespace HappyHour.Model
             MediaFolder = Path.GetDirectoryName(path);
             Pid = MediaFolder.Split('\\').Last();
             _dateDownloaded = File.GetLastWriteTime(path);
-            MediaName = $"{Pid} / " + DateTime.ToString("%M-%d %h:%m:%s");
+            MediaName = $"{Pid}\n" + DateTime.ToString("u");
         }
 
         public void ReloadAvItem()

@@ -50,7 +50,7 @@
             </Grid.ColumnDefinitions>
             <TextBlock Text="Released : " Grid.Column="0"
                        TextAlignment="Right"/>
-            <TextBox Grid.Column="1" Text="{Binding Av.ReleaseDate}"/>
+            <TextBox Grid.Column="1" Text="{Binding Av.DateReleased}"/>
             <StackPanel Grid.Column="2" Orientation="Horizontal">
                 <TextBlock Text="Leaked PID : " Margin="5,0,0,0"
                            VerticalAlignment="Center"/>
