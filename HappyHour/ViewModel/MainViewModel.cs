@@ -86,6 +86,7 @@ namespace HappyHour.ViewModel
             Anchors.Add(new DebugLogViewModel());
             Anchors.Add(new StatusLogViewModel());
             Anchors.Add(new ConsoleLogViewModel());
+            Anchors.Add(new ScreenshotViewModel());
 
             //Docs.Add(new AvDbViewModel());
             Docs.Add(_mediaListMv);

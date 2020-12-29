@@ -62,6 +62,9 @@ namespace HappyHour.ViewModel
 
         public ObservableCollection<MediaItem> MediaList { get; private set; }
         public SpiderEnum SpiderList { get; private set; }
+        public bool SearchSubFolder { get; set; } = false;
+        public bool SorByDateReleased { get; set; } = true;
+        public bool SorByDateAdded { get; set; } = false;
 
         public IFileList FileList
         {
@@ -109,7 +112,8 @@ namespace HappyHour.ViewModel
         void OnDirChanged(object sender, DirectoryInfo msg)
         {
             ClearMedia();
-            _serialQueue.Enqueue(() => UpdateMediaList(msg.FullName));
+            _serialQueue.Enqueue(() =>
+                UpdateMediaList(msg.FullName));
         }
 
         void OnDirModifed(object sender, FileSystemEventArgs e)
@@ -225,7 +229,7 @@ namespace HappyHour.ViewModel
             int idx = -1;
             if (item.IsImage)
             {
-                idx = MediaList.FindItem(item, i => i.DownloadDt);
+                idx = MediaList.FindItem(item, i => i.DateTime);
             }
             //MediaList.InsertInPlace(item, i => i.DownloadDt);
             if (idx >= 0)

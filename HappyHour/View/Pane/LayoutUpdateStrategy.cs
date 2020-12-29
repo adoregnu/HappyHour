@@ -17,7 +17,8 @@ namespace HappyHour.View.Pane
             ILayoutContainer destinationContainer)
         {
             LayoutAnchorablePane pane = null;
-            if (anchorableToShow.Content is TextViewModel)
+            if (anchorableToShow.Content is TextViewModel ||
+                anchorableToShow.Content is ScreenshotViewModel)
             {
                 pane = layout.Descendents().OfType<LayoutAnchorablePane>()
                             .FirstOrDefault(d => d.Name == "bottom");

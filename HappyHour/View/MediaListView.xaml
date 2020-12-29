@@ -7,19 +7,39 @@
              mc:Ignorable="d" 
              md:DialogServiceViews.IsRegistered="True"
              d:DesignHeight="450" d:DesignWidth="800">
-    <DockPanel>
-        <ListBox ScrollViewer.VerticalScrollBarVisibility="Disabled"
-                 ItemTemplate="{DynamicResource ScreenshotTemplate}"
-                 ItemsPanel="{DynamicResource ImagePanelTemplate}"
-                 ItemsSource="{Binding SelectedMedia.Screenshots}"
-                 Visibility="{Binding SelectedMedia,
-                    Converter={StaticResource ScreenshotsToVisConverter}}"
-                 Height="150" DockPanel.Dock="Bottom">
-            <ListBox.Background>
-                <Brush>Black</Brush>
-            </ListBox.Background>
-        </ListBox>
-        <ListBox
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center">
+            <ToggleButton Style="{DynamicResource ModernToggleButtonStyle2}"
+                          IsChecked="{Binding SearchSubFolder, Mode=TwoWay}"
+                          ToolTip="Search sub folders">
+                <Path Stretch="Uniform"
+                      Data="{Binding Source={StaticResource FolderDownIcon}, Path=Data}"
+                      Fill="{Binding Path=Foreground, RelativeSource=
+                            {RelativeSource AncestorType={x:Type ToggleButton}}}"/>
+            </ToggleButton>
+            <ToggleButton Style="{DynamicResource ModernToggleButtonStyle2}"
+                          IsChecked="{Binding SorByDateReleased, Mode=TwoWay}"
+                          ToolTip="Sort by Date Released">
+                <Path Stretch="Uniform"
+                      Data="{Binding Source={StaticResource SortByDateAccendingIcon}, Path=Data}"
+                      Fill="{Binding Path=Foreground, RelativeSource=
+                            {RelativeSource AncestorType={x:Type ToggleButton}}}"/>
+            </ToggleButton>
+            <ToggleButton Style="{DynamicResource ModernToggleButtonStyle2}"
+                          IsChecked="{Binding SorByDateAdded, Mode=TwoWay}"
+                          ToolTip="Sort by Date Added">
+                <Path Stretch="Uniform"
+                      Data="{Binding Source={StaticResource SortByClockAccendingIcon}, Path=Data}"
+                      Fill="{Binding Path=Foreground, RelativeSource=
+                            {RelativeSource AncestorType={x:Type ToggleButton}}}"/>
+            </ToggleButton>
+        </StackPanel>
+        <ListBox Grid.Row="1"
             x:Name="ImageListBox"
             SelectionMode="Extended"
             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
@@ -44,5 +64,5 @@
                 </MultiBinding>
             </ListBox.ItemsSource>
         </ListBox>
-    </DockPanel>
+    </Grid>
 </UserControl>

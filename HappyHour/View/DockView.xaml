@@ -55,6 +55,12 @@
                     </DataTemplate>
                 </pane:PanesTemplateSelector.PlayerViewTemplate>
 
+                <pane:PanesTemplateSelector.ScreenshotViewTemplate>
+                    <DataTemplate>
+                        <view:ScreenshotView/>
+                    </DataTemplate>
+                </pane:PanesTemplateSelector.ScreenshotViewTemplate>
+
 <!--
                 <pane:PanesTemplateSelector.AvDbViewTemplate>
                     <DataTemplate>

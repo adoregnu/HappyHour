@@ -10,10 +10,31 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HappyHour.Model
 {
+    public enum OrderType { 
+        ByDateReleased,
+        ByDateUpdated,
+        ByDateDownload,
+    };
     public class MediaItem : ViewModelBase
     {
-        private string _bgImagePath;
-        public DateTime DownloadDt;
+        string _bgImagePath;
+        DateTime _dateDownloaded;
+        public static OrderType OrderType { get; set; }
+
+        public DateTime DateTime
+        {
+            get
+            {
+                if (_avItem == null)
+                    return _dateDownloaded;
+                else if (OrderType == OrderType.ByDateReleased)
+                    return _avItem.DateReleased;
+                else if (OrderType == OrderType.ByDateUpdated)
+                    return _avItem.DateModifed;
+                else
+                    return _dateDownloaded;
+            }
+        }
 
         public string MediaName { get; private set; }
         public string MediaFile { get; private set; }
@@ -200,8 +221,8 @@ namespace HappyHour.Model
             MediaFile = path;
             MediaFolder = Path.GetDirectoryName(path);
             Pid = MediaFolder.Split('\\').Last();
-            DownloadDt = File.GetLastWriteTime(path);
-            MediaName = $"{Pid} / " + DownloadDt.ToString("%M-%d %h:%m:%s");
+            _dateDownloaded = File.GetLastWriteTime(path);
+            MediaName = $"{Pid} / " + DateTime.ToString("%M-%d %h:%m:%s");
         }
 
         public void ReloadAvItem()
