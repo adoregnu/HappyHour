@@ -95,6 +95,7 @@ namespace HappyHour.ViewModel
                 new SpiderJavDb(this),
                 new SpiderJavfree(this),
                 new SpiderPornav(this),
+                new SpiderAvsox(this),
             };
             _selectedSpider = Spiders[0];
             Title = Address = _selectedSpider.URL;
@@ -160,22 +161,21 @@ namespace HappyHour.ViewModel
 
         public void StopScrapping(MediaItem mitem, bool forceStop = false)
         {
-            webBrowser.Stop();
-            _bStarted = false;
-            if (SelectedSpider is SpiderSehuatang) return;
+            UiServices.Invoke(delegate {
+                webBrowser.Stop();
+                _bStarted = false;
+                if (SelectedSpider is SpiderSehuatang) return;
 
-            if (mitem != null)
-            {
-                UiServices.Invoke(delegate
+                if (mitem != null)
                 {
                     mitem.UpdateFields();
-                });
-            }
+                }
 
-            if (!forceStop && _nextScrappingIndex > 0)
-                StartBatchedScrapping();
-            else
-                _nextScrappingIndex = 0;
+                if (!forceStop && _nextScrappingIndex > 0)
+                    StartBatchedScrapping();
+                else
+                    _nextScrappingIndex = 0;
+            });
         }
 
         public DownloadHandler DownloadHandler { get; private set; }

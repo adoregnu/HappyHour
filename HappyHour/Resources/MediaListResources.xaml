@@ -58,24 +58,34 @@
                     x:Key="CtrlContext"
                     Data="{Binding RelativeSource={RelativeSource FindAncestor,
                         AncestorType={x:Type ListBox}}}"/>
-            </Grid.Resources>
-
-            <Grid.ContextMenu>
-                <ContextMenu>
-                    <MenuItem
+                <ContextMenu x:Key="videoContextMenu">
+                    <MenuItem 
                         Header="Scrap"
-                        ItemsSource="{Binding Data.SpiderList,
-                            Source={StaticResource VmContext}}">
+                        ItemsSource="{Binding Data.SpiderList, Source={StaticResource VmContext}}">
                         <MenuItem.ItemTemplate>
                             <DataTemplate>
                                 <MenuItem
-                                    Header="{Binding Name}"
-                                    Command="{Binding CmdScrap}"
+                                    Header="{Binding Name}" Command="{Binding CmdScrap}"
                                     CommandParameter="{Binding Data.SelectedItems,
                                         Source={StaticResource CtrlContext}}">
                                 </MenuItem>
                             </DataTemplate>
                         </MenuItem.ItemTemplate>
+<!--
+                        <MenuItem.Style>
+                            <Style TargetType="MenuItem">
+                                <Setter Property="IsEnabled" Value="True"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsScrapOngoing}" Value="True">
+                                        <Setter Property="IsEnabled" Value="False"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsScrapOngoing}" Value="False">
+                                        <Setter Property="IsEnabled" Value="True"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </MenuItem.Style>
+-->
                     </MenuItem>
 
                     <MenuItem Header="Move" 
@@ -105,7 +115,12 @@
                             Source={StaticResource VmContext}}"
                         CommandParameter="{Binding}"/>
                 </ContextMenu>
-            </Grid.ContextMenu>
+            </Grid.Resources>
+            <Grid.Style>
+                <Style TargetType="{x:Type Grid}">
+                    <Setter Property="ContextMenu" Value="{StaticResource videoContextMenu}"/>
+                </Style>
+            </Grid.Style>
             <Grid.ToolTip>
                 <ToolTip>
                     <TextBlock Text="{Binding Actors}"/>
@@ -116,9 +131,6 @@
                               Command="{Binding Data.CmdDoubleClick,
                                     Source={StaticResource VmContext}}"/>
             </Grid.InputBindings>
-<!--
-            <player:MiniPlayer MediaSource="{Binding}" Grid.Row="0"/>
--->
             <Image HorizontalAlignment="Center" ToolTipService.ShowDuration="20000"
                    Source="{Binding BgImagePath, Converter=
                       {StaticResource PathToImageConverter}, ConverterParameter=200}">
@@ -133,7 +145,7 @@
             <TextBlock
                 Text="{Binding Info}" Grid.Row="1" Opacity="0.5"
                 HorizontalAlignment="Center" VerticalAlignment="Center"
-                Foreground="White"/>
+                Foreground="White" TextAlignment="Center"/>
         </Grid>
     </ControlTemplate>
 
@@ -178,7 +190,7 @@
         <WrapPanel/>
 -->
     </ItemsPanelTemplate>
-
+<!--
     <ControlTemplate x:Key="MediaListTamplate">
         <local:MediaListView DataContext="{Binding MediaList}"/>
     </ControlTemplate>
@@ -198,4 +210,5 @@
             </DataTrigger>
         </Style.Triggers>
     </Style>
+-->
 </ResourceDictionary>

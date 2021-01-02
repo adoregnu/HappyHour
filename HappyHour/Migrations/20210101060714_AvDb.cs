@@ -13,7 +13,8 @@ namespace HappyHour.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    PicturePath = table.Column<string>(type: "TEXT", nullable: true)
+                    PicturePath = table.Column<string>(type: "TEXT", nullable: true),
+                    DateAdded = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {

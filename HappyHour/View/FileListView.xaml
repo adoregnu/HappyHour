@@ -47,34 +47,39 @@
                 </Button>
             </StackPanel>
         </Grid>
-            <ListView Grid.Row="1" lm:ListViewLayoutManager.Enabled="True"
-                      ItemsSource="{Binding FileList}" Name="fileListView"
-                      SelectedItem="{Binding SelectedFile}">
-            <i:Interaction.Triggers>
-                <i:EventTrigger EventName="MouseDoubleClick">
-                    <i:CallMethodAction MethodName="OnMouseDoubleClicked" TargetObject="{Binding}"/>
+        <ListView Grid.Row="1" lm:ListViewLayoutManager.Enabled="True"
+                  ItemsSource="{Binding FileList}" Name="fileListView"
+                  SelectedItem="{Binding SelectedFile}"
+                  KeyboardNavigation.DirectionalNavigation="Cycle">
+            <ListView.InputBindings>
+                <KeyBinding Command="{Binding CmdDownToSubfolder}" Key="Enter"/>
+                <KeyBinding Command="{Binding CmdUpDir}" Key="Backspace"/>
+            </ListView.InputBindings>
+        <i:Interaction.Triggers>
+            <i:EventTrigger EventName="MouseDoubleClick">
+                    <i:InvokeCommandAction Command="{Binding CmdDownToSubfolder}"/>
                 </i:EventTrigger>
-            </i:Interaction.Triggers>
-                <ListView.ItemContainerStyle>
-                    <Style TargetType="ListViewItem">
-                        <Setter Property="FontFamily" Value="Courier New" />
-                    </Style>
-                </ListView.ItemContainerStyle>
-                <ListView.View>
-                    <GridView>
-                        <GridViewColumn
-                            Header="Name" Width="Auto"
-                            DisplayMemberBinding="{Binding Name}"/>
-                        <GridViewColumn
-                            Header="Date modified" Width="Auto"
-                            DisplayMemberBinding="{Binding LastWriteTime,
-                                StringFormat='{}{0:MM/dd/yyyy hh:mm:ss}'}"/>
-                        <GridViewColumn
-                            Header="Size" Width="Auto"
-                            DisplayMemberBinding="{Binding .,
-                                Converter={StaticResource SizeConverter}}"/>
-                    </GridView> 
-                </ListView.View>
-            </ListView>
+        </i:Interaction.Triggers>
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="FontFamily" Value="Courier New" />
+                </Style>
+            </ListView.ItemContainerStyle>
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn
+                        Header="Name" Width="Auto"
+                        DisplayMemberBinding="{Binding Name}"/>
+                    <GridViewColumn
+                        Header="Date modified" Width="Auto"
+                        DisplayMemberBinding="{Binding LastWriteTime,
+                            StringFormat='{}{0:MM/dd/yyyy hh:mm:ss}'}"/>
+                    <GridViewColumn
+                        Header="Size" Width="Auto"
+                        DisplayMemberBinding="{Binding .,
+                            Converter={StaticResource SizeConverter}}"/>
+                </GridView> 
+            </ListView.View>
+        </ListView>
     </Grid>
 </UserControl>

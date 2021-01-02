@@ -9,7 +9,7 @@ namespace HappyHour.Extension
 {
     static class Extensions
     {
-        public static int FindItem<TItem, TKey>(this ObservableCollection<TItem> collection,
+        public static int FindItem<TItem, TKey>(this IList<TItem> collection,
             TItem itemToAdd, Func<TItem, TKey> keyGetter)
         {
             return collection.BinarySearch(

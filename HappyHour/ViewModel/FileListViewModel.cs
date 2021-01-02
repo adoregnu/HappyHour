@@ -19,8 +19,8 @@ namespace HappyHour.ViewModel
     class FileListViewModel : Pane, IFileList
     {
         string _currPath;
-        DirectoryInfo _currDirInfo;
         DriveInfo _currDrive;
+        DirectoryInfo _currDirInfo;
         FileSystemWatcher _fsWatcher;
         DispatcherTimer _refreshTimer; 
 
@@ -68,6 +68,7 @@ namespace HappyHour.ViewModel
 
         public ICommand CmdUpDir { get; set; }
         public ICommand CmdRefreshDir { get; set; }
+        public ICommand CmdDownToSubfolder { get; set; }
         public FileListViewModel()
         {
             Title = "Files";
@@ -79,6 +80,7 @@ namespace HappyHour.ViewModel
                 PopulateFiles();
                 DirChanged?.Invoke(this, CurrDirInfo);
             });
+            CmdDownToSubfolder = new RelayCommand(() => EnterSubFolder());
 
             var lastDir = App.GConf["general"]["last_path"];
             var driveName = lastDir.Substring(0, 2);
@@ -108,7 +110,7 @@ namespace HappyHour.ViewModel
             if (CurrDrive == null) CurrDrive = Drives[0];
         }
 
-        public void OnMouseDoubleClicked()
+        public void EnterSubFolder()
         { 
             //Log.Print($"DoubleClicked {SelectedFile.FullName}");
             if (SelectedFile is DirectoryInfo)

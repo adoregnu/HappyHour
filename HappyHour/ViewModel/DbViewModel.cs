@@ -1,0 +1,179 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+using Microsoft.EntityFrameworkCore;
+
+using HappyHour.Model;
+using HappyHour.Interfaces;
+using GalaSoft.MvvmLight.Messaging;
+
+namespace HappyHour.ViewModel
+{
+    class DbViewModel : Pane
+    {
+        string _selectedType = "Pid";
+        string _searchText;
+
+        public IMediaList MediaList { get; set; }
+
+        public string SearchText
+        {
+            get => _searchText;
+            set
+            {
+                Set(ref _searchText, value);
+                if (_typeToPropertyName.ContainsKey(SelectedType))
+                    RaisePropertyChanged(_typeToPropertyName[SelectedType]);
+            }
+        }
+        public string SelectedType
+        {
+            get => _selectedType;
+            set => Set(ref _selectedType, value);
+        }
+        public List<string> ListType { get; set; }
+
+        public IEnumerable<AvItem> AvItemList
+        { 
+            get
+            {
+                if (string.IsNullOrEmpty(SearchText))
+                    return null;
+
+                return App.DbContext.Items
+                    .Where(i => EF.Functions.Like(i.Pid, $"%{SearchText}%"))
+                    .ToList();
+            }
+        }
+        public IEnumerable<AvActorName> AvActorNameList
+        {
+            get
+            { 
+                if (string.IsNullOrEmpty(SearchText))
+                    return App.DbContext.ActorNames
+                        .ToList();
+
+                return App.DbContext.ActorNames
+                    .Where(i => EF.Functions.Like(i.Name, $"%{SearchText}%"))
+                    .ToList();
+            }
+        }
+        public IEnumerable<AvStudio> AvStudioList
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(SearchText))
+                    return App.DbContext.Studios
+                        .ToList();
+
+                return App.DbContext.Studios
+                    .Where(s => EF.Functions.Like(s.Name, $"{SearchText}%"))
+                    .ToList();
+            }
+        }
+
+        public IEnumerable<AvSeries> AvSeriesList
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(SearchText))
+                    return App.DbContext.Series
+                        .ToList();
+
+                return App.DbContext.Series
+                    .Where(s => EF.Functions.Like(s.Name, $"%{SearchText}%"))
+                    .ToList();
+            }
+        }
+
+        AvItem _selectedAvItem;
+        public AvItem  SelectedItem
+        {
+            get => _selectedAvItem;
+            set
+            {
+                Set(ref _selectedAvItem, value);
+                if (value == null) return;
+
+                var media = MediaItem.Create(value.Path);
+                MessengerInstance.Send(new NotificationMessage<MediaItem>(
+                    media, "MediaItemDblClicked"));
+            }
+        }
+
+        AvActorName _selectedActorName;
+        public AvActorName  SelectedActorName
+        {
+            get => _selectedActorName;
+            set
+            {
+                Set(ref _selectedActorName, value);
+                if (value == null) return;
+
+                App.DbContext.Entry(value)
+                    .Reference(n => n.Actor).Load();
+                App.DbContext.Entry(value.Actor)
+                    .Collection(a => a.Items).Load();
+
+                var paths = value.Actor.Items
+                    .Select(i => i.Path).ToList();
+                MediaList.Replace(paths);
+            }
+        }
+        AvStudio _selectedStudio;
+        public AvStudio SelectedStudio
+        {
+            get => _selectedStudio;
+            set
+            {
+                Set(ref _selectedStudio, value);
+                if (value == null) return;
+
+                UiServices.WaitCursor(true);
+                var paths = App.DbContext.Items
+                    .Where(i => i.Studio == value)
+                    .Select(i => i.Path)
+                    .ToList();
+                MediaList.Replace(paths);
+                UiServices.WaitCursor(false);
+            }
+        }
+
+        AvSeries _selectedSeries;
+        public AvSeries SelectedSeries
+        {
+            get => _selectedSeries;
+            set
+            {
+                Set(ref _selectedSeries, value);
+                if (value == null) return;
+
+                UiServices.WaitCursor(true);
+                var paths = App.DbContext.Items
+                    .Where(i => i.Series == value)
+                    .Select(i => i.Path)
+                    .ToList();
+                MediaList.Replace(paths);
+                UiServices.WaitCursor(false);
+            }
+        }
+
+        readonly Dictionary<string, string> _typeToPropertyName
+            = new Dictionary<string, string>
+            {
+                { "Pid", nameof(AvItemList) },
+                //{ "Actor", nameof(AvActorNameList) },
+                { "Studio", nameof(AvStudioList) },
+                { "Series", nameof(AvSeriesList) },
+            };
+
+        public DbViewModel()
+        {
+            Title = "Database";
+            ListType = _typeToPropertyName.Keys.ToList();
+        }
+    }
+}

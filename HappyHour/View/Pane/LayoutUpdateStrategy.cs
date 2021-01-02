@@ -23,7 +23,8 @@ namespace HappyHour.View.Pane
                 pane = layout.Descendents().OfType<LayoutAnchorablePane>()
                             .FirstOrDefault(d => d.Name == "bottom");
             }
-            else if (anchorableToShow.Content is FileListViewModel)
+            else if (anchorableToShow.Content is FileListViewModel ||
+                anchorableToShow.Content is DbViewModel)
             { 
                 pane = layout.Descendents().OfType<LayoutAnchorablePane>()
                             .FirstOrDefault(d => d.Name == "left");

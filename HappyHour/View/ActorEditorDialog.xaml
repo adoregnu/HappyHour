@@ -17,8 +17,17 @@
         <ControlTemplate x:Key="_controlTpl" TargetType="ListBoxItem">
             <Border Name="_Border" Padding="2" SnapsToDevicePixels="true"
                     Width="128" Height="128">
-                <Image HorizontalAlignment="Center"
-                       Source="{Binding ., Converter={StaticResource PathToImageConverter}}"/>
+                <Grid>
+                    <Image HorizontalAlignment="Center" VerticalAlignment="Top"
+                           Source="{Binding ., Converter=
+                                {StaticResource PathToImageConverter},
+                                    ConverterParameter=125}"/>
+                    <StackPanel VerticalAlignment="Bottom"
+                                Background="Black" Opacity="0.60">
+                        <TextBlock Text="{Binding .}" Foreground="White"
+                           Height="15" Margin="5,0,5,0" TextAlignment="Center" />
+                    </StackPanel>
+                </Grid>
             </Border>
             <ControlTemplate.Triggers>
                 <Trigger Property="IsSelected" Value="true">
@@ -94,6 +103,8 @@
         </Grid>
         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal"
                     HorizontalAlignment="Center">
+            <Button Content="Clear" Margin="0,0,5,5" Padding="2"
+                    Command="{Binding CmdClearActors}"/>
             <Button Content="Save" Margin="0,0,5,5" Padding="2"
                     Command="{Binding CmdSave}"/>
             <Button Content="Close" Margin="0,0,5,5" Padding="2"
@@ -174,7 +185,7 @@
                         <TextBox Text="{Binding NewName}"/>
                     </DockPanel>
                     <ListBox  Height="100" Margin="5,0,5,0" x:Name="_namesOfActor"
-                              ItemsSource="{Binding NamesOfActor}"
+                              ItemsSource="{Binding NameListOfOneActor}"
                               SelectedItem="{Binding SelectedNameOfActor}">
                         <ListBox.Resources>
                             <Style TargetType="{x:Type ListBoxItem}">
@@ -185,14 +196,28 @@
                                     Value="{StaticResource _namesOfActorCMenu}"/>
                             </Style>
                         </ListBox.Resources>
+                        <ListBox.InputBindings>
+                            <KeyBinding Command="{Binding CmdDeleteNameOfActor}"
+                                Key="Delete"/>
+                        </ListBox.InputBindings>
                     </ListBox>
                 </DockPanel>
-                <ListBox ItemsSource="{Binding Actors}" Margin="5"
-                         SelectedItem="{Binding SelectedActor}">
-                    <i:Interaction.Behaviors>
-                        <bh:ListboxBehavior/>
-                    </i:Interaction.Behaviors>
-                </ListBox>
+                <DockPanel>
+                    <TextBox DockPanel.Dock="Top" Margin="5,5,5,0"
+                             Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
+                    <ListBox ItemsSource="{Binding ActorNameList}" Margin="5"
+                             SelectedItem="{Binding SelectedActorName}">
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="MouseDoubleClick">
+                                <i:InvokeCommandAction
+                                    Command="{Binding CmdActorNameDoubleClick}"/>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                        <i:Interaction.Behaviors>
+                            <bh:ListboxBehavior/>
+                        </i:Interaction.Behaviors>
+                    </ListBox>
+                </DockPanel>
             </DockPanel>
         </Grid>
     </DockPanel>

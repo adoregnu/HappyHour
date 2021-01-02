@@ -24,6 +24,7 @@ namespace HappyHour.View.Pane
         public DataTemplate FileViewTemplate { get; set; }
         public DataTemplate AvDbViewTemplate { get; set; }
         public DataTemplate ScreenshotViewTemplate { get; set; }
+        public DataTemplate DbViewTemplate { get; set; }
 
         public override DataTemplate SelectTemplate(object item, DependencyObject container)
         {
@@ -41,6 +42,8 @@ namespace HappyHour.View.Pane
                 return BrowserViewTemplate;
             if (item is ScreenshotViewModel)
                 return ScreenshotViewTemplate;
+            if (item is DbViewModel)
+                return DbViewTemplate;
 #if false
             if (item is MediaViewModel)
                 return MediaViewTemplate;

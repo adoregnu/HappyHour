@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
+using Microsoft.EntityFrameworkCore;
+
 using GalaSoft.MvvmLight;
 
 using HappyHour.Utils;
-using Microsoft.EntityFrameworkCore;
 
 namespace HappyHour.Model
 {
@@ -67,7 +68,7 @@ namespace HappyHour.Model
             get
             {
                 if (AvItem == null) return Pid;
-                return $"{AvItem.Pid} / {AvItem.Studio.Name}";
+                return $"{AvItem.Pid}\n{AvItem.Studio.Name}";
             }
         }
 
@@ -91,6 +92,21 @@ namespace HappyHour.Model
                 RaisePropertyChanged(nameof(Actors));
                 RaisePropertyChanged(nameof(BgImagePath));
             }
+        }
+
+        public static MediaItem Create(string path)
+        {
+            try
+            {
+                var item = new MediaItem(path);
+                if (!item.IsExcluded && !item.IsDownload && item.IsMediaFolder)
+                    return item;
+            }
+            catch (Exception ex)
+            {
+                Log.Print(ex.Message);
+            }
+            return null;
         }
 
         public MediaItem(string path = null)

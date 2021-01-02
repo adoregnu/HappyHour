@@ -13,16 +13,22 @@ using MvvmDialogs;
 
 using HappyHour.Model;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel;
 
 namespace HappyHour.ViewModel
 {
     class AvEditorViewModel : ViewModelBase, IModalDialogViewModel
     {
         readonly MediaItem _mediaItem;
+        readonly IEnumerable<AvActor> _allActors;
+        string _searchActorName;
+
+        AvStudio _studio;
+        AvSeries _series;
+
         bool? _dialogResult;
 
         public AvItem Av { get; private set; }
-        AvStudio _studio;
         public AvStudio Studio
         {
             get => _studio;
@@ -35,7 +41,7 @@ namespace HappyHour.ViewModel
                 }
             }
         }
-        AvSeries _series;
+
         public AvSeries Series
         {
             get => _series;
@@ -53,9 +59,27 @@ namespace HappyHour.ViewModel
 
         public IEnumerable<AvSeries> AllSeries { get; private set; }
         public IEnumerable<AvGenre> AllGenres { get; private set; }
-        public IEnumerable<AvActor> AllActors { get; private set; }
+        public IEnumerable<AvActor> AllActors
+        {
+            get
+            { 
+                if (string.IsNullOrEmpty(SearchActorName))
+                    return _allActors;
+                return _allActors.Where(
+                    a => a.ToString().IndexOf(SearchActorName,
+                        StringComparison.OrdinalIgnoreCase) >= 0);
+            }
+        }
         public IEnumerable<AvStudio> AllStudios { get; private set; }
-        public List<string> ActorNameInitials { get; private set; }
+        public string SearchActorName
+        {
+            get => _searchActorName;
+            set
+            {
+                Set(ref _searchActorName, value);
+                RaisePropertyChanged(nameof(AllActors));
+            }
+        }
 
         public bool? DialogResult
         {
@@ -71,16 +95,6 @@ namespace HappyHour.ViewModel
 
         public AvActor SelectedAvActor { get; set; }
         public AvGenre SelectedAvGenre { get; set; }
-        string _selectedActorInitial;
-        public string SelectedActorInitial
-        {
-            get => _selectedActorInitial;
-            set
-            {
-                _selectedActorInitial = value;
-                OnActorNameInitialChanged(value);
-            }
-        }
 
         public ICommand CmdSetStudio { get; private set; }
         public ICommand CmdSetSeries { get; private set; }
@@ -111,13 +125,12 @@ namespace HappyHour.ViewModel
             AllGenres = App.DbContext.Genres.ToList();
 
             var names = App.DbContext.ActorNames
-                .Include("Actor")
+                .Include(n => n.Actor)
+                .Where(n => n.Actor != null)
                 .OrderBy(n => n.Name)
                 .ToList();
-            AllActors = names.Select(n => n.Actor).Distinct();
+            _allActors = names.Select(n => n.Actor).Distinct();
             AllStudios = App.DbContext.Studios.ToList();
-            ActorNameInitials = Enumerable.Range('A', 'Z' - 'A' + 1).
-                      Select(c => ((char)c).ToString()).ToList();
         }
 
         bool _actorChanged = false;
@@ -155,16 +168,6 @@ namespace HappyHour.ViewModel
             App.DbContext.SaveChanges();
 
             _mediaItem.ReloadAvItem();
-        }
-        void OnActorNameInitialChanged(string initial)
-        {
-            var names = App.DbContext.ActorNames
-                .Include("Actor")
-                .Where(n => n.Name.StartsWith(initial))
-                .OrderBy(n => n.Name)
-                .ToList();
-            AllActors = names.Select(n => n.Actor).Distinct();
-            RaisePropertyChanged(nameof(AllActors));
         }
     }
 }

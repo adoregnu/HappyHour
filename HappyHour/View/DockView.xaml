@@ -61,6 +61,11 @@
                     </DataTemplate>
                 </pane:PanesTemplateSelector.ScreenshotViewTemplate>
 
+                <pane:PanesTemplateSelector.DbViewTemplate>
+                    <DataTemplate>
+                        <view:DbView/>
+                    </DataTemplate>
+                </pane:PanesTemplateSelector.DbViewTemplate>
 <!--
                 <pane:PanesTemplateSelector.AvDbViewTemplate>
                     <DataTemplate>

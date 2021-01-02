@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HappyHour.Migrations
 {
     [DbContext(typeof(AvDbContext))]
-    [Migration("20201228144633_AvDb")]
+    [Migration("20210101060714_AvDb")]
     partial class AvDb
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -53,6 +53,9 @@ namespace HappyHour.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("DateAdded")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("PicturePath")
                         .HasColumnType("TEXT");

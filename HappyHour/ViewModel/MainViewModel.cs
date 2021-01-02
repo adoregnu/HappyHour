@@ -78,11 +78,12 @@ namespace HappyHour.ViewModel
         public MainViewModel(IDialogService dialogService)
         {
             // Order of VieModel creation is important.
-
             _fileListMv = new FileListViewModel();
             _mediaListMv = new MediaListViewModel { FileList = _fileListMv };
 
             Anchors.Add(_fileListMv);
+            Anchors.Add(new DbViewModel { MediaList = _mediaListMv });
+
             Anchors.Add(new DebugLogViewModel());
             Anchors.Add(new StatusLogViewModel());
             Anchors.Add(new ConsoleLogViewModel());
@@ -94,8 +95,8 @@ namespace HappyHour.ViewModel
             Docs.Add(new BrowserViewModel());
             Docs.Add(new SpiderViewModel());
 
-            CmdFileToFolder = new RelayCommand(() => OnFileToFolder());
             CmdActorEdtor = new RelayCommand(() => OnActorEditor());
+            CmdFileToFolder = new RelayCommand(() => OnFileToFolder());
             //KeyDownCommand = new RelayCommand<EventArgs>(e => OnKeyDown(e));
 
             _dialogService = dialogService;

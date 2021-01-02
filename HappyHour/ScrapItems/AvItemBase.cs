@@ -63,9 +63,6 @@ namespace HappyHour.ScrapItems
             Log.Print($"items : {_numScrapedItem}/{NumItemsToScrap}" +
                 $", Link Count:{_links.Count}");
 
-            if (_numScrapedItem != NumItemsToScrap)
-                return;
-
             lock (_links)
             {
                 Log.Print($"Num valid items: {_numValidItems}");
@@ -79,8 +76,8 @@ namespace HappyHour.ScrapItems
                 {
                     if (_numValidItems > 0)
                         UdpateAvItem();
-                    _spider.OnScrapCompleted(_numValidItems > 0);
                     Clear();
+                    _spider.OnScrapCompleted(_numValidItems > 0);
                 }
             }
         }
@@ -142,7 +139,7 @@ namespace HappyHour.ScrapItems
             });
         }
 
-        List<AvActor> _actors;
+        List<AvActor> _actors = new List<AvActor>();
         void UpdateActorInternal(List<List<AvActorName>> listOfNameList)
         {
             foreach (var list in listOfNameList)
@@ -151,7 +148,7 @@ namespace HappyHour.ScrapItems
                 foreach (var aname in list)
                 {
                     aan = _context.ActorNames
-                        .Include("Actor")
+                        .Include(n => n.Actor)
                         .Where(n => n.Name.ToLower() == aname.Name.ToLower())
                         .FirstOrDefault();
                     if (aan != null) break;
@@ -176,6 +173,7 @@ namespace HappyHour.ScrapItems
                     var actor = new AvActor();
                     list.ForEach(i => i.Actor = actor);
                     actor.Names = list;
+                    actor.DateAdded = DateTime.Now;
 
                     _context.Actors.Add(actor);
                     _actors.Add(actor);
@@ -185,7 +183,6 @@ namespace HappyHour.ScrapItems
 
         protected void UpdateActor2(List<List<AvActorName>> listOfNameList)
         {
-            _actors = new List<AvActor>();
             UiServices.Invoke(delegate
             {
                 UpdateActorInternal(listOfNameList);

@@ -52,6 +52,9 @@ namespace HappyHour.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<DateTime>("DateAdded")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("PicturePath")
                         .HasColumnType("TEXT");
 

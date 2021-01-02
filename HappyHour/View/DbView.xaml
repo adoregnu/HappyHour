@@ -1,0 +1,72 @@
+﻿<UserControl x:Class="HappyHour.View.DbView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:HappyHour.View"
+             mc:Ignorable="d" 
+             d:DesignHeight="500" d:DesignWidth="400">
+    <UserControl.Resources>
+        <ControlTemplate x:Key="AvSeriesTemplate">
+            <ListBox ItemsSource="{Binding AvSeriesList}"
+                     SelectedItem="{Binding SelectedSeries}"/>
+        </ControlTemplate>
+        <ControlTemplate x:Key="AvItemTemplate">
+            <ListBox ItemsSource="{Binding AvItemList}"
+                     SelectedItem="{Binding SelectedItem}"/>
+        </ControlTemplate>
+        <ControlTemplate x:Key="AvActorTemplate">
+            <ListBox ItemsSource="{Binding AvActorNameList}"
+                     SelectedItem="{Binding SelectedActorName}"/>
+        </ControlTemplate>
+        <ControlTemplate x:Key="AvStudioTemplate">
+            <ListBox ItemsSource="{Binding AvStudioList}"
+                     SelectedItem="{Binding SelectedStudio}"/>
+        </ControlTemplate>
+     
+        <Style x:Key="DbListStyle" TargetType="ContentControl">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding SelectedType, Mode=TwoWay}"
+                             Value="Pid">
+                    <Setter Property="Template"
+                        Value="{StaticResource AvItemTemplate}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding SelectedType, Mode=TwoWay}"
+                             Value="Studio">
+                    <Setter Property="Template"
+                        Value="{StaticResource AvStudioTemplate}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding SelectedType, Mode=TwoWay}"
+                             Value="Series">
+                    <Setter Property="Template"
+                        Value="{StaticResource AvSeriesTemplate}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding SelectedType, Mode=TwoWay}"
+                             Value="Actor">
+                    <Setter Property="Template"
+                        Value="{StaticResource AvActorTemplate}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <ComboBox Grid.Column="0" Width="80"
+                      ItemsSource="{Binding ListType}"
+                      SelectedItem="{Binding SelectedType}"/>
+            <TextBox Grid.Column="1"
+                     Text="{Binding SearchText,
+                        UpdateSourceTrigger=PropertyChanged}"/>
+        </Grid>
+        <ContentControl Grid.Row="1" Style="{StaticResource DbListStyle}"
+                        Margin="0,2,0,0"/>
+    </Grid>
+</UserControl>

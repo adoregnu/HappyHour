@@ -45,6 +45,7 @@ namespace HappyHour.Model
         public int Id { get; set; }
 
         public string PicturePath { get; set; }
+        public DateTime DateAdded { get; set; }
         public virtual ICollection<AvActorName> Names { get; set; }
         public virtual ICollection<AvItem> Items { get; set; }
         public override string ToString()
@@ -137,6 +138,11 @@ namespace HappyHour.Model
                 aidx++;
             }
             return ret;
+        }
+
+        public override string ToString()
+        {
+            return Pid;
         }
     }
 }

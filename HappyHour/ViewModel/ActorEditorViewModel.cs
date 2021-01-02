@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 
 using Microsoft.EntityFrameworkCore;
@@ -48,12 +49,23 @@ namespace HappyHour.ViewModel
         string _picturePath;
         string _actorName;
         string _newName;
+        string _searchText;
 
         bool? _dialogResult;
         public bool? DialogResult
         {
             get => _dialogResult;
             private set => Set(nameof(DialogResult), ref _dialogResult, value);
+        }
+
+        public string SearchText
+        {
+            get => _searchText;
+            set
+            {
+                Set(ref _searchText, value);
+                RaisePropertyChanged(nameof(ActorNameList));
+            }
         }
 
         ObservableCollection<AvActor> _actors
@@ -66,14 +78,28 @@ namespace HappyHour.ViewModel
 
         public AvActorName SelectedNameOfActor { get; set; }
 
-        ObservableCollection<AvActorName> _namesOfActor = null;
-        public ObservableCollection<AvActorName> NamesOfActor
+        ObservableCollection<AvActorName> _nameListOfOneActor = null;
+        public ObservableCollection<AvActorName> NameListOfOneActor
         {
-            get => _namesOfActor;
-            set => Set(ref _namesOfActor, value);
+            get => _nameListOfOneActor;
+            set => Set(ref _nameListOfOneActor, value);
         }
 
         public List<ActorInitial> ActorInitials { get; private set; }
+
+        public AvActorName SelectedActorName { get; set; }
+        public IEnumerable<AvActorName> ActorNameList
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(SearchText))
+                    return null;
+
+                return App.DbContext.ActorNames
+                    .Where(n => EF.Functions.Like(n.Name, $"%{SearchText}%"))
+                    .ToList();
+            }
+        }
 
         public AvActor SelectedActor
         {
@@ -83,20 +109,8 @@ namespace HappyHour.ViewModel
                 Set(ref _actor, value);
                 if (value != null)
                 {
-                    NamesOfActor = new ObservableCollection<AvActorName>(_actor.Names);
+                    NameListOfOneActor = new ObservableCollection<AvActorName>(_actor.Names);
                 }
-            }
-        }
-
-        AvActorName _selectedActorName;
-        public AvActorName SelectedActorName
-        {
-            get => _selectedActorName;
-            set
-            {
-                Set(ref _selectedActorName, value);
-                if  (value != null)
-                    SelectedActor = value.Actor;
             }
         }
 
@@ -127,9 +141,12 @@ namespace HappyHour.ViewModel
         public ICommand CmdBrowsePicture { get; private set; }
         public ICommand CmdAddNewName { get; private set; }
         public ICommand CmdDoubleClick { get; private set; }
+        public ICommand CmdActorNameDoubleClick { get; private set; }
         public ICommand CmdMergeActors { get; private set; }
         public ICommand CmdDelNameOfActor { get; private set; }
+        public ICommand CmdClearActors { get; private set; }
         public ICommand CmdSave { get; private set; }
+        public ICommand CmdDeleteNameOfActor { get; private set; }
 
         public ActorEditorViewModel()
         {
@@ -139,16 +156,19 @@ namespace HappyHour.ViewModel
             CmdChangePicture = new RelayCommand(() => OnChangePicture());
             CmdAddNewName = new RelayCommand(() => OnAddNewName());
             CmdDoubleClick = new RelayCommand(() => OnDoubleClicked());
+            CmdActorNameDoubleClick = new RelayCommand(() => OnActorNameDoubleClicked());
             CmdMergeActors = new RelayCommand<object>(
                 p => OnMergeActors(p), 
                 p => p is IList<object> list && list.Count > 1);
             CmdDelNameOfActor = new RelayCommand(() =>
             {
                 App.DbContext.ActorNames.Remove(SelectedNameOfActor);
-                NamesOfActor.Remove(SelectedNameOfActor);
+                NameListOfOneActor.Remove(SelectedNameOfActor);
                 SelectedNameOfActor = null;
             });
+            CmdClearActors = new RelayCommand(() => OnClearActors());
             CmdSave = new RelayCommand(() => App.DbContext.SaveChanges());
+            CmdDeleteNameOfActor = new RelayCommand(() => OnDeleteNameOfActor());
 
             ActorInitials = Enumerable.Range('A', 'Z' - 'A' + 1)
                 .Select(c => new ActorInitial
@@ -206,14 +226,16 @@ namespace HappyHour.ViewModel
                 return;
             }
 
+            var names = new List<AvActorName> {
+                new AvActorName { Name = ActorName }
+            };
             var actor = new AvActor
             {
                 PicturePath = Path.GetFileName(PicturePath),
-                Names = new List<AvActorName>
-                {
-                    new AvActorName { Name = ActorName }
-                }
+                Names = names
             };
+            names.ForEach(n => n.Actor = actor);
+
             App.DbContext.Actors.Add(actor);
             App.DbContext.SaveChanges();
 
@@ -234,7 +256,7 @@ namespace HappyHour.ViewModel
             Actors.Remove(SelectedActor);
 
             SelectedActor = null;
-            NamesOfActor = null;
+            NameListOfOneActor = null;
         }
 
         void OnChangePicture()
@@ -244,7 +266,7 @@ namespace HappyHour.ViewModel
                 return;
 
             SelectedActor.PicturePath = Path.GetFileName(file);
-            App.DbContext.SaveChanges();
+            //App.DbContext.SaveChanges();
         }
 
         void OnAddNewName()
@@ -265,8 +287,8 @@ namespace HappyHour.ViewModel
                 App.DbContext.SaveChanges();
                 RaisePropertyChanged(nameof(SelectedActor));
                 NewName = "";
-                NamesOfActor.Clear();
-                NamesOfActor.Concat(_actor.Names);
+                NameListOfOneActor.Clear();
+                NameListOfOneActor.Concat(_actor.Names);
             }
             catch (Exception ex)
             {
@@ -276,7 +298,7 @@ namespace HappyHour.ViewModel
 
         public void OnActorAlphabet(string p, bool isSelected)
         {
-            NamesOfActor = null;
+            NameListOfOneActor = null;
             SelectedActor = null;
             List<AvActorName> names = null;
             if (p == "All")
@@ -289,7 +311,7 @@ namespace HappyHour.ViewModel
                 {
                     names = App.DbContext.ActorNames
                         .Include(name => name.Actor)
-                            .ThenInclude(actor => actor.Items)
+                            //.ThenInclude(actor => actor.Items)
                         .OrderBy(n => n.Name)
                         .ToList();
                     Actors = new ObservableCollection<AvActor>(
@@ -302,11 +324,10 @@ namespace HappyHour.ViewModel
                 return;
             }
 
-            string searcStr = $"{p}%";
             names = App.DbContext.ActorNames
                 .Include(name => name.Actor)
-                    .ThenInclude(actor => actor.Items)
-                .Where(n => EF.Functions.Like(n.Name, searcStr))
+                    //.ThenInclude(actor => actor.Items)
+                .Where(n => EF.Functions.Like(n.Name, $"{p}%"))
                 .OrderBy(n => n.Name)
                 .ToList();
 
@@ -331,15 +352,60 @@ namespace HappyHour.ViewModel
 
         void OnDoubleClicked()
         {
-            //MessengerInstance.Send(new NotificationMessage<AvActor>(
-            //    SelectedActor, "ActorDoubleClicked"));
+            if (SelectedActor == null)
+                return;
+
             var movies = new List<string>();
+            UiServices.WaitCursor(true);
+            App.DbContext.Entry(SelectedActor)
+                .Collection(a => a.Items).Load();
             foreach (var item in SelectedActor.Items.ToList())
             {
                 movies.Add(item.Path);
             }
             if (MediaList != null)
                 MediaList.Replace(movies);
+            UiServices.WaitCursor(false);
+        }
+
+        void OnActorNameDoubleClicked()
+        {
+            if (SelectedActorName == null)
+                return;
+
+            if (Actors.Any(a => a.Names.Contains(SelectedActorName)))
+                return;
+
+            App.DbContext.Entry(SelectedActorName)
+                .Reference(n => n.Actor).Load();
+            Actors.Add(SelectedActorName.Actor);
+        }
+
+        void OnClearActors()
+        {
+            ActorInitials.ForEach(i => i.UnCheck());
+            Actors.Clear();
+        }
+
+        void OnDeleteNameOfActor()
+        {
+            if (SelectedNameOfActor == null) return;
+            App.DbContext.Entry(SelectedNameOfActor)
+                .Reference(n => n.Actor).Load();
+            App.DbContext.Entry(SelectedNameOfActor.Actor)
+                .Collection(a => a.Names).Load();
+            if (SelectedNameOfActor.Actor.Names.Count < 2)
+                return;
+
+            var ret = DialogService.ShowMessageBox(this,
+                $"Delete {SelectedNameOfActor.Name} from Actor",
+                "Warning", MessageBoxButton.YesNo);
+            if (ret == MessageBoxResult.Yes)
+            {
+                //Log.Print($"Delete {SelectedNameOfActor.Name}");
+                SelectedNameOfActor.Actor.Names.Remove(SelectedNameOfActor);
+                NameListOfOneActor.Remove(SelectedNameOfActor);
+            }
         }
 
         void OnMergeActors(object p)
@@ -355,6 +421,8 @@ namespace HappyHour.ViewModel
                     continue;
                 }
 
+                App.DbContext.Entry(actor)
+                    .Collection(a => a.Items).Load();
                 var avItems = actor.Items.ToList();
                 foreach (var item in avItems)
                 {
@@ -366,6 +434,7 @@ namespace HappyHour.ViewModel
                     if (!tgtActor.Names.Any(n => n.Name.Equals(name.Name,
                         StringComparison.OrdinalIgnoreCase)))
                     {
+                        name.Actor = tgtActor;
                         tgtActor.Names.Add(name);
                     }
                 }

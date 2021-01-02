@@ -9,12 +9,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
+using Microsoft.EntityFrameworkCore;
+
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Messaging;
-
-//using FileListView.Interfaces;
-//using FileSystemModels.Models.FSItems.Base;
 
 using MvvmDialogs;
 using MvvmDialogs.FrameworkDialogs.FolderBrowser;
@@ -41,6 +40,7 @@ namespace HappyHour.ViewModel
         bool _isBrowsing = false;
         bool _sortByDateReleased = true;
         bool _sortByDateAdded = false;
+        bool _searchSubFolder = false;
         IFileList _fileList;
 
         public MediaItem SelectedMedia
@@ -64,7 +64,15 @@ namespace HappyHour.ViewModel
 
         public ObservableCollection<MediaItem> MediaList { get; private set; }
         public SpiderEnum SpiderList { get; private set; }
-        public bool SearchSubFolder { get; set; }
+        public bool SearchSubFolder
+        {
+            get => _searchSubFolder;
+            set
+            {
+                Set(ref _searchSubFolder, value);
+                RefreshMediaList(_fileList.CurrDirInfo);
+            }
+        }
         public bool SorByDateReleased
         {
             get => _sortByDateReleased;
@@ -116,6 +124,8 @@ namespace HappyHour.ViewModel
         public ICommand CmdClearDb { get; set; }
         public ICommand CmdEditItem { get; set; }
         public ICommand CmdDoubleClick { get; set; }
+        public ICommand CmdSearchOrphanageMedia { get; set; }
+        public ICommand CmdSearchEmptyActor { get; set; }
 
         public MediaListViewModel()
         {
@@ -132,6 +142,8 @@ namespace HappyHour.ViewModel
             CmdClearDb = new RelayCommand<object>(p => OnClearDb(p));
             CmdEditItem = new RelayCommand<object>(p => OnEditItem(p));
             CmdDoubleClick = new RelayCommand(() => OnDoubleClicked());
+            CmdSearchOrphanageMedia = new RelayCommand(() => OnSearchOrphanageMedia());
+            CmdSearchEmptyActor = new RelayCommand(() => OnSearchEmptyActor());
 
             MessengerInstance.Register<NotificationMessage<SpiderEnum>>(this,
                 (msg) => SpiderList = msg.Content.Where(i => i.Name != "sehuatang"));
@@ -141,9 +153,16 @@ namespace HappyHour.ViewModel
 
         void OnDirChanged(object sender, DirectoryInfo msg)
         {
+            _searchSubFolder = false;
+            RaisePropertyChanged(nameof(SearchSubFolder));
+            RefreshMediaList(msg);
+        }
+
+        void RefreshMediaList(DirectoryInfo msg)
+        { 
             ClearMedia();
             _serialQueue.Enqueue(() =>
-                UpdateMediaList(msg.FullName));
+                UpdateMediaList(msg.FullName, _searchSubFolder));
         }
 
         void OnDirModifed(object sender, FileSystemEventArgs e)
@@ -208,13 +227,13 @@ namespace HappyHour.ViewModel
 
         public void Replace(IEnumerable<string> paths)
         {
-            IsBrowsing = false;
+            IsBrowsing = true;
             MediaList.Clear();
             foreach (var path in paths)
             {
                 InsertMedia(path);
             }
-            IsBrowsing = true;
+            IsBrowsing = false;
         }
 
         void UpdateMediaList(string path, bool bRecursive = false, int level = 0)
@@ -240,21 +259,6 @@ namespace HappyHour.ViewModel
             }
         }
 
-        public MediaItem GetMedia(string path)
-        {
-            try
-            {
-                var item = new MediaItem(path);
-                if (!item.IsExcluded && !item.IsDownload && item.IsMediaFolder)
-                    return item;
-            }
-            catch (Exception ex)
-            {
-                Log.Print(ex.Message);
-            }
-            return null;
-        }
-
         void InsertMediaAsync(string path)
         {
             UiServices.Invoke(delegate
@@ -266,7 +270,7 @@ namespace HappyHour.ViewModel
 
         void InsertMedia(string path)
         {
-            var item = GetMedia(path);
+            var item = MediaItem.Create(path);
             if (item == null) return;
 
             MediaList.InsertInPlace(item, i => i.DateTime);
@@ -359,6 +363,65 @@ namespace HappyHour.ViewModel
         {
             MessengerInstance.Send(new NotificationMessage<MediaItem>(
                 SelectedMedia, "MediaItemDblClicked"));
+        }
+
+        void IterateMedia(string currDir, List<string> dbDirs)
+        {
+            try
+            {
+                var dirs = Directory.GetDirectories(currDir);
+                if (dirs.Length == 0 || dirs[0].EndsWith(".actors"))
+                {
+                    if (dbDirs.BinarySearch(currDir) < 0)
+                    {
+                        InsertMediaAsync(currDir);
+                    }
+                }
+                else 
+                {
+                    foreach (var dir in dirs)
+                    {
+                        IterateMedia(dir, dbDirs);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Print(ex.Message);
+            }
+        }
+
+        void OnSearchOrphanageMedia()
+        {
+            UiServices.WaitCursor(true);
+            ClearMedia();
+
+            var currDir = _fileList.CurrDirInfo.FullName;
+            var dbDirs = App.DbContext.Items
+                .Where(i => EF.Functions.Like(i.Path, $"{currDir}%"))
+                .Select(i => i.Path)
+                .ToList();
+
+            _serialQueue.Enqueue(() =>
+            {
+                dbDirs.Sort();
+                IterateMedia(currDir, dbDirs);
+                Log.Print("Search orphanage media done!");
+            });
+            UiServices.WaitCursor(false);
+        }
+
+        void OnSearchEmptyActor()
+        { 
+            UiServices.WaitCursor(true);
+            var paths = App.DbContext.Items
+                .Include(i => i.Actors)
+                .Where(i => i.Actors.Count == 0)
+                .Select(i => i.Path)
+                .ToList();
+
+            Replace(paths);
+            UiServices.WaitCursor(false);
         }
 
         void OnContextMenu(MediaItem item, MediaListMenuType type)
