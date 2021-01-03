@@ -26,11 +26,12 @@ namespace HappyHour.ScrapItems
                 { "Honnaka", "Hon Naka" },
                 { "K.M.Produce", "K M Produce" },
                 { "Uchu Kikaku", "K M Produce" },
-                { "Real Works", "K M Produce" },
+                //{ "Real Works", "K M Produce" },
                 { "Crystal Eizou", "Crystal Eizo"},
                 { "Deeps", "Deep's"},
                 { "Kyandei", "Candy"},
                 { "MAX-A", "Max A"},
+                { "Saidobi-", "Nagae Style" },
                 { "Das !", "Das"},
                 { "Bi", "Chijo Heaven"},
             };

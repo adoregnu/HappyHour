@@ -32,47 +32,21 @@ namespace HappyHour.ScrapItems
             Interlocked.Increment(ref _numDownloadCnt);
         }
 
-        void ParseItem(string name, List<object> items)
+        void ParseCover(string url)
         {
-            if (name == "cover")
+            var ext = url.Split('.').Last();
+            if (File.Exists($"{PosterPath}.{ext}"))
+                return;
+
+            if (!url.StartsWith("http"))
             {
-                var url = items[0] as string;
-                if (!url.StartsWith("http"))
-                {
-                    _spider.Browser.Download(_spider.URL + url);
-                }
-                else
-                {
-                    _spider.Browser.Download(url);
-                }
-                Interlocked.Increment(ref _numItemsToScrap);
+                _spider.Browser.Download(_spider.URL + url);
             }
-            else if (name == "studio")
+            else
             {
-                var m = Regex.Match(items[0] as string, @"\]=([\w\d]+)");
-                if (m.Success)
-                {
-                    Log.Print($"\tstudio:{m.Groups[1].Value}");
-                    UpdateStudio(m.Groups[1].Value);
-                }
+                _spider.Browser.Download(url);
             }
-            else if (name == "title")
-            {
-                 UpdateTitle(items[0] as string);
-            }
-            else if (name == "releasedate")
-            { 
-                var strdate = (items[0] as string).Trim(); ;
-                try
-                {
-                    _avItem.DateReleased = DateTime.ParseExact(
-                        strdate, "yyyy/MM/dd", enUS);
-                }
-                catch (Exception e)
-                {
-                    Log.Print(e.Message);
-                }
-            }
+            Interlocked.Increment(ref _numItemsToScrap);
         }
 
         void IScrapItem.OnJsResult(string name, List<object> items)
@@ -81,7 +55,36 @@ namespace HappyHour.ScrapItems
             if (items != null && items.Count > 0)
             {
                 _numValidItems++;
-                ParseItem(name, items);
+                if (name == "cover")
+                {
+                    ParseCover(items[0] as string);
+                }
+                else if (name == "studio")
+                {
+                    var m = Regex.Match(items[0] as string, @"\]=([\w\d]+)");
+                    if (m.Success)
+                    {
+                        //Log.Print($"\tstudio:{m.Groups[1].Value}");
+                        UpdateStudio(m.Groups[1].Value);
+                    }
+                }
+                else if (name == "title")
+                {
+                    UpdateTitle(items[0] as string);
+                }
+                else if (name == "releasedate")
+                {
+                    var strdate = (items[0] as string).Trim(); ;
+                    try
+                    {
+                        _avItem.DateReleased = DateTime.ParseExact(
+                            strdate, "yyyy/MM/dd", enUS);
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Print(e.Message);
+                    }
+                }
             }
             CheckCompleted();
         }

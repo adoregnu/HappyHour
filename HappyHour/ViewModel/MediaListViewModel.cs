@@ -147,8 +147,6 @@ namespace HappyHour.ViewModel
 
             MessengerInstance.Register<NotificationMessage<SpiderEnum>>(this,
                 (msg) => SpiderList = msg.Content.Where(i => i.Name != "sehuatang"));
-
-            //PropertyChanged += OnPropertyChanged
         }
 
         void OnDirChanged(object sender, DirectoryInfo msg)
@@ -278,7 +276,7 @@ namespace HappyHour.ViewModel
 
         void OnMoveItem(object param)
         {
-            if (!(param is IList<object> items) || items.Count == 0)
+            if (param is not IList<object> items || items.Count == 0)
                     return;
 
             foreach (var item in items.Cast<MediaItem>().ToList())
@@ -291,7 +289,7 @@ namespace HappyHour.ViewModel
         }
         void OnMoveItemTo(object param)
         {
-            if (!(param is IList<object> items) || items.Count == 0)
+            if (param is not IList<object> items || items.Count == 0)
                     return;
 
             IDialogService dlgSvc = null;

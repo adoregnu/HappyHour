@@ -116,7 +116,8 @@ namespace HappyHour.ScrapItems
             UiServices.Invoke(delegate
             {
                 studio = HtmlEntity.DeEntitize(studio.Trim());
-                studio = NameMap.StudioName(studio);
+                if (_spider.Name == "Javlibrary")
+                    studio = NameMap.StudioName(studio);
                 _studio = _context.Studios.FirstOrDefault(
                     x => x.Name.ToLower() == studio.ToLower());
                 if (_studio == null)
@@ -150,6 +151,7 @@ namespace HappyHour.ScrapItems
                     aan = _context.ActorNames
                         .Include(n => n.Actor)
                         .Where(n => n.Name.ToLower() == aname.Name.ToLower())
+                        .Where(n => n.Actor != null)
                         .FirstOrDefault();
                     if (aan != null) break;
                 }

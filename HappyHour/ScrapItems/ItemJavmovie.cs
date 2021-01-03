@@ -32,6 +32,29 @@ namespace HappyHour.ScrapItems
             e.SuggestedFileName = $"{PosterPath}{ext}";
         }
 
+        void ParseActorName(List<object> items)
+        {
+            List<List<AvActorName>> ll = new List<List<AvActorName>>();
+            foreach (string actor in items)
+            {
+                var name = actor.Trim();
+                var list = new List<AvActorName>();
+                var m = Regex.Match(name, @"([\w\s]+) \((.+)\)");
+                if (m.Success)
+                {
+                    name = m.Groups[1].Value.Trim();
+                    var regex = new Regex(@"([\w\s]+),?");
+                    foreach (Match mm in regex.Matches(m.Groups[2].Value))
+                    {
+                        list.Add(new AvActorName { Name = mm.Groups[1].Value.Trim() });
+                    }
+                }
+                list.Insert(0, new AvActorName { Name = name });
+                ll.Add(list);
+            }
+            UpdateActor2(ll);
+        }
+
         void IScrapItem.OnJsResult(string name, List<object> items)
         {
             PrintItem(name, items);
@@ -67,15 +90,7 @@ namespace HappyHour.ScrapItems
                 }
                 else if (name == "actor")
                 {
-                    List<List<AvActorName>> ll = new List<List<AvActorName>>();
-                    foreach (string actor in items)
-                    {
-                        ll.Add(new List<AvActorName>
-                        {
-                            new AvActorName { Name= actor.Trim() }
-                        });
-                    }
-                    UpdateActor2(ll);
+                    ParseActorName(items);
                 }
                 else if (name == "title")
                 {

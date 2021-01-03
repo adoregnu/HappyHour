@@ -25,7 +25,7 @@
                     <StackPanel VerticalAlignment="Bottom"
                                 Background="Black" Opacity="0.60">
                         <TextBlock Text="{Binding .}" Foreground="White"
-                           Height="15" Margin="5,0,5,0" TextAlignment="Center" />
+                           Height="18" Margin="5,0,5,0" TextAlignment="Center" />
                     </StackPanel>
                 </Grid>
             </Border>

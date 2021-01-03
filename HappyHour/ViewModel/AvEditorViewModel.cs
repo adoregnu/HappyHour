@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.ComponentModel;
 using System.Windows.Input;
 
 using GalaSoft.MvvmLight;
@@ -13,7 +14,6 @@ using MvvmDialogs;
 
 using HappyHour.Model;
 using Microsoft.EntityFrameworkCore;
-using System.ComponentModel;
 
 namespace HappyHour.ViewModel
 {
@@ -101,6 +101,7 @@ namespace HappyHour.ViewModel
         public ICommand CmdAddActor { get; private set; }
         public ICommand CmdRemoveActor { get; private set; }
         public ICommand CmdAddGenre { get; private set; }
+        public ICommand CmdRemoveGenre { get; private set; }
         public ICommand CmdSave { get; private set; }
 
         public AvEditorViewModel(MediaItem mediaItem)
@@ -136,6 +137,8 @@ namespace HappyHour.ViewModel
         bool _actorChanged = false;
         void OnAddActor()
         {
+            if (SelectedActor == null) return;
+
             if (!Actors.Any(a => a == SelectedActor))
             {
                 Actors.Add(SelectedActor);
@@ -155,6 +158,8 @@ namespace HappyHour.ViewModel
         bool _genreChanges = false;
         void OnAddGnere()
         {
+            if (SelectedGenre == null) return;
+
             if (!Genres.Any(g => g == SelectedGenre))
                 Genres.Add(SelectedGenre);
         }

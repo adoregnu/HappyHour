@@ -2,6 +2,8 @@
 using System.Windows.Controls;
 using System.Windows.Data;
 
+using CefSharp;
+
 namespace HappyHour.View
 {
     /// <summary>
@@ -12,6 +14,18 @@ namespace HappyHour.View
         public SpiderView()
         {
             InitializeComponent();
+            //imageLoaingButton.IsChecked = true;
         }
+#if false
+        void EnableImageLoading(object sender, RoutedEventArgs e)
+        {
+            //browser.BrowserSettings.ImageLoading = CefState.Enabled;
+        }
+
+        void DisableImageLoading(object sender, RoutedEventArgs e)
+        { 
+            //browser.BrowserSettings.ImageLoading = CefState.Disabled;
+        }
+#endif
     }
 }

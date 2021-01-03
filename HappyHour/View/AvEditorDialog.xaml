@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:HappyHour.View"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         mc:Ignorable="d"
         WindowStartupLocation="CenterOwner"
         Title="{Binding Title}"
@@ -119,7 +119,6 @@
         <Grid Grid.Row="5" Margin="5">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
-                <ColumnDefinition Width="25"/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
             <DockPanel Grid.Column="0" VerticalAlignment="Top">
@@ -127,41 +126,55 @@
                           Width="60" TextAlignment="Right" />
                 <ListBox MinHeight="60" MaxHeight="300" ItemsSource="{Binding Actors}"
                          SelectedItem="{Binding SelectedAvActor}"
-                         ItemTemplate="{StaticResource ActorMiniTemplate}"/>
+                         ItemTemplate="{StaticResource ActorMiniTemplate}">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="MouseDoubleClick">
+                            <i:InvokeCommandAction Command="{Binding CmdRemoveActor}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </ListBox>
             </DockPanel>
-            <StackPanel  Grid.Column="1" VerticalAlignment="Center">
-                <Button Content="&lt;" Margin="2"
-                        Command="{Binding CmdAddActor}"/>
-                <Button Content="&gt;" Margin="2"
-                        Command="{Binding CmdRemoveActor}"/>
-            </StackPanel>
-            <DockPanel Grid.Column="2" >
+            <DockPanel Grid.Column="1" Margin="2,0,0,0">
                 <TextBox DockPanel.Dock="Top" Margin="0,0,0,2"
+                         Style="{StaticResource EnderlinedTextbox}"
                          Text="{Binding SearchActorName,
                             UpdateSourceTrigger=PropertyChanged}"/>
                 <ListBox MaxHeight="300" ItemsSource="{Binding AllActors}"
                      ItemTemplate="{StaticResource ActorMiniTemplate}"
-                     SelectedItem="{Binding SelectedActor}"/>
+                     SelectedItem="{Binding SelectedActor}">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="MouseDoubleClick">
+                            <i:InvokeCommandAction Command="{Binding CmdAddActor}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </ListBox>
             </DockPanel>
         </Grid>
         <Grid Grid.Row="6" Margin="5">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
-                <ColumnDefinition Width="25"/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-            <DockPanel Grid.Column="0" VerticalAlignment="Top">
+            <DockPanel Grid.Column="0" VerticalAlignment="Top" Margin="0,0,2,0">
                 <TextBlock Text="Genres : " DockPanel.Dock="Left"
                           Width="60" TextAlignment="Right" />
                 <ListBox MinHeight="50" MaxHeight="100" ItemsSource="{Binding Genres}"
-                         SelectedItem="{Binding SelectedAvGenre}"/>
+                         SelectedItem="{Binding SelectedAvGenre}">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="MouseDoubleClick">
+                            <i:InvokeCommandAction Command="{Binding CmdRemoveGenre}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </ListBox>
             </DockPanel>
-            <StackPanel  Grid.Column="1" VerticalAlignment="Center">
-                <Button Content="&lt;" Margin="2"
-                    Command="{Binding CmdAddGenre}"/>
-            </StackPanel>
-            <ListBox Grid.Column="2" MaxHeight="100" ItemsSource="{Binding AllGenres}"
-                     SelectedItem="{Binding SelectedGenre}"/>
+             <ListBox Grid.Column="2" MaxHeight="100" ItemsSource="{Binding AllGenres}"
+                     SelectedItem="{Binding SelectedGenre}">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="MouseDoubleClick">
+                        <i:InvokeCommandAction Command="{Binding CmdAddGenre}"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </ListBox>
         </Grid>
         <DockPanel Grid.Row="7" Margin="5">
             <TextBlock Text="Plot : " DockPanel.Dock="Left"

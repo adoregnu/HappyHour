@@ -311,7 +311,7 @@ namespace HappyHour.ViewModel
                 {
                     names = App.DbContext.ActorNames
                         .Include(name => name.Actor)
-                            //.ThenInclude(actor => actor.Items)
+                        .Where(n => n.Actor != null)
                         .OrderBy(n => n.Name)
                         .ToList();
                     Actors = new ObservableCollection<AvActor>(
@@ -326,8 +326,8 @@ namespace HappyHour.ViewModel
 
             names = App.DbContext.ActorNames
                 .Include(name => name.Actor)
-                    //.ThenInclude(actor => actor.Items)
                 .Where(n => EF.Functions.Like(n.Name, $"{p}%"))
+                .Where(n => n.Actor != null)
                 .OrderBy(n => n.Name)
                 .ToList();
 
@@ -378,6 +378,11 @@ namespace HappyHour.ViewModel
 
             App.DbContext.Entry(SelectedActorName)
                 .Reference(n => n.Actor).Load();
+            if (SelectedActorName.Actor == null)
+            {
+                Log.Print($"Dangling ActorName {SelectedActorName}");
+                return;
+            }
             Actors.Add(SelectedActorName.Actor);
         }
 
@@ -404,6 +409,7 @@ namespace HappyHour.ViewModel
             {
                 //Log.Print($"Delete {SelectedNameOfActor.Name}");
                 SelectedNameOfActor.Actor.Names.Remove(SelectedNameOfActor);
+                App.DbContext.ActorNames.Remove(SelectedNameOfActor);
                 NameListOfOneActor.Remove(SelectedNameOfActor);
             }
         }
