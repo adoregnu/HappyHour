@@ -46,7 +46,7 @@
                     AncestorType=ContextMenu}}"/>
             <MenuItem
                 Header="Delete"
-                Command="{Binding PlacementTarget.Tag.DataContext.CmdDeleteActor,
+                Command="{Binding PlacementTarget.Tag.DataContext.CmdDeleteActorFromDb,
                     RelativeSource={RelativeSource FindAncestor,
                     AncestorType=ContextMenu}}"/>
             <MenuItem
@@ -55,14 +55,12 @@
                     RelativeSource={RelativeSource FindAncestor,
                     AncestorType=ContextMenu}}"/>
         </ContextMenu>
-        <ContextMenu x:Key="_namesOfActorCMenu">
-            <MenuItem
-                Header="Delete"
-                Command="{Binding PlacementTarget.Tag.CmdDelNameOfActor,
-                    RelativeSource={RelativeSource FindAncestor,
-                    AncestorType=ContextMenu}}" />
-        </ContextMenu>
     </Window.Resources>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Closed">
+            <i:InvokeCommandAction Command="{Binding CmdClosed}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
     <DockPanel>
         <Grid DockPanel.Dock="Top" Margin="5">
             <Grid.ColumnDefinitions>
@@ -101,14 +99,9 @@
                 </Button.ToolTip>
             </Button>
         </Grid>
-        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal"
-                    HorizontalAlignment="Center">
-            <Button Content="Clear" Margin="0,0,5,5" Padding="2"
-                    Command="{Binding CmdClearActors}"/>
-            <Button Content="Save" Margin="0,0,5,5" Padding="2"
-                    Command="{Binding CmdSave}"/>
-            <Button Content="Close" Margin="0,0,5,5" Padding="2"
-                    IsCancel="True"  Click="Close"/>
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Center">
+            <Button Content="Clear" Margin="0,0,5,5" Padding="2" Command="{Binding CmdClearActors}"/>
+            <Button Content="Close" Margin="0,0,5,5" Padding="2" IsCancel="True" Click="Close"/>
         </StackPanel>
         <Grid>
             <Grid.ColumnDefinitions>
@@ -142,7 +135,7 @@
                     </ItemsControl>
                 </WrapPanel>
 
-                 <ListBox Margin="5,0,0,5" Grid.Row="1"
+                <ListBox Margin="5,0,0,5" Grid.Row="1"
                     SelectionMode="Extended" x:Name="_actorListbox"
                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                     ItemsPanel="{StaticResource ImagePanelTemplate}"
@@ -166,6 +159,9 @@
                                     Value="{StaticResource _controlTpl}"/>
                         </Style>
                     </ListBox.Resources>
+                    <ListBox.InputBindings>
+                        <KeyBinding Command="{Binding CmdDeleteActorFromList}" Key="Delete"/>
+                    </ListBox.InputBindings>
                 </ListBox>
             </Grid>
             <DockPanel Grid.Column="1" Width="200">
@@ -184,21 +180,11 @@
                         </Button>
                         <TextBox Text="{Binding NewName}"/>
                     </DockPanel>
-                    <ListBox  Height="100" Margin="5,0,5,0" x:Name="_namesOfActor"
+                    <ListBox  Height="100" Margin="5,0,5,0"
                               ItemsSource="{Binding NameListOfOneActor}"
                               SelectedItem="{Binding SelectedNameOfActor}">
-                        <ListBox.Resources>
-                            <Style TargetType="{x:Type ListBoxItem}">
-                                <Setter Property="Tag"
-                                    Value="{Binding ElementName=_namesOfActor,
-                                        Path=DataContext}"/>
-                                <Setter Property="ContextMenu"
-                                    Value="{StaticResource _namesOfActorCMenu}"/>
-                            </Style>
-                        </ListBox.Resources>
                         <ListBox.InputBindings>
-                            <KeyBinding Command="{Binding CmdDeleteNameOfActor}"
-                                Key="Delete"/>
+                            <KeyBinding Command="{Binding CmdDeleteNameOfActor}" Key="Delete"/>
                         </ListBox.InputBindings>
                     </ListBox>
                 </DockPanel>

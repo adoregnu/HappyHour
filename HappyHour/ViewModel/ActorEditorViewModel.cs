@@ -22,7 +22,7 @@ using HappyHour.Interfaces;
 
 namespace HappyHour.ViewModel
 {
-    class ActorInitial : ViewModelBase
+    internal class ActorInitial : ViewModelBase
     {
         bool _isChecked = false;
         public ActorEditorViewModel ActorEditor;
@@ -51,7 +51,7 @@ namespace HappyHour.ViewModel
         string _newName;
         string _searchText;
 
-        bool? _dialogResult;
+        bool? _dialogResult = false;
         public bool? DialogResult
         {
             get => _dialogResult;
@@ -136,39 +136,36 @@ namespace HappyHour.ViewModel
         public IDialogService DialogService { get; set; }
 
         public ICommand CmdAddNewActor { get; private set; }
-        public ICommand CmdDeleteActor { get; private set; }
+        public ICommand CmdDeleteActorFromDb { get; private set; }
         public ICommand CmdChangePicture { get; private set; }
         public ICommand CmdBrowsePicture { get; private set; }
         public ICommand CmdAddNewName { get; private set; }
         public ICommand CmdDoubleClick { get; private set; }
+        public ICommand CmdDeleteActorFromList { get; private set; }
         public ICommand CmdActorNameDoubleClick { get; private set; }
         public ICommand CmdMergeActors { get; private set; }
-        public ICommand CmdDelNameOfActor { get; private set; }
         public ICommand CmdClearActors { get; private set; }
-        public ICommand CmdSave { get; private set; }
         public ICommand CmdDeleteNameOfActor { get; private set; }
+        public ICommand CmdClosed { get; private set; }
 
         public ActorEditorViewModel()
         {
             CmdBrowsePicture = new RelayCommand(() => PicturePath = ChoosePicture());
             CmdAddNewActor = new RelayCommand(() => OnAddNewActor());
-            CmdDeleteActor = new RelayCommand(() => OnDeleteActor());
+            CmdDeleteActorFromDb = new RelayCommand(() => OnDeleteActor());
             CmdChangePicture = new RelayCommand(() => OnChangePicture());
             CmdAddNewName = new RelayCommand(() => OnAddNewName());
             CmdDoubleClick = new RelayCommand(() => OnDoubleClicked());
+            CmdDeleteActorFromList = new RelayCommand(() => {
+                if (SelectedActor != null) Actors.Remove(SelectedActor);
+            });
             CmdActorNameDoubleClick = new RelayCommand(() => OnActorNameDoubleClicked());
             CmdMergeActors = new RelayCommand<object>(
                 p => OnMergeActors(p), 
                 p => p is IList<object> list && list.Count > 1);
-            CmdDelNameOfActor = new RelayCommand(() =>
-            {
-                App.DbContext.ActorNames.Remove(SelectedNameOfActor);
-                NameListOfOneActor.Remove(SelectedNameOfActor);
-                SelectedNameOfActor = null;
-            });
             CmdClearActors = new RelayCommand(() => OnClearActors());
-            CmdSave = new RelayCommand(() => App.DbContext.SaveChanges());
             CmdDeleteNameOfActor = new RelayCommand(() => OnDeleteNameOfActor());
+            CmdClosed = new RelayCommand(() => OnClose());
 
             ActorInitials = Enumerable.Range('A', 'Z' - 'A' + 1)
                 .Select(c => new ActorInitial
@@ -267,6 +264,7 @@ namespace HappyHour.ViewModel
 
             SelectedActor.PicturePath = Path.GetFileName(file);
             //App.DbContext.SaveChanges();
+            DialogResult = true;
         }
 
         void OnAddNewName()
@@ -300,7 +298,6 @@ namespace HappyHour.ViewModel
         {
             NameListOfOneActor = null;
             SelectedActor = null;
-            List<AvActorName> names = null;
             if (p == "All")
             {
                 foreach (var initial in ActorInitials)
@@ -309,13 +306,14 @@ namespace HappyHour.ViewModel
                 }
                 if (isSelected)
                 {
-                    names = App.DbContext.ActorNames
+                    var tmpActors = App.DbContext.ActorNames
                         .Include(name => name.Actor)
                         .Where(n => n.Actor != null)
                         .OrderBy(n => n.Name)
+                        .Select(n => n.Actor)
+                        .Distinct()
                         .ToList();
-                    Actors = new ObservableCollection<AvActor>(
-                        names.Select(n => n.Actor).Distinct());
+                    Actors = new ObservableCollection<AvActor>(tmpActors);
                 }
                 else
                 {
@@ -324,24 +322,23 @@ namespace HappyHour.ViewModel
                 return;
             }
 
-            names = App.DbContext.ActorNames
+            var actors = App.DbContext.ActorNames
                 .Include(name => name.Actor)
                 .Where(n => EF.Functions.Like(n.Name, $"{p}%"))
                 .Where(n => n.Actor != null)
                 .OrderBy(n => n.Name)
+                .Select(n => n.Actor)
+                .Distinct()
                 .ToList();
 
-            if (names == null || names.Count == 0)
+            if (actors == null || actors.Count == 0)
                 return;
 
-            var actors = names.Select(n => n.Actor).Distinct();
             foreach (var actor in actors)
             {
-                if (actor == null) continue;
                 if (isSelected)
                 {
                     Actors.Add(actor);
-                    //Actors.InsertInPlace(actor, a => a.ToString());
                 }
                 else
                 {
@@ -412,6 +409,8 @@ namespace HappyHour.ViewModel
                 App.DbContext.ActorNames.Remove(SelectedNameOfActor);
                 NameListOfOneActor.Remove(SelectedNameOfActor);
             }
+
+            DialogResult = true;
         }
 
         void OnMergeActors(object p)
@@ -448,6 +447,13 @@ namespace HappyHour.ViewModel
                 Actors.Remove(actor);
             }
             //App.DbContext.SaveChanges();
+            DialogResult = true;
+        }
+
+        void OnClose()
+        { 
+            if (DialogResult == true)
+                App.DbContext.SaveChanges();
         }
     }
 }

@@ -409,17 +409,15 @@ namespace HappyHour.ViewModel
             UiServices.WaitCursor(false);
         }
 
-        void OnSearchEmptyActor()
+        async void OnSearchEmptyActor()
         { 
-            UiServices.WaitCursor(true);
-            var paths = App.DbContext.Items
+            var paths = await App.DbContext.Items
                 .Include(i => i.Actors)
                 .Where(i => i.Actors.Count == 0)
                 .Select(i => i.Path)
-                .ToList();
+                .ToListAsync();
 
             Replace(paths);
-            UiServices.WaitCursor(false);
         }
 
         void OnContextMenu(MediaItem item, MediaListMenuType type)

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,7 +24,6 @@ namespace HappyHour.ViewModel
         bool _isPropertiesPanelOpen = App.IsInDesignMode;
         bool _isPlayerLoaded = App.IsInDesignMode;
         bool _isPlaying = false;
-        bool _isMiniMode = false;
         MediaItem _mediaItem;
 
         public MediaItem MediaItem
@@ -68,10 +68,9 @@ namespace HappyHour.ViewModel
         public ICommand StopCommand { get; private set; }
         public ICommand CloseCommand { get; private set; }
 
-        public PlayerViewModel(bool isMiniMode = false)
+        public PlayerViewModel()
         {
             Title = "Player";
-            _isMiniMode = isMiniMode;
             MediaPlayer = new Unosquare.FFME.MediaElement
             {
                 Background = Brushes.Black,
@@ -80,26 +79,13 @@ namespace HappyHour.ViewModel
                 IsDesignPreviewEnabled = true,
                 IsMuted = true
             };
-            if (_isMiniMode)
-            {
-                MediaPlayer.LoadedBehavior = MediaPlaybackState.Play;
-            }
-            else
-            {
-                MediaPlayer.LoadedBehavior = MediaPlaybackState.Stop;
-            }
+            MediaPlayer.LoadedBehavior = MediaPlaybackState.Stop;
 
             InitMediaEventHandler();
 
             KeyDownCommand = new RelayCommand<KeyEventArgs>(e => OnPKeyDown(e));
 
-            PlayCommand = new RelayCommand(async () =>
-            {
-                if (_isMiniMode && !MediaPlayer.IsOpen)
-                    await MediaPlayer.Open(new Uri(_mediaItem.MediaFile));
-                else
-                    await MediaPlayer.Play();
-            });
+            PlayCommand = new RelayCommand(async () => await MediaPlayer.Play());
             PauseCommand = new RelayCommand(async () => await MediaPlayer.Pause());
             StopCommand = new RelayCommand(async () => await MediaPlayer.Stop());
             CloseCommand = new RelayCommand(async () => await MediaPlayer.Close());
@@ -126,6 +112,7 @@ namespace HappyHour.ViewModel
                     MediaPlayer.MediaState == MediaPlaybackState.Pause,
                 nameof(MediaPlayer.IsPlaying));
         }
+
         async public void SetMediaItem(MediaItem media)
         {
             MediaItem = media;
@@ -135,11 +122,9 @@ namespace HappyHour.ViewModel
             }
             if (media != null)
             {
-                if (!_isMiniMode)
-                {
-                    await MediaPlayer.Open(new Uri(media.MediaFile));
-                }
+                await MediaPlayer.Open(new Uri(media.MediaFile));
             }
+            Title = Path.GetFileName(media.MediaFile);
             IsSelected = true;
         }
 
