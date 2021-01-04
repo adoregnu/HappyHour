@@ -242,14 +242,14 @@ namespace HappyHour.Model
             MediaName = $"{Pid}\n" + DateTime.ToString("u");
         }
 
-        public void ReloadAvItem()
+        public async void ReloadAvItem()
         {
-            AvItem = App.DbContext.Items
+            AvItem = await App.DbContext.Items
                 .Include(i => i.Studio)
                 .Include(i => i.Genres)
                 .Include(i => i.Actors)
                     .ThenInclude(a => a.Names)
-                .FirstOrDefault(i => i.Pid == Pid);
+                .FirstOrDefaultAsync(i => i.Pid == Pid);
         }
 
         public void UpdateFields()

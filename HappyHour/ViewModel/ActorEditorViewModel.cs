@@ -294,7 +294,7 @@ namespace HappyHour.ViewModel
             }
         }
 
-        public void OnActorAlphabet(string p, bool isSelected)
+        public async void OnActorAlphabet(string p, bool isSelected)
         {
             NameListOfOneActor = null;
             SelectedActor = null;
@@ -306,14 +306,15 @@ namespace HappyHour.ViewModel
                 }
                 if (isSelected)
                 {
-                    var tmpActors = App.DbContext.ActorNames
+                    var allNames = await App.DbContext.ActorNames
                         .Include(name => name.Actor)
+                            .ThenInclude(a => a.Names)
                         .Where(n => n.Actor != null)
                         .OrderBy(n => n.Name)
-                        .Select(n => n.Actor)
-                        .Distinct()
-                        .ToList();
-                    Actors = new ObservableCollection<AvActor>(tmpActors);
+                        .ToListAsync();
+
+                    var allActors = allNames.Select(n => n.Actor).Distinct();
+                    Actors = new ObservableCollection<AvActor>(allActors);
                 }
                 else
                 {
@@ -322,16 +323,18 @@ namespace HappyHour.ViewModel
                 return;
             }
 
-            var actors = App.DbContext.ActorNames
+            var namesStartOf = await App.DbContext.ActorNames
                 .Include(name => name.Actor)
+                    .ThenInclude(a => a.Names)
                 .Where(n => EF.Functions.Like(n.Name, $"{p}%"))
                 .Where(n => n.Actor != null)
                 .OrderBy(n => n.Name)
-                .Select(n => n.Actor)
-                .Distinct()
-                .ToList();
+                .ToListAsync();
 
-            if (actors == null || actors.Count == 0)
+            var actors = namesStartOf
+                .Select(n => n.Actor).Distinct();
+
+            if (!actors.Any())
                 return;
 
             foreach (var actor in actors)

@@ -86,10 +86,12 @@
             Address="{Binding Address, Mode=TwoWay}"
             UseLayoutRounding="True"
             RenderOptions.BitmapScalingMode="NearestNeighbor">
+<!--
             <cefSharp:ChromiumWebBrowser.BrowserSettings>
                 <cefSharpCore:BrowserSettings
                     ImageLoading="Disabled"/>
             </cefSharp:ChromiumWebBrowser.BrowserSettings>
+-->
         </cefSharp:ChromiumWebBrowser>
     </Grid>
 </UserControl>

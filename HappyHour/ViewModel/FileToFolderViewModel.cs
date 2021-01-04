@@ -59,6 +59,27 @@ namespace HappyHour.ViewModel
             "mp4", "avi", "mkv", "ts", "wmv", "srt",
             "smi", "sup", "sub", "idx", "m4v"
         };
+
+        bool AddUncensored(string path)
+        {
+            var file = Path.GetFileName(path);
+            if (file.IndexOf("1pon", StringComparison.OrdinalIgnoreCase) < 0 &&
+                file.IndexOf("carib", StringComparison.OrdinalIgnoreCase) < 0)
+            {
+                return false;
+            }
+
+            var ext = Path.GetExtension(file);
+            var folder = file.Substring(0, file.LastIndexOf('-'));
+            Files.Add(new FileItem
+            {
+                SourceName = file,
+                TargetPath = $"{folder}\\{folder}{ext}",
+                MediaPath = Path.GetDirectoryName(path)
+            });
+
+            return true;
+        }
         void OnPreview()
         {
             Files.Clear();
@@ -70,6 +91,9 @@ namespace HappyHour.ViewModel
                 if (_exts.Any(s => file.EndsWith(s,
                     StringComparison.CurrentCultureIgnoreCase)))
                 {
+                    if (AddUncensored(path))
+                        continue;
+
                     var m = reg.Match(file);
                     if (!m.Success) continue;
 

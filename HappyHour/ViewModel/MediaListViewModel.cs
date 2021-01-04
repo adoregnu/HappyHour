@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using System.Windows.Data;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -35,6 +36,7 @@ namespace HappyHour.ViewModel
     class MediaListViewModel : Pane, IMediaList
     {
         static readonly SerialQueue _serialQueue = new SerialQueue();
+        readonly object _lock = new object();
 
         MediaItem _selectedMedia = null;
         bool _isBrowsing = false;
@@ -132,6 +134,8 @@ namespace HappyHour.ViewModel
             Title = "AVList";
             MediaList = new ObservableCollection<MediaItem>();
 
+            BindingOperations.EnableCollectionSynchronization(MediaList, _lock);
+
             CmdExclude = new RelayCommand<MediaItem>(
                 p => OnContextMenu(p, MediaListMenuType.excluded));
             CmdDownload = new RelayCommand<MediaItem>(
@@ -156,11 +160,13 @@ namespace HappyHour.ViewModel
             RefreshMediaList(msg);
         }
 
-        void RefreshMediaList(DirectoryInfo msg)
+        async void RefreshMediaList(DirectoryInfo msg)
         { 
             ClearMedia();
-            _serialQueue.Enqueue(() =>
-                UpdateMediaList(msg.FullName, _searchSubFolder));
+            //_serialQueue.Enqueue(() =>
+            //    UpdateMediaList(msg.FullName, _searchSubFolder));
+            bool bSubFolder = _searchSubFolder;
+            await Task.Run(() => UpdateMediaList(msg.FullName, bSubFolder));
         }
 
         void OnDirModifed(object sender, FileSystemEventArgs e)
@@ -223,15 +229,30 @@ namespace HappyHour.ViewModel
             IsBrowsing = false; 
         }
 
+        void InsertMedia(string path)
+        {
+            var item = MediaItem.Create(path);
+            if (item == null) return;
+
+            MediaList.InsertInPlace(item, i => i.DateTime);
+        }
+
         public void Replace(IEnumerable<string> paths)
         {
             IsBrowsing = true;
             MediaList.Clear();
-            foreach (var path in paths)
-            {
-                InsertMedia(path);
-            }
+            ReplaceAsync(paths);
             IsBrowsing = false;
+        }
+
+        async void ReplaceAsync(IEnumerable<string> paths)
+        { 
+            await Task.Run(() => {
+                foreach (var path in paths)
+                {
+                    InsertMedia(path);
+                }
+            });
         }
 
         void UpdateMediaList(string path, bool bRecursive = false, int level = 0)
@@ -241,7 +262,7 @@ namespace HappyHour.ViewModel
                 var dirs = Directory.GetDirectories(path);
                 if (dirs.Length == 0 || dirs[0].EndsWith(".actors"))
                 {
-                    InsertMediaAsync(path);
+                    InsertMedia(path);
                 }
                 else if (bRecursive || level < 1)
                 {
@@ -255,23 +276,6 @@ namespace HappyHour.ViewModel
             {
                 Log.Print(ex.Message);
             }
-        }
-
-        void InsertMediaAsync(string path)
-        {
-            UiServices.Invoke(delegate
-            {
-                InsertMedia(path);
-            }, true);
-            //Thread.Sleep(10);
-        }
-
-        void InsertMedia(string path)
-        {
-            var item = MediaItem.Create(path);
-            if (item == null) return;
-
-            MediaList.InsertInPlace(item, i => i.DateTime);
         }
 
         void OnMoveItem(object param)
@@ -372,7 +376,7 @@ namespace HappyHour.ViewModel
                 {
                     if (dbDirs.BinarySearch(currDir) < 0)
                     {
-                        InsertMediaAsync(currDir);
+                        InsertMedia(currDir);
                     }
                 }
                 else 
@@ -389,23 +393,24 @@ namespace HappyHour.ViewModel
             }
         }
 
-        void OnSearchOrphanageMedia()
+        async void OnSearchOrphanageMedia()
         {
             UiServices.WaitCursor(true);
             ClearMedia();
 
             var currDir = _fileList.CurrDirInfo.FullName;
-            var dbDirs = App.DbContext.Items
+            var dbDirs = await App.DbContext.Items
                 .Where(i => EF.Functions.Like(i.Path, $"{currDir}%"))
                 .Select(i => i.Path)
-                .ToList();
+                .ToListAsync();
 
-            _serialQueue.Enqueue(() =>
+            await Task.Run(() =>
             {
                 dbDirs.Sort();
                 IterateMedia(currDir, dbDirs);
                 Log.Print("Search orphanage media done!");
             });
+
             UiServices.WaitCursor(false);
         }
 

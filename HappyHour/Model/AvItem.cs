@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel;
 
 //using SQLite.CodeFirst;
 
@@ -38,13 +39,16 @@ namespace HappyHour.Model
         }
     }
 
-    public class AvActor
-    { 
+    public class AvActor : NotifyPropertyChanged
+    {
+        string picturePath;
         [Key]
-        //[Autoincrement]
         public int Id { get; set; }
 
-        public string PicturePath { get; set; }
+        public string PicturePath {
+            get => picturePath;
+            set => Set(ref picturePath, value, nameof(PicturePath));
+        }
         public DateTime DateAdded { get; set; }
         public virtual ICollection<AvActorName> Names { get; set; }
         public virtual ICollection<AvItem> Items { get; set; }

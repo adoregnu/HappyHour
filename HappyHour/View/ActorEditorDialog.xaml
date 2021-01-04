@@ -19,7 +19,7 @@
                     Width="128" Height="128">
                 <Grid>
                     <Image HorizontalAlignment="Center" VerticalAlignment="Top"
-                           Source="{Binding ., Converter=
+                           Source="{Binding PicturePath, Converter=
                                 {StaticResource PathToImageConverter},
                                     ConverterParameter=125}"/>
                     <StackPanel VerticalAlignment="Bottom"

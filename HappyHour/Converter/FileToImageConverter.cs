@@ -42,35 +42,24 @@ namespace HappyHour.Converter
         {
             try
             {
-                string path = null;
-                if (value_ is AvActor avactor)
+                if (value_ is string path)
                 {
-                    if (!string.IsNullOrEmpty(avactor.PicturePath))
-                        path = $"{App.CurrentPath}\\db\\{avactor.PicturePath}";
-                }
-                else
-                {
-                    path = value_ as string;
-                }
-                if (path != null)
-                {
-                    using (var bmpTemp = new Bitmap(path))
-                    {
-                        return ConvertBitmap(bmpTemp, parameter_ != null ?
-                            int.Parse(parameter_.ToString()) : 0);
-                    }
-                }
-                else
-                {
-                    return new BitmapImage(new Uri(@"pack://application:,,,/" +
-                        "Resources/default-fallback-image.png"));
+                    var width = parameter_ != null ?
+                        int.Parse(parameter_.ToString()) : 0;
+                    // $"{App.CurrentPath}
+                    if (width != 0 && width < 150)
+                        path = "db\\" + path;
+ 
+                    using var bmpTemp = new Bitmap(path);
+                    return ConvertBitmap(bmpTemp, width);
                 }
             }
-            catch (Exception /*e*/)
+            catch (Exception ex)
             {
-                //Log.Print(e.Message);
+                Log.Print(ex.Message);
             }
-            return null;
+            return new BitmapImage(new Uri(@"pack://application:,,,/" +
+                            "Resources/default-fallback-image.png"));
         }
 
         public object ConvertBack(object value, Type targetType,
