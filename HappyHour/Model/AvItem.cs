@@ -47,7 +47,7 @@ namespace HappyHour.Model
 
         public string PicturePath {
             get => picturePath;
-            set => Set(ref picturePath, value, nameof(PicturePath));
+            set => Set(ref picturePath, value);
         }
         public DateTime DateAdded { get; set; }
         public virtual ICollection<AvActorName> Names { get; set; }

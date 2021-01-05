@@ -98,9 +98,7 @@ namespace HappyHour.ViewModel
                 Set(ref _selectedAvItem, value);
                 if (value == null) return;
 
-                var media = MediaItem.Create(value.Path);
-                MessengerInstance.Send(new NotificationMessage<MediaItem>(
-                    media, "MediaItemDblClicked"));
+                MediaList.AddMedia(value.Path);
             }
         }
 

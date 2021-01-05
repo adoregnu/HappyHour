@@ -18,6 +18,7 @@ using HappyHour.Spider;
 using HappyHour.ScrapItems;
 using HappyHour.CefHandler;
 using HappyHour.Utils;
+using HappyHour.Interfaces;
 
 namespace HappyHour.ViewModel
 {
@@ -30,6 +31,7 @@ namespace HappyHour.ViewModel
         bool _bStarted = false;
         int _nextScrappingIndex = 0;
         List<MediaItem> _mediaToScrap;
+        MediaItem _selectedMedia;
         string _pid;
 
         string address;
@@ -53,8 +55,6 @@ namespace HappyHour.ViewModel
             set => Set(ref _pid, value);
         }
 
-        public MediaItem SelectedMedia;
-
         SpiderBase _selectedSpider;
         public SpiderBase SelectedSpider
         {
@@ -76,9 +76,12 @@ namespace HappyHour.ViewModel
 
         public ICommand CmdReloadUrl { get; private set; }
         public ICommand CmdBack { get; private set; }
+
+        public IMediaList MediaList { get; set; }
+
         public SpiderViewModel()
         {
-            CmdStart = new RelayCommand(() => OnStartScrapping(SelectedMedia,true));
+            CmdStart = new RelayCommand(() => OnStartScrapping(_selectedMedia,true));
             CmdStop = new RelayCommand(() => StopScrapping(null, true));
             CmdReloadUrl = new RelayCommand(() => WebBrowser.Reload());
             CmdBack = new RelayCommand(() => WebBrowser.Back());
@@ -101,20 +104,11 @@ namespace HappyHour.ViewModel
             Title = Address = _selectedSpider.URL;
 
             PropertyChanged += OnPropertyChanged;
+            MediaList.ItemSelectedHandler += (o, i) => {
+                _selectedMedia = i;
+                if (i != null) Pid = i.Pid;
+            };
 
-            MessengerInstance.Register<NotificationMessage<MediaItem>>(
-                this, (msg) => {
-                    if (msg.Notification != "mediaSelected")
-                        return;
-
-                    SelectedMedia = msg.Content;
-                    if (SelectedMedia != null)
-                    {
-                        Pid = SelectedMedia.Pid;
-                        //_bStarted = false;
-                    }
-                });
- 
             MessengerInstance.Send(new NotificationMessage<SpiderEnum>(Spiders, ""));
         }
 
@@ -135,7 +129,6 @@ namespace HappyHour.ViewModel
             }
             var media = _mediaToScrap[_nextScrappingIndex++];
             Pid = media.Pid;
-            //SelectedMedia = media;
             OnStartScrapping(media);
         }
 

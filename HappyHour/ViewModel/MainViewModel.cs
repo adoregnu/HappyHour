@@ -14,8 +14,6 @@ using Unosquare.FFME;
 using Unosquare.FFME.Common;
 
 using HappyHour.View;
-using HappyHour.Model;
-using HappyHour.Interfaces;
 
 namespace HappyHour.ViewModel
 {
@@ -77,9 +75,14 @@ namespace HappyHour.ViewModel
 
         public MainViewModel(IDialogService dialogService)
         {
+            _dialogService = dialogService;
             // Order of VieModel creation is important.
             _fileListMv = new FileListViewModel();
-            _mediaListMv = new MediaListViewModel { FileList = _fileListMv };
+            _mediaListMv = new MediaListViewModel
+            {
+                FileList = _fileListMv,
+                DialogService = dialogService
+            };
 
             Anchors.Add(_fileListMv);
             Anchors.Add(new DbViewModel { MediaList = _mediaListMv });
@@ -87,28 +90,19 @@ namespace HappyHour.ViewModel
             Anchors.Add(new DebugLogViewModel());
             Anchors.Add(new StatusLogViewModel());
             Anchors.Add(new ConsoleLogViewModel());
-            Anchors.Add(new ScreenshotViewModel());
+            Anchors.Add(new ScreenshotViewModel { MediaList = _mediaListMv });
 
-            //Docs.Add(new AvDbViewModel());
             Docs.Add(_mediaListMv);
-            Docs.Add(new PlayerViewModel());
+            Docs.Add(new PlayerViewModel { MediaList = _mediaListMv });
             Docs.Add(new BrowserViewModel());
-            Docs.Add(new SpiderViewModel());
+            Docs.Add(new SpiderViewModel { MediaList = _mediaListMv });
 
             CmdActorEdtor = new RelayCommand(() => OnActorEditor());
             CmdFileToFolder = new RelayCommand(() => OnFileToFolder());
             //KeyDownCommand = new RelayCommand<EventArgs>(e => OnKeyDown(e));
 
-            _dialogService = dialogService;
-
             MessengerInstance.Register<NotificationMessage<string>>(
                 this, OnStatusMessage);
-
-            MessengerInstance.Register<NotificationMessage<MediaItem>>(
-                this, OnAvEdit);
-
-            MessengerInstance.Register<NotificationMessageAction<IDialogService>>(
-                this, msg => msg.Execute(_dialogService));
 
             MediaElement.FFmpegMessageLogged += OnMediaFFmpegMessageLogged;
 
@@ -165,13 +159,6 @@ namespace HappyHour.ViewModel
             { 
                 Status = "";
             }
-        }
-
-        void OnAvEdit(NotificationMessage<MediaItem> msg)
-        {
-            if (msg.Notification != "editAv") return;
-            var dialog = new AvEditorViewModel(msg.Content);
-            _dialogService.ShowDialog<AvEditorDialog>(this, dialog);
         }
 
         void OnMediaFFmpegMessageLogged(object sender, MediaLogMessageEventArgs e)

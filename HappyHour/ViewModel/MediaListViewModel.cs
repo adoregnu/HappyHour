@@ -24,6 +24,7 @@ using HappyHour.Model;
 using HappyHour.Utils;
 using HappyHour.Spider;
 using HappyHour.Interfaces;
+using HappyHour.View;
 
 namespace HappyHour.ViewModel
 {
@@ -50,10 +51,9 @@ namespace HappyHour.ViewModel
             get => _selectedMedia;
             set
             {
-                if (_selectedMedia != value)
+                if (value != null && _selectedMedia != value)
                 {
-                    MessengerInstance.Send(new NotificationMessage<MediaItem>(
-                        value, "mediaSelected"));
+                    ItemSelectedHandler?.Invoke(this, value);
                 }
                 Set(ref _selectedMedia, value);
             }
@@ -117,6 +117,7 @@ namespace HappyHour.ViewModel
                 }
             }
         }
+        public IDialogService DialogService { get; set; }
 
         public ICommand CmdExclude { get; set; }
         public ICommand CmdDownload { get; set; }
@@ -128,6 +129,9 @@ namespace HappyHour.ViewModel
         public ICommand CmdDoubleClick { get; set; }
         public ICommand CmdSearchOrphanageMedia { get; set; }
         public ICommand CmdSearchEmptyActor { get; set; }
+
+        public MediaListItemSelectedEventHandler ItemSelectedHandler { get; set; }
+        public MediaListItemSelectedEventHandler ItemDoubleClickedHandler { get; set; }
 
         public MediaListViewModel()
         {
@@ -145,9 +149,10 @@ namespace HappyHour.ViewModel
             CmdDeleteItem = new RelayCommand<object>(p => OnDeleteItem(p));
             CmdClearDb = new RelayCommand<object>(p => OnClearDb(p));
             CmdEditItem = new RelayCommand<object>(p => OnEditItem(p));
-            CmdDoubleClick = new RelayCommand(() => OnDoubleClicked());
             CmdSearchOrphanageMedia = new RelayCommand(() => OnSearchOrphanageMedia());
             CmdSearchEmptyActor = new RelayCommand(() => OnSearchEmptyActor());
+            CmdDoubleClick = new RelayCommand(() =>
+                ItemDoubleClickedHandler?.Invoke(this, SelectedMedia));
 
             MessengerInstance.Register<NotificationMessage<SpiderEnum>>(this,
                 (msg) => SpiderList = msg.Content.Where(i => i.Name != "sehuatang"));
@@ -162,9 +167,8 @@ namespace HappyHour.ViewModel
 
         async void RefreshMediaList(DirectoryInfo msg)
         { 
-            ClearMedia();
-            //_serialQueue.Enqueue(() =>
-            //    UpdateMediaList(msg.FullName, _searchSubFolder));
+            MediaList.Clear();
+
             bool bSubFolder = _searchSubFolder;
             await Task.Run(() => UpdateMediaList(msg.FullName, bSubFolder));
         }
@@ -198,21 +202,12 @@ namespace HappyHour.ViewModel
         void SortMedia()
         {
             var tmp = MediaList.ToList();
-            IsBrowsing = true;
             MediaList.Clear();
+
             foreach (var m in tmp)
             {
-                //MediaList.Add(m);
                 MediaList.InsertInPlace(m, i => i.DateTime);
             }
-            IsBrowsing = false;
-        }
-
-        void ClearMedia()
-        {
-            IsBrowsing = true;
-            MediaList.Clear();
-            IsBrowsing = false;
         }
 
         public void AddMedia(string itemPath)
@@ -237,16 +232,9 @@ namespace HappyHour.ViewModel
             MediaList.InsertInPlace(item, i => i.DateTime);
         }
 
-        public void Replace(IEnumerable<string> paths)
+        public async void Replace(IEnumerable<string> paths)
         {
-            IsBrowsing = true;
             MediaList.Clear();
-            ReplaceAsync(paths);
-            IsBrowsing = false;
-        }
-
-        async void ReplaceAsync(IEnumerable<string> paths)
-        { 
             await Task.Run(() => {
                 foreach (var path in paths)
                 {
@@ -296,20 +284,11 @@ namespace HappyHour.ViewModel
             if (param is not IList<object> items || items.Count == 0)
                     return;
 
-            IDialogService dlgSvc = null;
-            MessengerInstance.Send(new NotificationMessageAction<IDialogService>(
-                "queryDialogService", p => { dlgSvc = p; }));
-
-            if (dlgSvc == null)
-            {
-                Log.Print("Could not find dialog service!");
-                return;
-            }
             var settings = new FolderBrowserDialogSettings
             { 
                 Description = "Select Target folder"
             };
-            bool? success = dlgSvc.ShowFolderBrowserDialog(this, settings);
+            bool? success = DialogService.ShowFolderBrowserDialog(this, settings);
             if (success == null || success == false)
             {
                 Log.Print("Target folder is not selected!");
@@ -356,15 +335,9 @@ namespace HappyHour.ViewModel
         {
             if (param is MediaItem item && item.AvItem != null)
             {
-                MessengerInstance.Send(new NotificationMessage<MediaItem>(
-                    item, "editAv"));
+                var dialog = new AvEditorViewModel(item);
+                DialogService.ShowDialog<AvEditorDialog>(this, dialog);
             }
-        }
-
-        void OnDoubleClicked()
-        {
-            MessengerInstance.Send(new NotificationMessage<MediaItem>(
-                SelectedMedia, "MediaItemDblClicked"));
         }
 
         void IterateMedia(string currDir, List<string> dbDirs)
@@ -395,8 +368,7 @@ namespace HappyHour.ViewModel
 
         async void OnSearchOrphanageMedia()
         {
-            UiServices.WaitCursor(true);
-            ClearMedia();
+            MediaList.Clear();
 
             var currDir = _fileList.CurrDirInfo.FullName;
             var dbDirs = await App.DbContext.Items
@@ -410,8 +382,6 @@ namespace HappyHour.ViewModel
                 IterateMedia(currDir, dbDirs);
                 Log.Print("Search orphanage media done!");
             });
-
-            UiServices.WaitCursor(false);
         }
 
         async void OnSearchEmptyActor()
@@ -422,7 +392,7 @@ namespace HappyHour.ViewModel
                 .Select(i => i.Path)
                 .ToListAsync();
 
-            Replace(paths);
+            await Task.Run(() => paths.ForEach(p => InsertMedia(p)));
         }
 
         void OnContextMenu(MediaItem item, MediaListMenuType type)

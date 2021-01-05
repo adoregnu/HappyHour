@@ -151,11 +151,11 @@ namespace HappyHour.Spider
             }
             else
             {
-                //if (!string.IsNullOrEmpty(path))
-                //    MessengerInstance.Send(new NotificationMessage<string>(
-                //        path, "mediaAdded"));
-                //else
-                //    Log.Print(" Continue next Item!");
+                if (!string.IsNullOrEmpty(path))
+                    Browser.MediaList.AddMedia(path);
+                else
+                    Log.Print(" Continue next Item!");
+
                 MoveArticle(null);
             }
         }
@@ -163,6 +163,7 @@ namespace HappyHour.Spider
         public override void Navigate(MediaItem _)
         {
             _state = 0;
+            _pageNum = 1;
             Browser.Address = URL;
         }
 

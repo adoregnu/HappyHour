@@ -350,22 +350,21 @@ namespace HappyHour.ViewModel
             }
         }
 
-        void OnDoubleClicked()
+        async void OnDoubleClicked()
         {
             if (SelectedActor == null)
                 return;
 
+            await App.DbContext.Entry(SelectedActor)
+                .Collection(a => a.Items).LoadAsync();
+
             var movies = new List<string>();
-            UiServices.WaitCursor(true);
-            App.DbContext.Entry(SelectedActor)
-                .Collection(a => a.Items).Load();
             foreach (var item in SelectedActor.Items.ToList())
             {
                 movies.Add(item.Path);
             }
             if (MediaList != null)
                 MediaList.Replace(movies);
-            UiServices.WaitCursor(false);
         }
 
         void OnActorNameDoubleClicked()

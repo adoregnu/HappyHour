@@ -12,10 +12,11 @@ using System.Windows.Controls;
 using Unosquare.FFME.Common;
 
 using GalaSoft.MvvmLight.Command;
+using GalaSoft.MvvmLight.Messaging;
 
 using HappyHour.Model;
 using HappyHour.Extension;
-using GalaSoft.MvvmLight.Messaging;
+using HappyHour.Interfaces;
 
 namespace HappyHour.ViewModel
 {
@@ -68,6 +69,8 @@ namespace HappyHour.ViewModel
         public ICommand StopCommand { get; private set; }
         public ICommand CloseCommand { get; private set; }
 
+        public IMediaList MediaList { get; set; }
+
         public PlayerViewModel()
         {
             Title = "Player";
@@ -93,12 +96,7 @@ namespace HappyHour.ViewModel
             Controller.OnApplicationLoaded();
             IsPlayerLoaded = true;
 
-
-            MessengerInstance.Register<NotificationMessage<MediaItem>>(this, (msg) =>
-            {
-                if (msg.Notification == "MediaItemDblClicked")
-                    SetMediaItem(msg.Content);
-            });
+            MediaList.ItemDoubleClickedHandler += (o, i) => SetMediaItem(i);
         }
 
         void InitMediaEventHandler()
@@ -115,17 +113,16 @@ namespace HappyHour.ViewModel
 
         async public void SetMediaItem(MediaItem media)
         {
-            MediaItem = media;
             if (MediaPlayer.IsOpen)
             {
                 await MediaPlayer.Close();
             }
-            if (media != null)
-            {
-                await MediaPlayer.Open(new Uri(media.MediaFile));
-            }
-            Title = Path.GetFileName(media.MediaFile);
+            if (media == null) return;
+
+            MediaItem = media;
             IsSelected = true;
+            Title = Path.GetFileName(media.MediaFile);
+            await MediaPlayer.Open(new Uri(media.MediaFile));
         }
 
         void OnMediaOpening(object sender, MediaOpeningEventArgs e)

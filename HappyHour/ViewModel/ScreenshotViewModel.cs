@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using GalaSoft.MvvmLight.Messaging;
 
+using HappyHour.Interfaces;
 using HappyHour.Model;
 
 namespace HappyHour.ViewModel
@@ -19,18 +20,20 @@ namespace HappyHour.ViewModel
             set => Set(ref _screenshots, value);
         }
 
+        public IMediaList MediaList { get; set; }
+
         public ScreenshotViewModel()
         {
             Title = "Screenshot";
-            MessengerInstance.Register<NotificationMessage<MediaItem>>(
-                this, (msg) =>
-                {
-                    if (msg.Notification != "mediaSelected") return;
-                    if (msg.Content != null)
-                        ScreenshotList = msg.Content.Screenshots;
-                    else
-                        ScreenshotList = null;
-                });
+            MediaList.ItemSelectedHandler += OnMediaItemSelected;
+        }
+
+        void OnMediaItemSelected(object sender, MediaItem item)
+        {
+            if (item != null)
+                ScreenshotList = item.Screenshots;
+            else
+                ScreenshotList = null;
         }
     }
 }
