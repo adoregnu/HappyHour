@@ -69,7 +69,16 @@ namespace HappyHour.ViewModel
         public ICommand StopCommand { get; private set; }
         public ICommand CloseCommand { get; private set; }
 
-        public IMediaList MediaList { get; set; }
+        IMediaList _mediaList;
+        public IMediaList MediaList
+        {
+            get => _mediaList;
+            set
+            {
+                _mediaList = value;
+                _mediaList.ItemDoubleClickedHandler += (o, i) => SetMediaItem(i);
+            }
+        }
 
         public PlayerViewModel()
         {
@@ -95,8 +104,6 @@ namespace HappyHour.ViewModel
             Controller = new ControllerViewModel(this);
             Controller.OnApplicationLoaded();
             IsPlayerLoaded = true;
-
-            MediaList.ItemDoubleClickedHandler += (o, i) => SetMediaItem(i);
         }
 
         void InitMediaEventHandler()

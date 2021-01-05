@@ -385,7 +385,9 @@ namespace HappyHour.ViewModel
         }
 
         async void OnSearchEmptyActor()
-        { 
+        {
+            MediaList.Clear();
+
             var paths = await App.DbContext.Items
                 .Include(i => i.Actors)
                 .Where(i => i.Actors.Count == 0)

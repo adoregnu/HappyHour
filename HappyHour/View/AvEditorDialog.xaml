@@ -12,7 +12,7 @@
         <DataTemplate x:Key="ActorMiniTemplate">
             <StackPanel Orientation="Horizontal">
                 <Image HorizontalAlignment="Center" Width="64" Height="64"
-                       Source="{Binding .,
+                       Source="{Binding PicturePath,
                             Converter={StaticResource PathToImageConverter},
                             ConverterParameter=64}"/>
                 <TextBlock Text="{Binding .}" VerticalAlignment="Center"/>

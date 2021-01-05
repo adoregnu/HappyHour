@@ -20,12 +20,20 @@ namespace HappyHour.ViewModel
             set => Set(ref _screenshots, value);
         }
 
-        public IMediaList MediaList { get; set; }
+        IMediaList _mediaList;
+        public IMediaList MediaList
+        {
+            get => _mediaList;
+            set
+            {
+                _mediaList = value;
+                _mediaList.ItemSelectedHandler += OnMediaItemSelected;
+            }
+        }
 
         public ScreenshotViewModel()
         {
             Title = "Screenshot";
-            MediaList.ItemSelectedHandler += OnMediaItemSelected;
         }
 
         void OnMediaItemSelected(object sender, MediaItem item)

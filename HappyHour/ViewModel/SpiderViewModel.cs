@@ -32,6 +32,7 @@ namespace HappyHour.ViewModel
         int _nextScrappingIndex = 0;
         List<MediaItem> _mediaToScrap;
         MediaItem _selectedMedia;
+        IMediaList _mediaList;
         string _pid;
 
         string address;
@@ -77,7 +78,19 @@ namespace HappyHour.ViewModel
         public ICommand CmdReloadUrl { get; private set; }
         public ICommand CmdBack { get; private set; }
 
-        public IMediaList MediaList { get; set; }
+        public IMediaList MediaList
+        {
+            get => _mediaList;
+            set
+            {
+                _mediaList = value;
+                _mediaList.ItemSelectedHandler += (o, i) =>
+                {
+                    _selectedMedia = i;
+                    if (i != null) Pid = i.Pid;
+                };
+            }
+        }
 
         public SpiderViewModel()
         {
@@ -104,11 +117,6 @@ namespace HappyHour.ViewModel
             Title = Address = _selectedSpider.URL;
 
             PropertyChanged += OnPropertyChanged;
-            MediaList.ItemSelectedHandler += (o, i) => {
-                _selectedMedia = i;
-                if (i != null) Pid = i.Pid;
-            };
-
             MessengerInstance.Send(new NotificationMessage<SpiderEnum>(Spiders, ""));
         }
 

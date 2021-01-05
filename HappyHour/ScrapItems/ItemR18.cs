@@ -95,7 +95,7 @@ namespace HappyHour.ScrapItems
                     continue;
 
                 var list = new List<AvActorName>();
-                var m = Regex.Match(name, @"([\w\s]+) \((.+)\)");
+                var m = Regex.Match(name, @"([\w\s]+)(?:\n|\s)\((.+)\)");
                 if (m.Success)
                 {
                     name = m.Groups[1].Value.Trim();
