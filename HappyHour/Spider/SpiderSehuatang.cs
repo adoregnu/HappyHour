@@ -183,9 +183,6 @@ namespace HappyHour.Spider
             case 2:
                 ParsePage();
                 break;
-            default:
-                Log.Print("Not implementd state{0}", _state);
-                return;
             }
         }
     }

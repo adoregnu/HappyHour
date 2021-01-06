@@ -56,7 +56,9 @@ namespace HappyHour.Converter
             }
             catch (Exception ex)
             {
-                Log.Print(ex.Message);
+                //Log.Print(ex.Message);
+                if (value_ is string path)
+                    Log.Print($"{ex.Message}: {path}, {parameter_}");
             }
             return new BitmapImage(new Uri(@"pack://application:,,,/" +
                             "Resources/default-fallback-image.png"));

@@ -27,7 +27,7 @@ namespace HappyHour.Spider
         public string URL = null;
         public string Name { get; protected set; } = "";
         public bool FromCommand { get; private set; } = false;
-        public bool StartScrapping { get; set; } = true;
+        public bool StartScrapping { get; set; } = false;
         protected int _state = -1;
         protected string _linkName;
 
