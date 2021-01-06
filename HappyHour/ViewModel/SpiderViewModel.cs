@@ -28,7 +28,6 @@ namespace HappyHour.ViewModel
 
     partial class SpiderViewModel : Pane
     {
-        bool _bStarted = false;
         int _nextScrappingIndex = 0;
         List<MediaItem> _mediaToScrap;
         MediaItem _selectedMedia;
@@ -75,6 +74,8 @@ namespace HappyHour.ViewModel
             }
         }
 
+        public ICommand CmdStart { get; private set; }
+        public ICommand CmdStop { get; private set; }
         public ICommand CmdReloadUrl { get; private set; }
         public ICommand CmdBack { get; private set; }
 
@@ -122,12 +123,6 @@ namespace HappyHour.ViewModel
 
         public void StartBatchedScrapping(List<MediaItem> mediaItems = null)
         {
-            if (SelectedSpider is SpiderSehuatang)
-            {
-                Log.Print($"Not supported in this spider {SelectedSpider}");
-                return;
-            }
-
             if (mediaItems != null) _mediaToScrap = mediaItems;
             if (_mediaToScrap.Count <= _nextScrappingIndex)
             {
@@ -142,31 +137,16 @@ namespace HappyHour.ViewModel
 
         public void OnStartScrapping(MediaItem mitem, bool manualSearch = false)
         {
-            if (!(SelectedSpider is SpiderSehuatang) &&
-                string.IsNullOrEmpty(Pid))
-            {
-                Log.Print("No Pid is set!");
-                return;
-            }
-
-            if (SelectedSpider is SpiderSehuatang || !manualSearch)
-                _bStarted = true;
-
-            if (SelectedSpider is not SpiderSehuatang && mitem == null)
-            {
-                Log.Print("MediaItem is not selected!");
-                return;
-            }
-            SelectedSpider.Navigate(mitem);
+            SelectedSpider.StartScrapping = SelectedSpider.Navigate(mitem) && !manualSearch;
         }
 
         public void StopScrapping(MediaItem mitem, bool forceStop = false)
         {
-            UiServices.Invoke(delegate {
-                webBrowser.Stop();
-                _bStarted = false;
-                if (SelectedSpider is SpiderSehuatang) return;
+            webBrowser.Stop();
+            SelectedSpider.StartScrapping = false;
+            if (SelectedSpider is SpiderSehuatang) return;
 
+            UiServices.Invoke(delegate {
                 if (mitem != null)
                 {
                     mitem.UpdateFields();
@@ -221,7 +201,7 @@ namespace HappyHour.ViewModel
 
         void OnStateChanged(object sender, LoadingStateChangedEventArgs e)
         {
-            if (!e.IsLoading && _bStarted)
+            if (!e.IsLoading)
             {
                 SelectedSpider.Scrap();
             }

@@ -44,7 +44,10 @@ namespace HappyHour.Spider
                 return;
             }
 
-            _state = 1;
+            if (StartScrapping)
+                _state = 1;
+            else
+                _state = -1;
             if (list.Count > 1)
             {
                 Log.Print("Multiple matched. Select manually!");
@@ -56,11 +59,14 @@ namespace HappyHour.Spider
             }
         }
 
-        public override void Navigate(MediaItem mitem)
+        public override bool Navigate(MediaItem mitem)
         {
-            base.Navigate(mitem);
+            if (!base.Navigate(mitem))
+                return false;
+
             Browser.Address = $"{URL}search_Products.aspx?languageID=1" +
                 $"&dept_id=29&keyword={Media.Pid}&searchby=keyword";
+            return true;
         }
 
         public override void Scrap()

@@ -20,31 +20,22 @@
                      SelectedItem="{Binding SelectedActorName}"/>
         </ControlTemplate>
         <ControlTemplate x:Key="AvStudioTemplate">
-            <ListBox ItemsSource="{Binding AvStudioList}"
-                     SelectedItem="{Binding SelectedStudio}"/>
+            <ListBox ItemsSource="{Binding AvStudioList}" SelectedItem="{Binding SelectedStudio}"/>
         </ControlTemplate>
      
         <Style x:Key="DbListStyle" TargetType="ContentControl">
             <Style.Triggers>
-                <DataTrigger Binding="{Binding SelectedType, Mode=TwoWay}"
-                             Value="Pid">
-                    <Setter Property="Template"
-                        Value="{StaticResource AvItemTemplate}"/>
+                <DataTrigger Binding="{Binding SelectedType, Mode=TwoWay}" Value="Pid">
+                    <Setter Property="Template" Value="{StaticResource AvItemTemplate}"/>
                 </DataTrigger>
-                <DataTrigger Binding="{Binding SelectedType, Mode=TwoWay}"
-                             Value="Studio">
-                    <Setter Property="Template"
-                        Value="{StaticResource AvStudioTemplate}"/>
+                <DataTrigger Binding="{Binding SelectedType, Mode=TwoWay}" Value="Studio">
+                    <Setter Property="Template" Value="{StaticResource AvStudioTemplate}"/>
                 </DataTrigger>
-                <DataTrigger Binding="{Binding SelectedType, Mode=TwoWay}"
-                             Value="Series">
-                    <Setter Property="Template"
-                        Value="{StaticResource AvSeriesTemplate}"/>
+                <DataTrigger Binding="{Binding SelectedType, Mode=TwoWay}" Value="Series">
+                    <Setter Property="Template" Value="{StaticResource AvSeriesTemplate}"/>
                 </DataTrigger>
-                <DataTrigger Binding="{Binding SelectedType, Mode=TwoWay}"
-                             Value="Actor">
-                    <Setter Property="Template"
-                        Value="{StaticResource AvActorTemplate}"/>
+                <DataTrigger Binding="{Binding SelectedType, Mode=TwoWay}" Value="Actor">
+                    <Setter Property="Template" Value="{StaticResource AvActorTemplate}"/>
                 </DataTrigger>
             </Style.Triggers>
         </Style>
@@ -62,8 +53,7 @@
             <ComboBox Grid.Column="0" Width="80"
                       ItemsSource="{Binding ListType}"
                       SelectedItem="{Binding SelectedType}"/>
-            <TextBox Grid.Column="1"
-                     Text="{Binding SearchText,
+            <TextBox Grid.Column="1" Text="{Binding SearchText,
                         UpdateSourceTrigger=PropertyChanged}"/>
         </Grid>
         <ContentControl Grid.Row="1" Style="{StaticResource DbListStyle}"

@@ -32,10 +32,13 @@ namespace HappyHour.Spider
             };
         }
 
-        public override void Navigate(MediaItem mitem)
+        public override bool Navigate(MediaItem mitem)
         {
-            base.Navigate(mitem);
+            if (!base.Navigate(mitem))
+                return false;
+
             Browser.Address = $"{URL}product/product_detail/{Media.Pid.ToUpper()}/";
+            return true;
         }
 
         public override void Scrap()
@@ -51,10 +54,13 @@ namespace HappyHour.Spider
                 { "rating",  XPath("//th[contains(., '評価：')]/following-sibling::td//text()") },
             };
 
-            ParsePage(new ItemMgstage(this)
+            if (StartScrapping)
             {
-                NumItemsToScrap = _xpathDic.Count
-            }, _xpathDic);
+                ParsePage(new ItemMgstage(this)
+                {
+                    NumItemsToScrap = _xpathDic.Count
+                }, _xpathDic);
+            }
         }
     }
 }

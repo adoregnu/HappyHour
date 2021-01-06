@@ -35,10 +35,13 @@ namespace HappyHour.Spider
             };
         }
 
-        public override void Navigate(MediaItem mitem)
+        public override bool Navigate(MediaItem mitem)
         {
-            base.Navigate(mitem);
+            if (!base.Navigate(mitem))
+                return false;
+
             Browser.Address = $"{URL}search/{Media.Pid}";
+            return true;
         }
 
         void OnMultiResult(List<object> list)
@@ -74,7 +77,11 @@ namespace HappyHour.Spider
                 Browser.StopScrapping(Media);
                 return;
             }
-            _state = 1;
+            if (StartScrapping)
+                _state = 1;
+            else
+                _state = -1;
+
             Browser.Address = anode.Attributes["href"].Value;
         }
 

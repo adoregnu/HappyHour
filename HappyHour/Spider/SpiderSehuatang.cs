@@ -28,8 +28,9 @@ namespace HappyHour.Spider
         List<object> _articlesInPage = null;
         Dictionary<string, string> _xpathDic;
 
-        public int NumPage = 1;
-        public List<string> Boards;
+        public int NumPage { get; set; }  = 1;
+        public bool StopOnExistingId { get; set; } = true;
+        public List<string> Boards { get; set; }
         public string MediaFolder { get; protected set; }
 
         public string SelectedBoard
@@ -160,11 +161,13 @@ namespace HappyHour.Spider
             }
         }
 
-        public override void Navigate(MediaItem _)
+        public override bool  Navigate(MediaItem _)
         {
             _state = 0;
             _pageNum = 1;
             Browser.Address = URL;
+
+            return true;
         }
 
         public override void Scrap()

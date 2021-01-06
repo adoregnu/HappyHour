@@ -72,12 +72,16 @@ namespace HappyHour.Spider
                 if (m.Success)
                 {
                     exactUrl = url;
-                    _state = 1;
                     matchCount++;
                 }
             }
             if (matchCount == 1)
             {
+                if (StartScrapping)
+                    _state = 1;
+                else
+                    _state = -1;
+
                 var url = HtmlEntity.DeEntitize(exactUrl);
                 Browser.Address = url;
             }
@@ -90,10 +94,13 @@ namespace HappyHour.Spider
             }
         }
 
-        public override void Navigate(MediaItem mitem)
+        public override bool Navigate(MediaItem mitem)
         {
-            base.Navigate(mitem);
+            if (!base.Navigate(mitem))
+                return false;
+
             Browser.Address = $"{URL}common/search/searchword={Media.Pid}/";
+            return true;
         }
 
         ItemR18 _item = null;

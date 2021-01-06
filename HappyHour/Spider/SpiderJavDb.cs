@@ -77,14 +77,21 @@ namespace HappyHour.Spider
                 Browser.StopScrapping(Media);
                 return;
             }
-            _state = 1;
+            if (StartScrapping)
+                _state = 1;
+            else
+                _state = -1;
+
             Browser.Address = $"{URL}{a.Attributes["href"].Value.Substring(1)}";
         }
 
-        public override void Navigate(MediaItem mitem)
+        public override bool Navigate(MediaItem mitem)
         {
-            base.Navigate(mitem);
+            if (!base.Navigate(mitem))
+                return false;
+
             Browser.Address = $"{URL}search?q={Media.Pid}&f=all";
+            return true;
         }
 
         public override void Scrap()

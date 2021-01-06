@@ -27,6 +27,7 @@ namespace HappyHour.Spider
         public string URL = null;
         public string Name { get; protected set; } = "";
         public bool FromCommand { get; private set; } = false;
+        public bool StartScrapping { get; set; } = true;
         protected int _state = -1;
         protected string _linkName;
 
@@ -44,7 +45,7 @@ namespace HappyHour.Spider
                         items.Cast<MediaItem>().ToList());
                 }
                 FromCommand = false;
-            });
+            }, (p) => this is not SpiderSehuatang);
         }
 
         string XPath(string xpath, string jsPath)
@@ -64,10 +65,17 @@ namespace HappyHour.Spider
             return XPath(xpath, @"XPathClick.sbn.js");
         }
 
-        public virtual void Navigate(MediaItem mitem)
+        public virtual bool Navigate(MediaItem mitem)
         {
+            if (string.IsNullOrEmpty(Browser.Pid) || mitem == null)
+            {
+                Log.Print("Pid is not set!");
+                return false;
+            }
             _state = 0;
             Media = mitem;
+
+            return true;
         }
 
         public virtual void Navigate(string name, string url)

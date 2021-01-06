@@ -41,7 +41,11 @@ namespace HappyHour.Spider
                 Browser.StopScrapping(Media);
                 return;
             }
-            _state = 1;
+            if (StartScrapping)
+                _state = 1;
+            else
+                _state = -1;
+
             if (list.Count > 1)
             {
                 Log.Print("Multitple item matched, Select manually.");
@@ -53,11 +57,14 @@ namespace HappyHour.Spider
             }
         }
 
-        public override void Navigate(MediaItem mitem)
+        public override bool Navigate(MediaItem mitem)
         {
             //http://javmovie.com/en/search.html?k=XC-1379
-            base.Navigate(mitem);
+            if (!base.Navigate(mitem))
+                return false;
+
             Browser.Address = $"{URL}search.html?k={Media.Pid}";
+            return true;
         }
 
         ItemJavmovie _item = null; 

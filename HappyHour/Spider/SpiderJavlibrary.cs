@@ -69,7 +69,10 @@ namespace HappyHour.Spider
                 if (div.Trim().Equals(Media.Pid, StringComparison.OrdinalIgnoreCase))
                 {
                     var href = doc.DocumentNode.FirstChild.Attributes["href"].Value;
-                    _state = 1;
+                    if (StartScrapping)
+                        _state = 1;
+                    else
+                        _state = -1;
                     Browser.Address = $"{URL}{href}";
                     return;
                 }
@@ -77,10 +80,13 @@ namespace HappyHour.Spider
             Browser.StopScrapping(Media);
         }
 
-        public override void Navigate(MediaItem mitem)
+        public override bool Navigate(MediaItem mitem)
         {
-            base.Navigate(mitem);
+            if (!base.Navigate(mitem))
+                return false;
+
             Browser.Address = $"{URL}vl_searchbyid.php?keyword={Media.Pid}";
+            return true;
         }
 
         public override void Scrap()

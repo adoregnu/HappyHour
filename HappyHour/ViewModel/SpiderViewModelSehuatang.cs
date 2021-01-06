@@ -11,9 +11,6 @@ namespace HappyHour.ViewModel
 {
     partial class SpiderViewModel : Pane
     {
-        public ICommand CmdStart { get; private set; }
-        public ICommand CmdStop { get; private set; }
-
         public int NumPage
         {
             set

@@ -60,13 +60,16 @@ namespace HappyHour.Spider
                 if (m.Success)
                 {
                     exactUrl = url;
-                    _state = 1;
                     matchCount++;
                 }
             }
 
             if (matchCount == 1)
             {
+                if (StartScrapping)
+                    _state = 1;
+                else
+                    _state = -1;
                 Browser.Address = exactUrl;
             }
             else if (matchCount > 1)
@@ -80,10 +83,13 @@ namespace HappyHour.Spider
             }
         }
 
-        public override void Navigate(MediaItem mitem)
+        public override bool Navigate(MediaItem mitem)
         {
-            base.Navigate(mitem);
+            if (!base.Navigate(mitem))
+                return false;
+
             Browser.Address = $"{URL}mono/-/search/=/searchstr={Media.Pid}/";
+            return true;
         }
 
         public override void Scrap()
