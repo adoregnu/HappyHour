@@ -24,27 +24,12 @@ namespace HappyHour.Spider
         int _index = 0;
         bool _isPageChanged = false;
         string _currentPage = null;
-        string _selectedBoard = "censored";
         List<object> _articlesInPage = null;
         Dictionary<string, string> _xpathDic;
 
         public int NumPage { get; set; }  = 1;
-        public bool StopOnExistingId { get; set; } = true;
         public List<string> Boards { get; set; }
-        public string MediaFolder { get; protected set; }
-
-        public string SelectedBoard
-        {
-            get => _selectedBoard;
-            set
-            {
-                if (_selectedBoard != value)
-                {
-                    _selectedBoard = value;
-                    MediaFolder = $"{App.GConf["general"]["data_path"]}sehuatang\\{value}\\";
-                }
-            }
-        }
+        public string SelectedBoard { set; get; } = "censored";
 
         public SpiderSehuatang(SpiderViewModel browser) : base(browser)
         {
@@ -68,7 +53,16 @@ namespace HappyHour.Spider
             {
                 "censored", "uncensored", "subtitle"
             };
-            MediaFolder = $"{App.GConf["general"]["data_path"]}sehuatang\\{SelectedBoard}\\";
+        }
+
+        public override string GetConf(string key)
+        {
+            if (key == "DataPath")
+            {
+                return $"{App.GConf["general"]["data_path"]}sehuatang\\{SelectedBoard}\\";
+            }
+
+            return base.GetConf(key);
         }
 
         void ParsePage()
@@ -78,7 +72,6 @@ namespace HappyHour.Spider
             var list = _xpathDic.Where(i => keys.Contains(i.Key));
             foreach (var xpath in list)
             {
-                //ExecJavaScript(item, xpath);
                 Browser.ExecJavaScript(xpath.Value, item, xpath.Key);
             }
         }
@@ -102,7 +95,7 @@ namespace HappyHour.Spider
             _state = 1;
             _index = 0;
             _isPageChanged = true;
-            if (items != null)
+            if (items != null && items.Count == 1)
             {
                 _currentPage = items[0].ToString();
             }
@@ -110,10 +103,11 @@ namespace HappyHour.Spider
             {
                 _currentPage = GetNextPage(_currentPage);
             }
+
             if (!string.IsNullOrEmpty(_currentPage))
             {
+                //Log.Print("Move Page to " + Browser.Address);
                 Browser.Address = URL + _currentPage;
-                Log.Print("Move Page to " + Browser.Address);
             }
             else
             {
@@ -144,34 +138,32 @@ namespace HappyHour.Spider
             }
         }
 
-        public override void OnScrapCompleted(bool isValid, string path)
+        public override void OnScrapCompleted(string path)
         {
-            if (!isValid && Browser.StopOnExistingId)
-            {
-                Browser.StopScrapping(null);
-            }
-            else
-            {
-                if (!string.IsNullOrEmpty(path))
+            if (!string.IsNullOrEmpty(path))
+                UiServices.Invoke(delegate {
                     Browser.MediaList.AddMedia(path);
-                else
-                    Log.Print(" Continue next Item!");
+                }, true);
 
+            if(EnableScrapIntoDb)
                 MoveArticle(null);
-            }
+            else
+                Browser.StopScrapping(null);
         }
 
-        public override bool  Navigate(MediaItem _)
+        public override void Navigate(MediaItem item, bool bSkipScrap)
         {
             _state = 0;
             _pageNum = 1;
-            Browser.Address = URL;
+            EnableScrapIntoDb = true;
 
-            return true;
+            Browser.Address = URL;
         }
 
         public override void Scrap()
         {
+            if (!EnableScrapIntoDb) return;
+
             switch (_state)
             {
             case 0:

@@ -207,13 +207,13 @@ namespace HappyHour.Model
         {
             try
             {
-                Directory.Delete(MediaFolder, true);
                 if (AvItem != null)
                 {
                     App.DbContext.Items.Remove(AvItem);
                     App.DbContext.SaveChanges();
                     AvItem = null;
                 }
+                Directory.Delete(MediaFolder, true);
             }
             catch (Exception ex)
             {

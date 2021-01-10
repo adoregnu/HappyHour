@@ -77,7 +77,7 @@ namespace HappyHour.ScrapItems
                     if (_numValidItems > 0)
                         UdpateAvItem();
                     Clear();
-                    _spider.OnScrapCompleted(_numValidItems > 0);
+                    _spider.OnScrapCompleted();
                 }
             }
         }

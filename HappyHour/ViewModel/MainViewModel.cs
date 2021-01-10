@@ -14,12 +14,14 @@ using Unosquare.FFME;
 using Unosquare.FFME.Common;
 
 using HappyHour.View;
+using System.Collections.Specialized;
 
 namespace HappyHour.ViewModel
 {
     class MainViewModel : GalaSoft.MvvmLight.ViewModelBase
     {
         string _status;
+        bool _nasEnabled;
 
         public ICommand CmdFileToFolder { get; private set; }
         public ICommand CmdActorEdtor { get; private set; }
@@ -55,20 +57,16 @@ namespace HappyHour.ViewModel
                 }
             }
         }
-
+#endif
         public bool NasEnabled
         {
             get => _nasEnabled;
             set
             {
-                if (value == true && _nasEnabled != value)
-                {
-                    OnPaneEnabled<BrowserViewModel>(value);
-                    Set(ref _nasEnabled, value);
-                }
+                Set(ref _nasEnabled, value);
+                OnPaneEnabled<BrowserViewModel>(value);
             }
         }
-#endif
         readonly IDialogService _dialogService;
         readonly FileListViewModel _fileListMv;
         readonly MediaListViewModel _mediaListMv;
@@ -93,9 +91,8 @@ namespace HappyHour.ViewModel
             Anchors.Add(new ScreenshotViewModel { MediaList = _mediaListMv });
 
             Docs.Add(_mediaListMv);
-            Docs.Add(new PlayerViewModel { MediaList = _mediaListMv });
-            Docs.Add(new BrowserViewModel());
             Docs.Add(new SpiderViewModel { MediaList = _mediaListMv });
+            Docs.Add(new PlayerViewModel { MediaList = _mediaListMv });
 
             CmdActorEdtor = new RelayCommand(() => OnActorEditor());
             CmdFileToFolder = new RelayCommand(() => OnFileToFolder());
@@ -108,13 +105,29 @@ namespace HappyHour.ViewModel
 
             //for update media list
             _fileListMv.DirChanged.Invoke(this, _fileListMv.CurrDirInfo);
+            Docs.CollectionChanged += DocsCollectionChanged;
         }
-#if false
+
+        void DocsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            switch (e.Action)
+            {
+                case NotifyCollectionChangedAction.Remove:
+                    foreach (var doc in e.OldItems)
+                    {
+                        (doc as GalaSoft.MvvmLight.ViewModelBase).Cleanup();
+                    }
+                    break;
+            }
+        }
+
         void OnPaneEnabled<VMType>(bool enabled)
         {
             if (enabled)
-        {
-                Docs.Add((Pane)Activator.CreateInstance(typeof(VMType)));
+            {
+                var pane = (Pane)Activator.CreateInstance(typeof(VMType));
+                Docs.Add(pane);
+                pane.IsSelected = true;
             }
             else
             {
@@ -122,8 +135,8 @@ namespace HappyHour.ViewModel
                 if (spiderMv != null)
                     Docs.Remove(spiderMv);
             }
-            }
-#endif
+        }
+
         void OnFileToFolder()
         {
             var dialog = new FileToFolderViewModel { MediaPath = _fileListMv.CurrPath };

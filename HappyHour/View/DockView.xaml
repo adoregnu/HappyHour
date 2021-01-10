@@ -83,11 +83,11 @@
         <ad:LayoutRoot x:Name="_layoutRoot">
             <ad:LayoutPanel Orientation="Vertical">
                 <ad:LayoutPanel Orientation="Horizontal">
-                    <ad:LayoutAnchorablePane DockWidth="300" Name="left"/>
+                    <ad:LayoutAnchorablePane DockWidth="250" Name="left"/>
                     <ad:LayoutDocumentPane x:Name="center"/>
                     <!--<ad:LayoutAnchorablePane DockWidth="800" Name="right"/>-->
                 </ad:LayoutPanel>
-                <ad:LayoutAnchorablePane DockHeight="200" Name="bottom"/>
+                <ad:LayoutAnchorablePane DockHeight="150" Name="bottom"/>
             </ad:LayoutPanel>
         </ad:LayoutRoot>
 

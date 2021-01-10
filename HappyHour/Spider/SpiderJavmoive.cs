@@ -17,6 +17,13 @@ namespace HappyHour.Spider
     {
         Dictionary<string, string> _xpathDic;
 
+        protected override string SearchURL
+        {
+            get
+            {
+                return $"{URL}search.html?k={Media.Pid}";
+            }
+        }
         public SpiderJavmoive(SpiderViewModel browser) : base(browser)
         {
             Name = "JavMovie";
@@ -41,7 +48,7 @@ namespace HappyHour.Spider
                 Browser.StopScrapping(Media);
                 return;
             }
-            if (StartScrapping)
+            if (EnableScrapIntoDb)
                 _state = 1;
             else
                 _state = -1;
@@ -55,16 +62,6 @@ namespace HappyHour.Spider
                 var url = HtmlEntity.DeEntitize(list[0] as string);
                 Browser.Address = url;
             }
-        }
-
-        public override bool Navigate(MediaItem mitem)
-        {
-            //http://javmovie.com/en/search.html?k=XC-1379
-            if (!base.Navigate(mitem))
-                return false;
-
-            Browser.Address = $"{URL}search.html?k={Media.Pid}";
-            return true;
         }
 
         ItemJavmovie _item = null; 

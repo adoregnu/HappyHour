@@ -20,6 +20,14 @@ namespace HappyHour.Spider
     class SpiderR18 : SpiderBase
     {
         Dictionary<string, string> _xpathDic;
+
+        protected override string SearchURL
+        {
+            get
+            {
+                return $"{URL}common/search/searchword={Media.Pid}/";
+            }
+        }
         public SpiderR18(SpiderViewModel browser) : base(browser)
         {
             Name = "R18";
@@ -77,7 +85,7 @@ namespace HappyHour.Spider
             }
             if (matchCount == 1)
             {
-                if (StartScrapping)
+                if (EnableScrapIntoDb)
                     _state = 1;
                 else
                     _state = -1;
@@ -92,15 +100,6 @@ namespace HappyHour.Spider
                 Browser.StopScrapping(Media);
                 Log.Print($"No exact matched ID");
             }
-        }
-
-        public override bool Navigate(MediaItem mitem)
-        {
-            if (!base.Navigate(mitem))
-                return false;
-
-            Browser.Address = $"{URL}common/search/searchword={Media.Pid}/";
-            return true;
         }
 
         ItemR18 _item = null;

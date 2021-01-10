@@ -17,6 +17,13 @@ namespace HappyHour.Spider
     {
         readonly Dictionary<string, string> _xpathDic;
 
+        protected override string SearchURL
+        {
+            get
+            {
+                return $"{URL}/jp/search?q={Media.Pid}";
+            }
+        }
         public SpiderPornav(SpiderViewModel browser) : base(browser)
         {
             Name = "PornAv";
@@ -30,14 +37,6 @@ namespace HappyHour.Spider
             };
         }
 
-        public override bool Navigate(MediaItem mitem)
-        {
-            if (!base.Navigate(mitem))
-                return false;
-
-            Browser.Address = $"{URL}/jp/search?q={Media.Pid}";
-            return true;
-        }
         public void OnMultiResult(List<object> list)
         {
             Log.Print($"OnMultiResult : {list.Count} items found!");
@@ -65,7 +64,7 @@ namespace HappyHour.Spider
                 Browser.StopScrapping(Media);
                 return;
             }
-            if (StartScrapping)
+            if (EnableScrapIntoDb)
                 _state = 1;
             else
                 _state = -1;

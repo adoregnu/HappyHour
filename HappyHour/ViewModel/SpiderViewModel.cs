@@ -96,7 +96,7 @@ namespace HappyHour.ViewModel
         public SpiderViewModel()
         {
             CmdStart = new RelayCommand(() => OnStartScrapping(_selectedMedia,true));
-            CmdStop = new RelayCommand(() => StopScrapping(null, true));
+            CmdStop = new RelayCommand(() => StopScrapping(null));
             CmdReloadUrl = new RelayCommand(() => WebBrowser.Reload());
             CmdBack = new RelayCommand(() => WebBrowser.Back());
 
@@ -135,27 +135,30 @@ namespace HappyHour.ViewModel
             OnStartScrapping(media);
         }
 
-        public void OnStartScrapping(MediaItem mitem, bool manualSearch = false)
+        public void OnStartScrapping(MediaItem mitem, bool bSkipScrap = false)
         {
-            SelectedSpider.StartScrapping = SelectedSpider.Navigate(mitem) && !manualSearch;
+            SelectedSpider.Navigate(mitem, bSkipScrap);
         }
 
-        public void StopScrapping(MediaItem mitem, bool forceStop = false)
+        public void StopScrapping(MediaItem mitem)
         {
             webBrowser.Stop();
-            SelectedSpider.StartScrapping = false;
-            if (SelectedSpider is SpiderSehuatang) return;
+            if (mitem == null)
+            {
+                SelectedSpider.EnableScrapIntoDb = false;
+                return;
+            }
 
             UiServices.Invoke(delegate {
-                if (mitem != null)
-                {
-                    mitem.UpdateFields();
-                }
+                mitem.UpdateFields();
 
-                if (!forceStop && _nextScrappingIndex > 0)
+                if (_nextScrappingIndex > 0)
                     StartBatchedScrapping();
                 else
+                {
+                    SelectedSpider.EnableScrapIntoDb = false;
                     _nextScrappingIndex = 0;
+                }
             });
         }
 

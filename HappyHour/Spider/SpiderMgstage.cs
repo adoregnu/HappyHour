@@ -12,6 +12,13 @@ namespace HappyHour.Spider
 {
     class SpiderMgstage : SpiderBase
     {
+        protected override string SearchURL
+        {
+            get
+            {
+                return $"{URL}product/product_detail/{Media.Pid.ToUpper()}/";
+            }
+        }
         public SpiderMgstage(SpiderViewModel browser) : base(browser)
         {
             Name = "MGStage";
@@ -32,15 +39,6 @@ namespace HappyHour.Spider
             };
         }
 
-        public override bool Navigate(MediaItem mitem)
-        {
-            if (!base.Navigate(mitem))
-                return false;
-
-            Browser.Address = $"{URL}product/product_detail/{Media.Pid.ToUpper()}/";
-            return true;
-        }
-
         public override void Scrap()
         {
             Dictionary<string, string> _xpathDic = new Dictionary<string, string>
@@ -54,7 +52,7 @@ namespace HappyHour.Spider
                 { "rating",  XPath("//th[contains(., '評価：')]/following-sibling::td//text()") },
             };
 
-            if (StartScrapping)
+            if (EnableScrapIntoDb)
             {
                 ParsePage(new ItemMgstage(this)
                 {

@@ -17,17 +17,17 @@ namespace HappyHour.ScrapItems
     {
         public DateTime DateTime;
 
+        bool _skipDownload = false;
         string _pid = null;
         string _outPath = null;
-        bool _bStop = false;
-        bool _bOverwrite = false;
         Dictionary<string, int> _images = null;
+        ManualResetEvent _eventPidParsed = new ManualResetEvent(false);
 
         public ItemSehuatang(SpiderBase spider) : base(spider)
         {
         }
 
-        void CheckCompleted(bool isValid)
+        void CheckCompleted()
         {
             lock (_spider)
             {
@@ -35,7 +35,7 @@ namespace HappyHour.ScrapItems
                 Log.Print($"{_numScrapedItem}/{NumItemsToScrap}");
                 if (_numScrapedItem == NumItemsToScrap)
                 {
-                    _spider.OnScrapCompleted(isValid, isValid ? _outPath : null);
+                    _spider.OnScrapCompleted(_outPath);
                     Clear();
                 }
             }
@@ -75,7 +75,7 @@ namespace HappyHour.ScrapItems
                     Log.Print(ex.Message);
                 }
 
-                CheckCompleted(true);
+                CheckCompleted();
             }
         }
 
@@ -85,28 +85,33 @@ namespace HappyHour.ScrapItems
             if (!m.Success)
             {
                 Log.Print($"Could not find pid pattern in [] {title}");
-                return;
+                goto setEvent;
             }
 
             _pid = m.Groups[0].Value;
-            _outPath += (_spider as SpiderSehuatang).MediaFolder + _pid + "\\";
+            _outPath += _spider.GetConf("DataPath") + _pid + "\\";
 
             var di = new DirectoryInfo(_outPath);
             if (!di.Exists)
             {
                 Directory.CreateDirectory(_outPath);
             }
-            else if (!_bOverwrite)
+            else
             {
-                _bStop = true;
                 Log.Print($"Already downloaded! {_outPath}");
-                return;
+                if (_spider.Browser.StopOnExistingId)
+                    _spider.EnableScrapIntoDb = false;
+                _skipDownload = true;
             }
-            Interlocked.Increment(ref _numItemsToScrap);
+        setEvent:
+            _eventPidParsed.Set();
         }
 
         void ParseImage(List<object> items)
         {
+            _eventPidParsed.WaitOne();
+            if (_skipDownload) return;
+
             _images = new Dictionary<string, int>();
             int i = 0;
             foreach (string f in items)
@@ -124,12 +129,21 @@ namespace HappyHour.ScrapItems
                 i++;
             }
         }
-
+#if false
+        bool IsTorrentDownloaded()
+        {
+            var files = Directory.GetFiles(_outPath);
+            if (files.Any(f => f.EndsWith(".torrent")))
+                return true;
+            else 
+                return false;
+        }
+#endif
         void IScrapItem.OnJsResult(string name, List<object> items)
         {
             PrintItem(name, items);
 
-            if (!items.IsNullOrEmpty() && !_bStop)
+            if (!items.IsNullOrEmpty())
             {
                 if (name == "pid")
                 {
@@ -150,12 +164,14 @@ namespace HappyHour.ScrapItems
                 {
                     ParseImage(items);
                 }
-                else if (name == "files")
-                {
-                    //Interlocked.Increment(ref NumItemsToScrap);
-                }
             }
-            CheckCompleted(false);
+            else if (name == "files")
+            {
+                _eventPidParsed.WaitOne();
+                if (!_skipDownload/* || !IsTorrentDownloaded()*/) 
+                    Interlocked.Increment(ref _numItemsToScrap);
+            }
+            CheckCompleted();
         }
     }
 }

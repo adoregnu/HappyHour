@@ -14,6 +14,14 @@ namespace HappyHour.Spider
 {
     class SpiderJavfree : SpiderBase
     {
+        protected override string SearchURL
+        {
+            get
+            {
+                return $"{URL}?s={Media.Pid}";
+            }
+        }
+
         public SpiderJavfree(SpiderViewModel browser) : base(browser)
         {
             Name = "Javfree";
@@ -41,7 +49,7 @@ namespace HappyHour.Spider
             }
             if (exactUrl != null)
             {
-                if (StartScrapping)
+                if (EnableScrapIntoDb)
                     _state = 1;
                 else
                     _state = -1;
@@ -53,15 +61,6 @@ namespace HappyHour.Spider
                 Log.Print("No matched Pid!");
                 Browser.StopScrapping(Media);
             }
-        }
-
-        public override bool Navigate(MediaItem mitem)
-        {
-            if (!base.Navigate(mitem))
-                return false;
-
-            Browser.Address = $"{URL}?s={Media.Pid}";
-            return true;
         }
 
         public override void Scrap()

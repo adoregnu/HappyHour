@@ -238,6 +238,38 @@
         </Setter>
     </Style>
 
+    <Style x:Key="ModernToggleButtonStyle3" TargetType="ToggleButton">
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Foreground" Value="Gray" />
+            </Trigger>
+            <Trigger Property="IsPressed" Value="True">
+                <Setter Property="Foreground" Value="DarkGray" />
+            </Trigger>
+            <Trigger Property="IsChecked" Value="True">
+                <Setter Property="Foreground" Value="Black" />
+            </Trigger>
+        </Style.Triggers>
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Width" Value="30"/>
+        <Setter Property="Height" Value="30"/>
+        <Setter Property="Padding" Value="2"/>
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="DarkGray" />
+        <!--
+        <Setter Property="Foreground" Value="{StaticResource CustomSliderHighlightBrush}" />
+-->
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ToggleButton}">
+                    <Border Background="{TemplateBinding Background}" BorderThickness="0" Padding="{TemplateBinding Padding}">
+                        <ContentPresenter x:Name="contentPresenter" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style x:Key="ModernButtonStyle" TargetType="{x:Type Button}">
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">

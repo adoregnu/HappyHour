@@ -113,5 +113,12 @@ namespace HappyHour.ViewModel
             if (_numLoading == 4)
                 WebBrowser.ExecuteScriptAsync(App.ReadResource("NasLogin.js"));
         }
+
+        public override void Cleanup()
+        {
+            PropertyChanged -= OnPropertyChanged;
+            WebBrowser.Dispose();
+            base.Cleanup();
+        }
     }
 }

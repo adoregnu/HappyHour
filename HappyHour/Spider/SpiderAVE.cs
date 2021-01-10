@@ -15,6 +15,15 @@ namespace HappyHour.Spider
 {
     class SpiderAVE : SpiderBase
     {
+        protected override string SearchURL
+        {
+            get
+            {
+                return $"{URL}search_Products.aspx?languageID=1" +
+                $"&dept_id=29&keyword={Media.Pid}&searchby=keyword";
+            }
+        }
+
         public SpiderAVE(SpiderViewModel browser) : base(browser)
         {
             Name = "AVE";
@@ -44,7 +53,7 @@ namespace HappyHour.Spider
                 return;
             }
 
-            if (StartScrapping)
+            if (EnableScrapIntoDb)
                 _state = 1;
             else
                 _state = -1;
@@ -57,16 +66,6 @@ namespace HappyHour.Spider
                 var url = HtmlEntity.DeEntitize(list[0] as string);
                 Browser.Address = url;
             }
-        }
-
-        public override bool Navigate(MediaItem mitem)
-        {
-            if (!base.Navigate(mitem))
-                return false;
-
-            Browser.Address = $"{URL}search_Products.aspx?languageID=1" +
-                $"&dept_id=29&keyword={Media.Pid}&searchby=keyword";
-            return true;
         }
 
         public override void Scrap()

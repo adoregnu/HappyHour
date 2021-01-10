@@ -27,9 +27,10 @@ namespace HappyHour.Spider
         public string URL = null;
         public string Name { get; protected set; } = "";
         public bool FromCommand { get; private set; } = false;
-        public bool StartScrapping { get; set; } = false;
+        public bool EnableScrapIntoDb { get; set; } = false;
         protected int _state = -1;
         protected string _linkName;
+        protected virtual string SearchURL { get => URL; }
 
         public ICommand CmdScrap { get; set; }
 
@@ -46,6 +47,11 @@ namespace HappyHour.Spider
                 }
                 FromCommand = false;
             }, (p) => this is not SpiderSehuatang);
+        }
+
+        public virtual string GetConf(string key)
+        {
+            throw new Exception("Unknown Config");
         }
 
         string XPath(string xpath, string jsPath)
@@ -65,17 +71,18 @@ namespace HappyHour.Spider
             return XPath(xpath, @"XPathClick.sbn.js");
         }
 
-        public virtual bool Navigate(MediaItem mitem)
+        public virtual void Navigate(MediaItem mitem, bool skipScrap)
         {
             if (string.IsNullOrEmpty(Browser.Pid) || mitem == null)
             {
                 Log.Print("Pid is not set!");
-                return false;
+                return;
             }
             _state = 0;
             Media = mitem;
 
-            return true;
+            EnableScrapIntoDb = !skipScrap;
+            Browser.Address = SearchURL;
         }
 
         public virtual void Navigate(string name, string url)
@@ -101,7 +108,7 @@ namespace HappyHour.Spider
             _isCookieSet = true;
         }
 
-        public virtual void OnScrapCompleted(bool isValid, string path = null)
+        public virtual void OnScrapCompleted(string path = null)
         {
             Browser.StopScrapping(Media);
         }

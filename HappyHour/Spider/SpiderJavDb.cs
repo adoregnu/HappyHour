@@ -16,6 +16,14 @@ namespace HappyHour.Spider
     class SpiderJavDb : SpiderBase
     {
         readonly Dictionary<string, string> _xpathDic;
+        protected override string SearchURL
+        {
+            get
+            {
+                return $"{URL}search?q={Media.Pid}&f=all";
+            }
+        }
+
         public SpiderJavDb(SpiderViewModel browser) : base(browser)
         { 
             Name = "JavDB";
@@ -77,21 +85,12 @@ namespace HappyHour.Spider
                 Browser.StopScrapping(Media);
                 return;
             }
-            if (StartScrapping)
+            if (EnableScrapIntoDb)
                 _state = 1;
             else
                 _state = -1;
 
             Browser.Address = $"{URL}{a.Attributes["href"].Value.Substring(1)}";
-        }
-
-        public override bool Navigate(MediaItem mitem)
-        {
-            if (!base.Navigate(mitem))
-                return false;
-
-            Browser.Address = $"{URL}search?q={Media.Pid}&f=all";
-            return true;
         }
 
         public override void Scrap()

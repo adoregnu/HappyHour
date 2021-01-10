@@ -36,7 +36,6 @@ namespace HappyHour.ViewModel
     }
     class MediaListViewModel : Pane, IMediaList
     {
-        static readonly SerialQueue _serialQueue = new SerialQueue();
         readonly object _lock = new object();
 
         MediaItem _selectedMedia = null;
@@ -210,11 +209,6 @@ namespace HappyHour.ViewModel
             }
         }
 
-        public void AddMedia(string itemPath)
-        {
-            _serialQueue.Enqueue(() => UpdateMediaList(itemPath, true));
-        }
-
         public void RemoveMedia(string path)
         {
             IsBrowsing = true;
@@ -224,7 +218,7 @@ namespace HappyHour.ViewModel
             IsBrowsing = false; 
         }
 
-        void InsertMedia(string path)
+        public void AddMedia(string path)
         {
             var item = MediaItem.Create(path);
             if (item == null) return;
@@ -235,10 +229,11 @@ namespace HappyHour.ViewModel
         public async void Replace(IEnumerable<string> paths)
         {
             MediaList.Clear();
+            IsSelected = true;
             await Task.Run(() => {
                 foreach (var path in paths)
                 {
-                    InsertMedia(path);
+                    AddMedia(path);
                 }
             });
         }
@@ -250,7 +245,7 @@ namespace HappyHour.ViewModel
                 var dirs = Directory.GetDirectories(path);
                 if (dirs.Length == 0 || dirs[0].EndsWith(".actors"))
                 {
-                    InsertMedia(path);
+                    AddMedia(path);
                 }
                 else if (bRecursive || level < 1)
                 {
@@ -349,7 +344,7 @@ namespace HappyHour.ViewModel
                 {
                     if (dbDirs.BinarySearch(currDir) < 0)
                     {
-                        InsertMedia(currDir);
+                        AddMedia(currDir);
                     }
                 }
                 else 
@@ -394,7 +389,7 @@ namespace HappyHour.ViewModel
                 .Select(i => i.Path)
                 .ToListAsync();
 
-            await Task.Run(() => paths.ForEach(p => InsertMedia(p)));
+            await Task.Run(() => paths.ForEach(p => AddMedia(p)));
         }
 
         void OnContextMenu(MediaItem item, MediaListMenuType type)

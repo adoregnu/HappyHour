@@ -8,7 +8,7 @@
         xmlns:view="clr-namespace:HappyHour.View"
         mc:Ignorable="d"
         md:DialogServiceViews.IsRegistered="True"
-        Title="Scrapper" Height="1000" Width="2000"
+        Title="Scrapper" Height="720" Width="1024"
         DataContext="{Binding Source={StaticResource Locator}, Path=MainWindow}">
     <!--
     <i:Interaction.Triggers>
@@ -57,17 +57,16 @@
                       Fill="{Binding Path=Foreground, RelativeSource=
                         {RelativeSource AncestorType={x:Type ToggleButton}}}"/>
             </ToggleButton>
-
+-->
             <ToggleButton
-                Style="{DynamicResource ModernToggleButtonStyle2}"
+                Style="{DynamicResource ModernToggleButtonStyle3}"
                 IsChecked="{Binding NasEnabled, Mode=TwoWay}"
-                ToolTip="Enable Spider">
+                ToolTip="Open/Close Synology DSM">
                 <Path Stretch="Uniform"
                       Data="{Binding Source={StaticResource NasIcon}, Path=Data}"
                       Fill="{Binding Path=Foreground, RelativeSource=
                         {RelativeSource AncestorType={x:Type ToggleButton}}}"/>
             </ToggleButton>
--->
         </ToolBar>
         <view:DockView Grid.Row="1" x:Name="Dock"/>
         <StatusBar  Grid.Row="2">

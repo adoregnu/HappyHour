@@ -10,12 +10,21 @@ using HappyHour.Extension;
 using HappyHour.Model;
 using HappyHour.ViewModel;
 using HappyHour.ScrapItems;
+using System.Text.RegularExpressions;
 
 namespace HappyHour.Spider
 {
     class SpiderAvsox : SpiderBase
     {
         readonly Dictionary<string, string> _xpathDic;
+
+        protected override string SearchURL
+        {
+            get
+            {
+                return $"{URL}search/{Media.Pid}";
+            }
+        }
 
         public SpiderAvsox(SpiderViewModel browser) : base(browser)
         {
@@ -35,16 +44,7 @@ namespace HappyHour.Spider
             };
         }
 
-        public override bool Navigate(MediaItem mitem)
-        {
-            if (!base.Navigate(mitem))
-                return false;
-
-            Browser.Address = $"{URL}search/{Media.Pid}";
-            return true;
-        }
-
-        void OnMultiResult(List<object> list)
+       void OnMultiResult(List<object> list)
         { 
             Log.Print($"OnMultiResult : {list.Count} items found!");
             if (list.IsNullOrEmpty())
@@ -57,14 +57,17 @@ namespace HappyHour.Spider
             HtmlDocument doc = new HtmlDocument();
 
             var pid = Media.Pid;
-            if (pid.StartsWith("HEYZO", StringComparison.OrdinalIgnoreCase))
+            if (pid.StartsWith("HEYZO", StringComparison.OrdinalIgnoreCase) ||
+                Regex.Match(Media.Pid, @"^\d{6}(?:_|-)\d{3}$").Success)
+            {
                 pid = pid.Replace('_', '-');
-            
+            }
             foreach (string it in list)
             {
                 doc.LoadHtml(it);
                 var node = doc.DocumentNode.SelectSingleNode("//date[1]");
-                if (node.InnerText.IndexOf(pid, StringComparison.OrdinalIgnoreCase) >= 0)
+                var innerText = node.InnerText.Trim().Replace('_','-');
+                if (innerText.IndexOf(pid, StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     anode = doc.DocumentNode.FirstChild;
                     break;
@@ -77,7 +80,7 @@ namespace HappyHour.Spider
                 Browser.StopScrapping(Media);
                 return;
             }
-            if (StartScrapping)
+            if (EnableScrapIntoDb)
                 _state = 1;
             else
                 _state = -1;

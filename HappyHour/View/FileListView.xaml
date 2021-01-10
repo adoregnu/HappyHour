@@ -70,10 +70,12 @@
                     <GridViewColumn
                         Header="Name" Width="Auto"
                         DisplayMemberBinding="{Binding Name}"/>
+<!--
                     <GridViewColumn
                         Header="Date modified" Width="Auto"
                         DisplayMemberBinding="{Binding LastWriteTime,
                             StringFormat='{}{0:MM/dd/yyyy hh:mm:ss}'}"/>
+-->
                     <GridViewColumn
                         Header="Size" Width="Auto"
                         DisplayMemberBinding="{Binding .,

@@ -455,7 +455,7 @@ namespace HappyHour.ViewModel
         void OnClose()
         { 
             if (DialogResult == true)
-                App.DbContext.SaveChanges();
+                App.DbContext.SaveChangesAsync();
         }
     }
 }

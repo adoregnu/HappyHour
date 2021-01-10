@@ -16,6 +16,14 @@ namespace HappyHour.Spider
 {
     class SpiderDmm : SpiderBase
     {
+        protected override string SearchURL
+        {
+            get
+            {
+                return $"{URL}mono/-/search/=/searchstr={Media.Pid}/";
+            }
+        }
+
         public SpiderDmm(SpiderViewModel browser) : base(browser)
         {
             Name = "DMM";
@@ -66,7 +74,7 @@ namespace HappyHour.Spider
 
             if (matchCount == 1)
             {
-                if (StartScrapping)
+                if (EnableScrapIntoDb)
                     _state = 1;
                 else
                     _state = -1;
@@ -81,15 +89,6 @@ namespace HappyHour.Spider
                 Browser.StopScrapping(Media);
                 Log.Print("No Exact match ID");
             }
-        }
-
-        public override bool Navigate(MediaItem mitem)
-        {
-            if (!base.Navigate(mitem))
-                return false;
-
-            Browser.Address = $"{URL}mono/-/search/=/searchstr={Media.Pid}/";
-            return true;
         }
 
         public override void Scrap()
