@@ -73,16 +73,6 @@
             <StatusBarItem>
                 <TextBlock Text="{Binding Status, Mode=OneWay}"/>
             </StatusBarItem>
-            <!--
-            <StatusBarItem HorizontalAlignment="Right">
-                <Grid>
-                    <ProgressBar Width="200" Name="pbStatus" Minimum="0" Maximum="100"
-                                 Value="{Binding CurrProgress, Mode=OneWay}"/>
-                    <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
-                        Text="{Binding ElementName=pbStatus, Path=Value, StringFormat={}{0:0}%}"/>
-                </Grid>
-            </StatusBarItem>
--->
         </StatusBar>
     </Grid>
 </Window>

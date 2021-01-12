@@ -18,6 +18,7 @@ using HappyHour.Model;
 
 namespace HappyHour.Spider
 {
+    delegate void OnJsResultSingle(object items);
     delegate void OnJsResult(List<object> items);
 
     abstract class SpiderBase : ViewModelBase

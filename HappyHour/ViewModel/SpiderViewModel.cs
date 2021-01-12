@@ -106,8 +106,9 @@ namespace HappyHour.ViewModel
                 new SpiderR18(this),
                 new SpiderJavlibrary(this),
                 new SpiderJavmoive(this),
-                new SpiderDmm(this),
+                new SpiderAvwiki(this),
                 new SpiderMgstage(this),
+                new SpiderDmm(this),
                 new SpiderAVE(this),
                 new SpiderJavDb(this),
                 new SpiderJavfree(this),
@@ -167,11 +168,10 @@ namespace HappyHour.ViewModel
         {
             DownloadHandler = new DownloadHandler();
 
-            WebBrowser.MenuHandler = new MenuHandler();
+            WebBrowser.MenuHandler = new MenuHandler(this);
             WebBrowser.DownloadHandler = DownloadHandler;
             WebBrowser.LifeSpanHandler = new PopupHandler();
             //WebBrowser.RequestHandler = new AvRequestHandler();
-
             WebBrowser.ConsoleMessage += (s, e) =>
             {
                 MessengerInstance.Send(new CefConsoleMsg(e, "log"));
@@ -181,8 +181,23 @@ namespace HappyHour.ViewModel
                 MessengerInstance.Send(new CefStatusMsg(e, "log"));
             };
 
+            WebBrowser.FrameLoadEnd += OnFrameLoadEnd;
+            WebBrowser.JavascriptMessageReceived += OnBrowserJavascriptMessageReceived;
             WebBrowser.LoadingStateChanged += OnStateChanged;
             _selectedSpider.SetCookies();
+        }
+
+        void OnFrameLoadEnd(object sender, FrameLoadEndEventArgs e)
+        {
+            WebBrowser.ExecuteScriptAsync(App.ReadResource("ElementAt.js"));
+        }
+        void OnBrowserJavascriptMessageReceived(object sender, JavascriptMessageReceivedEventArgs e)
+        {
+            Log.Print((string)e.Message);
+            //DO SOMETHING WITH THIS MESSAGE
+            //This event is called on a CEF Thread, to access your UI thread
+            //You can cast sender to ChromiumWebBrowser
+            //use Control.BeginInvoke/Dispatcher.BeginInvoke
         }
 
         void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -216,6 +231,20 @@ namespace HappyHour.ViewModel
             host.StartDownload(url);
         }
 
+        public void ExecJavaScriptString(string s, OnJsResultSingle callback = null)
+        {
+            webBrowser.EvaluateScriptAsync(s).ContinueWith(x =>
+            {
+                var response = x.Result;
+                if (!response.Success)
+                {
+                    Log.Print(response.Message);
+                    return;
+                }
+                callback?.Invoke(response.Result);
+            });
+        }
+
         public void ExecJavaScript(string s, OnJsResult callback = null)
         {
             webBrowser.EvaluateScriptAsync(s).ContinueWith(x =>
@@ -240,6 +269,7 @@ namespace HappyHour.ViewModel
                 }
             });
         }
+
         public void ExecJavaScript(string s, IScrapItem item, string name)
         {
             webBrowser.EvaluateScriptAsync(s).ContinueWith(x =>

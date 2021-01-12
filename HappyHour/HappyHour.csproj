@@ -55,6 +55,7 @@
 
   <ItemGroup>
     <None Remove="Resources\default-fallback-image.png" />
+    <None Remove="Resources\ElementAt.js" />
     <None Remove="Resources\NasLogin.js" />
     <None Remove="Resources\XPathClick.sbn.js" />
     <None Remove="Resources\XPathMulti.sbn.js" />
@@ -62,6 +63,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Resources\ElementAt.js" />
     <EmbeddedResource Include="Resources\NasLogin.js" />
     <EmbeddedResource Include="Resources\XPathClick.sbn.js" />
     <EmbeddedResource Include="Resources\XPathMulti.sbn.js" />
@@ -71,9 +73,7 @@
   <ItemGroup>
     <Folder Include="Model\" />
     <Folder Include="Extension\" />
-    <Folder Include="Resources\" />
     <Folder Include="Utils\" />
-    <Folder Include="CefHandler\" />
     <Folder Include="View\Behavior\" />
     <Folder Include="View\Pane\" />
   </ItemGroup>

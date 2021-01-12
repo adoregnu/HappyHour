@@ -11,10 +11,18 @@ using CefSharp.Wpf;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 
+using HappyHour.ViewModel;
+
 namespace HappyHour.CefHandler
 {
-    public class MenuHandler : IContextMenuHandler
+    class MenuHandler : IContextMenuHandler
     {
+        readonly SpiderViewModel _spider;
+        public MenuHandler(SpiderViewModel spider = null)
+        {
+            _spider = spider;
+        }
+
         void IContextMenuHandler.OnBeforeContextMenu(
             IWebBrowser chromiumWebBrowser,
             IBrowser browser,
@@ -22,8 +30,8 @@ namespace HappyHour.CefHandler
             IContextMenuParams parameters,
             IMenuModel model)
         {
-            Log.Print("Context menu opened");
-            Log.Print(parameters.MisspelledWord);
+            //Log.Print("Context menu opened");
+            //Log.Print(parameters.MisspelledWord);
 
             if (model.Count > 0)
             {
@@ -35,6 +43,14 @@ namespace HappyHour.CefHandler
 
             //To disable context mode then clear
             // model.Clear();
+
+            if (_spider != null)
+            {
+                // Add a separator
+                model.AddSeparator();
+                // Add another example item
+                model.AddItem((CefMenuCommand)26503, "Display alert message");
+            }
         }
 
         bool IContextMenuHandler.OnContextMenuCommand(
@@ -152,58 +168,67 @@ namespace HappyHour.CefHandler
             // you can work out the rest
             switch (item.Item2)
             {
-            case CefMenuCommand.Back:
-                browser.GoBack();
-                break;
-            case CefMenuCommand.Forward:
-                browser.GoForward();
-                break;
-            case CefMenuCommand.Cut:
-                browser.FocusedFrame.Cut();
-                break;
-            case CefMenuCommand.Copy:
-                browser.FocusedFrame.Copy();
-                break;
-            case CefMenuCommand.Paste:
-                browser.FocusedFrame.Paste();
-                break;
-            case CefMenuCommand.Print:
-                browser.GetHost().Print();
-                break;
-            case CefMenuCommand.ViewSource:
-                browser.FocusedFrame.ViewSource();
-                break;
-            case CefMenuCommand.Undo:
-                browser.FocusedFrame.Undo();
-                break;
-            case CefMenuCommand.StopLoad:
-                browser.StopLoad();
-                break;
-            case CefMenuCommand.SelectAll:
-                browser.FocusedFrame.SelectAll();
-                break;
-            case CefMenuCommand.Redo:
-                browser.FocusedFrame.Redo();
-                break;
-            case CefMenuCommand.Find:
-                browser.GetHost().Find(0, parameters.SelectionText, true, false, false);
-                break;
-            case CefMenuCommand.AddToDictionary:
-                browser.GetHost().AddWordToDictionary(parameters.MisspelledWord);
-                break;
-            case CefMenuCommand.Reload:
-                browser.Reload();
-                break;
-            case CefMenuCommand.ReloadNoCache:
-                browser.Reload(ignoreCache: true);
-                break;
-            case (CefMenuCommand)26501:
-                browser.GetHost().ShowDevTools();
-                break;
-            case (CefMenuCommand)26502:
-                browser.GetHost().CloseDevTools();
-                break;
+                case CefMenuCommand.Back:
+                    browser.GoBack();
+                    break;
+                case CefMenuCommand.Forward:
+                    browser.GoForward();
+                    break;
+                case CefMenuCommand.Cut:
+                    browser.FocusedFrame.Cut();
+                    break;
+                case CefMenuCommand.Copy:
+                    browser.FocusedFrame.Copy();
+                    break;
+                case CefMenuCommand.Paste:
+                    browser.FocusedFrame.Paste();
+                    break;
+                case CefMenuCommand.Print:
+                    browser.GetHost().Print();
+                    break;
+                case CefMenuCommand.ViewSource:
+                    browser.FocusedFrame.ViewSource();
+                    break;
+                case CefMenuCommand.Undo:
+                    browser.FocusedFrame.Undo();
+                    break;
+                case CefMenuCommand.StopLoad:
+                    browser.StopLoad();
+                    break;
+                case CefMenuCommand.SelectAll:
+                    browser.FocusedFrame.SelectAll();
+                    break;
+                case CefMenuCommand.Redo:
+                    browser.FocusedFrame.Redo();
+                    break;
+                case CefMenuCommand.Find:
+                    browser.GetHost().Find(0, parameters.SelectionText, true, false, false);
+                    break;
+                case CefMenuCommand.AddToDictionary:
+                    browser.GetHost().AddWordToDictionary(parameters.MisspelledWord);
+                    break;
+                case CefMenuCommand.Reload:
+                    browser.Reload();
+                    break;
+                case CefMenuCommand.ReloadNoCache:
+                    browser.Reload(ignoreCache: true);
+                    break;
+                case (CefMenuCommand)26501:
+                    browser.GetHost().ShowDevTools();
+                    break;
+                case (CefMenuCommand)26502:
+                    browser.GetHost().CloseDevTools();
+                    break;
+                case (CefMenuCommand)26503:
+                    if (_spider == null) break;
+                    Log.Print("Custom context menu Message!!");
+                    break;
             }
+        }
+
+        void OnElement(object item)
+        {
+            Log.Print(item.ToString());
         }
 
         private static IEnumerable<Tuple<string, CefMenuCommand, bool>>
