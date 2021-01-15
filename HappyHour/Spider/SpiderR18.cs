@@ -21,11 +21,11 @@ namespace HappyHour.Spider
     {
         Dictionary<string, string> _xpathDic;
 
-        protected override string SearchURL
+        public override string SearchURL
         {
             get
             {
-                return $"{URL}common/search/searchword={Media.Pid}/";
+                return $"{URL}common/search/searchword={Keyword}/";
             }
         }
         public SpiderR18(SpiderViewModel browser) : base(browser)
@@ -65,12 +65,9 @@ namespace HappyHour.Spider
         void OnMultiResult(List<object> list)
         {
             Log.Print($"OnMultiResult : {list.Count} items found!");
-            if (list.IsNullOrEmpty())
-            {
-                Browser.StopScrapping(Media);
-                return;
-            }
-            var apid = Media.Pid.Split('-');
+            if (list.IsNullOrEmpty()) goto NotFound;
+
+            var apid = Keyword.Split('-');
             var regex = new Regex($@"id=(h_)?(\d+)?{apid[0].ToLower()}\d*{apid[1]}");
             int matchCount = 0;
             string exactUrl = null;
@@ -83,23 +80,23 @@ namespace HappyHour.Spider
                     matchCount++;
                 }
             }
+            if (matchCount == 0) goto NotFound;
+
             if (matchCount == 1)
             {
-                if (EnableScrapIntoDb)
-                    _state = 1;
-                else
-                    _state = -1;
-
+                _state = 1;
                 var url = HtmlEntity.DeEntitize(exactUrl);
                 Browser.Address = url;
             }
-            else if (matchCount > 1)
-                Log.Print("Ambiguous match! Select manually!");
             else
             {
-                Browser.StopScrapping(Media);
-                Log.Print($"No exact matched ID");
+                Log.Print("Ambiguous match! Select manually!");
             }
+            return;
+
+        NotFound:
+            Log.Print($"No exact matched ID");
+            OnScrapCompleted();
         }
 
         ItemR18 _item = null;

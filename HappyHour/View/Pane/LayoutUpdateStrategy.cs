@@ -54,7 +54,7 @@ namespace HappyHour.View.Pane
         public void AfterInsertDocument(LayoutRoot layout,
             LayoutDocument anchorableShown)
         {
-#if false
+#if true
             if (anchorableShown.Content is SpiderViewModel ||
                 anchorableShown.Content is BrowserViewModel ||
                 anchorableShown.Content is PlayerViewModel)

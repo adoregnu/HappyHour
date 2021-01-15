@@ -21,7 +21,7 @@ namespace HappyHour.ScrapItems
         string _pid = null;
         string _outPath = null;
         Dictionary<string, int> _images = null;
-        ManualResetEvent _eventPidParsed = new ManualResetEvent(false);
+        readonly ManualResetEvent _eventPidParsed = new ManualResetEvent(false);
 
         public ItemSehuatang(SpiderBase spider) : base(spider)
         {
@@ -35,7 +35,8 @@ namespace HappyHour.ScrapItems
                 Log.Print($"{_numScrapedItem}/{NumItemsToScrap}");
                 if (_numScrapedItem == NumItemsToScrap)
                 {
-                    _spider.OnScrapCompleted(_outPath);
+                    _spider.DataPath = _outPath;
+                    _spider.OnScrapCompleted();
                     Clear();
                 }
             }
@@ -99,8 +100,10 @@ namespace HappyHour.ScrapItems
             else
             {
                 Log.Print($"Already downloaded! {_outPath}");
-                if (_spider.Browser.StopOnExistingId)
-                    _spider.EnableScrapIntoDb = false;
+                if (_spider.GetConf("StopOnExist") == "True")
+                {
+                    _spider.Stop();
+                }
                 _skipDownload = true;
             }
         setEvent:
@@ -117,15 +120,12 @@ namespace HappyHour.ScrapItems
             foreach (string f in items)
             {
                 _images.Add(f.Split('/').Last(), i);
-                Interlocked.Increment(ref _numItemsToScrap);
+                string url = f;
                 if (!f.StartsWith("http"))
                 {
-                    _spider.Browser.Download(_spider.URL + f);
+                    url = _spider.URL + f;
                 }
-                else
-                {
-                    _spider.Browser.Download(f);
-                }
+                _spider.Download(url, ref _numItemsToScrap);
                 i++;
             }
         }

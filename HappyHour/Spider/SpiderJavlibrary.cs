@@ -19,11 +19,11 @@ namespace HappyHour.Spider
     class SpiderJavlibrary : SpiderBase
     {
         Dictionary<string, string> _xpathDic;
-        protected override string SearchURL
+        public override string SearchURL
         {
             get
             {
-                return $"{URL}vl_searchbyid.php?keyword={Media.Pid}";
+                return $"{URL}vl_searchbyid.php?keyword={Keyword}";
             }
         }
         public SpiderJavlibrary(SpiderViewModel browser) : base(browser)
@@ -61,13 +61,10 @@ namespace HappyHour.Spider
         {
             if (list == null || list.Count == 0)
             {
-                if (EnableScrapIntoDb)
+                ParsePage(new ItemJavlibrary(this)
                 {
-                    ParsePage(new ItemJavlibrary(this)
-                    {
-                        NumItemsToScrap = _xpathDic.Count
-                    }, _xpathDic);
-                }
+                    NumItemsToScrap = _xpathDic.Count
+                }, _xpathDic);
                 return;
             }
 
@@ -76,18 +73,15 @@ namespace HappyHour.Spider
             {
                 doc.LoadHtml(url);
                 var div = doc.DocumentNode.SelectSingleNode("//div[@class='id']").InnerText;
-                if (div.Trim().Equals(Media.Pid, StringComparison.OrdinalIgnoreCase))
+                if (div.Trim().Equals(Keyword, StringComparison.OrdinalIgnoreCase))
                 {
                     var href = doc.DocumentNode.FirstChild.Attributes["href"].Value;
-                    if (EnableScrapIntoDb)
-                        _state = 1;
-                    else
-                        _state = -1;
+                    _state = 1;
                     Browser.Address = $"{URL}{href}";
                     return;
                 }
             }
-            Browser.StopScrapping(Media);
+            OnScrapCompleted();
         }
 
         public override void Scrap()

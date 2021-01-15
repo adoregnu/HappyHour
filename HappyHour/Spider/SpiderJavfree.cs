@@ -14,11 +14,11 @@ namespace HappyHour.Spider
 {
     class SpiderJavfree : SpiderBase
     {
-        protected override string SearchURL
+        public override string SearchURL
         {
             get
             {
-                return $"{URL}?s={Media.Pid}";
+                return $"{URL}?s={Keyword}";
             }
         }
 
@@ -31,12 +31,9 @@ namespace HappyHour.Spider
         public void OnMultiResult(List<object> list)
         { 
             Log.Print($"OnMultiResult : {list.Count} items found!");
-            if (list.IsNullOrEmpty())
-            {
-                Browser.StopScrapping(Media);
-                return;
-            }
-            var regex = new Regex($@"{Media.Pid.ToLower()}");
+            if (list.IsNullOrEmpty()) goto NotFound;
+
+            var regex = new Regex($@"{Keyword.ToLower()}");
             string exactUrl = null;
             foreach (string url in list)
             {
@@ -47,20 +44,15 @@ namespace HappyHour.Spider
                     break;
                 }
             }
-            if (exactUrl != null)
-            {
-                if (EnableScrapIntoDb)
-                    _state = 1;
-                else
-                    _state = -1;
+            if (exactUrl == null) goto NotFound;
 
-                Browser.Address = exactUrl;
-            }
-            else
-            {
-                Log.Print("No matched Pid!");
-                Browser.StopScrapping(Media);
-            }
+            _state = 1;
+            Browser.Address = exactUrl;
+            return;
+
+        NotFound:
+            Log.Print("No matched Pid!");
+            OnScrapCompleted();
         }
 
         public override void Scrap()

@@ -16,11 +16,11 @@ namespace HappyHour.Spider
 {
     class SpiderDmm : SpiderBase
     {
-        protected override string SearchURL
+        public override string SearchURL
         {
             get
             {
-                return $"{URL}mono/-/search/=/searchstr={Media.Pid}/";
+                return $"{URL}mono/-/search/=/searchstr={Keyword}/";
             }
         }
 
@@ -53,12 +53,9 @@ namespace HappyHour.Spider
         void OnMultiResult(List<object> list)
         {
             Log.Print($"OnMultiResult : {list.Count} items found!");
-            if (list.IsNullOrEmpty())
-            {
-                Browser.StopScrapping(Media);
-                return;
-            }
-            var apid = Media.Pid.Split('-');
+            if (list.IsNullOrEmpty()) goto NotFound;
+
+            var apid = Keyword.Split('-');
             var regex = new Regex($@"cid=(h_)?(\d+)?{apid[0].ToLower()}");
             int matchCount = 0;
             string exactUrl = null;
@@ -71,24 +68,22 @@ namespace HappyHour.Spider
                     matchCount++;
                 }
             }
+            if (matchCount == 0) goto NotFound;
 
             if (matchCount == 1)
             {
-                if (EnableScrapIntoDb)
-                    _state = 1;
-                else
-                    _state = -1;
+                _state = 1;
                 Browser.Address = exactUrl;
             }
             else if (matchCount > 1)
             {
                 Log.Print("Ambguous match! Select manually!");
             }
-            else
-            {
-                Browser.StopScrapping(Media);
-                Log.Print("No Exact match ID");
-            }
+            return;
+
+        NotFound:
+            Log.Print("No Exact match ID");
+            OnScrapCompleted();
         }
 
         public override void Scrap()
@@ -99,7 +94,7 @@ namespace HappyHour.Spider
                     Browser.ExecJavaScript(XPath("//p[@class='tmb']/a/@href"), OnMultiResult);
                     break;
                 case 1:
-                    Browser.StopScrapping(Media);
+                    //Browser.StopScrapping(Media);
                     break;
             }
         }

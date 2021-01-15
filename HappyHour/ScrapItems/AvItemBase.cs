@@ -26,7 +26,7 @@ namespace HappyHour.ScrapItems
 
         protected string PosterPath
         {
-            get => $"{_spider.Media.MediaFolder}\\{_spider.Media.Pid}_poster";
+            get => $"{_spider.DataPath}\\{_spider.Keyword}_poster";
         }
 
         public bool OverwriteImage { set; get; } = false;
@@ -35,8 +35,8 @@ namespace HappyHour.ScrapItems
         { 
             _avItem = new AvItem
             {
-                Pid = spider.Media.Pid,
-                Path = spider.Media.MediaFolder,
+                Pid = spider.Keyword,
+                Path = spider.DataPath,
                 IsCensored = true,
             };
             _context = App.DbContext;
@@ -49,7 +49,7 @@ namespace HappyHour.ScrapItems
         {
             if (e.IsComplete)
             {
-                Log.Print($"{_spider.Media.Pid} download completed: {e.FullPath}");
+                Log.Print($"{_spider.Keyword} download completed: {e.FullPath}");
                 CheckCompleted();
             };
         }
@@ -74,8 +74,7 @@ namespace HappyHour.ScrapItems
                 }
                 else
                 {
-                    if (_numValidItems > 0)
-                        UdpateAvItem();
+                    if (_numValidItems > 0) UdpateAvItem();
                     Clear();
                     _spider.OnScrapCompleted();
                 }

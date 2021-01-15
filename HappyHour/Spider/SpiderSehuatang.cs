@@ -23,6 +23,7 @@ namespace HappyHour.Spider
         int _pageNum = 1;
         int _index = 0;
         bool _isPageChanged = false;
+        bool _scrapRunning = false;
         string _currentPage = null;
         List<object> _articlesInPage = null;
         Dictionary<string, string> _xpathDic;
@@ -60,6 +61,10 @@ namespace HappyHour.Spider
             if (key == "DataPath")
             {
                 return $"{App.GConf["general"]["data_path"]}sehuatang\\{SelectedBoard}\\";
+            }
+            else if (key == "StopOnExist")
+            {
+                return Browser.StopOnExistingId.ToString();
             }
 
             return base.GetConf(key);
@@ -109,10 +114,6 @@ namespace HappyHour.Spider
                 //Log.Print("Move Page to " + Browser.Address);
                 Browser.Address = URL + _currentPage;
             }
-            else
-            {
-                Browser.StopScrapping(null);
-            }
         }
 
         public void MoveArticle(List<object> items)
@@ -138,43 +139,40 @@ namespace HappyHour.Spider
             }
         }
 
-        public override void OnScrapCompleted(string path)
+        public override void OnScrapCompleted()
         {
-            if (!string.IsNullOrEmpty(path))
-                UiServices.Invoke(delegate {
-                    Browser.MediaList.AddMedia(path);
-                }, true);
-
-            if(EnableScrapIntoDb)
+            Browser.MediaList.AddMedia(DataPath);
+            if(_scrapRunning)
                 MoveArticle(null);
-            else
-                Browser.StopScrapping(null);
         }
 
-        public override void Navigate(MediaItem item, bool bSkipScrap)
+        public override void Navigate2()
         {
             _state = 0;
             _pageNum = 1;
-            EnableScrapIntoDb = true;
-
+            _scrapRunning = true;
             Browser.Address = URL;
+        }
+        public override void Stop()
+        {
+            _scrapRunning = false;
         }
 
         public override void Scrap()
         {
-            if (!EnableScrapIntoDb) return;
+            if (!_scrapRunning) return;
 
             switch (_state)
             {
-            case 0:
-                Browser.ExecJavaScript(_xpathDic[SelectedBoard], MovePage);
-                break;
-            case 1:
-                Browser.ExecJavaScript(_xpathDic["articles"], MoveArticle);
-                break;
-            case 2:
-                ParsePage();
-                break;
+                case 0:
+                    Browser.ExecJavaScript(_xpathDic[SelectedBoard], MovePage);
+                    break;
+                case 1:
+                    Browser.ExecJavaScript(_xpathDic["articles"], MoveArticle);
+                    break;
+                case 2:
+                    ParsePage();
+                    break;
             }
         }
     }

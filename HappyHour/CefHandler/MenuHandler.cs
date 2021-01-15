@@ -23,6 +23,7 @@ namespace HappyHour.CefHandler
             _spider = spider;
         }
 
+        const int CefUserCommand = 26503;
         void IContextMenuHandler.OnBeforeContextMenu(
             IWebBrowser chromiumWebBrowser,
             IBrowser browser,
@@ -49,7 +50,11 @@ namespace HappyHour.CefHandler
                 // Add a separator
                 model.AddSeparator();
                 // Add another example item
-                model.AddItem((CefMenuCommand)26503, "Display alert message");
+                int cefCmdId = CefUserCommand;
+                foreach (var spider in _spider.Spiders)
+                {
+                    model.AddItem((CefMenuCommand)cefCmdId++, spider.Name);
+                }
             }
         }
 
@@ -219,16 +224,16 @@ namespace HappyHour.CefHandler
                 case (CefMenuCommand)26502:
                     browser.GetHost().CloseDevTools();
                     break;
-                case (CefMenuCommand)26503:
-                    if (_spider == null) break;
-                    Log.Print("Custom context menu Message!!");
+                //case (CefMenuCommand)CefUserCommand:
+                default:
+                    if (_spider != null)
+                    {
+                        var sp = _spider.Spiders[(int)item.Item2 - CefUserCommand];
+                        _spider.SelectedSpider = sp;
+                        //Log.Print(sp.Name);
+                    }
                     break;
             }
-        }
-
-        void OnElement(object item)
-        {
-            Log.Print(item.ToString());
         }
 
         private static IEnumerable<Tuple<string, CefMenuCommand, bool>>

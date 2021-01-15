@@ -64,6 +64,7 @@ namespace HappyHour.ViewModel
         }
 
         public ObservableCollection<MediaItem> MediaList { get; private set; }
+        public ObservableCollection<MediaItem> SelectedMedias { get; private set; }
         public SpiderEnum SpiderList { get; private set; }
         public bool SearchSubFolder
         {
@@ -116,6 +117,7 @@ namespace HappyHour.ViewModel
                 }
             }
         }
+
         public IDialogService DialogService { get; set; }
 
         public ICommand CmdExclude { get; set; }
@@ -128,6 +130,8 @@ namespace HappyHour.ViewModel
         public ICommand CmdDoubleClick { get; set; }
         public ICommand CmdSearchOrphanageMedia { get; set; }
         public ICommand CmdSearchEmptyActor { get; set; }
+        public ICommand CmdScrap { get; private set; }
+        public ICommand CmdStopBatchingScrap { get; set; }
 
         public MediaListItemSelectedEventHandler ItemSelectedHandler { get; set; }
         public MediaListItemSelectedEventHandler ItemDoubleClickedHandler { get; set; }
@@ -136,6 +140,7 @@ namespace HappyHour.ViewModel
         {
             Title = "AVList";
             MediaList = new ObservableCollection<MediaItem>();
+            SelectedMedias = new ObservableCollection<MediaItem>();
 
             BindingOperations.EnableCollectionSynchronization(MediaList, _lock);
 
@@ -152,6 +157,10 @@ namespace HappyHour.ViewModel
             CmdSearchEmptyActor = new RelayCommand(() => OnSearchEmptyActor());
             CmdDoubleClick = new RelayCommand(() =>
                 ItemDoubleClickedHandler?.Invoke(this, SelectedMedia));
+            CmdScrap = new RelayCommand<object>(p => OnScrapAvInfo(p as SpiderBase));
+            CmdStopBatchingScrap = new RelayCommand(() => {
+                if (_mitemsToSearch != null) _mitemsToSearch.Clear();
+            });
 
             MessengerInstance.Register<NotificationMessage<SpiderEnum>>(this,
                 (msg) => SpiderList = msg.Content.Where(i => i.Name != "sehuatang"));
@@ -390,6 +399,45 @@ namespace HappyHour.ViewModel
                 .ToListAsync();
 
             await Task.Run(() => paths.ForEach(p => AddMedia(p)));
+        }
+
+        List<MediaItem> _mitemsToSearch;
+        void OnScrapCompleted(SpiderBase spider)
+        {
+            Log.Print($"{_mitemsToSearch[0].Pid} Scrap completed ");
+            spider.ScrapCompleted -= OnScrapCompleted;
+
+            if (_mitemsToSearch.Count > 0)
+            {
+                _mitemsToSearch[0].UpdateFields();
+                _mitemsToSearch.RemoveAt(0);
+            }
+            OnScrapAvInfo(spider);
+        }
+
+        void OnScrapAvInfo(SpiderBase spider)
+        {
+            if (_mitemsToSearch == null)
+                _mitemsToSearch = SelectedMedias.ToList();
+
+            if (_mitemsToSearch.Count > 0)
+            {
+                MessengerInstance.Send(
+                    new NotificationMessage<string>(
+                        $"{_mitemsToSearch.Count} remained",
+                        "UpdateStatus"));
+                spider.ScrapCompleted += OnScrapCompleted;
+                spider.Keyword = _mitemsToSearch[0].Pid;
+                spider.DataPath = _mitemsToSearch[0].MediaFolder;
+                spider.Navigate2();
+            }
+            else
+            {
+                MessengerInstance.Send(
+                    new NotificationMessage<string>("", "ClearStatus"));
+                _mitemsToSearch = null;
+                spider.Reset();
+            }
         }
 
         void OnContextMenu(MediaItem item, MediaListMenuType type)

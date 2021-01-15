@@ -74,7 +74,6 @@
     <Folder Include="Model\" />
     <Folder Include="Extension\" />
     <Folder Include="Utils\" />
-    <Folder Include="View\Behavior\" />
     <Folder Include="View\Pane\" />
   </ItemGroup>
 

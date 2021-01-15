@@ -27,8 +27,8 @@ namespace HappyHour.ScrapItems
             if (_numDownloadCnt == 0)
                 e.SuggestedFileName = $"{PosterPath}{ext}";
             else
-                e.SuggestedFileName = $"{_spider.Media.MediaFolder}\\" +
-                    $"{_spider.Media.Pid}_screenshot{_numDownloadCnt}{ext}";
+                e.SuggestedFileName = $"{_spider.DataPath}\\" +
+                    $"{_spider.Keyword}_screenshot{_numDownloadCnt}{ext}";
             Interlocked.Increment(ref _numDownloadCnt);
         }
 
@@ -40,13 +40,9 @@ namespace HappyHour.ScrapItems
 
             if (!url.StartsWith("http"))
             {
-                _spider.Browser.Download(_spider.URL + url);
+                url = _spider.URL + url;
             }
-            else
-            {
-                _spider.Browser.Download(url);
-            }
-            Interlocked.Increment(ref _numItemsToScrap);
+            _spider.Download(url, ref _numItemsToScrap);
         }
 
         void IScrapItem.OnJsResult(string name, List<object> items)

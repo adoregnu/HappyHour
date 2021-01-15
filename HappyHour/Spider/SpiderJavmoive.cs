@@ -17,11 +17,11 @@ namespace HappyHour.Spider
     {
         Dictionary<string, string> _xpathDic;
 
-        protected override string SearchURL
+        public override string SearchURL
         {
             get
             {
-                return $"{URL}search.html?k={Media.Pid}";
+                return $"{URL}search.html?k={Keyword}";
             }
         }
         public SpiderJavmoive(SpiderViewModel browser) : base(browser)
@@ -45,14 +45,10 @@ namespace HappyHour.Spider
             Log.Print($"OnMultiResult: {list.Count} items found!");
             if (list.IsNullOrEmpty())
             {
-                Browser.StopScrapping(Media);
+                OnScrapCompleted();
                 return;
             }
-            if (EnableScrapIntoDb)
-                _state = 1;
-            else
-                _state = -1;
-
+            _state = 1;
             if (list.Count > 1)
             {
                 Log.Print("Multitple item matched, Select manually.");

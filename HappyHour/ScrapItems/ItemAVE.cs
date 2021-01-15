@@ -105,8 +105,7 @@ namespace HappyHour.ScrapItems
                     var ext = url.Split('.').Last();
                     if (!File.Exists($"{PosterPath}.{ext}"))
                     {
-                        Interlocked.Increment(ref _numItemsToScrap);
-                        _spider.Browser.Download(url);
+                        _spider.Download(url, ref _numItemsToScrap);
                     }
                 }
                 else if (name == "title")

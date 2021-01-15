@@ -90,9 +90,9 @@ namespace HappyHour.ViewModel
             Anchors.Add(new ConsoleLogViewModel());
             Anchors.Add(new ScreenshotViewModel { MediaList = _mediaListMv });
 
-            Docs.Add(_mediaListMv);
-            Docs.Add(new SpiderViewModel { MediaList = _mediaListMv });
             Docs.Add(new PlayerViewModel { MediaList = _mediaListMv });
+            Docs.Add(new SpiderViewModel { MediaList = _mediaListMv });
+            Docs.Add(_mediaListMv);
 
             CmdActorEdtor = new RelayCommand(() => OnActorEditor());
             CmdFileToFolder = new RelayCommand(() => OnFileToFolder());

@@ -15,39 +15,47 @@ using CefSharp;
 using HappyHour.ViewModel;
 using HappyHour.ScrapItems;
 using HappyHour.Model;
+using System.Threading;
 
 namespace HappyHour.Spider
 {
     delegate void OnJsResultSingle(object items);
     delegate void OnJsResult(List<object> items);
+    delegate void ScrapCompletedHandler(SpiderBase spider);
 
     abstract class SpiderBase : ViewModelBase
     {
+        bool _isCookieSet = false;
+        string _keyword;
+
         public SpiderViewModel Browser { get; private set; }
-        public MediaItem Media = null;
         public string URL = null;
         public string Name { get; protected set; } = "";
-        public bool FromCommand { get; private set; } = false;
-        public bool EnableScrapIntoDb { get; set; } = false;
+        public virtual string SearchURL { get => URL; }
+        public bool IsRunning
+        {
+            get => !string.IsNullOrEmpty(Keyword);
+        }
+
+        public string Keyword
+        {
+            get => _keyword;
+            set
+            {
+                Set(ref _keyword, value);
+                RaisePropertyChanged(nameof(IsRunning));
+            }
+        }
+        public string DataPath { get; set; }
+
+        public ScrapCompletedHandler ScrapCompleted { get; set; }
+
         protected int _state = -1;
         protected string _linkName;
-        protected virtual string SearchURL { get => URL; }
-
-        public ICommand CmdScrap { get; set; }
 
         public SpiderBase(SpiderViewModel br)
         {
             Browser = br;
-            CmdScrap = new RelayCommand<object>((p) => {
-                FromCommand = true;
-                Browser.SelectedSpider = this;
-                if (p is IList<object> items && items.Count > 0)
-                {
-                    Browser.StartBatchedScrapping(
-                        items.Cast<MediaItem>().ToList());
-                }
-                FromCommand = false;
-            }, (p) => this is not SpiderSehuatang);
         }
 
         public virtual string GetConf(string key)
@@ -59,7 +67,6 @@ namespace HappyHour.Spider
         {
             var template = Template.Parse(App.ReadResource(jsPath));
             var result = template.Render(new { XPath = xpath });
-            //Log.Print(result);
             return result;
         }
 
@@ -72,18 +79,15 @@ namespace HappyHour.Spider
             return XPath(xpath, @"XPathClick.sbn.js");
         }
 
-        public virtual void Navigate(MediaItem mitem, bool skipScrap)
+        public virtual void Navigate2()
         {
-            if (string.IsNullOrEmpty(Browser.Pid) || mitem == null)
+            if (string.IsNullOrEmpty(Keyword))
             {
-                Log.Print("Pid is not set!");
+                Log.Print("Empty keyword!");
                 return;
             }
             _state = 0;
-            Media = mitem;
-
-            EnableScrapIntoDb = !skipScrap;
-            Browser.Address = SearchURL;
+            Browser.SelectedSpider = this;
         }
 
         public virtual void Navigate(string name, string url)
@@ -94,7 +98,6 @@ namespace HappyHour.Spider
 
         public virtual List<Cookie> CreateCookie() { return null; }
 
-        bool _isCookieSet = false;
         public void SetCookies()
         {
             if (_isCookieSet) return;
@@ -109,13 +112,26 @@ namespace HappyHour.Spider
             _isCookieSet = true;
         }
 
-        public virtual void OnScrapCompleted(string path = null)
+        public virtual void OnScrapCompleted()
         {
-            Browser.StopScrapping(Media);
+            if (ScrapCompleted != null)
+                UiServices.Invoke(delegate { ScrapCompleted?.Invoke(this); }, true);
+            else
+                Reset();
+        }
+
+        public void Reset()
+        { 
+            Keyword = null;
+            DataPath = null;
+            Log.Print($"Reset Spider : {Name}");
         }
 
         protected void ParsePage(IScrapItem item, Dictionary<string, string> dic)
         {
+            if (string.IsNullOrEmpty(DataPath))
+                return;
+
             foreach (var xpath in dic )
             {
                 Browser.ExecJavaScript(xpath.Value, item, xpath.Key);
@@ -124,6 +140,12 @@ namespace HappyHour.Spider
         }
 
         public abstract void Scrap();
+        public virtual void Stop() { }
+        public virtual void Download(string url, ref int itemToScrap)
+        {
+            Interlocked.Increment(ref itemToScrap);
+            Browser.Download(url);
+        }
 
         public override string ToString()
         {

@@ -65,9 +65,10 @@
                         <MenuItem.ItemTemplate>
                             <DataTemplate>
                                 <MenuItem
-                                    Header="{Binding Name}" Command="{Binding CmdScrap}"
-                                    CommandParameter="{Binding Data.SelectedItems,
-                                        Source={StaticResource CtrlContext}}">
+                                    Header="{Binding Name}"
+                                    Command="{Binding Data.CmdScrap,
+                                        Source={StaticResource VmContext}}"
+                                    CommandParameter="{Binding .}">
                                 </MenuItem>
                             </DataTemplate>
                         </MenuItem.ItemTemplate>
@@ -76,10 +77,10 @@
                             <Style TargetType="MenuItem">
                                 <Setter Property="IsEnabled" Value="True"/>
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsScrapOngoing}" Value="True">
+                                    <DataTrigger Binding="{Binding IsRunning}" Value="True">
                                         <Setter Property="IsEnabled" Value="False"/>
                                     </DataTrigger>
-                                    <DataTrigger Binding="{Binding IsScrapOngoing}" Value="False">
+                                    <DataTrigger Binding="{Binding IsRunning}" Value="False">
                                         <Setter Property="IsEnabled" Value="True"/>
                                     </DataTrigger>
                                 </Style.Triggers>

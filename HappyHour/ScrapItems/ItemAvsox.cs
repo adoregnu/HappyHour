@@ -75,9 +75,10 @@ namespace HappyHour.ScrapItems
                 if (!imgUrl.EndsWith("nowprinting.gif") &&
                     !_actorPicturs.ContainsKey(imgUrl))
                 {
-                    Interlocked.Increment(ref _numItemsToScrap);
+                    //Interlocked.Increment(ref _numItemsToScrap);
                     _actorPicturs.Add(imgUrl, actorName);
-                    _spider.Browser.Download(imgUrl);
+                    //_spider.Browser.Download(imgUrl);
+                    _spider.Download(imgUrl, ref _numItemsToScrap);
                 }
             }
         }
@@ -111,8 +112,7 @@ namespace HappyHour.ScrapItems
                     var ext = url.Split('.').Last();
                     if (!File.Exists($"{PosterPath}.{ext}"))
                     {
-                        Interlocked.Increment(ref _numItemsToScrap);
-                        _spider.Browser.Download(url);
+                        _spider.Download(url, ref _numItemsToScrap);
                     }
                 }
                 else if (name == "actor")
@@ -126,7 +126,7 @@ namespace HappyHour.ScrapItems
                 else if (name == "title")
                 {
                     var title = items[0] as string;
-                    var start = title.IndexOf(_spider.Media.Pid) + _spider.Media.Pid.Length;
+                    var start = title.IndexOf(_spider.Keyword) + _spider.Keyword.Length;
                     title = title.Substring(start);
                     UpdateTitle(title);
                 }

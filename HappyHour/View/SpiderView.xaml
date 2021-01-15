@@ -59,7 +59,7 @@
                     Converter={StaticResource BoardVisibilityConverter},
                     ConverterParameter=others}">
                 <TextBlock Margin="5,0,0,0" Text="Product ID:" VerticalAlignment="Center"/>
-                <TextBox Text="{Binding Pid}" Width="80" Margin="5,0,0,0"/>
+                <TextBox Text="{Binding Keyword}" Width="80" Margin="5,0,0,0"/>
             </StackPanel>
             <Button Style="{DynamicResource ModernButtonStyle2}"
                     Command="{Binding CmdStart}" Margin="5,0,0,0">

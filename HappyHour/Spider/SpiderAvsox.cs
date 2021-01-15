@@ -18,11 +18,11 @@ namespace HappyHour.Spider
     {
         readonly Dictionary<string, string> _xpathDic;
 
-        protected override string SearchURL
+        public override string SearchURL
         {
             get
             {
-                return $"{URL}search/{Media.Pid}";
+                return $"{URL}search/{Keyword}";
             }
         }
 
@@ -49,16 +49,15 @@ namespace HappyHour.Spider
             Log.Print($"OnMultiResult : {list.Count} items found!");
             if (list.IsNullOrEmpty())
             {
-                Browser.StopScrapping(Media);
-                return;
+                goto NotFound;
             }
 
             HtmlNode anode = null;
             HtmlDocument doc = new HtmlDocument();
 
-            var pid = Media.Pid;
+            var pid = Keyword;
             if (pid.StartsWith("HEYZO", StringComparison.OrdinalIgnoreCase) ||
-                Regex.Match(Media.Pid, @"^\d{6}(?:_|-)\d{3}$").Success)
+                Regex.Match(Keyword, @"^\d{6}(?:_|-)\d{3}$").Success)
             {
                 pid = pid.Replace('_', '-');
             }
@@ -76,16 +75,15 @@ namespace HappyHour.Spider
 
             if (anode == null)
             {
-                Log.Print($"Not found {Media.Pid}");
-                Browser.StopScrapping(Media);
-                return;
+                Log.Print($"Not found {Keyword}");
+                goto NotFound;
             }
-            if (EnableScrapIntoDb)
-                _state = 1;
-            else
-                _state = -1;
-
+            _state = 1;
             Browser.Address = anode.Attributes["href"].Value;
+            return;
+
+        NotFound:
+            OnScrapCompleted();
         }
 
         public override void Scrap()

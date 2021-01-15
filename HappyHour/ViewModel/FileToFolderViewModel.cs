@@ -62,9 +62,12 @@ namespace HappyHour.ViewModel
 
         bool AddUncensored(string path)
         {
+            List<string> studios = new List<string>
+            {
+                "1pon", "carib", "mu"
+            };
             var file = Path.GetFileName(path);
-            if (file.IndexOf("1pon", StringComparison.OrdinalIgnoreCase) < 0 &&
-                file.IndexOf("carib", StringComparison.OrdinalIgnoreCase) < 0)
+            if (!studios.Any(s => file.IndexOf(s, StringComparison.OrdinalIgnoreCase) < 0))
             {
                 return false;
             }

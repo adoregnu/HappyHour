@@ -14,9 +14,9 @@ namespace HappyHour.Spider
 {
     class SpiderAvwiki : SpiderBase
     {
-        protected override string SearchURL
+        public override string SearchURL
         {
-            get => $"{URL}?s={Media.Pid}";
+            get => $"{URL}?s={Keyword}";
         }
 
         public SpiderAvwiki(SpiderViewModel browser) : base(browser)
@@ -29,7 +29,7 @@ namespace HappyHour.Spider
         {
             if (list.IsNullOrEmpty())
             {
-                Log.Print($"Could not find {Media.Pid}");
+                Log.Print($"Could not find {Keyword}");
                 goto stopScrapping;
             }
             if (list.Count > 1)
@@ -47,7 +47,7 @@ namespace HappyHour.Spider
             Log.Print($"Actress : {node.InnerText}, url={node.Attributes["href"].Value}");
 
         stopScrapping:
-            Browser.StopScrapping(Media);
+            OnScrapCompleted();
             _state = -1;
         }
 

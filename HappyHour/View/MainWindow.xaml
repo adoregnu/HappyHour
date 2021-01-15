@@ -8,7 +8,7 @@
         xmlns:view="clr-namespace:HappyHour.View"
         mc:Ignorable="d"
         md:DialogServiceViews.IsRegistered="True"
-        Title="Scrapper" Height="720" Width="1024"
+        Title="Scrapper" Height="1024" Width="2048"
         DataContext="{Binding Source={StaticResource Locator}, Path=MainWindow}">
     <!--
     <i:Interaction.Triggers>

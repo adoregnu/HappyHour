@@ -28,17 +28,17 @@ namespace HappyHour.ViewModel
 
     partial class SpiderViewModel : Pane
     {
-        int _nextScrappingIndex = 0;
-        List<MediaItem> _mediaToScrap;
-        MediaItem _selectedMedia;
         IMediaList _mediaList;
-        string _pid;
+        string _keyword;
 
         string address;
         public string Address
         {
             get { return address; }
-            set { Set(ref address, value); }
+            set
+            {
+                Set(ref address, value);
+            }
         }
 
         IWpfWebBrowser webBrowser;
@@ -49,10 +49,10 @@ namespace HappyHour.ViewModel
         }
 
         public List<SpiderBase> Spiders { get; set; }
-        public string Pid
+        public string Keyword
         { 
-            get => _pid;
-            set => Set(ref _pid, value);
+            get => _keyword;
+            set => Set(ref _keyword, value);
         }
 
         SpiderBase _selectedSpider;
@@ -64,7 +64,11 @@ namespace HappyHour.ViewModel
                 if (value != null)
                 {
                     value.SetCookies();
-                    if (!value.FromCommand) Address = value.URL;
+                    if (string.IsNullOrEmpty(value.Keyword))
+                        Address = value.URL;
+                    else
+                        Address = value.SearchURL;
+
                     if (value is SpiderSehuatang ss)
                     { 
                         SelectedBoard = ss.Boards[0];
@@ -73,6 +77,7 @@ namespace HappyHour.ViewModel
                 Set(ref _selectedSpider, value);
             }
         }
+
 
         public ICommand CmdStart { get; private set; }
         public ICommand CmdStop { get; private set; }
@@ -87,16 +92,21 @@ namespace HappyHour.ViewModel
                 _mediaList = value;
                 _mediaList.ItemSelectedHandler += (o, i) =>
                 {
-                    _selectedMedia = i;
-                    if (i != null) Pid = i.Pid;
+                    //_selectedMedia = i;
+                    if (i != null) Keyword = i.Pid;
                 };
             }
         }
+        public DownloadHandler DownloadHandler { get; private set; }
 
         public SpiderViewModel()
         {
-            CmdStart = new RelayCommand(() => OnStartScrapping(_selectedMedia,true));
-            CmdStop = new RelayCommand(() => StopScrapping(null));
+            CmdStart = new RelayCommand(() =>
+            {
+                SelectedSpider.Keyword = Keyword;
+                SelectedSpider.Navigate2();
+            });
+            CmdStop = new RelayCommand(() => SelectedSpider.Stop());
             CmdReloadUrl = new RelayCommand(() => WebBrowser.Reload());
             CmdBack = new RelayCommand(() => WebBrowser.Back());
 
@@ -122,48 +132,6 @@ namespace HappyHour.ViewModel
             MessengerInstance.Send(new NotificationMessage<SpiderEnum>(Spiders, ""));
         }
 
-        public void StartBatchedScrapping(List<MediaItem> mediaItems = null)
-        {
-            if (mediaItems != null) _mediaToScrap = mediaItems;
-            if (_mediaToScrap.Count <= _nextScrappingIndex)
-            {
-                _mediaToScrap.Clear();
-                _nextScrappingIndex = 0;
-                return;
-            }
-            var media = _mediaToScrap[_nextScrappingIndex++];
-            Pid = media.Pid;
-            OnStartScrapping(media);
-        }
-
-        public void OnStartScrapping(MediaItem mitem, bool bSkipScrap = false)
-        {
-            SelectedSpider.Navigate(mitem, bSkipScrap);
-        }
-
-        public void StopScrapping(MediaItem mitem)
-        {
-            webBrowser.Stop();
-            if (mitem == null)
-            {
-                SelectedSpider.EnableScrapIntoDb = false;
-                return;
-            }
-
-            UiServices.Invoke(delegate {
-                mitem.UpdateFields();
-
-                if (_nextScrappingIndex > 0)
-                    StartBatchedScrapping();
-                else
-                {
-                    SelectedSpider.EnableScrapIntoDb = false;
-                    _nextScrappingIndex = 0;
-                }
-            });
-        }
-
-        public DownloadHandler DownloadHandler { get; private set; }
         public void InitBrowser()
         {
             DownloadHandler = new DownloadHandler();
@@ -181,8 +149,8 @@ namespace HappyHour.ViewModel
                 MessengerInstance.Send(new CefStatusMsg(e, "log"));
             };
 
-            WebBrowser.FrameLoadEnd += OnFrameLoadEnd;
-            WebBrowser.JavascriptMessageReceived += OnBrowserJavascriptMessageReceived;
+            //WebBrowser.FrameLoadEnd += OnFrameLoadEnd;
+            //WebBrowser.JavascriptMessageReceived += OnBrowserJavascriptMessageReceived;
             WebBrowser.LoadingStateChanged += OnStateChanged;
             _selectedSpider.SetCookies();
         }
@@ -231,8 +199,21 @@ namespace HappyHour.ViewModel
             host.StartDownload(url);
         }
 
+        bool CanExecuteJS()
+        { 
+            if (!webBrowser.CanExecuteJavascriptInMainFrame)
+            {
+                Log.Print("V8Context is not ready!");
+                return false;
+            }
+
+            return true;
+        }
+
         public void ExecJavaScriptString(string s, OnJsResultSingle callback = null)
         {
+            if (!CanExecuteJS()) return;
+
             webBrowser.EvaluateScriptAsync(s).ContinueWith(x =>
             {
                 var response = x.Result;
@@ -247,6 +228,8 @@ namespace HappyHour.ViewModel
 
         public void ExecJavaScript(string s, OnJsResult callback = null)
         {
+            if (!CanExecuteJS()) return;
+
             webBrowser.EvaluateScriptAsync(s).ContinueWith(x =>
             {
                 var response = x.Result;
@@ -272,6 +255,8 @@ namespace HappyHour.ViewModel
 
         public void ExecJavaScript(string s, IScrapItem item, string name)
         {
+            if (!CanExecuteJS()) return;
+
             webBrowser.EvaluateScriptAsync(s).ContinueWith(x =>
             {
                 if (!x.Result.Success)

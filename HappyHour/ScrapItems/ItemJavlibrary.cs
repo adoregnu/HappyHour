@@ -61,8 +61,7 @@ namespace HappyHour.ScrapItems
             var ext = url.Split('.').Last();
             if (File.Exists($"{PosterPath}.{ext}")) return;
 
-            Interlocked.Increment(ref _numItemsToScrap);
-            _spider.Browser.Download(url);
+            _spider.Download(url, ref _numItemsToScrap);
         }
 
         void ParseDate(string date)
@@ -84,8 +83,8 @@ namespace HappyHour.ScrapItems
                 else if (name == "title")
                 {
                     var title = (items[0] as string).Trim();
-                    if (title.StartsWith(_spider.Media.Pid, StringComparison.OrdinalIgnoreCase))
-                        title = title.Substring(_spider.Media.Pid.Length+1);
+                    if (title.StartsWith(_spider.Keyword, StringComparison.OrdinalIgnoreCase))
+                        title = title.Substring(_spider.Keyword.Length+1);
 
                     UpdateTitle(title);
                 }

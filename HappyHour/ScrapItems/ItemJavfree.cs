@@ -37,8 +37,7 @@ namespace HappyHour.ScrapItems
                 if (name == "cover")
                 {
                     var url = items[0] as string;
-                    Interlocked.Increment(ref _numItemsToScrap);
-                    _spider.Browser.Download(url);
+                    _spider.Download(url, ref _numItemsToScrap);
                 }
             }
             CheckCompleted();

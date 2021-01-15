@@ -15,12 +15,12 @@ namespace HappyHour.Spider
 {
     class SpiderAVE : SpiderBase
     {
-        protected override string SearchURL
+        public override string SearchURL
         {
             get
             {
                 return $"{URL}search_Products.aspx?languageID=1" +
-                $"&dept_id=29&keyword={Media.Pid}&searchby=keyword";
+                $"&dept_id=29&keyword={Keyword}&searchby=keyword";
             }
         }
 
@@ -49,14 +49,11 @@ namespace HappyHour.Spider
             Log.Print($"OnMultiResult : {list.Count} items found!");
             if (list.IsNullOrEmpty())
             {
-                Browser.StopScrapping(Media);
+                OnScrapCompleted();
                 return;
             }
 
-            if (EnableScrapIntoDb)
-                _state = 1;
-            else
-                _state = -1;
+            _state = 1;
             if (list.Count > 1)
             {
                 Log.Print("Multiple matched. Select manually!");

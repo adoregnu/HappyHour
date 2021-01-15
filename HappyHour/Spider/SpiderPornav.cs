@@ -17,11 +17,11 @@ namespace HappyHour.Spider
     {
         readonly Dictionary<string, string> _xpathDic;
 
-        protected override string SearchURL
+        public override string SearchURL
         {
             get
             {
-                return $"{URL}/jp/search?q={Media.Pid}";
+                return $"{URL}/en/search?q={Keyword}";
             }
         }
         public SpiderPornav(SpiderViewModel browser) : base(browser)
@@ -42,7 +42,7 @@ namespace HappyHour.Spider
             Log.Print($"OnMultiResult : {list.Count} items found!");
             if (list.IsNullOrEmpty())
             {
-                Browser.StopScrapping(Media);
+                OnScrapCompleted();
                 return;
             }
 
@@ -52,7 +52,7 @@ namespace HappyHour.Spider
             {
                 doc.LoadHtml(it);
                 var node = doc.DocumentNode.SelectSingleNode("//a");
-                if (node.InnerText.IndexOf(Media.Pid, StringComparison.OrdinalIgnoreCase) > 0)
+                if (node.InnerText.IndexOf(Keyword, StringComparison.OrdinalIgnoreCase) > 0)
                 {
                     anode = node;
                     break;
@@ -60,17 +60,14 @@ namespace HappyHour.Spider
             }
             if (anode == null)
             {
-                Log.Print($"Not found {Media.Pid}");
-                Browser.StopScrapping(Media);
+                Log.Print($"Not found {Keyword}");
+                OnScrapCompleted();
                 return;
             }
-            if (EnableScrapIntoDb)
-                _state = 1;
-            else
-                _state = -1;
+            _state = 1;
             Browser.Address = $"{URL}{anode.Attributes["href"].Value}";
         }
- 
+
         public override void Scrap()
         {
             switch (_state)

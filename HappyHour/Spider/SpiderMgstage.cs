@@ -12,11 +12,11 @@ namespace HappyHour.Spider
 {
     class SpiderMgstage : SpiderBase
     {
-        protected override string SearchURL
+        public override string SearchURL
         {
             get
             {
-                return $"{URL}product/product_detail/{Media.Pid.ToUpper()}/";
+                return $"{URL}product/product_detail/{Keyword.ToUpper()}/";
             }
         }
         public SpiderMgstage(SpiderViewModel browser) : base(browser)
@@ -52,13 +52,10 @@ namespace HappyHour.Spider
                 { "rating",  XPath("//th[contains(., '評価：')]/following-sibling::td//text()") },
             };
 
-            if (EnableScrapIntoDb)
+            ParsePage(new ItemMgstage(this)
             {
-                ParsePage(new ItemMgstage(this)
-                {
-                    NumItemsToScrap = _xpathDic.Count
-                }, _xpathDic);
-            }
+                NumItemsToScrap = _xpathDic.Count
+            }, _xpathDic);
         }
     }
 }

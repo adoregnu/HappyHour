@@ -16,11 +16,11 @@ namespace HappyHour.Spider
     class SpiderJavDb : SpiderBase
     {
         readonly Dictionary<string, string> _xpathDic;
-        protected override string SearchURL
+        public override string SearchURL
         {
             get
             {
-                return $"{URL}search?q={Media.Pid}&f=all";
+                return $"{URL}search?q={Keyword}&f=all";
             }
         }
 
@@ -64,7 +64,7 @@ namespace HappyHour.Spider
             Log.Print($"OnMultiResult : {list.Count} items found!");
             if (list == null || list.Count == 0)
             {
-                Browser.StopScrapping(Media);
+                OnScrapCompleted();
                 return;
             }
             HtmlDocument doc = new HtmlDocument();
@@ -74,7 +74,7 @@ namespace HappyHour.Spider
                 doc.LoadHtml(it);
                 var node = doc.DocumentNode.SelectSingleNode("//div[@class='uid']");
                 var pid = node.InnerText.Trim();
-                if (pid.Equals(Media.Pid, StringComparison.OrdinalIgnoreCase))
+                if (pid.Equals(Keyword, StringComparison.OrdinalIgnoreCase))
                 {
                     a = doc.DocumentNode.FirstChild;
                     break;
@@ -82,14 +82,10 @@ namespace HappyHour.Spider
             }
             if (a == null)
             {
-                Browser.StopScrapping(Media);
+                OnScrapCompleted();
                 return;
             }
-            if (EnableScrapIntoDb)
-                _state = 1;
-            else
-                _state = -1;
-
+            _state = 1;
             Browser.Address = $"{URL}{a.Attributes["href"].Value.Substring(1)}";
         }
 
