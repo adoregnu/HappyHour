@@ -40,14 +40,11 @@ namespace HappyHour.Spider
             };
         }
 
-        void OnMultiResult(List<object> list)
+        void OnMultiResult(object result)
         {
-            Log.Print($"OnMultiResult: {list.Count} items found!");
-            if (list.IsNullOrEmpty())
-            {
-                OnScrapCompleted();
+            if (!CheckResult(result, out List<string> list))
                 return;
-            }
+
             _state = 1;
             if (list.Count > 1)
             {

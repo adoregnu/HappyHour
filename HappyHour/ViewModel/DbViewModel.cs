@@ -54,10 +54,12 @@ namespace HappyHour.ViewModel
             { 
                 if (string.IsNullOrEmpty(SearchText))
                     return App.DbContext.ActorNames
+                        .OrderBy(a => a.Name)
                         .ToList();
 
                 return App.DbContext.ActorNames
                     .Where(i => EF.Functions.Like(i.Name, $"%{SearchText}%"))
+                    .OrderBy(a => a.Name)
                     .ToList();
             }
         }
@@ -67,10 +69,12 @@ namespace HappyHour.ViewModel
             {
                 if (string.IsNullOrEmpty(SearchText))
                     return App.DbContext.Studios
+                        .OrderBy(s => s.Name)
                         .ToList();
 
                 return App.DbContext.Studios
                     .Where(s => EF.Functions.Like(s.Name, $"{SearchText}%"))
+                    .OrderBy(s => s.Name)
                     .ToList();
             }
         }
@@ -130,13 +134,11 @@ namespace HappyHour.ViewModel
                 Set(ref _selectedStudio, value);
                 if (value == null) return;
 
-                UiServices.WaitCursor(true);
                 var paths = App.DbContext.Items
                     .Where(i => i.Studio == value)
                     .Select(i => i.Path)
                     .ToList();
                 MediaList.Replace(paths);
-                UiServices.WaitCursor(false);
             }
         }
 
@@ -149,13 +151,11 @@ namespace HappyHour.ViewModel
                 Set(ref _selectedSeries, value);
                 if (value == null) return;
 
-                UiServices.WaitCursor(true);
                 var paths = App.DbContext.Items
                     .Where(i => i.Series == value)
                     .Select(i => i.Path)
                     .ToList();
                 MediaList.Replace(paths);
-                UiServices.WaitCursor(false);
             }
         }
 

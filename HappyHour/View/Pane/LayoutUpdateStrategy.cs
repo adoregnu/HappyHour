@@ -56,7 +56,7 @@ namespace HappyHour.View.Pane
         {
 #if true
             if (anchorableShown.Content is SpiderViewModel ||
-                anchorableShown.Content is BrowserViewModel ||
+                //anchorableShown.Content is BrowserViewModel ||
                 anchorableShown.Content is PlayerViewModel)
             {
                 var parentDocumentGroup = anchorableShown.FindParent<LayoutDocumentPaneGroup>();
@@ -84,8 +84,7 @@ namespace HappyHour.View.Pane
                 else
                 {
                     var indexOfParentPane = parentDocumentGroup.IndexOfChild(parentDocumentPane);
-                    var documentPane = parentDocumentGroup.Children[indexOfParentPane + 1] as LayoutDocumentPane;
-                    //var numChildren = documentPane.ChildrenCount;
+                    var documentPane = parentDocumentGroup.Children[indexOfParentPane+1] as LayoutDocumentPane;
                     documentPane.InsertChildAt(0, anchorableShown);
                 }
                 anchorableShown.IsActive = true;

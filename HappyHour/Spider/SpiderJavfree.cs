@@ -28,10 +28,10 @@ namespace HappyHour.Spider
             URL = "https://javfree.me/";
         }
 
-        public void OnMultiResult(List<object> list)
-        { 
-            Log.Print($"OnMultiResult : {list.Count} items found!");
-            if (list.IsNullOrEmpty()) goto NotFound;
+        public void OnMultiResult(object result)
+        {
+            if (!CheckResult(result, out List<string> list))
+                goto NotFound;
 
             var regex = new Regex($@"{Keyword.ToLower()}");
             string exactUrl = null;
@@ -44,7 +44,8 @@ namespace HappyHour.Spider
                     break;
                 }
             }
-            if (exactUrl == null) goto NotFound;
+            if (exactUrl == null)
+                goto NotFound;
 
             _state = 1;
             Browser.Address = exactUrl;

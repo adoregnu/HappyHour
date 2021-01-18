@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using GalaSoft.MvvmLight;
 
 using HappyHour.Utils;
+using HappyHour.Model;
 
 namespace HappyHour.Model
 {
@@ -21,6 +22,8 @@ namespace HappyHour.Model
     {
         string _bgImagePath;
         DateTime _dateDownloaded;
+        static AvDbContext _dbContext;
+
         public static OrderType OrderType { get; set; } = OrderType.ByDateReleased;
 
         public DateTime DateTime
@@ -68,7 +71,9 @@ namespace HappyHour.Model
             get
             {
                 if (AvItem == null) return Pid;
-                return $"{AvItem.Pid}\n{AvItem.Studio.Name}";
+                var studio = AvItem.Studio != null ?
+                    AvItem.Studio.Name : "Studio Unknown";
+                return $"{AvItem.Pid}\n{studio}";
             }
         }
 
@@ -98,6 +103,8 @@ namespace HappyHour.Model
         {
             try
             {
+                if (_dbContext == null)
+                    _dbContext = App.DbContext;//new AvDbContext();
                 var item = new MediaItem(path);
                 if (!item.IsExcluded && !item.IsDownload && item.IsMediaFolder)
                     return item;
@@ -125,7 +132,7 @@ namespace HappyHour.Model
             UiServices.Invoke(delegate
             {
                 AvItem.Path = MediaFolder;
-                App.DbContext.SaveChanges();
+                _dbContext.SaveChanges();
                 OnComplete?.Invoke(this);
             });
         }
@@ -209,8 +216,8 @@ namespace HappyHour.Model
             {
                 if (AvItem != null)
                 {
-                    App.DbContext.Items.Remove(AvItem);
-                    App.DbContext.SaveChanges();
+                    _dbContext.Items.Remove(AvItem);
+                    _dbContext.SaveChanges();
                     AvItem = null;
                 }
                 Directory.Delete(MediaFolder, true);
@@ -227,8 +234,8 @@ namespace HappyHour.Model
         {
             if (AvItem != null)
             {
-                App.DbContext.Items.Remove(AvItem);
-                App.DbContext.SaveChanges();
+                _dbContext.Items.Remove(AvItem);
+                _dbContext.SaveChanges();
                 AvItem = null;
             }
         }
@@ -244,7 +251,7 @@ namespace HappyHour.Model
 
         public async void ReloadAvItem()
         {
-            AvItem = await App.DbContext.Items
+            AvItem = await _dbContext.Items
                 .Include(i => i.Studio)
                 .Include(i => i.Genres)
                 .Include(i => i.Actors)

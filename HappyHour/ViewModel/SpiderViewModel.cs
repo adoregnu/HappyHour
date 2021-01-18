@@ -17,7 +17,7 @@ using HappyHour.Model;
 using HappyHour.Spider;
 using HappyHour.ScrapItems;
 using HappyHour.CefHandler;
-using HappyHour.Utils;
+using HappyHour.Extension;
 using HappyHour.Interfaces;
 
 namespace HappyHour.ViewModel
@@ -63,18 +63,19 @@ namespace HappyHour.ViewModel
             {
                 if (value != null)
                 {
+                    Set(ref _selectedSpider, value);
                     value.SetCookies();
                     if (string.IsNullOrEmpty(value.Keyword))
                         Address = value.URL;
                     else
                         Address = value.SearchURL;
+                    Log.Print($"Spider:{value.Name}, Keyword:{value.Keyword}");
 
                     if (value is SpiderSehuatang ss)
                     { 
                         SelectedBoard = ss.Boards[0];
                     }
                 }
-                Set(ref _selectedSpider, value);
             }
         }
 
@@ -154,19 +155,20 @@ namespace HappyHour.ViewModel
             WebBrowser.LoadingStateChanged += OnStateChanged;
             _selectedSpider.SetCookies();
         }
-
+#if false
         void OnFrameLoadEnd(object sender, FrameLoadEndEventArgs e)
         {
             WebBrowser.ExecuteScriptAsync(App.ReadResource("ElementAt.js"));
         }
         void OnBrowserJavascriptMessageReceived(object sender, JavascriptMessageReceivedEventArgs e)
         {
-            Log.Print((string)e.Message);
-            //DO SOMETHING WITH THIS MESSAGE
-            //This event is called on a CEF Thread, to access your UI thread
-            //You can cast sender to ChromiumWebBrowser
-            //use Control.BeginInvoke/Dispatcher.BeginInvoke
-        }
+            var msg = e.ConvertMessageTo<JsMessage>();
+            if (msg.Type == "SearchText")
+            {
+                Keyword = msg.Data;
+            }
+         }
+#endif
 
         void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
@@ -195,8 +197,10 @@ namespace HappyHour.ViewModel
 
         public void Download(string url)
         {
-            var host = webBrowser.GetBrowserHost();
-            host.StartDownload(url);
+            webBrowser.Dispatcher.Invoke(delegate {
+                var host = webBrowser.GetBrowserHost();
+                host.StartDownload(url);
+            });
         }
 
         bool CanExecuteJS()
@@ -210,22 +214,6 @@ namespace HappyHour.ViewModel
             return true;
         }
 
-        public void ExecJavaScriptString(string s, OnJsResultSingle callback = null)
-        {
-            if (!CanExecuteJS()) return;
-
-            webBrowser.EvaluateScriptAsync(s).ContinueWith(x =>
-            {
-                var response = x.Result;
-                if (!response.Success)
-                {
-                    Log.Print(response.Message);
-                    return;
-                }
-                callback?.Invoke(response.Result);
-            });
-        }
-
         public void ExecJavaScript(string s, OnJsResult callback = null)
         {
             if (!CanExecuteJS()) return;
@@ -235,21 +223,10 @@ namespace HappyHour.ViewModel
                 var response = x.Result;
                 if (!response.Success)
                 {
-                    Log.Print(response.Message);
+                    Log.Print("ExecJavaScript:: " + response.Message);
                     return;
                 }
-                if (response.Result == null)
-                {
-                    callback?.Invoke(null);
-                }
-                else if (response.Result is List<object> list)
-                {
-                    callback?.Invoke(list);
-                }
-                else
-                {
-                    Log.Print("Result is not list!!");
-                }
+                callback?.Invoke(response.Result);
             });
         }
 
@@ -264,7 +241,7 @@ namespace HappyHour.ViewModel
                     Log.Print(x.Result.Message);
                     return;
                 }
-                item.OnJsResult(name, x.Result.Result as List<object>);
+                item.OnJsResult(name, x.Result.Result.ToList<object>());
             });
         }
     }

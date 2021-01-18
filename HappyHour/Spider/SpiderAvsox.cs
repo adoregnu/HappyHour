@@ -44,13 +44,10 @@ namespace HappyHour.Spider
             };
         }
 
-       void OnMultiResult(List<object> list)
-        { 
-            Log.Print($"OnMultiResult : {list.Count} items found!");
-            if (list.IsNullOrEmpty())
-            {
+       void OnMultiResult(object result)
+        {
+            if (!CheckResult(result, out List<string> list))
                 goto NotFound;
-            }
 
             HtmlNode anode = null;
             HtmlDocument doc = new HtmlDocument();

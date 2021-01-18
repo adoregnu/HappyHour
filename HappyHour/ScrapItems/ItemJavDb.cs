@@ -8,8 +8,10 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using CefSharp;
+using HtmlAgilityPack;
 
 using HappyHour.Extension;
+using HappyHour.Model;
 using HappyHour.Spider;
 
 namespace HappyHour.ScrapItems
@@ -21,12 +23,24 @@ namespace HappyHour.ScrapItems
             _avItem.IsCensored = false;
         }
 
-        protected override void UdpateAvItem() { }
+        //protected override void UdpateAvItem() { }
 
         protected override void OnBeforeDownload(object sender, DownloadItem e)
         {
             var ext = Path.GetExtension(e.SuggestedFileName);
             e.SuggestedFileName = $"{PosterPath}{ext}";
+        }
+
+        void ParseActor(List<object> items)
+        {
+            List<List<AvActorName>> ll = new List<List<AvActorName>>();
+            foreach (string name in items)
+            {
+                ll.Add(new List<AvActorName> {
+                    new AvActorName { Name = name }
+                });
+            }
+            UpdateActor2(ll);
         }
 
         void IScrapItem.OnJsResult(string name, List<object> items)
@@ -39,7 +53,33 @@ namespace HappyHour.ScrapItems
                 if (name == "cover")
                 {
                     var url = items[0] as string;
-                    _spider.Download(url, ref _numItemsToScrap);
+                    var ext = url.Split('.').Last();
+                    if (!File.Exists($"{PosterPath}.{ext}"))
+                    {
+                        _spider.Download(url, ref _numItemsToScrap);
+                    }
+                }
+                else if (name == "title")
+                {
+                    UpdateTitle(items[0] as string);
+                }
+                else if (name == "studio")
+                {
+                    UpdateStudio(items[0] as string);
+                }
+                else if (name == "genre")
+                {
+                    UpdateGenre(items);
+                }
+                else if (name == "actor")
+                {
+                    ParseActor(items);
+                }
+                else if (name == "date")
+                {
+                    var strdate = (items[0] as string).Trim();
+                    _avItem.DateReleased = DateTime.ParseExact(
+                        strdate, "yyyy-MM-dd", enUS);
                 }
             }
 

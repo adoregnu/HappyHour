@@ -62,13 +62,22 @@ namespace HappyHour.Spider
             };
         }
 
-        void OnMultiResult(List<object> list)
+        void OnMultiResult(object result)
         {
-            Log.Print($"OnMultiResult : {list.Count} items found!");
-            if (list.IsNullOrEmpty()) goto NotFound;
+            if (!CheckResult(result, out List<string> list))
+                goto NotFound;
 
-            var apid = Keyword.Split('-');
-            var regex = new Regex($@"id=(h_)?(\d+)?{apid[0].ToLower()}\d*{apid[1]}");
+            string pattern = @"id=(h_)?(\d+)?";
+            if (Keyword.Contains('-'))
+            {
+                var apid = Keyword.Split('-');
+                pattern += $@"{apid[0].ToLower()}\d*{apid[1]}";
+            }
+            else
+            {
+                pattern += Keyword;
+            }
+            var regex = new Regex(pattern);
             int matchCount = 0;
             string exactUrl = null;
             foreach (string url in list)
@@ -80,7 +89,8 @@ namespace HappyHour.Spider
                     matchCount++;
                 }
             }
-            if (matchCount == 0) goto NotFound;
+            if (matchCount == 0)
+                goto NotFound;
 
             if (matchCount == 1)
             {

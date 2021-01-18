@@ -57,9 +57,9 @@ namespace HappyHour.Spider
             };
         }
 
-        void OnMultiResult(List<object> list)
+        void OnMultiResult(object result)
         {
-            if (list == null || list.Count == 0)
+            if (!CheckResult(result, out List<string> list))
             {
                 ParsePage(new ItemJavlibrary(this)
                 {
@@ -89,7 +89,8 @@ namespace HappyHour.Spider
             switch (_state)
             {
             case 0:
-                Browser.ExecJavaScript(XPath("//div[@class='videos']/div/a"),
+                Browser.ExecJavaScript(
+                    XPath("//div[@class='videos']/div/a"),
                     OnMultiResult);
                 break;
             case 1:

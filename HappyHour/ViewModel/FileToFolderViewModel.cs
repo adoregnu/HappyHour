@@ -67,7 +67,8 @@ namespace HappyHour.ViewModel
                 "1pon", "carib", "mu"
             };
             var file = Path.GetFileName(path);
-            if (!studios.Any(s => file.IndexOf(s, StringComparison.OrdinalIgnoreCase) < 0))
+            file = file.ToLower();
+            if (!studios.Any(s => file.EndsWith(s)))
             {
                 return false;
             }
@@ -83,6 +84,7 @@ namespace HappyHour.ViewModel
 
             return true;
         }
+
         void OnPreview()
         {
             Files.Clear();

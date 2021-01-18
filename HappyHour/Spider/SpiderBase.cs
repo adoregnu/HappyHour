@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -14,13 +15,12 @@ using CefSharp;
 
 using HappyHour.ViewModel;
 using HappyHour.ScrapItems;
-using HappyHour.Model;
-using System.Threading;
+using HappyHour.Extension;
 
 namespace HappyHour.Spider
 {
-    delegate void OnJsResultSingle(object items);
-    delegate void OnJsResult(List<object> items);
+    delegate void OnJsResult(object items);
+    //delegate void OnJsResult(List<object> items);
     delegate void ScrapCompletedHandler(SpiderBase spider);
 
     abstract class SpiderBase : ViewModelBase
@@ -121,7 +121,8 @@ namespace HappyHour.Spider
         }
 
         public void Reset()
-        { 
+        {
+            _state = -1;
             Keyword = null;
             DataPath = null;
             Log.Print($"Reset Spider : {Name}");
@@ -130,7 +131,10 @@ namespace HappyHour.Spider
         protected void ParsePage(IScrapItem item, Dictionary<string, string> dic)
         {
             if (string.IsNullOrEmpty(DataPath))
+            {
+                OnScrapCompleted();
                 return;
+            }
 
             foreach (var xpath in dic )
             {
@@ -145,6 +149,18 @@ namespace HappyHour.Spider
         {
             Interlocked.Increment(ref itemToScrap);
             Browser.Download(url);
+        }
+
+        protected bool CheckResult(object result, out List<string> list)
+        {
+            list = result.ToList<string>();
+            if (list.IsNullOrEmpty())
+            {
+                Log.Print("CheckResult: result is empty or null!");
+                return false;
+            }
+            Log.Print($"CheckResult: {list.Count} items found!");
+            return true;
         }
 
         public override string ToString()

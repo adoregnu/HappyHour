@@ -44,15 +44,14 @@ namespace HappyHour.Spider
             };
         }
 
-        void OnMultiResult(List<object> list)
-        { 
-            Log.Print($"OnMultiResult : {list.Count} items found!");
-            if (list.IsNullOrEmpty())
+        void OnMultiResult(object result)
+        {
+            if (!CheckResult(result, out List<string> list))
             {
                 OnScrapCompleted();
                 return;
             }
-
+            
             _state = 1;
             if (list.Count > 1)
             {
@@ -60,7 +59,7 @@ namespace HappyHour.Spider
             }
             else
             {
-                var url = HtmlEntity.DeEntitize(list[0] as string);
+                var url = HtmlEntity.DeEntitize(list[0]);
                 Browser.Address = url;
             }
         }

@@ -86,5 +86,13 @@ namespace HappyHour.Extension
             else
                 return false;
         }
+
+        public static List<T> ToList<T>(this object obj)
+        {
+            if (obj is IList<object> list)
+                return list.Cast<T>().ToList();
+
+            return null;
+        }
     }
 }

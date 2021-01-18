@@ -33,10 +33,10 @@ namespace HappyHour.Spider
             {
                 { "title", XPath("//h2[contains(@class, 'title')]/strong/text()") },
                 { "cover", XPath("//div[@class='column column-video-cover']/a/@href") },
-                { "pid", XPath("//nav[@class='panel video-panel-info']/div[1]/span/text()") },
-                { "date", XPath("//nav[@class='panel video-panel-info']/div[2]/span/text()") },
-                { "genre", XPath("//nav[@class='panel video-panel-info']/div[7]/span/a/text()") },
-                { "actor", XPath("//nav[@class='panel video-panel-info']/div[8]/span//text()") },
+                { "date", XPath("//strong[contains(., 'Released Date')]/following-sibling::span/text()") },
+                { "studio", XPath("//strong[contains(., 'Maker')]/following-sibling::span/a/text()") },
+                { "actor", XPath("//strong[contains(., 'Actor')]/following-sibling::span/a/text()") },
+                { "genre", XPath("//strong[contains(., 'Tags')]/following-sibling::span/a/text()") },
             };
         }
 
@@ -59,14 +59,11 @@ namespace HappyHour.Spider
             };
         }
 
-        void OnMultiResult(List<object> list)
-        { 
-            Log.Print($"OnMultiResult : {list.Count} items found!");
-            if (list == null || list.Count == 0)
-            {
-                OnScrapCompleted();
-                return;
-            }
+        void OnMultiResult(object result)
+        {
+            if (!CheckResult(result, out List<string> list))
+                goto NotFound;
+
             HtmlDocument doc = new HtmlDocument();
             HtmlNode a = null;
             foreach (string it in list)
@@ -81,12 +78,13 @@ namespace HappyHour.Spider
                 }
             }
             if (a == null)
-            {
-                OnScrapCompleted();
-                return;
-            }
+                goto NotFound;
+
             _state = 1;
             Browser.Address = $"{URL}{a.Attributes["href"].Value.Substring(1)}";
+            return;
+        NotFound:
+            OnScrapCompleted();
         }
 
         public override void Scrap()

@@ -148,16 +148,24 @@ namespace HappyHour.ViewModel
                 p => OnContextMenu(p, MediaListMenuType.excluded));
             CmdDownload = new RelayCommand<MediaItem>(
                 p => OnContextMenu(p, MediaListMenuType.downloaded));
-            CmdMoveItem = new RelayCommand<object>(p => OnMoveItem(p));
-            CmdMoveItemTo = new RelayCommand<object>(p => OnMoveItemTo(p));
-            CmdDeleteItem = new RelayCommand<object>(p => OnDeleteItem(p));
-            CmdClearDb = new RelayCommand<object>(p => OnClearDb(p));
-            CmdEditItem = new RelayCommand<object>(p => OnEditItem(p));
-            CmdSearchOrphanageMedia = new RelayCommand(() => OnSearchOrphanageMedia());
-            CmdSearchEmptyActor = new RelayCommand(() => OnSearchEmptyActor());
+            CmdMoveItem = new RelayCommand<object>(
+                p => OnMoveItem(p.ToList<MediaItem>()));
+            CmdMoveItemTo = new RelayCommand<object>(
+                p => OnMoveItemTo(p.ToList<MediaItem>()));
+            CmdDeleteItem = new RelayCommand<object>(
+                p => OnDeleteItem(p.ToList<MediaItem>()));
+            CmdClearDb = new RelayCommand<object>(
+                p => p.ToList<MediaItem>().ForEach(m => m.ClearDb()));
+            CmdEditItem = new RelayCommand<object>(
+                p => OnEditItem(p));
+            CmdSearchOrphanageMedia = new RelayCommand(
+                () => OnSearchOrphanageMedia());
+            CmdSearchEmptyActor = new RelayCommand(
+                () => OnSearchEmptyActor());
             CmdDoubleClick = new RelayCommand(() =>
                 ItemDoubleClickedHandler?.Invoke(this, SelectedMedia));
-            CmdScrap = new RelayCommand<object>(p => OnScrapAvInfo(p as SpiderBase));
+            CmdScrap = new RelayCommand<object>(
+                p => OnScrapAvInfo(p as SpiderBase));
             CmdStopBatchingScrap = new RelayCommand(() => {
                 if (_mitemsToSearch != null) _mitemsToSearch.Clear();
             });
@@ -173,13 +181,6 @@ namespace HappyHour.ViewModel
             RefreshMediaList(msg);
         }
 
-        async void RefreshMediaList(DirectoryInfo msg)
-        { 
-            MediaList.Clear();
-
-            bool bSubFolder = _searchSubFolder;
-            await Task.Run(() => UpdateMediaList(msg.FullName, bSubFolder));
-        }
 
         void OnDirModifed(object sender, FileSystemEventArgs e)
         {
@@ -235,47 +236,9 @@ namespace HappyHour.ViewModel
             MediaList.InsertInPlace(item, i => i.DateTime);
         }
 
-        public async void Replace(IEnumerable<string> paths)
+        void OnMoveItem(List<MediaItem> mitems)
         {
-            MediaList.Clear();
-            IsSelected = true;
-            await Task.Run(() => {
-                foreach (var path in paths)
-                {
-                    AddMedia(path);
-                }
-            });
-        }
-
-        void UpdateMediaList(string path, bool bRecursive = false, int level = 0)
-        {
-            try
-            {
-                var dirs = Directory.GetDirectories(path);
-                if (dirs.Length == 0 || dirs[0].EndsWith(".actors"))
-                {
-                    AddMedia(path);
-                }
-                else if (bRecursive || level < 1)
-                {
-                    foreach (var dir in dirs)
-                    {
-                        UpdateMediaList(dir, bRecursive, level + 1);
-                    }
-                }
-            }
-            catch(Exception ex)
-            {
-                Log.Print(ex.Message);
-            }
-        }
-
-        void OnMoveItem(object param)
-        {
-            if (param is not IList<object> items || items.Count == 0)
-                    return;
-
-            foreach (var item in items.Cast<MediaItem>().ToList())
+            foreach (var item in mitems)
             {
                 if (item.MoveItem())
                 {
@@ -283,11 +246,9 @@ namespace HappyHour.ViewModel
                 }
             }
         }
-        void OnMoveItemTo(object param)
-        {
-            if (param is not IList<object> items || items.Count == 0)
-                    return;
 
+        void OnMoveItemTo(List<MediaItem> mitems)
+        {
             var settings = new FolderBrowserDialogSettings
             { 
                 Description = "Select Target folder"
@@ -299,7 +260,7 @@ namespace HappyHour.ViewModel
                 return;
             }
             Log.Print(settings.SelectedPath);
-            foreach (var item in items.Cast<MediaItem>().ToList())
+            foreach (var item in mitems)
             {
                 item.MoveItem(settings.SelectedPath, mitem => {
                     if (mitem != null)
@@ -310,28 +271,14 @@ namespace HappyHour.ViewModel
             }
         }
 
-        void OnDeleteItem(object param)
+        void OnDeleteItem(List<MediaItem> mitems)
         {
-            if (param is not IList<object> items || items.Count == 0)
-                return;
-
-            foreach (var item in items.Cast<MediaItem>().ToList())
+            foreach (var item in mitems)
             {
                 if (item.DeleteItem())
                 {
                     MediaList.Remove(item);
                 }
-            }
-        }
-
-        void OnClearDb(object param)
-        {
-            if (param is not IList<object> items || items.Count == 0)
-                return;
-
-            foreach (var item in items.Cast<MediaItem>().ToList())
-            {
-                item.ClearDb();
             }
         }
 
@@ -343,9 +290,38 @@ namespace HappyHour.ViewModel
                 DialogService.ShowDialog<AvEditorDialog>(this, dialog);
             }
         }
-
-        void IterateMedia(string currDir, List<string> dbDirs)
+        void UpdateMediaList(string path, CancellationToken token,
+            bool bRecursive = false, int level = 0)
         {
+            if (token.IsCancellationRequested)
+                return;
+
+            try
+            {
+                var dirs = Directory.GetDirectories(path);
+                if (dirs.Length == 0 || dirs[0].EndsWith(".actors"))
+                {
+                    AddMedia(path);
+                }
+                else if (bRecursive || level < 1)
+                {
+                    foreach (var dir in dirs)
+                    {
+                        UpdateMediaList(dir, token, bRecursive, level + 1);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Print(ex.Message);
+            }
+        }
+
+        void IterateMedia(string currDir, List<string> dbDirs,
+            CancellationToken token)
+        {
+            if (token.IsCancellationRequested)
+                return;
             try
             {
                 var dirs = Directory.GetDirectories(currDir);
@@ -360,7 +336,7 @@ namespace HappyHour.ViewModel
                 {
                     foreach (var dir in dirs)
                     {
-                        IterateMedia(dir, dbDirs);
+                        IterateMedia(dir, dbDirs, token);
                     }
                 }
             }
@@ -370,8 +346,55 @@ namespace HappyHour.ViewModel
             }
         }
 
+        Task _runningTask = null;
+        CancellationTokenSource _tokenSource;
+
+        void WaitIfTaskRunning()
+        { 
+            if (_runningTask != null && !_runningTask.IsCompleted)
+            {
+                _tokenSource.Cancel();
+                _runningTask.Wait();
+            }
+        }
+
+        async void RefreshMediaList(DirectoryInfo msg)
+        {
+            WaitIfTaskRunning();
+            MediaList.Clear();
+
+            _tokenSource = new CancellationTokenSource();
+            var token = _tokenSource.Token;
+            bool bSubFolder = _searchSubFolder;
+            _runningTask = Task.Run(
+                () => UpdateMediaList(msg.FullName, token, bSubFolder), token);
+            await _runningTask;
+        }
+
+        public async void Replace(IEnumerable<string> paths)
+        {
+            WaitIfTaskRunning();
+            MediaList.Clear();
+            IsSelected = true;
+
+            _tokenSource = new CancellationTokenSource();
+            var token = _tokenSource.Token;
+
+            _runningTask = Task.Run(() => {
+                foreach (var path in paths)
+                {
+                    if (token.IsCancellationRequested)
+                        break;
+                    AddMedia(path);
+                }
+            }, token);
+            await _runningTask;
+        }
+
         async void OnSearchOrphanageMedia()
         {
+            WaitIfTaskRunning();
+
             MediaList.Clear();
 
             var currDir = _fileList.CurrDirInfo.FullName;
@@ -380,16 +403,22 @@ namespace HappyHour.ViewModel
                 .Select(i => i.Path)
                 .ToListAsync();
 
-            await Task.Run(() =>
+            _tokenSource = new CancellationTokenSource();
+            var token = _tokenSource.Token;
+
+            _runningTask = Task.Run(() =>
             {
                 dbDirs.Sort();
-                IterateMedia(currDir, dbDirs);
+                IterateMedia(currDir, dbDirs, token);
                 Log.Print("Search orphanage media done!");
-            });
+            }, token);
+            await _runningTask;
         }
 
         async void OnSearchEmptyActor()
         {
+            WaitIfTaskRunning();
+
             MediaList.Clear();
 
             var paths = await App.DbContext.Items
@@ -398,7 +427,18 @@ namespace HappyHour.ViewModel
                 .Select(i => i.Path)
                 .ToListAsync();
 
-            await Task.Run(() => paths.ForEach(p => AddMedia(p)));
+            _tokenSource = new CancellationTokenSource();
+            var token = _tokenSource.Token;
+
+            _runningTask = Task.Run(() => {
+                foreach (var p in paths)
+                {
+                    if (token.IsCancellationRequested)
+                        break;
+                    AddMedia(p);
+                }
+            }, token);
+            await _runningTask;
         }
 
         List<MediaItem> _mitemsToSearch;

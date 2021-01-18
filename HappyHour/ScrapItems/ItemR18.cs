@@ -171,8 +171,7 @@ namespace HappyHour.ScrapItems
                 }
                 else if (name == "studio")
                 {
-                    var studio = (items[0] as string).Trim();
-                    UpdateStudio(studio);
+                    UpdateStudio(items[0] as string);
                 }
                 else if (name == "actor")
                 {

@@ -50,10 +50,10 @@ namespace HappyHour.Spider
             };
         }
 
-        void OnMultiResult(List<object> list)
+        void OnMultiResult(object result)
         {
-            Log.Print($"OnMultiResult : {list.Count} items found!");
-            if (list.IsNullOrEmpty()) goto NotFound;
+            if (!CheckResult(result, out List<string> list))
+                goto NotFound;
 
             var apid = Keyword.Split('-');
             var regex = new Regex($@"cid=(h_)?(\d+)?{apid[0].ToLower()}");
@@ -68,7 +68,8 @@ namespace HappyHour.Spider
                     matchCount++;
                 }
             }
-            if (matchCount == 0) goto NotFound;
+            if (matchCount == 0)
+                goto NotFound;
 
             if (matchCount == 1)
             {
@@ -91,7 +92,9 @@ namespace HappyHour.Spider
             switch (_state)
             {
                 case 0:
-                    Browser.ExecJavaScript(XPath("//p[@class='tmb']/a/@href"), OnMultiResult);
+                    Browser.ExecJavaScript(
+                        XPath("//p[@class='tmb']/a/@href"),
+                        OnMultiResult);
                     break;
                 case 1:
                     //Browser.StopScrapping(Media);

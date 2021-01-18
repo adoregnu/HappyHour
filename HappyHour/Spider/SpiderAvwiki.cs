@@ -25,17 +25,15 @@ namespace HappyHour.Spider
             URL = "https://av-wiki.net/";
         }
 
-        void OnSearchResult(List<object> list)
+        void OnSearchResult(object result)
         {
-            if (list.IsNullOrEmpty())
-            {
-                Log.Print($"Could not find {Keyword}");
-                goto stopScrapping;
-            }
+            if (!CheckResult(result, out List<string> list))
+                goto NotFound;
+
             if (list.Count > 1)
             {
                 Log.Print("Multiple results found!");
-                goto stopScrapping;
+                goto NotFound;
             }
             HtmlDocument doc = new HtmlDocument();
             doc.LoadHtml(list[0] as string);
@@ -46,7 +44,7 @@ namespace HappyHour.Spider
             node = doc.DocumentNode.SelectSingleNode("//li[@class='actress-name']//a");
             Log.Print($"Actress : {node.InnerText}, url={node.Attributes["href"].Value}");
 
-        stopScrapping:
+        NotFound:
             OnScrapCompleted();
             _state = -1;
         }

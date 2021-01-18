@@ -44,13 +44,17 @@ namespace HappyHour.CefHandler
 
             //To disable context mode then clear
             // model.Clear();
+            int cefCmdId = CefUserCommand;
+
+            model.AddSeparator();
+            model.AddItem((CefMenuCommand)cefCmdId++, "Google");
+            model.AddItem((CefMenuCommand)cefCmdId++, "Google Translate");
 
             if (_spider != null)
             {
                 // Add a separator
                 model.AddSeparator();
                 // Add another example item
-                int cefCmdId = CefUserCommand;
                 foreach (var spider in _spider.Spiders)
                 {
                     model.AddItem((CefMenuCommand)cefCmdId++, spider.Name);
@@ -224,13 +228,33 @@ namespace HappyHour.CefHandler
                 case (CefMenuCommand)26502:
                     browser.GetHost().CloseDevTools();
                     break;
-                //case (CefMenuCommand)CefUserCommand:
+                case (CefMenuCommand)(CefUserCommand):
+                    _spider.ExecJavaScript(App.ReadResource("SearchText.js"),
+                        (o) => UiServices.Invoke(() =>
+                        {
+                            var query = o.ToString().Replace(' ', '+');
+                            _spider.Address = "https://www.google.com/" +
+                                "search?as_epq=" + query;
+                        }));
+                    break;
+                case (CefMenuCommand)(CefUserCommand+1):
+                    _spider.ExecJavaScript(App.ReadResource("SearchText.js"),
+                        (o) => UiServices.Invoke(() =>
+                        {
+                            _spider.Address = "https://translate.google.com/" +
+                                $"?hl=ko&tab=rT&sl=auto&tl=ko&text={o}&op=translate";
+                        }));
+                    break;
                 default:
                     if (_spider != null)
                     {
-                        var sp = _spider.Spiders[(int)item.Item2 - CefUserCommand];
-                        _spider.SelectedSpider = sp;
-                        //Log.Print(sp.Name);
+                        var sp = _spider.Spiders[(int)item.Item2 - CefUserCommand - 2];
+                        _spider.ExecJavaScript( App.ReadResource("SearchText.js"),
+                            (o) => UiServices.Invoke(() =>
+                            {
+                                sp.Keyword = o.ToString();
+                                _spider.SelectedSpider = sp;
+                            }));
                     }
                     break;
             }

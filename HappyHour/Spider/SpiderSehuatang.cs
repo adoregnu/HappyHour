@@ -95,12 +95,12 @@ namespace HappyHour.Spider
             return Regex.Replace(str, @"\d+\.html", $"{_pageNum}.html");
         }
 
-        void MovePage(List<object> items)
+        void MovePage(object result)
         {
             _state = 1;
             _index = 0;
             _isPageChanged = true;
-            if (items != null && items.Count == 1)
+            if (result is List<object> items && items.Count == 1)
             {
                 _currentPage = items[0].ToString();
             }
@@ -116,11 +116,11 @@ namespace HappyHour.Spider
             }
         }
 
-        public void MoveArticle(List<object> items)
+        public void MoveArticle(object result)
         {
             if (_isPageChanged)
             {
-                _articlesInPage = items;
+                _articlesInPage = result as List<object>;
                 _isPageChanged = false;
             }
             MessengerInstance.Send(new NotificationMessage<string>(

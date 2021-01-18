@@ -37,14 +37,10 @@ namespace HappyHour.Spider
             };
         }
 
-        public void OnMultiResult(List<object> list)
+        public void OnMultiResult(object result)
         {
-            Log.Print($"OnMultiResult : {list.Count} items found!");
-            if (list.IsNullOrEmpty())
-            {
-                OnScrapCompleted();
-                return;
-            }
+            if (!CheckResult(result, out List<string> list))
+                goto NotFound;
 
             HtmlNode anode = null;
             HtmlDocument doc = new HtmlDocument();
@@ -59,13 +55,13 @@ namespace HappyHour.Spider
                 }
             }
             if (anode == null)
-            {
-                Log.Print($"Not found {Keyword}");
-                OnScrapCompleted();
-                return;
-            }
+                goto NotFound;
+
             _state = 1;
             Browser.Address = $"{URL}{anode.Attributes["href"].Value}";
+            return;
+        NotFound:
+            OnScrapCompleted();
         }
 
         public override void Scrap()
