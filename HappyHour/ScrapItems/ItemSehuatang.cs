@@ -59,7 +59,7 @@ namespace HappyHour.ScrapItems
                     postfix = $"screenshot{idx}";
                 e.SuggestedFileName = _outPath + $"{_pid}_{postfix}{ext}";
             }
-            Log.Print($"{_pid} file to store: {e.SuggestedFileName}");
+            //Log.Print($"{_pid} file to store: {e.SuggestedFileName}");
         }
 
         protected override void OnDownloadUpdated(object sender, DownloadItem e)

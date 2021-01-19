@@ -109,11 +109,26 @@ namespace HappyHour.ViewModel
             _mediaItem = mediaItem;
             Title = mediaItem.Pid;
 
-            Av = mediaItem.AvItem;
-            Actors = new ObservableCollection<AvActor>(Av.Actors);
-            Genres = new ObservableCollection<AvGenre>(Av.Genres);
-            Studio = Av.Studio;
-            Series = Av.Series;
+            if (mediaItem.AvItem != null)
+            {
+                Av = mediaItem.AvItem;
+                Actors = new ObservableCollection<AvActor>(Av.Actors);
+                Genres = new ObservableCollection<AvGenre>(Av.Genres);
+                Studio = Av.Studio;
+                Series = Av.Series;
+            }
+            else
+            {
+                Av = new AvItem
+                {
+                    Path = mediaItem.MediaFolder,
+                    Pid = mediaItem.Pid,
+                };
+                Actors = new ObservableCollection<AvActor>();
+                Genres = new ObservableCollection<AvGenre>();
+
+                App.DbContext.Items.Attach(Av);
+            }
 
             CmdSetStudio = new RelayCommand(() => Studio = SelectedStudio);
             CmdSetSeries = new RelayCommand(() => Series = SelectedSeries);
@@ -161,7 +176,10 @@ namespace HappyHour.ViewModel
             if (SelectedGenre == null) return;
 
             if (!Genres.Any(g => g == SelectedGenre))
+            {
                 Genres.Add(SelectedGenre);
+                _genreChanges = true;
+            }
         }
 
         void OnSave()
@@ -170,9 +188,17 @@ namespace HappyHour.ViewModel
                 Av.Actors = Actors;
             if (_genreChanges)
                 Av.Genres = Genres;
+            if (_mediaItem.AvItem == null)
+            {
+                Av.DateAdded = DateTime.Now;
+                Av.DateModifed = DateTime.Now;
+                _mediaItem.AvItem = Av;
+            }
+            else
+            {
+                _mediaItem.RefreshAvInfo();
+            }
             App.DbContext.SaveChanges();
-
-            _mediaItem.ReloadAvItem();
         }
     }
 }

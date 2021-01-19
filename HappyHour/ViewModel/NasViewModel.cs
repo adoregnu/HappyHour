@@ -8,8 +8,6 @@ using System.Windows.Input;
 
 using CefSharp;
 
-using HappyHour.CefHandler;
-
 namespace HappyHour.ViewModel
 {
     class NasViewModel : BrowserBase
@@ -27,19 +25,19 @@ namespace HappyHour.ViewModel
             base.InitBrowser();
 
             WebBrowser.FrameLoadEnd += OnFrameLoaded;
-            WebBrowser.MenuHandler = new MenuHandler();
             Address = _nasUrl;
         }
 
         void OnFrameLoaded(object sender, FrameLoadEndEventArgs e)
         {
             if (Address != _nasUrl) return;
-
+#if false
             Log.Print($"Num loading :{++_numLoading}, isMain {e.Frame.IsMain}");
             if (e.Frame.IsMain)
             { 
-                //WebBrowser.ExecuteScriptAsync(App.ReadResource("NasLogin.js"));
+                WebBrowser.ExecuteScriptAsync(App.ReadResource("NasLogin.js"));
             }
+#endif
             if (_numLoading == 4)
                 WebBrowser.ExecuteScriptAsync(App.ReadResource("NasLogin.js"));
         }

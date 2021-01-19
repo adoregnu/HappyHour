@@ -56,6 +56,7 @@ namespace HappyHour.ViewModel
                 }
             }
         }
+        public DownloadHandler DownloadHandler { get; private set; }
 
         public ICommand CmdStart { get; private set; }
         public ICommand CmdStop { get; private set; }
@@ -68,7 +69,6 @@ namespace HappyHour.ViewModel
                 _mediaList = value;
                 _mediaList.ItemSelectedHandler += (o, i) =>
                 {
-                    //_selectedMedia = i;
                     if (i != null) Keyword = i.Pid;
                 };
             }
@@ -99,7 +99,7 @@ namespace HappyHour.ViewModel
                 new SpiderAvsox(this),
             };
             SelectedSpider = Spiders[0];
-            Title = Address = SelectedSpider.URL;
+            Address = SelectedSpider.URL;
 
             MessengerInstance.Send(new NotificationMessage<SpiderEnum>(Spiders, ""));
         }
@@ -107,13 +107,13 @@ namespace HappyHour.ViewModel
         protected override void InitBrowser()
         {
             base.InitBrowser();
-
+            DownloadHandler = new DownloadHandler();
+            WebBrowser.DownloadHandler = DownloadHandler;
             WebBrowser.MenuHandler = new MenuHandler(this);
             WebBrowser.LifeSpanHandler = new PopupHandler();
-            //WebBrowser.RequestHandler = new AvRequestHandler();
 
             WebBrowser.LoadingStateChanged += OnStateChanged;
-            _selectedSpider.SetCookies();
+            SelectedSpider.SetCookies();
         }
 
         void OnStateChanged(object sender, LoadingStateChangedEventArgs e)

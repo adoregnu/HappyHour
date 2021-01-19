@@ -5,26 +5,39 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
              d:DesignHeight="20" d:DesignWidth="550">
-    <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="center">
-        <ComboBox ItemsSource="{Binding Spiders}" Width="150"
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <ComboBox Grid.Column="0" ItemsSource="{Binding Spiders}"
                   SelectedItem="{Binding SelectedSpider}"/>
-        <ComboBox Margin="5,0,0,0" ItemsSource="{Binding Boards}" Width="100"
+        <ComboBox Grid.Column="1" Margin="5,0,0,0" 
+                  ItemsSource="{Binding SelectedSpider.Boards}"
                   SelectedItem="{Binding SelectedSpider.SelectedBoard}"/>
-        <TextBox Text="{Binding SelectedSpider.NumPage}" Width="50" Margin="5,0,0,0"/>
-        <CheckBox IsChecked="{Binding SelectedSpider.StopOnExistingId}" VerticalAlignment="Center"/>
-        <Button Style="{DynamicResource ModernButtonStyle2}"
-                    Command="{Binding CmdStart}" Margin="5,0,0,0">
-            <Path Stretch="Uniform"
-                  Data="{Binding Source={StaticResource SearchStartIcon}, Path=Data}"
-                  Fill="{Binding Path=Foreground, RelativeSource=
+        <TextBox  Grid.Column="2" Margin="5,0,0,0" Width="50"
+                  Text="{Binding SelectedSpider.NumPage}"/>
+        <StackPanel Grid.Column="3" Orientation="Horizontal">
+            <CheckBox Margin="5,0,0,0" VerticalAlignment="Center"
+                      IsChecked="{Binding SelectedSpider.StopOnExistingId}"/>
+            <Button Margin="5,0,0,0" Command="{Binding CmdStart}"
+                    Style="{DynamicResource ModernButtonStyle2}">
+                <Path Stretch="Uniform"
+                      Data="{Binding Source={StaticResource SearchStartIcon}, Path=Data}"
+                      Fill="{Binding Path=Foreground, RelativeSource=
+                            {RelativeSource AncestorType={x:Type Button}}}" />
+            </Button>
+            <Button Style="{DynamicResource ModernButtonStyle2}"
+                    Command="{Binding CmdStop}">
+                <Path Stretch="Uniform"
+                    Data="{Binding Source={StaticResource SearchStopIcon}, Path=Data}"
+                    Fill="{Binding Path=Foreground, RelativeSource=
                         {RelativeSource AncestorType={x:Type Button}}}" />
-        </Button>
-        <Button Style="{DynamicResource ModernButtonStyle2}"
-                Command="{Binding CmdStop}">
-            <Path Stretch="Uniform"
-                Data="{Binding Source={StaticResource SearchStopIcon}, Path=Data}"
-                Fill="{Binding Path=Foreground, RelativeSource=
-                    {RelativeSource AncestorType={x:Type Button}}}" />
-        </Button>
-    </StackPanel>
+            </Button>
+        </StackPanel>
+    </Grid>
 </UserControl>

@@ -9,8 +9,6 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
-        <conv:BrowserHeaderTypeToStringConverter x:Key="HeaderTypeToString"/>
-
         <ControlTemplate x:Key="BrowserHeaderBase">
             <local:BrowserHeaderBase/>
         </ControlTemplate>
@@ -39,6 +37,7 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Grid Grid.Row="0">
@@ -49,21 +48,21 @@
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="2">
                 <Button Style="{DynamicResource ModernButtonStyle2}"
-                        Command="{Binding CmdBackward}">
+                        Command="{Binding WebBrowser.BackCommand}">
                     <Path Stretch="Uniform"
                         Data="{Binding Source={StaticResource ArrowLeftIcon}, Path=Data}"
                         Fill="{Binding Path=Foreground, RelativeSource=
                             {RelativeSource AncestorType={x:Type Button}}}" />
                 </Button>
                  <Button Style="{DynamicResource ModernButtonStyle2}"
-                        Command="{Binding CmdForward}">
+                        Command="{Binding WebBrowser.ForwardCommand}">
                     <Path Stretch="Uniform"
                         Data="{Binding Source={StaticResource ArrowRightIcon}, Path=Data}"
                         Fill="{Binding Path=Foreground, RelativeSource=
                             {RelativeSource AncestorType={x:Type Button}}}" />
                 </Button>
                  <Button Style="{DynamicResource ModernButtonStyle2}"
-                         Command="{Binding CmdReloadUrl}">
+                         Command="{Binding WebBrowser.ReloadCommand}">
                     <Path Stretch="Uniform"
                         Data="{Binding Source={StaticResource RefreshIcon}, Path=Data}"
                         Fill="{Binding Path=Foreground, RelativeSource=
@@ -74,9 +73,14 @@
             <TextBox Grid.Column="1" KeyUp="TextBox_KeyEnterUpdate"
                      Text="{Binding Address}"/>
 -->
-            <ContentControl Grid.Column="1" Style="{StaticResource BrowserHeaderStyle}"/>
+            <ContentControl
+                Grid.Column="1" Margin="2,2,2,0"
+                Style="{StaticResource BrowserHeaderStyle}"/>
         </Grid>
-        <cefSharp:ChromiumWebBrowser x:Name="browser" Grid.Row="1"
+        <ProgressBar Grid.Row="1" Height="2" Margin="2" 
+                     IsIndeterminate="{Binding WebBrowser.IsLoading}" />
+
+        <cefSharp:ChromiumWebBrowser x:Name="browser" Grid.Row="2"
             WebBrowser="{Binding WebBrowser, Mode=OneWayToSource}"
             Title="{Binding Title, Mode=OneWayToSource}"
             Address="{Binding Address, Mode=TwoWay}"

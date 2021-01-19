@@ -44,25 +44,12 @@ namespace HappyHour.ViewModel
             get { return _webBrowser; }
             set { Set(ref _webBrowser, value); }
         }
-        public DownloadHandler DownloadHandler { get; private set; }
-
-        public ICommand CmdReloadUrl { get; private set; }
-        public ICommand CmdBackward { get; private set; }
-        public ICommand CmdForward { get; private set; }
 
         public BrowserBase()
         {
             Title = "Browser";
             HeaderType = "base";
             PropertyChanged += OnPropertyChanged;
-
-            CmdReloadUrl = new RelayCommand(() => WebBrowser.Reload());
-            CmdBackward = new RelayCommand(
-                () => WebBrowser.Back(),
-                () => WebBrowser != null && WebBrowser.CanGoBack);
-            CmdForward = new RelayCommand(
-                () => WebBrowser.Forward(),
-                () => WebBrowser != null && WebBrowser.CanGoForward);
         }
 
         protected virtual void InitBrowser()
@@ -75,9 +62,7 @@ namespace HappyHour.ViewModel
             {
                 MessengerInstance.Send(new CefStatusMsg(e, "log"));
             };
-            DownloadHandler = new DownloadHandler();
-            WebBrowser.DownloadHandler = DownloadHandler;
-
+            WebBrowser.MenuHandler = new MenuHandler();
             //Address = "https://www.google.com";
         }
 

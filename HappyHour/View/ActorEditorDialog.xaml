@@ -12,8 +12,6 @@
         md:DialogServiceViews.IsRegistered="True"
         Title="View Actors" Height="600" Width="1060">
     <Window.Resources>
-        <converter:SelectedItem2Visibility x:Key="SelectedCount2Visibility"/>
-
         <ControlTemplate x:Key="_controlTpl" TargetType="ListBoxItem">
             <Border Name="_Border" Padding="2" SnapsToDevicePixels="true"
                     Width="128" Height="128">

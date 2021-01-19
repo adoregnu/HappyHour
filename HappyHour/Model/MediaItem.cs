@@ -224,6 +224,13 @@ namespace HappyHour.Model
             MediaName = $"{Pid}\n" + DateTime.ToString("u");
         }
 
+        public void RefreshAvInfo()
+        {
+            RaisePropertyChanged(nameof(Info));
+            RaisePropertyChanged(nameof(Actors));
+            RaisePropertyChanged(nameof(BgImagePath));
+        }
+
         public async void ReloadAvItem()
         {
             AvItem = await _dbContext.Items

@@ -270,11 +270,12 @@ namespace HappyHour.ViewModel
 
         void OnEditItem(object param)
         {
-            if (param is MediaItem item && item.AvItem != null)
-            {
-                var dialog = new AvEditorViewModel(item);
-                DialogService.ShowDialog<AvEditorDialog>(this, dialog);
-            }
+            if (param is not MediaItem item)
+                return;
+
+            var dialog = new AvEditorViewModel(item);
+            //DialogService.ShowDialog<AvEditorDialog>(this, dialog);
+            DialogService.Show<AvEditorDialog>(this, dialog);
         }
         void UpdateMediaList(string path, CancellationToken token,
             bool bRecursive = false, int level = 0)

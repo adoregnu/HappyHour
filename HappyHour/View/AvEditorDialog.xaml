@@ -22,7 +22,7 @@
             <Setter Property="BorderBrush" Value="LightGray"/>
             <Setter Property="BorderThickness" Value="0,0,0,1"/>
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="IsReadOnly" Value="True"/>
+            <Setter Property="IsReadOnly" Value="False"/>
         </Style>
         <Style x:Key="EnderlinedTextbox" TargetType="TextBox">
             <Setter Property="BorderBrush" Value="Gray"/>

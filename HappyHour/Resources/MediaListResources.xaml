@@ -3,7 +3,6 @@
                     xmlns:conv="clr-namespace:HappyHour.Converter"
                     xmlns:local="clr-namespace:HappyHour.View"
                     xmlns:vwp="clr-namespace:WpfToolkit.Controls;assembly=VirtualizingWrapPanel" >
-    <conv:ScreenshotsToVisibilityConverter x:Key="ScreenshotsToVisConverter"/>
     <ControlTemplate x:Key="ImageItem">
          <Grid Width="200" Height="180"
                Tag="{Binding RelativeSource={RelativeSource FindAncestor,
