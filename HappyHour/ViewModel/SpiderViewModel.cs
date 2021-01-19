@@ -23,30 +23,12 @@ using HappyHour.Interfaces;
 namespace HappyHour.ViewModel
 {
     using SpiderEnum = IEnumerable<SpiderBase>;
-    using CefConsoleMsg = NotificationMessage<ConsoleMessageEventArgs>;
-    using CefStatusMsg = NotificationMessage<StatusMessageEventArgs>;
 
-    partial class SpiderViewModel : Pane
+    class SpiderViewModel : BrowserBase
     {
-        IMediaList _mediaList;
         string _keyword;
-
-        string address;
-        public string Address
-        {
-            get { return address; }
-            set
-            {
-                Set(ref address, value);
-            }
-        }
-
-        IWpfWebBrowser webBrowser;
-        public IWpfWebBrowser WebBrowser
-        {
-            get { return webBrowser; }
-            set { Set(ref webBrowser, value); }
-        }
+        IMediaList _mediaList;
+        SpiderBase _selectedSpider;
 
         public List<SpiderBase> Spiders { get; set; }
         public string Keyword
@@ -54,8 +36,6 @@ namespace HappyHour.ViewModel
             get => _keyword;
             set => Set(ref _keyword, value);
         }
-
-        SpiderBase _selectedSpider;
         public SpiderBase SelectedSpider
         {
             get => _selectedSpider;
@@ -63,6 +43,9 @@ namespace HappyHour.ViewModel
             {
                 if (value != null)
                 {
+                    HeaderType = value.Name != "sehuatang"
+                        ? "spider" : "sehuatang";
+
                     Set(ref _selectedSpider, value);
                     value.SetCookies();
                     if (string.IsNullOrEmpty(value.Keyword))
@@ -70,20 +53,12 @@ namespace HappyHour.ViewModel
                     else
                         Address = value.SearchURL;
                     Log.Print($"Spider:{value.Name}, Keyword:{value.Keyword}");
-
-                    if (value is SpiderSehuatang ss)
-                    { 
-                        SelectedBoard = ss.Boards[0];
-                    }
                 }
             }
         }
 
-
         public ICommand CmdStart { get; private set; }
         public ICommand CmdStop { get; private set; }
-        public ICommand CmdReloadUrl { get; private set; }
-        public ICommand CmdBack { get; private set; }
 
         public IMediaList MediaList
         {
@@ -98,9 +73,8 @@ namespace HappyHour.ViewModel
                 };
             }
         }
-        public DownloadHandler DownloadHandler { get; private set; }
 
-        public SpiderViewModel()
+        public SpiderViewModel() : base()
         {
             CmdStart = new RelayCommand(() =>
             {
@@ -108,8 +82,6 @@ namespace HappyHour.ViewModel
                 SelectedSpider.Navigate2();
             });
             CmdStop = new RelayCommand(() => SelectedSpider.Stop());
-            CmdReloadUrl = new RelayCommand(() => WebBrowser.Reload());
-            CmdBack = new RelayCommand(() => WebBrowser.Back());
 
             Spiders = new List<SpiderBase>
             {
@@ -126,65 +98,22 @@ namespace HappyHour.ViewModel
                 new SpiderPornav(this),
                 new SpiderAvsox(this),
             };
-            _selectedSpider = Spiders[0];
-            Title = Address = _selectedSpider.URL;
+            SelectedSpider = Spiders[0];
+            Title = Address = SelectedSpider.URL;
 
-            PropertyChanged += OnPropertyChanged;
             MessengerInstance.Send(new NotificationMessage<SpiderEnum>(Spiders, ""));
         }
 
-        public void InitBrowser()
+        protected override void InitBrowser()
         {
-            DownloadHandler = new DownloadHandler();
+            base.InitBrowser();
 
             WebBrowser.MenuHandler = new MenuHandler(this);
-            WebBrowser.DownloadHandler = DownloadHandler;
             WebBrowser.LifeSpanHandler = new PopupHandler();
             //WebBrowser.RequestHandler = new AvRequestHandler();
-            WebBrowser.ConsoleMessage += (s, e) =>
-            {
-                MessengerInstance.Send(new CefConsoleMsg(e, "log"));
-            };
-            WebBrowser.StatusMessage += (s, e) =>
-            { 
-                MessengerInstance.Send(new CefStatusMsg(e, "log"));
-            };
 
-            //WebBrowser.FrameLoadEnd += OnFrameLoadEnd;
-            //WebBrowser.JavascriptMessageReceived += OnBrowserJavascriptMessageReceived;
             WebBrowser.LoadingStateChanged += OnStateChanged;
             _selectedSpider.SetCookies();
-        }
-#if false
-        void OnFrameLoadEnd(object sender, FrameLoadEndEventArgs e)
-        {
-            WebBrowser.ExecuteScriptAsync(App.ReadResource("ElementAt.js"));
-        }
-        void OnBrowserJavascriptMessageReceived(object sender, JavascriptMessageReceivedEventArgs e)
-        {
-            var msg = e.ConvertMessageTo<JsMessage>();
-            if (msg.Type == "SearchText")
-            {
-                Keyword = msg.Data;
-            }
-         }
-#endif
-
-        void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            switch (e.PropertyName)
-            {
-                case nameof(WebBrowser):
-                    if (WebBrowser == null) break;
-                    InitBrowser();
-                    Log.Print("Spider Browser changed!");
-
-                    break;
-                case nameof(Address):
-                    Title = Address;
-                    Log.Print("Spider Address changed: " + Address);
-                    break;
-            }
         }
 
         void OnStateChanged(object sender, LoadingStateChangedEventArgs e)
@@ -195,46 +124,11 @@ namespace HappyHour.ViewModel
             }
         }
 
-        public void Download(string url)
-        {
-            webBrowser.Dispatcher.Invoke(delegate {
-                var host = webBrowser.GetBrowserHost();
-                host.StartDownload(url);
-            });
-        }
-
-        bool CanExecuteJS()
-        { 
-            if (!webBrowser.CanExecuteJavascriptInMainFrame)
-            {
-                Log.Print("V8Context is not ready!");
-                return false;
-            }
-
-            return true;
-        }
-
-        public void ExecJavaScript(string s, OnJsResult callback = null)
-        {
-            if (!CanExecuteJS()) return;
-
-            webBrowser.EvaluateScriptAsync(s).ContinueWith(x =>
-            {
-                var response = x.Result;
-                if (!response.Success)
-                {
-                    Log.Print("ExecJavaScript:: " + response.Message);
-                    return;
-                }
-                callback?.Invoke(response.Result);
-            });
-        }
-
         public void ExecJavaScript(string s, IScrapItem item, string name)
         {
             if (!CanExecuteJS()) return;
 
-            webBrowser.EvaluateScriptAsync(s).ContinueWith(x =>
+            WebBrowser.EvaluateScriptAsync(s).ContinueWith(x =>
             {
                 if (!x.Result.Success)
                 {

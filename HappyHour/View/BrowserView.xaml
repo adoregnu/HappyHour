@@ -4,8 +4,38 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:cefSharp="clr-namespace:CefSharp.Wpf;assembly=CefSharp.Wpf"
+             xmlns:local="clr-namespace:HappyHour.View"
+             xmlns:conv="clr-namespace:HappyHour.Converter"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <conv:BrowserHeaderTypeToStringConverter x:Key="HeaderTypeToString"/>
+
+        <ControlTemplate x:Key="BrowserHeaderBase">
+            <local:BrowserHeaderBase/>
+        </ControlTemplate>
+        <ControlTemplate x:Key="BrowserHeaderSpider">
+            <local:BrowserHeaderSpider/>
+        </ControlTemplate>
+        <ControlTemplate x:Key="BrowserHeaderSehuatang">
+            <local:BrowserHeaderSehuatang/>
+        </ControlTemplate>
+
+        <Style x:Key="BrowserHeaderStyle" TargetType="ContentControl">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding HeaderType, Mode=TwoWay}" Value="base">
+                    <Setter Property="Template" Value="{StaticResource BrowserHeaderBase}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding HeaderType, Mode=TwoWay}" Value="spider">
+                    <Setter Property="Template" Value="{StaticResource BrowserHeaderSpider}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding HeaderType, Mode=TwoWay}" Value="sehuatang">
+                    <Setter Property="Template" Value="{StaticResource BrowserHeaderSehuatang}"/>
+                </DataTrigger>
+            </Style.Triggers> 
+        </Style>
+    </UserControl.Resources>
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -40,8 +70,11 @@
                             {RelativeSource AncestorType={x:Type Button}}}" />
                 </Button>
             </StackPanel>
+<!--
             <TextBox Grid.Column="1" KeyUp="TextBox_KeyEnterUpdate"
                      Text="{Binding Address}"/>
+-->
+            <ContentControl Grid.Column="1" Style="{StaticResource BrowserHeaderStyle}"/>
         </Grid>
         <cefSharp:ChromiumWebBrowser x:Name="browser" Grid.Row="1"
             WebBrowser="{Binding WebBrowser, Mode=OneWayToSource}"

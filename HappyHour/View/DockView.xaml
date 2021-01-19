@@ -36,13 +36,13 @@
                         <view:MediaListView/>
                     </DataTemplate>
                 </pane:PanesTemplateSelector.MediaListViewTemplate>
-
+<!--
                 <pane:PanesTemplateSelector.SpiderViewTemplate>
                     <DataTemplate>
                         <view:SpiderView/>
                     </DataTemplate>
                 </pane:PanesTemplateSelector.SpiderViewTemplate>
-
+-->
                 <pane:PanesTemplateSelector.BrowserViewTemplate>
                     <DataTemplate>
                         <view:BrowserView/>
@@ -66,13 +66,6 @@
                         <view:DbView/>
                     </DataTemplate>
                 </pane:PanesTemplateSelector.DbViewTemplate>
-<!--
-                <pane:PanesTemplateSelector.AvDbViewTemplate>
-                    <DataTemplate>
-                        <view:AvDbView></view:AvDbView>
-                    </DataTemplate>
-                </pane:PanesTemplateSelector.AvDbViewTemplate>
--->
             </pane:PanesTemplateSelector>
         </ad:DockingManager.LayoutItemTemplateSelector>
 

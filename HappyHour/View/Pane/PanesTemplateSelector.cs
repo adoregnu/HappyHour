@@ -17,7 +17,7 @@ namespace HappyHour.View.Pane
         }
 
         public DataTemplate TextViewTemplate { get; set; }
-        public DataTemplate SpiderViewTemplate { get; set; }
+        //public DataTemplate SpiderViewTemplate { get; set; }
         public DataTemplate BrowserViewTemplate { get; set; }
         public DataTemplate MediaListViewTemplate { get; set; }
         public DataTemplate PlayerViewTemplate { get; set; }
@@ -34,11 +34,11 @@ namespace HappyHour.View.Pane
                 return FileViewTemplate;
             if (item is MediaListViewModel)
                 return MediaListViewTemplate;
-            if (item is SpiderViewModel)
-                return SpiderViewTemplate;
+            //if (item is SpiderViewModel)
+            //    return SpiderViewTemplate;
             if (item is PlayerViewModel)
                 return PlayerViewTemplate;
-            if (item is BrowserViewModel)
+            if (item is BrowserBase)
                 return BrowserViewTemplate;
             if (item is ScreenshotViewModel)
                 return ScreenshotViewTemplate;

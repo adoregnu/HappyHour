@@ -31,6 +31,7 @@ namespace HappyHour.Spider
         public int NumPage { get; set; }  = 1;
         public List<string> Boards { get; set; }
         public string SelectedBoard { set; get; } = "censored";
+        public bool StopOnExistingId { get; set; } = true;
 
         public SpiderSehuatang(SpiderViewModel browser) : base(browser)
         {
@@ -64,7 +65,7 @@ namespace HappyHour.Spider
             }
             else if (key == "StopOnExist")
             {
-                return Browser.StopOnExistingId.ToString();
+                return StopOnExistingId.ToString();
             }
 
             return base.GetConf(key);

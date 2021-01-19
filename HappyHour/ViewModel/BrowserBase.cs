@@ -19,12 +19,19 @@ namespace HappyHour.ViewModel
     using CefConsoleMsg = NotificationMessage<ConsoleMessageEventArgs>;
     using CefStatusMsg = NotificationMessage<StatusMessageEventArgs>;
 
-    class BrowserViewModel : Pane
+    delegate void OnJsResult(object items);
+
+    class BrowserBase : Pane
     {
         string _address;
-        readonly string _nasUrl;
+        string _headerType;
         IWpfWebBrowser _webBrowser;
-        int _numLoading = 0;
+
+        public string HeaderType
+        {
+            get => _headerType;
+            set => Set(ref _headerType, value);
+        }
 
         public string Address
         {
@@ -37,30 +44,29 @@ namespace HappyHour.ViewModel
             get { return _webBrowser; }
             set { Set(ref _webBrowser, value); }
         }
+        public DownloadHandler DownloadHandler { get; private set; }
 
         public ICommand CmdReloadUrl { get; private set; }
         public ICommand CmdBackward { get; private set; }
         public ICommand CmdForward { get; private set; }
 
-        public BrowserViewModel()
+        public BrowserBase()
         {
             Title = "Browser";
-            _nasUrl = App.GConf["general"]["nas_url"];
+            HeaderType = "base";
             PropertyChanged += OnPropertyChanged;
-        }
 
-        void InitBrowser()
-        {
             CmdReloadUrl = new RelayCommand(() => WebBrowser.Reload());
             CmdBackward = new RelayCommand(
                 () => WebBrowser.Back(),
-                () => WebBrowser.CanGoBack);
+                () => WebBrowser != null && WebBrowser.CanGoBack);
             CmdForward = new RelayCommand(
                 () => WebBrowser.Forward(),
-                () => WebBrowser.CanGoForward);
+                () => WebBrowser != null && WebBrowser.CanGoForward);
+        }
 
-            WebBrowser.MenuHandler = new MenuHandler();
-
+        protected virtual void InitBrowser()
+        {
             WebBrowser.ConsoleMessage += (s, e) =>
             {
                 MessengerInstance.Send(new CefConsoleMsg(e, "log"));
@@ -69,9 +75,10 @@ namespace HappyHour.ViewModel
             {
                 MessengerInstance.Send(new CefStatusMsg(e, "log"));
             };
-            //WebBrowser.LoadingStateChanged += OnStateChanged;
-            WebBrowser.FrameLoadEnd += OnFrameLoaded;
-            Address = _nasUrl;
+            DownloadHandler = new DownloadHandler();
+            WebBrowser.DownloadHandler = DownloadHandler;
+
+            //Address = "https://www.google.com";
         }
 
         void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -81,37 +88,48 @@ namespace HappyHour.ViewModel
                 case nameof(WebBrowser):
                     if (WebBrowser == null) break;
                     InitBrowser();
-                    Log.Print("Browser changed!");
-
                     break;
+
                 case nameof(Address):
                     Title = Address;
                     Log.Print("Address changed: " + Address);
                     break;
             }
         }
-#if false
-        void OnStateChanged(object sender, LoadingStateChangedEventArgs e)
-        {
-            if (!e.IsLoading && Address == _nasUrl && _numLoading < 2)
-            {
-                Log.Print($"Num loading :{_numLoading}");
-                WebBrowser.ExecuteScriptAsync(App.ReadResource("NasLogin.js"));
-                _numLoading++;
-            }
-        }
-#endif
-        void OnFrameLoaded(object sender, FrameLoadEndEventArgs e)
-        {
-            if (Address != _nasUrl) return;
 
-            Log.Print($"Num loading :{++_numLoading}, isMain {e.Frame.IsMain}");
-            if (e.Frame.IsMain)
-            { 
-                //WebBrowser.ExecuteScriptAsync(App.ReadResource("NasLogin.js"));
+        public void Download(string url)
+        {
+            WebBrowser.Dispatcher.Invoke(delegate {
+                var host = WebBrowser.GetBrowserHost();
+                host.StartDownload(url);
+            });
+        }
+
+        protected bool CanExecuteJS()
+        {
+            if (!WebBrowser.CanExecuteJavascriptInMainFrame)
+            {
+                Log.Print("V8Context is not ready!");
+                return false;
             }
-            if (_numLoading == 4)
-                WebBrowser.ExecuteScriptAsync(App.ReadResource("NasLogin.js"));
+
+            return true;
+        }
+
+        public void ExecJavaScript(string s, OnJsResult callback = null)
+        {
+            if (!CanExecuteJS()) return;
+
+            WebBrowser.EvaluateScriptAsync(s).ContinueWith(x =>
+            {
+                var response = x.Result;
+                if (!response.Success)
+                {
+                    Log.Print("ExecJavaScript:: " + response.Message);
+                    return;
+                }
+                callback?.Invoke(response.Result);
+            });
         }
 
         public override void Cleanup()

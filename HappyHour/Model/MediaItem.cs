@@ -129,12 +129,12 @@ namespace HappyHour.Model
         void OnMoveDone(string newPath, Action<MediaItem> OnComplete)
         {
             MediaFolder = newPath;
-            UiServices.Invoke(delegate
+            if (AvItem != null)
             {
                 AvItem.Path = MediaFolder;
                 _dbContext.SaveChanges();
-                OnComplete?.Invoke(this);
-            });
+            }
+            OnComplete?.Invoke(this);
         }
 
         void CopyFolder(string targetPath, Action<MediaItem> OnComplete)
@@ -162,38 +162,13 @@ namespace HappyHour.Model
             }
 #endif
         }
-        public bool MoveItem(string target = null, Action<MediaItem> OnComplete = null)
+        public bool MoveItem(string targetPath, Action<MediaItem> OnComplete = null)
         {
-            if (AvItem == null)
-            {
-                Log.Print($"No info for {Pid}");
-                return false;
-            }
-            var studio = AvItem.Studio.Name;
-            string targetPath = null;
-            if (target != null)
-            {
-                targetPath = target;// $"{target}\\{studio}";
-            }
-            else
-            {
-                targetPath = $"{MediaFolder.Split('\\')[0]}\\JAV\\{studio}";
-                if (!new DirectoryInfo(targetPath).Exists)
-                {
-                    Directory.CreateDirectory(targetPath);
-                }
-                targetPath += "\\" + Pid;
-                if (MediaFolder.Equals(targetPath, StringComparison.OrdinalIgnoreCase))
-                {
-                    Log.Print($"{Pid} already moved!");
-                    return false;
-                }
-            }
             try
             {
                 if (char.ToUpper(MediaFolder[0]) == char.ToUpper(targetPath[0]))
                 {
-                    if (target != null) targetPath += "\\" + Pid;
+                    targetPath += "\\" + Pid;
                     Directory.Move(MediaFolder, targetPath);
                     OnMoveDone(targetPath, OnComplete);
                 }

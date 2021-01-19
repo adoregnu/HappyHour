@@ -89,11 +89,6 @@
 -->
                     </MenuItem>
 
-                    <MenuItem Header="Move" 
-                        Command="{Binding Data.CmdMoveItem,
-                            Source={StaticResource VmContext}}"
-                        CommandParameter="{Binding Data.SelectedItems,
-                            Source={StaticResource CtrlContext}}"/>
                     <MenuItem
                         Header="MoveTo"
                         Command="{Binding Data.CmdMoveItemTo,

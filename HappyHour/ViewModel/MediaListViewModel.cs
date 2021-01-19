@@ -122,7 +122,6 @@ namespace HappyHour.ViewModel
 
         public ICommand CmdExclude { get; set; }
         public ICommand CmdDownload { get; set; }
-        public ICommand CmdMoveItem { get; set; }
         public ICommand CmdMoveItemTo { get; set; }
         public ICommand CmdDeleteItem { get; set; }
         public ICommand CmdClearDb { get; set; }
@@ -148,8 +147,6 @@ namespace HappyHour.ViewModel
                 p => OnContextMenu(p, MediaListMenuType.excluded));
             CmdDownload = new RelayCommand<MediaItem>(
                 p => OnContextMenu(p, MediaListMenuType.downloaded));
-            CmdMoveItem = new RelayCommand<object>(
-                p => OnMoveItem(p.ToList<MediaItem>()));
             CmdMoveItemTo = new RelayCommand<object>(
                 p => OnMoveItemTo(p.ToList<MediaItem>()));
             CmdDeleteItem = new RelayCommand<object>(
@@ -184,7 +181,6 @@ namespace HappyHour.ViewModel
 
         void OnDirModifed(object sender, FileSystemEventArgs e)
         {
-            //Log.Print($"{e.ChangeType}");
             switch (e.ChangeType)
             {
                 case WatcherChangeTypes.Deleted:
@@ -236,22 +232,12 @@ namespace HappyHour.ViewModel
             MediaList.InsertInPlace(item, i => i.DateTime);
         }
 
-        void OnMoveItem(List<MediaItem> mitems)
-        {
-            foreach (var item in mitems)
-            {
-                if (item.MoveItem())
-                {
-                    MediaList.Remove(item);
-                }
-            }
-        }
-
         void OnMoveItemTo(List<MediaItem> mitems)
         {
             var settings = new FolderBrowserDialogSettings
-            { 
-                Description = "Select Target folder"
+            {
+                Description = "Select Target folder",
+                SelectedPath = mitems[0].MediaFolder
             };
             bool? success = DialogService.ShowFolderBrowserDialog(this, settings);
             if (success == null || success == false)
@@ -317,8 +303,7 @@ namespace HappyHour.ViewModel
             }
         }
 
-        void IterateMedia(string currDir, List<string> dbDirs,
-            CancellationToken token)
+        void IterateMedia(string currDir, CancellationToken token, List<string> dbDirs)
         {
             if (token.IsCancellationRequested)
                 return;
@@ -336,7 +321,7 @@ namespace HappyHour.ViewModel
                 {
                     foreach (var dir in dirs)
                     {
-                        IterateMedia(dir, dbDirs, token);
+                        IterateMedia(dir, token, dbDirs);
                     }
                 }
             }
@@ -409,7 +394,7 @@ namespace HappyHour.ViewModel
             _runningTask = Task.Run(() =>
             {
                 dbDirs.Sort();
-                IterateMedia(currDir, dbDirs, token);
+                IterateMedia(currDir, token, dbDirs);
                 Log.Print("Search orphanage media done!");
             }, token);
             await _runningTask;

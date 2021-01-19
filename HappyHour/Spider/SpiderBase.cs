@@ -19,7 +19,6 @@ using HappyHour.Extension;
 
 namespace HappyHour.Spider
 {
-    delegate void OnJsResult(object items);
     //delegate void OnJsResult(List<object> items);
     delegate void ScrapCompletedHandler(SpiderBase spider);
 

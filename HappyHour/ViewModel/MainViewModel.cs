@@ -64,7 +64,7 @@ namespace HappyHour.ViewModel
             set
             {
                 Set(ref _nasEnabled, value);
-                OnPaneEnabled<BrowserViewModel>(value);
+                OnPaneEnabled<NasViewModel>(value);
             }
         }
         readonly IDialogService _dialogService;

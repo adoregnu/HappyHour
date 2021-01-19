@@ -28,7 +28,7 @@
                         {RelativeSource AncestorType={x:Type Button}}}" />
             </Button>
             <Button Style="{DynamicResource ModernButtonStyle2}"
-                    Command="{Binding CmdBack}">
+                    Command="{Binding CmdBackward}">
                 <Path Stretch="Uniform"
                     Data="{Binding Source={StaticResource ArrowLeftIcon}, Path=Data}"
                     Fill="{Binding Path=Foreground, RelativeSource=
