@@ -84,10 +84,8 @@ namespace HappyHour.ViewModel
 
         public void Download(string url)
         {
-            WebBrowser.Dispatcher.Invoke(delegate {
-                var host = WebBrowser.GetBrowserHost();
-                host.StartDownload(url);
-            });
+            var host = WebBrowser.GetBrowserHost();
+            host.StartDownload(url);
         }
 
         protected bool CanExecuteJS()

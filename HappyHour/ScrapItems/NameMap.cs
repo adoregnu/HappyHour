@@ -12,12 +12,12 @@ namespace HappyHour.ScrapItems
         static Dictionary<string, string> _studioMap
             = new Dictionary<string, string>
             {
-                { "Emmanuelle", "Emmanuelle"},
+                //{ "Emmanuelle", "Emmanuelle"},
                 { "h.m.p", "h.m.p"},
-                { "Daydream", "Mousouzoku"},
-                { "Daydreamers", "Mousouzoku"},
-                { "Mousouzoku", "Mousouzoku"},
-                { "Mousozoku", "Mousouzoku"},
+                //{ "Daydream", "Mousouzoku"},
+                //{ "Daydreamers", "Mousouzoku"},
+                //{ "Mousouzoku", "Mousouzoku"},
+                //{ "Mousozoku", "Mousouzoku"},
                 { "scute", "S-Cute"},
                 { "sodcreate", "SOD Create"},
                 { "Tameike Goro-", "Tameike Goro" },

@@ -18,14 +18,17 @@
                 <TextBlock Text="{Binding .}" VerticalAlignment="Center"/>
             </StackPanel>
         </DataTemplate>
-        <Style x:Key="EnderlinedTextboxReadonly" TargetType="TextBox">
+        <Style x:Key="TextboxStyle" TargetType="TextBox">
             <Setter Property="BorderBrush" Value="LightGray"/>
             <Setter Property="BorderThickness" Value="0,0,0,1"/>
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="IsReadOnly" Value="False"/>
         </Style>
-        <Style x:Key="EnderlinedTextbox" TargetType="TextBox">
-            <Setter Property="BorderBrush" Value="Gray"/>
+        <Style x:Key="ListBoxStyle" TargetType="ListBox">
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Background" Value="Transparent"/>
+        </Style>
+        <Style x:Key="ComboBoxStyle" TargetType="ComboBox">
+            <Setter Property="BorderBrush" Value="LightGray"/>
             <Setter Property="BorderThickness" Value="0,0,0,1"/>
             <Setter Property="Background" Value="Transparent"/>
         </Style>
@@ -46,13 +49,13 @@
             <TextBlock Text="Path : " DockPanel.Dock="Left"
                        Width="60" TextAlignment="Right"/>
             <TextBox Text="{Binding Av.Path}"
-                     Style="{StaticResource EnderlinedTextboxReadonly}"/>
+                     Style="{StaticResource TextboxStyle}"/>
         </DockPanel>
         <DockPanel Grid.Row="1" Margin="5">
             <TextBlock Text="Title : " DockPanel.Dock="Left"
                        Width="60" TextAlignment="Right"/>
             <TextBox Text="{Binding Av.Title}"
-                     Style="{StaticResource EnderlinedTextbox}"/>
+                     Style="{StaticResource TextboxStyle}"/>
         </DockPanel>
         <Grid Grid.Row="2" Margin="5">
             <Grid.ColumnDefinitions>
@@ -64,13 +67,13 @@
             <TextBlock Text="Released : " Grid.Column="0"
                        TextAlignment="Right"/>
             <TextBox Grid.Column="1" 
-                       Style="{StaticResource EnderlinedTextboxReadonly}"
+                       Style="{StaticResource TextboxStyle}"
                        Text="{Binding Av.DateReleased, StringFormat='{}{0:yyyy-MM-dd}'}"/>
             <StackPanel Grid.Column="2" Orientation="Horizontal">
                 <TextBlock Text="Leaked PID : " Margin="5,0,0,0"
                            VerticalAlignment="Center"/>
                 <TextBox Width="130" Text="{Binding Av.LeakedPid}"
-                         Style="{StaticResource EnderlinedTextboxReadonly}"/>
+                         Style="{StaticResource TextboxStyle}"/>
             </StackPanel>
             <CheckBox Grid.Column="3" Margin="5,0,5,0"
                       IsChecked="{Binding Av.IsCensored}"
@@ -87,14 +90,15 @@
                 <TextBlock Text="Studio : " DockPanel.Dock="Left"
                           Width="60" TextAlignment="Right" />
                 <TextBox Text="{Binding Studio, Mode=OneWay}"
-                         Style="{StaticResource EnderlinedTextboxReadonly}"/>
+                         Style="{StaticResource TextboxStyle}"/>
             </DockPanel>
             <DockPanel Grid.Column="1">
                 <Button DockPanel.Dock="Right" Content="Set" Margin="2,0,2,0"
                         Width="30" Command="{Binding CmdSetStudio}"/>
                 <ComboBox ItemsSource="{Binding AllStudios}" Margin="5,0,5,0"
                           SelectedItem="{Binding SelectedStudio}"
-                          IsEditable="True" IsTextSearchEnabled="True"/>
+                          IsEditable="True" IsTextSearchEnabled="True"
+                          Style="{StaticResource ComboBoxStyle}"/>
             </DockPanel>
         </Grid>
         <Grid Grid.Row="4" Margin="5">
@@ -106,14 +110,15 @@
                 <TextBlock Text="Series : " DockPanel.Dock="Left"
                           Width="60" TextAlignment="Right" />
                 <TextBox Text="{Binding Series, Mode=OneWay}"
-                         Style="{StaticResource EnderlinedTextboxReadonly}"/>
+                         Style="{StaticResource TextboxStyle}"/>
             </DockPanel>
             <DockPanel Grid.Column="1">
                 <Button DockPanel.Dock="Right" Content="Set" Margin="2,0,2,0"
                         Width="30" Command="{Binding CmdSetSeries}"/>
                 <ComboBox ItemsSource="{Binding AllSeries}" Margin="5,0,5,0"
                           SelectedItem="{Binding SelectedSeries}"
-                          IsEditable="True" IsTextSearchEnabled="True"/>
+                          IsEditable="True" IsTextSearchEnabled="True"
+                          Style="{StaticResource ComboBoxStyle}"/>
             </DockPanel>
         </Grid>
         <Grid Grid.Row="5" Margin="5">
@@ -125,6 +130,7 @@
                 <TextBlock Text="Actors : " DockPanel.Dock="Left"
                           Width="60" TextAlignment="Right" />
                 <ListBox MinHeight="60" MaxHeight="300" ItemsSource="{Binding Actors}"
+                         Style="{StaticResource ListBoxStyle}"
                          SelectedItem="{Binding SelectedAvActor}"
                          ItemTemplate="{StaticResource ActorMiniTemplate}">
                     <i:Interaction.Triggers>
@@ -135,13 +141,17 @@
                 </ListBox>
             </DockPanel>
             <DockPanel Grid.Column="1" Margin="2,0,0,0">
-                <TextBox DockPanel.Dock="Top" Margin="0,0,0,2"
-                         Style="{StaticResource EnderlinedTextbox}"
+                <DockPanel DockPanel.Dock="Top">
+                    <TextBlock DockPanel.Dock="Left" Text="Search: "/>
+                    <TextBox Margin="0,0,0,2"
+                         Style="{StaticResource TextboxStyle}"
                          Text="{Binding SearchActorName,
                             UpdateSourceTrigger=PropertyChanged}"/>
+                </DockPanel>
                 <ListBox MaxHeight="300" ItemsSource="{Binding AllActors}"
                      ItemTemplate="{StaticResource ActorMiniTemplate}"
-                     SelectedItem="{Binding SelectedActor}">
+                     SelectedItem="{Binding SelectedActor}"
+                     Style="{StaticResource ListBoxStyle}">
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="MouseDoubleClick">
                             <i:InvokeCommandAction Command="{Binding CmdAddActor}"/>
@@ -159,7 +169,8 @@
                 <TextBlock Text="Genres : " DockPanel.Dock="Left"
                           Width="60" TextAlignment="Right" />
                 <ListBox MinHeight="50" MaxHeight="100" ItemsSource="{Binding Genres}"
-                         SelectedItem="{Binding SelectedAvGenre}">
+                         SelectedItem="{Binding SelectedAvGenre}"
+                         Style="{StaticResource ListBoxStyle}">
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="MouseDoubleClick">
                             <i:InvokeCommandAction Command="{Binding CmdRemoveGenre}"/>
@@ -168,7 +179,8 @@
                 </ListBox>
             </DockPanel>
              <ListBox Grid.Column="2" MaxHeight="100" ItemsSource="{Binding AllGenres}"
-                     SelectedItem="{Binding SelectedGenre}">
+                      SelectedItem="{Binding SelectedGenre}"
+                      Style="{StaticResource ListBoxStyle}">
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="MouseDoubleClick">
                         <i:InvokeCommandAction Command="{Binding CmdAddGenre}"/>
@@ -179,14 +191,13 @@
         <DockPanel Grid.Row="7" Margin="5">
             <TextBlock Text="Plot : " DockPanel.Dock="Left"
                        Width="60" TextAlignment="Right"/>
-            <TextBox Height="60" Text="{Binding Av.Plot}"
-                      />
+            <TextBox Height="60" Text="{Binding Av.Plot}" />
         </DockPanel>
         <StackPanel Grid.Row="8" Orientation="Horizontal"
                     HorizontalAlignment="Right">
             <Button Content="Save" Margin="0,0,5,5"
                     Command="{Binding CmdSave}" Click="Close"/>
-            <Button Content="Cancel" Margin="0,0,5,5" IsCancel="True" />
+            <Button Content="Cancel" Margin="0,0,5,5" Click="Close"/>
         </StackPanel>
     </Grid>
 </Window>
