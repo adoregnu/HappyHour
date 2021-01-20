@@ -148,7 +148,6 @@ namespace HappyHour.ViewModel
             //Log.Print($"OnMediaInitializing");
         }
 #endif
-
         static readonly Key[] TogglePlayPauseKeys = {
             Key.Play, Key.MediaPlayPause, Key.Space
         };

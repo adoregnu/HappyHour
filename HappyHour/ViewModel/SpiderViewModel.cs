@@ -52,7 +52,7 @@ namespace HappyHour.ViewModel
                         Address = value.URL;
                     else
                         Address = value.SearchURL;
-                    Log.Print($"Spider:{value.Name}, Keyword:{value.Keyword}");
+                    //Log.Print($"Spider:{value.Name}, Keyword:{value.Keyword}");
                 }
             }
         }

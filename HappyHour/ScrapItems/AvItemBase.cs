@@ -229,19 +229,6 @@ namespace HappyHour.ScrapItems
                 catch (ValidationException e)
                 {
                     Log.Print(e.Message);
-#if false
-                    foreach (var eve in e.EntityValidationErrors)
-                    {
-                        Log.Print("Entity of type \"{0}\" in state \"{1}\"" +
-                            " has the following validation errors:",
-                            eve.Entry.Entity.GetType().Name, eve.Entry.State);
-                        foreach (var ve in eve.ValidationErrors)
-                        {
-                            Log.Print("- Property: \"{0}\", Error: \"{1}\"",
-                                ve.PropertyName, ve.ErrorMessage);
-                        }
-                    }
-#endif
                 }
                 finally
                 {

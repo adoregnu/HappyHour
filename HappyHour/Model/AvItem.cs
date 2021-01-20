@@ -7,14 +7,11 @@ using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel;
 
-//using SQLite.CodeFirst;
-
 namespace HappyHour.Model
 {
     public class AvGenre
     {
         [Key]
-        //[Autoincrement]
         public int Id { get; set; }
 
         public string Name { get; set; }
@@ -28,7 +25,6 @@ namespace HappyHour.Model
     public class AvActorName
     { 
         [Key]
-        //[Autoincrement]
         public int Id { get; set; }
 
         public string Name { get; set; }
@@ -77,7 +73,6 @@ namespace HappyHour.Model
     public class AvStudio
     { 
         [Key]
-        //[Autoincrement]
         public int Id { get; set; }
         public string Name { get; set; }
         public override string ToString()
@@ -89,7 +84,6 @@ namespace HappyHour.Model
     public class AvSeries
     { 
         [Key]
-        //[Autoincrement]
         public int Id { get; set; }
         [MaxLength(512)]
         public string Name { get; set; }
@@ -102,7 +96,6 @@ namespace HappyHour.Model
     public class AvItem
     {
         [Key]
-        //[Autoincrement]
         public int Id { get; set; }
 
         [Required]

@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
-
-using CefSharp;
+﻿using CefSharp;
 
 namespace HappyHour.ViewModel
 {
@@ -31,13 +23,8 @@ namespace HappyHour.ViewModel
         void OnFrameLoaded(object sender, FrameLoadEndEventArgs e)
         {
             if (Address != _nasUrl) return;
-#if false
-            Log.Print($"Num loading :{++_numLoading}, isMain {e.Frame.IsMain}");
-            if (e.Frame.IsMain)
-            { 
-                WebBrowser.ExecuteScriptAsync(App.ReadResource("NasLogin.js"));
-            }
-#endif
+
+            _numLoading++;
             if (_numLoading == 4)
                 WebBrowser.ExecuteScriptAsync(App.ReadResource("NasLogin.js"));
         }

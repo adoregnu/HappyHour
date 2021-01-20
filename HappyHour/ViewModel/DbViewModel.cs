@@ -8,7 +8,6 @@ using Microsoft.EntityFrameworkCore;
 
 using HappyHour.Model;
 using HappyHour.Interfaces;
-using GalaSoft.MvvmLight.Messaging;
 
 namespace HappyHour.ViewModel
 {

@@ -62,7 +62,7 @@ namespace HappyHour.Model
         }
         public List<string> Screenshots { get; private set; } = new List<string>();
 
-        public static string[] VideoExts = new string[] {
+        readonly string[] VideoExts = new string[] {
             ".mp4", ".avi", ".mkv", ".ts", ".wmv", ".m4v"
         };
 

@@ -191,12 +191,18 @@
                              Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
                     <ListBox ItemsSource="{Binding ActorNameList}" Margin="5"
                              SelectedItem="{Binding SelectedActorName}">
+                        <ListBox.InputBindings>
+                            <MouseBinding MouseAction="LeftDoubleClick"
+                                          Command="{Binding CmdActorNameDoubleClick}"/>
+                        </ListBox.InputBindings>
+<!--
                         <i:Interaction.Triggers>
                             <i:EventTrigger EventName="MouseDoubleClick">
                                 <i:InvokeCommandAction
                                     Command="{Binding CmdActorNameDoubleClick}"/>
                             </i:EventTrigger>
                         </i:Interaction.Triggers>
+-->
                         <i:Interaction.Behaviors>
                             <bh:ListboxBehavior/>
                         </i:Interaction.Behaviors>
