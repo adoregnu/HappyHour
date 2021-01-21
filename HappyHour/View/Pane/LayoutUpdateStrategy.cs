@@ -55,7 +55,7 @@ namespace HappyHour.View.Pane
             LayoutDocument anchorableShown)
         {
 #if true
-            if (anchorableShown.Content is SpiderViewModel ||
+            if (//anchorableShown.Content is SpiderViewModel ||
                 //anchorableShown.Content is BrowserViewModel ||
                 anchorableShown.Content is PlayerViewModel)
             {
@@ -75,10 +75,10 @@ namespace HappyHour.View.Pane
                     parentDocumentGroup.Orientation = Orientation.Horizontal;
                     var indexOfParentPane = parentDocumentGroup.IndexOfChild(parentDocumentPane);
                     parentDocumentGroup.InsertChildAt(indexOfParentPane + 1,
-                            new LayoutDocumentPane(anchorableShown)
-                            {
-                                DockWidth = new GridLength(1.5, GridUnitType.Star)
-                            });
+                        new LayoutDocumentPane(anchorableShown)
+                        {
+                            DockWidth = new GridLength(1.5, GridUnitType.Star)
+                        });
 
                 }
                 else

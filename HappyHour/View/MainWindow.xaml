@@ -8,17 +8,8 @@
         xmlns:view="clr-namespace:HappyHour.View"
         mc:Ignorable="d"
         md:DialogServiceViews.IsRegistered="True"
-        Title="Scrapper" Height="1024" Width="2048"
+        Title="Scrapper" Height="1024" Width="1900"
         DataContext="{Binding Source={StaticResource Locator}, Path=MainWindow}">
-    <!--
-    <i:Interaction.Triggers>
-        <i:EventTrigger EventName="PreviewKeyDown">
-            <cmd:EventToCommand
-                Command="{Binding KeyDownCommand}"
-                PassEventArgsToCommand="True" />
-        </i:EventTrigger>
-    </i:Interaction.Triggers>
--->
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"></RowDefinition>
@@ -47,17 +38,15 @@
                     <TextBlock Text="View Actors by order of alphabet"/>
                 </Button.ToolTip>
             </Button>
-<!--
             <ToggleButton
-                Style="{DynamicResource ModernToggleButtonStyle2}"
-                IsChecked="{Binding SpiderEnabled, Mode=TwoWay}"
+                Style="{DynamicResource ModernToggleButtonStyle3}"
+                IsChecked="{Binding SpiderEnabled}"
                 ToolTip="Enable Spider">
                 <Path Stretch="Uniform"
                       Data="{Binding Source={StaticResource SpiderIcon}, Path=Data}"
                       Fill="{Binding Path=Foreground, RelativeSource=
                         {RelativeSource AncestorType={x:Type ToggleButton}}}"/>
             </ToggleButton>
--->
             <ToggleButton
                 Style="{DynamicResource ModernToggleButtonStyle3}"
                 IsChecked="{Binding NasEnabled, Mode=TwoWay}"
@@ -71,7 +60,7 @@
         <view:DockView Grid.Row="1" x:Name="Dock"/>
         <StatusBar  Grid.Row="2">
             <StatusBarItem>
-                <TextBlock Text="{Binding Status, Mode=OneWay}"/>
+                <TextBlock Text="{Binding StatusMessage, Mode=OneWay}"/>
             </StatusBarItem>
         </StatusBar>
     </Grid>

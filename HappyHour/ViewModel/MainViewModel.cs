@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,50 +15,45 @@ using Unosquare.FFME;
 using Unosquare.FFME.Common;
 
 using HappyHour.View;
-using System.Collections.Specialized;
+using HappyHour.Interfaces;
 
 namespace HappyHour.ViewModel
 {
-    class MainViewModel : GalaSoft.MvvmLight.ViewModelBase
+    class MainViewModel : GalaSoft.MvvmLight.ViewModelBase, IMainView
     {
         string _status;
         bool _nasEnabled;
+        bool _spiderEnabled;
 
         public ICommand CmdFileToFolder { get; private set; }
         public ICommand CmdActorEdtor { get; private set; }
-        //public ICommand KeyDownCommand { get; private set; }
 
         public ObservableCollection<Pane> Docs { get; }
             = new ObservableCollection<Pane>();
         public ObservableCollection<Pane> Anchors { get; }
             = new ObservableCollection<Pane>();
 
-        public string Status
+        public string StatusMessage
         {
             get => _status;
-            set
-            {
-                _status = value;
-                RaisePropertyChanged(nameof(Status));
-            }
+            set => Set(ref _status, value);
         }
-#if false
-        bool _spiderEnabled;
-        bool _nasEnabled;
 
         public bool SpiderEnabled
         {
             get => _spiderEnabled;
             set
             {
-                if (value == true &&_spiderEnabled != value)
+                Set(ref _spiderEnabled, value);
+                var mv = OnPaneEnabled<SpiderViewModel>(value);
+                if (value == true)
                 {
-                    OnPaneEnabled<SpiderViewModel>(value);
-                    Set(ref _spiderEnabled, value);
+                    mv.MediaList = _mediaListMv;
+                    mv.MainView = this;
                 }
             }
         }
-#endif
+
         public bool NasEnabled
         {
             get => _nasEnabled;
@@ -67,19 +63,19 @@ namespace HappyHour.ViewModel
                 OnPaneEnabled<NasViewModel>(value);
             }
         }
-        readonly IDialogService _dialogService;
+        public IDialogService DialogService { get; set; }
         readonly FileListViewModel _fileListMv;
         readonly MediaListViewModel _mediaListMv;
 
         public MainViewModel(IDialogService dialogService)
         {
-            _dialogService = dialogService;
-            // Order of VieModel creation is important.
+            DialogService = dialogService;
+
             _fileListMv = new FileListViewModel();
             _mediaListMv = new MediaListViewModel
             {
                 FileList = _fileListMv,
-                DialogService = dialogService
+                MainView = this,
             };
 
             Anchors.Add(_fileListMv);
@@ -91,56 +87,42 @@ namespace HappyHour.ViewModel
             Anchors.Add(new ScreenshotViewModel { MediaList = _mediaListMv });
 
             Docs.Add(new PlayerViewModel { MediaList = _mediaListMv });
-            Docs.Add(new SpiderViewModel { MediaList = _mediaListMv });
             Docs.Add(_mediaListMv);
 
             CmdActorEdtor = new RelayCommand(() => OnActorEditor());
             CmdFileToFolder = new RelayCommand(() => OnFileToFolder());
-            //KeyDownCommand = new RelayCommand<EventArgs>(e => OnKeyDown(e));
-
-            MessengerInstance.Register<NotificationMessage<string>>(
-                this, OnStatusMessage);
 
             MediaElement.FFmpegMessageLogged += OnMediaFFmpegMessageLogged;
 
             //for update media list
-            _fileListMv.DirChanged.Invoke(this, _fileListMv.CurrDirInfo);
-            Docs.CollectionChanged += DocsCollectionChanged;
+            _fileListMv.DirChanged?.Invoke(this, _fileListMv.CurrDirInfo);
         }
 
-        void DocsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        VMType OnPaneEnabled<VMType>(bool enabled) where VMType : Pane
         {
-            switch (e.Action)
-            {
-                case NotifyCollectionChangedAction.Remove:
-                    foreach (var doc in e.OldItems)
-                    {
-                        (doc as GalaSoft.MvvmLight.ViewModelBase).Cleanup();
-                    }
-                    break;
-            }
-        }
-
-        void OnPaneEnabled<VMType>(bool enabled)
-        {
+            Pane pane = null;
             if (enabled)
             {
-                var pane = (Pane)Activator.CreateInstance(typeof(VMType));
+                pane = (Pane)Activator.CreateInstance(typeof(VMType));
                 Docs.Add(pane);
                 pane.IsSelected = true;
             }
             else
             {
-                var spiderMv = Docs.FirstOrDefault(d => d is VMType);
-                if (spiderMv != null)
-                    Docs.Remove(spiderMv);
+                pane = Docs.FirstOrDefault(d => d is VMType);
+                if (pane != null)
+                {
+                    Docs.Remove(pane);
+                    pane.Cleanup();
+                }
             }
+            return (VMType)pane;
         }
 
         void OnFileToFolder()
         {
             var dialog = new FileToFolderViewModel { MediaPath = _fileListMv.CurrPath };
-            _dialogService.ShowDialog<FileToFolderDialog>(this, dialog);
+            DialogService.ShowDialog<FileToFolderDialog>(this, dialog);
         }
 
         void OnActorEditor()
@@ -148,30 +130,9 @@ namespace HappyHour.ViewModel
             var dialog = new ActorEditorViewModel
             {
                 MediaList = _mediaListMv,
-                DialogService = _dialogService
+                DialogService = DialogService
             };
-            _dialogService.Show<ActorEditorDialog>(this, dialog);
-        }
-#if false
-        void OnKeyDown(EventArgs e)
-        {
-            foreach (var doc in Docs)
-            {
-                doc.OnKeyDown(e as KeyEventArgs);
-            }
-        }
-#endif
-        void OnStatusMessage(NotificationMessage<string> msg)
-        {
-            if (!msg.Notification.EndsWith("Status")) return;
-            if (msg.Notification == "UpdateStatus")
-            {
-                Status = msg.Content;
-            }
-            else if (msg.Notification == "ClearStatus")
-            { 
-                Status = "";
-            }
+            DialogService.Show<ActorEditorDialog>(this, dialog);
         }
 
         void OnMediaFFmpegMessageLogged(object sender, MediaLogMessageEventArgs e)

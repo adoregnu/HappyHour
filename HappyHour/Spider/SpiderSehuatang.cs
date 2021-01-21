@@ -124,9 +124,8 @@ namespace HappyHour.Spider
                 _articlesInPage = result as List<object>;
                 _isPageChanged = false;
             }
-            MessengerInstance.Send(new NotificationMessage<string>(
-                $"{_index}/{_articlesInPage.Count} {_pageNum}/{NumPage}",
-                "UpdateStatus"));
+            Browser.MainView.StatusMessage =
+                $"{_index}/{_articlesInPage.Count}, {_pageNum}/{NumPage}";
 
             if (_articlesInPage.Count > _index)
             {

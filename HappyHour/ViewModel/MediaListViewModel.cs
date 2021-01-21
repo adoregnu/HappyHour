@@ -12,24 +12,18 @@ using System.Windows.Data;
 
 using Microsoft.EntityFrameworkCore;
 
-using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
-using GalaSoft.MvvmLight.Messaging;
 
-using MvvmDialogs;
 using MvvmDialogs.FrameworkDialogs.FolderBrowser;
 
 using HappyHour.Extension;
 using HappyHour.Model;
-using HappyHour.Utils;
 using HappyHour.Spider;
 using HappyHour.Interfaces;
 using HappyHour.View;
 
 namespace HappyHour.ViewModel
 {
-    using SpiderEnum = IEnumerable<SpiderBase>;
-
     enum MediaListMenuType
     { 
         excluded, downloaded, scrap
@@ -44,6 +38,7 @@ namespace HappyHour.ViewModel
         bool _sortByDateAdded = false;
         bool _searchSubFolder = false;
         IFileList _fileList;
+        IEnumerable<SpiderBase> _spiderList;
 
         public MediaItem SelectedMedia
         {
@@ -63,9 +58,13 @@ namespace HappyHour.ViewModel
             set => Set(ref _isBrowsing, value);
         }
 
+        public IEnumerable<SpiderBase> SpiderList
+        {
+            get => _spiderList;
+            set => Set(ref _spiderList, value);
+        }
         public ObservableCollection<MediaItem> MediaList { get; private set; }
         public ObservableCollection<MediaItem> SelectedMedias { get; private set; }
-        public SpiderEnum SpiderList { get; private set; }
         public bool SearchSubFolder
         {
             get => _searchSubFolder;
@@ -104,6 +103,7 @@ namespace HappyHour.ViewModel
             }
         }
 
+        public IMainView MainView { get; set; }
         public IFileList FileList
         {
             get => _fileList;
@@ -117,8 +117,6 @@ namespace HappyHour.ViewModel
                 }
             }
         }
-
-        public IDialogService DialogService { get; set; }
 
         public ICommand CmdExclude { get; set; }
         public ICommand CmdDownload { get; set; }
@@ -162,13 +160,11 @@ namespace HappyHour.ViewModel
             CmdDoubleClick = new RelayCommand(() =>
                 ItemDoubleClickedHandler?.Invoke(this, SelectedMedia));
             CmdScrap = new RelayCommand<object>(
-                p => OnScrapAvInfo(p as SpiderBase));
-            CmdStopBatchingScrap = new RelayCommand(() => {
-                if (_mitemsToSearch != null) _mitemsToSearch.Clear();
-            });
-
-            MessengerInstance.Register<NotificationMessage<SpiderEnum>>(this,
-                (msg) => SpiderList = msg.Content.Where(i => i.Name != "sehuatang"));
+                p => OnScrapAvInfo(p as SpiderBase),
+                p => SpiderList != null);
+            CmdStopBatchingScrap = new RelayCommand(
+                () => _mitemsToSearch.Clear(),
+                () => SpiderList != null && _mitemsToSearch != null);
         }
 
         void OnDirChanged(object sender, DirectoryInfo msg)
@@ -239,7 +235,7 @@ namespace HappyHour.ViewModel
                 Description = "Select Target folder",
                 SelectedPath = mitems[0].MediaFolder
             };
-            bool? success = DialogService.ShowFolderBrowserDialog(this, settings);
+            bool? success = MainView.DialogService.ShowFolderBrowserDialog(this, settings);
             if (success == null || success == false)
             {
                 Log.Print("Target folder is not selected!");
@@ -274,8 +270,7 @@ namespace HappyHour.ViewModel
                 return;
 
             var dialog = new AvEditorViewModel(item);
-            //DialogService.ShowDialog<AvEditorDialog>(this, dialog);
-            DialogService.Show<AvEditorDialog>(this, dialog);
+            MainView.DialogService.Show<AvEditorDialog>(this, dialog);
         }
         void UpdateMediaList(string path, CancellationToken token,
             bool bRecursive = false, int level = 0)
@@ -448,10 +443,7 @@ namespace HappyHour.ViewModel
 
             if (_mitemsToSearch.Count > 0)
             {
-                MessengerInstance.Send(
-                    new NotificationMessage<string>(
-                        $"{_mitemsToSearch.Count} remained",
-                        "UpdateStatus"));
+                MainView.StatusMessage = $"{_mitemsToSearch.Count} remained";
                 spider.ScrapCompleted += OnScrapCompleted;
                 spider.Keyword = _mitemsToSearch[0].Pid;
                 spider.DataPath = _mitemsToSearch[0].MediaFolder;
@@ -459,8 +451,7 @@ namespace HappyHour.ViewModel
             }
             else
             {
-                MessengerInstance.Send(
-                    new NotificationMessage<string>("", "ClearStatus"));
+                MainView.StatusMessage = "";
                 _mitemsToSearch = null;
                 spider.Reset();
             }

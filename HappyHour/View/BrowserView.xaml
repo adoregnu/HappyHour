@@ -12,6 +12,9 @@
         <ControlTemplate x:Key="BrowserHeaderBase">
             <local:BrowserHeaderBase/>
         </ControlTemplate>
+        <ControlTemplate x:Key="BrowserHeaderGoogleEarth">
+            <local:BrowserHeaderGoogleEarth/>
+        </ControlTemplate>
         <ControlTemplate x:Key="BrowserHeaderSpider">
             <local:BrowserHeaderSpider/>
         </ControlTemplate>
@@ -29,6 +32,9 @@
                 </DataTrigger>
                 <DataTrigger Binding="{Binding HeaderType, Mode=TwoWay}" Value="sehuatang">
                     <Setter Property="Template" Value="{StaticResource BrowserHeaderSehuatang}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding HeaderType, Mode=TwoWay}" Value="googleEarth">
+                    <Setter Property="Template" Value="{StaticResource BrowserHeaderGoogleEarth}"/>
                 </DataTrigger>
             </Style.Triggers> 
         </Style>

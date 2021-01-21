@@ -22,8 +22,6 @@ using HappyHour.Interfaces;
 
 namespace HappyHour.ViewModel
 {
-    using SpiderEnum = IEnumerable<SpiderBase>;
-
     class SpiderViewModel : BrowserBase
     {
         string _keyword;
@@ -43,8 +41,7 @@ namespace HappyHour.ViewModel
             {
                 if (value != null)
                 {
-                    HeaderType = value.Name != "sehuatang"
-                        ? "spider" : "sehuatang";
+                    HeaderType = value.Name != "sehuatang" ? "spider" : "sehuatang";
 
                     Set(ref _selectedSpider, value);
                     value.SetCookies();
@@ -52,7 +49,6 @@ namespace HappyHour.ViewModel
                         Address = value.URL;
                     else
                         Address = value.SearchURL;
-                    //Log.Print($"Spider:{value.Name}, Keyword:{value.Keyword}");
                 }
             }
         }
@@ -61,12 +57,16 @@ namespace HappyHour.ViewModel
         public ICommand CmdStart { get; private set; }
         public ICommand CmdStop { get; private set; }
 
+        public IMainView MainView { get; set; }
         public IMediaList MediaList
         {
             get => _mediaList;
             set
             {
+                if (value == null) return;
+
                 _mediaList = value;
+                _mediaList.SpiderList = Spiders;
                 _mediaList.ItemSelectedHandler += (o, i) =>
                 {
                     if (i != null) Keyword = i.Pid;
@@ -100,8 +100,6 @@ namespace HappyHour.ViewModel
             };
             SelectedSpider = Spiders[0];
             Address = SelectedSpider.URL;
-
-            MessengerInstance.Send(new NotificationMessage<SpiderEnum>(Spiders, ""));
         }
 
         protected override void InitBrowser()
@@ -137,6 +135,18 @@ namespace HappyHour.ViewModel
                 }
                 item.OnJsResult(name, x.Result.Result.ToList<object>());
             });
+        }
+
+        public override void Cleanup()
+        {
+            base.Cleanup();
+            if (_mediaList != null)
+            {
+                _mediaList.SpiderList = null;
+                _mediaList.ItemSelectedHandler = null;
+            }
+            _mediaList = null;
+            MainView = null;
         }
     }
 }

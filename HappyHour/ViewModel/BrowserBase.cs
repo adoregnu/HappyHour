@@ -66,6 +66,12 @@ namespace HappyHour.ViewModel
             //Address = "https://www.google.com";
         }
 
+        protected virtual void OnAddressChanged()
+        {
+            //Title = Address;
+            Log.Print("Address changed: " + Address);
+        }
+
         void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             switch (e.PropertyName)
@@ -76,8 +82,7 @@ namespace HappyHour.ViewModel
                     break;
 
                 case nameof(Address):
-                    Title = Address;
-                    Log.Print("Address changed: " + Address);
+                    OnAddressChanged();
                     break;
             }
         }

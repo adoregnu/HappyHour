@@ -59,6 +59,7 @@
     <None Remove="Resources\NasLogin.js" />
     <None Remove="Resources\SearchText.js" />
     <None Remove="Resources\XPathClick.sbn.js" />
+    <None Remove="Resources\XPathClickSIngle.sbn.js" />
     <None Remove="Resources\XPathMulti.sbn.js" />
     <None Remove="Resources\XPathSingle.sbn.js" />
   </ItemGroup>
@@ -67,6 +68,7 @@
     <EmbeddedResource Include="Resources\ElementAt.js" />
     <EmbeddedResource Include="Resources\NasLogin.js" />
     <EmbeddedResource Include="Resources\SearchText.js" />
+    <EmbeddedResource Include="Resources\XPathClickSingle.sbn.js" />
     <EmbeddedResource Include="Resources\XPathClick.sbn.js" />
     <EmbeddedResource Include="Resources\XPathMulti.sbn.js" />
     <EmbeddedResource Include="Resources\XPathSingle.sbn.js" />

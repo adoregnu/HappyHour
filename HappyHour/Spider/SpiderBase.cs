@@ -62,20 +62,24 @@ namespace HappyHour.Spider
             throw new Exception("Unknown Config");
         }
 
-        string XPath(string xpath, string jsPath)
+        static string XPath(string xpath, string jsPath)
         {
             var template = Template.Parse(App.ReadResource(jsPath));
             var result = template.Render(new { XPath = xpath });
             return result;
         }
 
-        protected string XPath(string xpath)
+        public static string XPath(string xpath)
         { 
             return XPath(xpath, @"XPathMulti.sbn.js");
         }
-        protected string XPathClick(string xpath)
+        public static string XPathClick(string xpath)
         { 
             return XPath(xpath, @"XPathClick.sbn.js");
+        }
+        public static string XPathClickSingle(string xpath)
+        { 
+            return XPath(xpath, @"XPathClickSingle.sbn.js");
         }
 
         public virtual void Navigate2()
