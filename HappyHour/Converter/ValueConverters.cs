@@ -293,6 +293,22 @@ namespace HappyHour.Converter
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) =>
             value != null && (bool)value ? CaptionsChannel.CC1 : CaptionsChannel.CCP;
     }
+
+    internal class NullToVisivilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType,
+            object parameter, CultureInfo culture)
+        {
+            if (value == null)
+                return Visibility.Collapsed;
+            else
+                return Visibility.Visible;
+        }
+
+        public object ConvertBack(object value, Type targetType,
+            object parameter, CultureInfo culture) =>
+            throw new NotSupportedException();
+    }
 }
 #pragma warning restore CA1812 // Remove classes that are apparently never instantiated
 #pragma warning restore SA1649 // File name must match first type name

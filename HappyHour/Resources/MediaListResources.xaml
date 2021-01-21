@@ -60,7 +60,11 @@
                 <ContextMenu x:Key="videoContextMenu">
                     <MenuItem 
                         Header="Scrap"
-                        ItemsSource="{Binding Data.SpiderList, Source={StaticResource VmContext}}">
+                        Visibility="{Binding Data.SpiderList,
+                            Source={StaticResource VmContext},
+                            Converter={StaticResource nulltoVis}}"
+                        ItemsSource="{Binding Data.SpiderList,
+                            Source={StaticResource VmContext}}">
                         <MenuItem.ItemTemplate>
                             <DataTemplate>
                                 <MenuItem
@@ -71,21 +75,6 @@
                                 </MenuItem>
                             </DataTemplate>
                         </MenuItem.ItemTemplate>
-<!--
-                        <MenuItem.Style>
-                            <Style TargetType="MenuItem">
-                                <Setter Property="IsEnabled" Value="True"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsRunning}" Value="True">
-                                        <Setter Property="IsEnabled" Value="False"/>
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding IsRunning}" Value="False">
-                                        <Setter Property="IsEnabled" Value="True"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </MenuItem.Style>
--->
                     </MenuItem>
 
                     <MenuItem

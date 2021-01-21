@@ -61,7 +61,13 @@ namespace HappyHour.ViewModel
         public IEnumerable<SpiderBase> SpiderList
         {
             get => _spiderList;
-            set => Set(ref _spiderList, value);
+            set
+            {
+                IEnumerable<SpiderBase> list = null;
+                if (value != null)
+                    list = value.Where(l => l.Name != "sehuatang");
+                Set(ref _spiderList, list);
+            }
         }
         public ObservableCollection<MediaItem> MediaList { get; private set; }
         public ObservableCollection<MediaItem> SelectedMedias { get; private set; }
@@ -159,12 +165,10 @@ namespace HappyHour.ViewModel
                 () => OnSearchEmptyActor());
             CmdDoubleClick = new RelayCommand(() =>
                 ItemDoubleClickedHandler?.Invoke(this, SelectedMedia));
-            CmdScrap = new RelayCommand<object>(
-                p => OnScrapAvInfo(p as SpiderBase),
-                p => SpiderList != null);
+            CmdScrap = new RelayCommand<object>(p => OnScrapAvInfo(p as SpiderBase));
             CmdStopBatchingScrap = new RelayCommand(
                 () => _mitemsToSearch.Clear(),
-                () => SpiderList != null && _mitemsToSearch != null);
+                () => _mitemsToSearch != null);
         }
 
         void OnDirChanged(object sender, DirectoryInfo msg)

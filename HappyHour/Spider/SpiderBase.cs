@@ -16,10 +16,10 @@ using CefSharp;
 using HappyHour.ViewModel;
 using HappyHour.ScrapItems;
 using HappyHour.Extension;
+using System.Windows;
 
 namespace HappyHour.Spider
 {
-    //delegate void OnJsResult(List<object> items);
     delegate void ScrapCompletedHandler(SpiderBase spider);
 
     abstract class SpiderBase : ViewModelBase

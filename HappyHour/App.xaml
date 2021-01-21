@@ -11,6 +11,7 @@
                 <ResourceDictionary>
                     <vm:ViewModelLocator x:Key="Locator" />
                     <BooleanToVisibilityConverter x:Key="boolToVis" />
+                    <conv:NullToVisivilityConverter x:Key="nulltoVis"/>
                     <conv:UpdateBindingConverter x:Key="UpdateBindingConverter" />
                     <conv:FileToImageConverter x:Key="PathToImageConverter"/>
                 </ResourceDictionary>
