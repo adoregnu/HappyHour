@@ -9,7 +9,6 @@ using System.Windows.Input;
 using CefSharp;
 using CefSharp.Wpf;
 
-using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Messaging;
 
 using HappyHour.CefHandler;

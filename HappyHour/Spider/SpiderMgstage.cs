@@ -4,7 +4,6 @@ using System.Linq;
 
 using CefSharp;
 
-using HappyHour.Model;
 using HappyHour.ScrapItems;
 using HappyHour.ViewModel;
 

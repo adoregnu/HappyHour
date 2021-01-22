@@ -4,13 +4,10 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 using CefSharp;
 using HtmlAgilityPack;
 
-using HappyHour.Model;
 using HappyHour.ScrapItems;
 using HappyHour.ViewModel;
 
@@ -76,7 +73,7 @@ namespace HappyHour.Spider
                 if (div.Trim().Equals(Keyword, StringComparison.OrdinalIgnoreCase))
                 {
                     var href = doc.DocumentNode.FirstChild.Attributes["href"].Value;
-                    _state = 1;
+                    ParsingState = 1;
                     Browser.Address = $"{URL}{href}";
                     return;
                 }
@@ -86,7 +83,7 @@ namespace HappyHour.Spider
 
         public override void Scrap()
         {
-            switch (_state)
+            switch (ParsingState)
             {
             case 0:
                 Browser.ExecJavaScript(
@@ -98,7 +95,7 @@ namespace HappyHour.Spider
                 {
                     NumItemsToScrap = _xpathDic.Count
                 }, _xpathDic);
-                _state = 2;
+                ParsingState = 2;
                 break;
             }
         }

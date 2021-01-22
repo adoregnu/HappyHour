@@ -2,12 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 using CefSharp;
 using HtmlAgilityPack;
 
-using HappyHour.Model;
 using HappyHour.ScrapItems;
 using HappyHour.ViewModel;
 
@@ -80,7 +78,7 @@ namespace HappyHour.Spider
             if (a == null)
                 goto NotFound;
 
-            _state = 1;
+            ParsingState = 1;
             Browser.Address = $"{URL}{a.Attributes["href"].Value.Substring(1)}";
             return;
         NotFound:
@@ -89,7 +87,7 @@ namespace HappyHour.Spider
 
         public override void Scrap()
         {
-            switch (_state)
+            switch (ParsingState)
             {
                 case 0:
                     Browser.ExecJavaScript(
@@ -101,7 +99,7 @@ namespace HappyHour.Spider
                     {
                         NumItemsToScrap = _xpathDic.Count
                     }, _xpathDic);
-                    _state = 2;
+                    ParsingState = 2;
                     break;
             }
         }

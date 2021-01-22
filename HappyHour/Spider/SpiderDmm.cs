@@ -8,8 +8,6 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 using CefSharp;
-using HappyHour.Extension;
-using HappyHour.Model;
 using HappyHour.ViewModel;
 
 namespace HappyHour.Spider
@@ -73,7 +71,7 @@ namespace HappyHour.Spider
 
             if (matchCount == 1)
             {
-                _state = 1;
+                ParsingState = 1;
                 Browser.Address = exactUrl;
             }
             else if (matchCount > 1)
@@ -89,7 +87,7 @@ namespace HappyHour.Spider
 
         public override void Scrap()
         {
-            switch (_state)
+            switch (ParsingState)
             {
                 case 0:
                     Browser.ExecJavaScript(

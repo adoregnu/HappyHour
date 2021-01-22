@@ -5,16 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Windows;
-
-using GalaSoft.MvvmLight.Messaging;
-
-using CefSharp;
-using FFmpeg.AutoGen;
 
 using HappyHour.ViewModel;
 using HappyHour.ScrapItems;
-using HappyHour.Model;
 
 namespace HappyHour.Spider
 {
@@ -98,7 +91,7 @@ namespace HappyHour.Spider
 
         void MovePage(object result)
         {
-            _state = 1;
+            ParsingState = 1;
             _index = 0;
             _isPageChanged = true;
             if (result is List<object> items && items.Count == 1)
@@ -129,7 +122,7 @@ namespace HappyHour.Spider
 
             if (_articlesInPage.Count > _index)
             {
-                _state = 2;
+                ParsingState = 2;
                 string article = _articlesInPage[_index++].ToString();
                 Browser.Address = URL + article;
             }
@@ -148,7 +141,7 @@ namespace HappyHour.Spider
 
         public override void Navigate2()
         {
-            _state = 0;
+            ParsingState = 0;
             _pageNum = 1;
             _scrapRunning = true;
             Browser.Address = URL;
@@ -162,7 +155,7 @@ namespace HappyHour.Spider
         {
             if (!_scrapRunning) return;
 
-            switch (_state)
+            switch (ParsingState)
             {
                 case 0:
                     Browser.ExecJavaScript(_xpathDic[SelectedBoard], MovePage);

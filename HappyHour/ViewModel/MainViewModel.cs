@@ -8,11 +8,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 
 using MvvmDialogs;
-using GalaSoft.MvvmLight.Messaging;
 using GalaSoft.MvvmLight.Command;
-
-using Unosquare.FFME;
-using Unosquare.FFME.Common;
 
 using HappyHour.View;
 using HappyHour.Interfaces;
@@ -92,8 +88,6 @@ namespace HappyHour.ViewModel
             CmdActorEdtor = new RelayCommand(() => OnActorEditor());
             CmdFileToFolder = new RelayCommand(() => OnFileToFolder());
 
-            MediaElement.FFmpegMessageLogged += OnMediaFFmpegMessageLogged;
-
             //for update media list
             _fileListMv.DirChanged?.Invoke(this, _fileListMv.CurrDirInfo);
         }
@@ -133,19 +127,6 @@ namespace HappyHour.ViewModel
                 DialogService = DialogService
             };
             DialogService.Show<ActorEditorDialog>(this, dialog);
-        }
-
-        void OnMediaFFmpegMessageLogged(object sender, MediaLogMessageEventArgs e)
-        {
-            if (e.MessageType != MediaLogMessageType.Warning &&
-                e.MessageType != MediaLogMessageType.Error)
-                return;
-
-            if (string.IsNullOrWhiteSpace(e.Message) == false &&
-                e.Message.ContainsOrdinal("Using non-standard frame rate"))
-                return;
-
-            Log.Print(e.Message);
         }
     }
 }

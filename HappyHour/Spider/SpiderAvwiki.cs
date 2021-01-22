@@ -6,8 +6,6 @@ using System.Threading.Tasks;
 
 using HtmlAgilityPack;
 
-using HappyHour.Extension;
-using HappyHour.Model;
 using HappyHour.ViewModel;
 
 namespace HappyHour.Spider
@@ -46,12 +44,12 @@ namespace HappyHour.Spider
 
         NotFound:
             OnScrapCompleted();
-            _state = -1;
+            ParsingState = -1;
         }
 
         public override void Scrap()
         {
-            switch (_state)
+            switch (ParsingState)
             {
                 case 0:
                     Browser.ExecJavaScript(

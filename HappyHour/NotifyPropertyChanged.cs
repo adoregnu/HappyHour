@@ -12,7 +12,7 @@ namespace HappyHour
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
-        protected void OnPropertyChanged(string propertyName)
+        protected void RaisePropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
@@ -21,7 +21,7 @@ namespace HappyHour
             [CallerMemberName] string name = null)
         {
             field = newValue;
-            OnPropertyChanged(name);
+            RaisePropertyChanged(name);
         }
     }
 }

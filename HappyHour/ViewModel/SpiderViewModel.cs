@@ -7,13 +7,9 @@ using System.ComponentModel;
 using System.Windows.Input;
 
 using CefSharp;
-using CefSharp.Wpf;
 
-using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
-using GalaSoft.MvvmLight.Messaging;
 
-using HappyHour.Model;
 using HappyHour.Spider;
 using HappyHour.ScrapItems;
 using HappyHour.CefHandler;

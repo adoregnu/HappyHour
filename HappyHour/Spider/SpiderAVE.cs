@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+
 using CefSharp;
+
 using HtmlAgilityPack;
-using HappyHour.Extension;
-using HappyHour.Model;
+
 using HappyHour.ScrapItems;
 using HappyHour.ViewModel;
 
@@ -52,7 +53,7 @@ namespace HappyHour.Spider
                 return;
             }
             
-            _state = 1;
+            ParsingState = 1;
             if (list.Count > 1)
             {
                 Log.Print("Multiple matched. Select manually!");
@@ -73,7 +74,7 @@ namespace HappyHour.Spider
                 { "product-info", XPath("//div[@class='single-info']") },
 
             };
-            switch (_state)
+            switch (ParsingState)
             {
                 case 0:
                     Browser.ExecJavaScript(
@@ -85,7 +86,7 @@ namespace HappyHour.Spider
                     {
                         NumItemsToScrap = xpathDic.Count
                     }, xpathDic);
-                    _state = 2;
+                    ParsingState = 2;
                     break;
             }
         }

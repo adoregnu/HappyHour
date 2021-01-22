@@ -204,17 +204,6 @@ namespace HappyHour.ViewModel
             }
         }
 
-        void SortMedia()
-        {
-            var tmp = MediaList.ToList();
-            MediaList.Clear();
-
-            foreach (var m in tmp)
-            {
-                MediaList.InsertInPlace(m, i => i.DateTime);
-            }
-        }
-
         public void RemoveMedia(string path)
         {
             IsBrowsing = true;
@@ -276,6 +265,7 @@ namespace HappyHour.ViewModel
             var dialog = new AvEditorViewModel(item);
             MainView.DialogService.Show<AvEditorDialog>(this, dialog);
         }
+
         void UpdateMediaList(string path, CancellationToken token,
             bool bRecursive = false, int level = 0)
         {
@@ -303,7 +293,7 @@ namespace HappyHour.ViewModel
             }
         }
 
-        void IterateMedia(string currDir, CancellationToken token, List<string> dbDirs)
+        void IterateMedia(string currDir, List<string> dbDirs, CancellationToken token)
         {
             if (token.IsCancellationRequested)
                 return;
@@ -321,7 +311,7 @@ namespace HappyHour.ViewModel
                 {
                     foreach (var dir in dirs)
                     {
-                        IterateMedia(dir, token, dbDirs);
+                        IterateMedia(dir, dbDirs, token);
                     }
                 }
             }
@@ -334,7 +324,7 @@ namespace HappyHour.ViewModel
         Task _runningTask = null;
         CancellationTokenSource _tokenSource;
 
-        void WaitIfTaskRunning()
+        void CancelTaskIfRunning()
         { 
             if (_runningTask != null && !_runningTask.IsCompleted)
             {
@@ -343,9 +333,27 @@ namespace HappyHour.ViewModel
             }
         }
 
+        async void SortMedia()
+        {
+            CancelTaskIfRunning();
+            var tmp = MediaList.ToList();
+            MediaList.Clear();
+
+            _tokenSource = new CancellationTokenSource();
+            var token = _tokenSource.Token;
+            _runningTask = Task.Run(() => {
+                foreach (var m in tmp)
+                {
+                    if (token.IsCancellationRequested) break;
+                    MediaList.InsertInPlace(m, i => i.DateTime);
+                }
+            }, token);
+            await _runningTask;
+        }
+
         async void RefreshMediaList(DirectoryInfo msg)
         {
-            WaitIfTaskRunning();
+            CancelTaskIfRunning();
             MediaList.Clear();
 
             _tokenSource = new CancellationTokenSource();
@@ -358,7 +366,7 @@ namespace HappyHour.ViewModel
 
         public async void Replace(IEnumerable<string> paths)
         {
-            WaitIfTaskRunning();
+            CancelTaskIfRunning();
             MediaList.Clear();
             IsSelected = true;
 
@@ -378,7 +386,7 @@ namespace HappyHour.ViewModel
 
         async void OnSearchOrphanageMedia()
         {
-            WaitIfTaskRunning();
+            CancelTaskIfRunning();
 
             MediaList.Clear();
 
@@ -394,7 +402,7 @@ namespace HappyHour.ViewModel
             _runningTask = Task.Run(() =>
             {
                 dbDirs.Sort();
-                IterateMedia(currDir, token, dbDirs);
+                IterateMedia(currDir, dbDirs, token);
                 Log.Print("Search orphanage media done!");
             }, token);
             await _runningTask;
@@ -402,7 +410,7 @@ namespace HappyHour.ViewModel
 
         async void OnSearchEmptyActor()
         {
-            WaitIfTaskRunning();
+            CancelTaskIfRunning();
 
             MediaList.Clear();
 

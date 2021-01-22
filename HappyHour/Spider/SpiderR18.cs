@@ -5,15 +5,12 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Runtime.InteropServices;
 
 using CefSharp;
 using HtmlAgilityPack;
 
 using HappyHour.ScrapItems;
 using HappyHour.ViewModel;
-using HappyHour.Extension;
-using HappyHour.Model;
 
 namespace HappyHour.Spider
 {
@@ -94,7 +91,7 @@ namespace HappyHour.Spider
 
             if (matchCount == 1)
             {
-                _state = 1;
+                ParsingState = 1;
                 var url = HtmlEntity.DeEntitize(exactUrl);
                 Browser.Address = url;
             }
@@ -112,7 +109,7 @@ namespace HappyHour.Spider
         ItemR18 _item = null;
         public override void Scrap()
         {
-            switch (_state)
+            switch (ParsingState)
             {
                 case 0:
                     Browser.ExecJavaScript(
@@ -125,7 +122,7 @@ namespace HappyHour.Spider
                         NumItemsToScrap = _xpathDic.Count,
                     };
                     ParsePage(_item, _xpathDic);
-                    _state = 2;
+                    ParsingState = 2;
                     break;
                 case 2:
                     if (_linkName != "series") break;
@@ -136,7 +133,7 @@ namespace HappyHour.Spider
 
                     _item.NumItemsToScrap = seriesXpath.Count; 
                     ParsePage(_item, seriesXpath);
-                    _state = 3;
+                    ParsingState = 3;
                     break;
             }
         }

@@ -5,8 +5,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-using HappyHour.Extension;
-using HappyHour.Model;
 using HappyHour.ScrapItems;
 using HappyHour.ViewModel;
 
@@ -47,7 +45,7 @@ namespace HappyHour.Spider
             if (exactUrl == null)
                 goto NotFound;
 
-            _state = 1;
+            ParsingState = 1;
             Browser.Address = exactUrl;
             return;
 
@@ -62,7 +60,7 @@ namespace HappyHour.Spider
             {
                 { "cover", XPath("//div[@class='entry-content']//img[1]/@src") }
             };
-            switch (_state)
+            switch (ParsingState)
             {
                 case 0:
                     Browser.ExecJavaScript(
@@ -74,7 +72,7 @@ namespace HappyHour.Spider
                     {
                         NumItemsToScrap = xpathDic.Count
                     }, xpathDic);
-                    _state = 2;
+                    ParsingState = 2;
                     break;
             }
         }

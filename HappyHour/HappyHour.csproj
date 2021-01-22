@@ -75,7 +75,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Model\" />
     <Folder Include="Extension\" />
     <Folder Include="View\Pane\" />
   </ItemGroup>

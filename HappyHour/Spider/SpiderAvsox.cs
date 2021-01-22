@@ -7,8 +7,6 @@ using System.Threading.Tasks;
 
 using HtmlAgilityPack;
 
-using HappyHour.Extension;
-using HappyHour.Model;
 using HappyHour.ViewModel;
 using HappyHour.ScrapItems;
 
@@ -75,7 +73,7 @@ namespace HappyHour.Spider
                 Log.Print($"Not found {Keyword}");
                 goto NotFound;
             }
-            _state = 1;
+            ParsingState = 1;
             Browser.Address = anode.Attributes["href"].Value;
             return;
 
@@ -85,7 +83,7 @@ namespace HappyHour.Spider
 
         public override void Scrap()
         {
-            switch (_state)
+            switch (ParsingState)
             {
                 case 0:
                     Browser.ExecJavaScript(
@@ -97,7 +95,7 @@ namespace HappyHour.Spider
                     {
                         NumItemsToScrap = _xpathDic.Count
                     }, _xpathDic);
-                    _state = 2;
+                    ParsingState = 2;
                     break;
             }
         }

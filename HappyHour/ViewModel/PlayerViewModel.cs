@@ -7,12 +7,11 @@ using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows.Input;
 using System.Windows.Threading;
-using System.Windows.Controls;
 
+using Unosquare.FFME;
 using Unosquare.FFME.Common;
 
 using GalaSoft.MvvmLight.Command;
-using GalaSoft.MvvmLight.Messaging;
 
 using HappyHour.Model;
 using HappyHour.Extension;
@@ -32,9 +31,10 @@ namespace HappyHour.ViewModel
             get => _mediaItem;
             set => Set(ref _mediaItem, value);
         }
-        public Unosquare.FFME.MediaElement MediaPlayer { get; private set; }
+        public MediaElement MediaPlayer { get; private set; }
         public MediaOptions CurrentMediaOptions { get; set; }
         public ControllerViewModel Controller { get; private set; }
+        public bool IsDisposed { get; private set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether this instance is properties panel open.
@@ -83,7 +83,9 @@ namespace HappyHour.ViewModel
         public PlayerViewModel()
         {
             Title = "Player";
-            MediaPlayer = new Unosquare.FFME.MediaElement
+            MediaElement.FFmpegMessageLogged += OnMediaFFmpegMessageLogged;
+
+            MediaPlayer = new MediaElement
             {
                 Background = Brushes.Black,
                 // https://stackoverflow.com/questions/24321237/switching-a-control-over-different-windows-inside-contentcontrol
@@ -154,7 +156,7 @@ namespace HappyHour.ViewModel
 
         async public void OnPKeyDown(KeyEventArgs e)
         {
-            if (e.OriginalSource is TextBox)
+            if (e.OriginalSource is System.Windows.Controls.TextBox)
                 return;
 
             // Pause
@@ -229,7 +231,19 @@ namespace HappyHour.ViewModel
                 return;
             }
         }
-        public bool IsDisposed { get; private set; }
+        void OnMediaFFmpegMessageLogged(object sender, MediaLogMessageEventArgs e)
+        {
+            if (e.MessageType != MediaLogMessageType.Warning &&
+                e.MessageType != MediaLogMessageType.Error)
+                return;
+
+            if (string.IsNullOrWhiteSpace(e.Message) == false &&
+                e.Message.ContainsOrdinal("Using non-standard frame rate"))
+                return;
+
+            Log.Print(e.Message);
+        }
+
         void IDisposable.Dispose()
         {
             if (!IsDisposed)

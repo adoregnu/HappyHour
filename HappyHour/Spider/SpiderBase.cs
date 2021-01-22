@@ -6,31 +6,33 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
-using GalaSoft.MvvmLight;
-using GalaSoft.MvvmLight.Messaging;
-using GalaSoft.MvvmLight.Command;
-
 using Scriban;
 using CefSharp;
 
 using HappyHour.ViewModel;
 using HappyHour.ScrapItems;
 using HappyHour.Extension;
-using System.Windows;
 
 namespace HappyHour.Spider
 {
     delegate void ScrapCompletedHandler(SpiderBase spider);
 
-    abstract class SpiderBase : ViewModelBase
+    abstract class SpiderBase : NotifyPropertyChanged
     {
         bool _isCookieSet = false;
         string _keyword;
 
+        protected int ParsingState = -1;
+        protected string _linkName;
+
         public SpiderViewModel Browser { get; private set; }
+        public ScrapCompletedHandler ScrapCompleted { get; set; }
+
         public string URL = null;
         public string Name { get; protected set; } = "";
+        public string DataPath { get; set; }
         public virtual string SearchURL { get => URL; }
+
         public bool IsRunning
         {
             get => !string.IsNullOrEmpty(Keyword);
@@ -45,12 +47,6 @@ namespace HappyHour.Spider
                 RaisePropertyChanged(nameof(IsRunning));
             }
         }
-        public string DataPath { get; set; }
-
-        public ScrapCompletedHandler ScrapCompleted { get; set; }
-
-        protected int _state = -1;
-        protected string _linkName;
 
         public SpiderBase(SpiderViewModel br)
         {
@@ -89,7 +85,7 @@ namespace HappyHour.Spider
                 Log.Print("Empty keyword!");
                 return;
             }
-            _state = 0;
+            ParsingState = 0;
             Browser.SelectedSpider = this;
         }
 
@@ -118,14 +114,14 @@ namespace HappyHour.Spider
         public virtual void OnScrapCompleted()
         {
             if (ScrapCompleted != null)
-                UiServices.Invoke(delegate { ScrapCompleted?.Invoke(this); }, true);
+                UiServices.Invoke(() => ScrapCompleted?.Invoke(this), true);
             else
                 Reset();
         }
 
         public void Reset()
         {
-            _state = -1;
+            ParsingState = -1;
             Keyword = null;
             DataPath = null;
             Log.Print($"Reset Spider : {Name}");

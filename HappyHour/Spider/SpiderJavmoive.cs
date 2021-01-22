@@ -6,8 +6,6 @@ using System.Threading.Tasks;
 
 using HtmlAgilityPack;
 
-using HappyHour.Extension;
-using HappyHour.Model;
 using HappyHour.ScrapItems;
 using HappyHour.ViewModel;
 
@@ -45,7 +43,7 @@ namespace HappyHour.Spider
             if (!CheckResult(result, out List<string> list))
                 return;
 
-            _state = 1;
+            ParsingState = 1;
             if (list.Count > 1)
             {
                 Log.Print("Multitple item matched, Select manually.");
@@ -60,7 +58,7 @@ namespace HappyHour.Spider
         ItemJavmovie _item = null; 
         public override void Scrap()
         {
-            switch (_state)
+            switch (ParsingState)
             {
                 case 0:
                     Browser.ExecJavaScript(
@@ -72,7 +70,7 @@ namespace HappyHour.Spider
                         NumItemsToScrap = _xpathDic.Count
                     };
                     ParsePage(_item, _xpathDic);
-                    _state = 2;
+                    ParsingState = 2;
                     break;
             }
         }
