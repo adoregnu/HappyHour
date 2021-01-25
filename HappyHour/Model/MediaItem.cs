@@ -42,7 +42,8 @@ namespace HappyHour.Model
         public string Poster { get; set; }
 
         public List<string> MediaFiles = new List<string>();
-        public List<string> Screenshots { get; set; } = new List<string>();
+        public List<string> Subtitles;
+        public List<string> Screenshots { get; set; }
 
         public bool IsDownload { get; private set; } = false;
         public bool IsExcluded { get; private set; } = false;
@@ -56,11 +57,13 @@ namespace HappyHour.Model
         {
             get
             {
+                string pid = $"{Pid}";
+                if (Subtitles != null) pid += "(sub)";
                 if (AvItem == null)
-                    return $"{Pid}\n" + _dateDownloaded.ToString("u");
+                    return $"{pid}\n" + _dateDownloaded.ToString("u");
                 var studio = AvItem.Studio != null ?
                     AvItem.Studio.Name : "Unknown Studio";
-                return $"{AvItem.Pid}\n{studio}";
+                return $"{pid}\n{studio}";
             }
         }
 
@@ -103,13 +106,15 @@ namespace HappyHour.Model
             return null;
         }
 
-        public MediaItem(string path = null)
+        MediaItem(string path)
         {
-            if (!string.IsNullOrEmpty(path))
+            if (string.IsNullOrEmpty(path))
             {
-                MediaPath = path;
-                UpdateFields();
+                throw new ArgumentNullException(nameof(path));
             }
+            MediaPath = path;
+            Pid = path.Split('\\').Last();
+            UpdateFields();
         }
 
         void OnMoveDone(string newPath, Action<MediaItem> OnComplete)
@@ -173,15 +178,6 @@ namespace HappyHour.Model
             }
         }
 
-        void UpdateMediaField(string path)
-        {
-            if (!MediaFiles.Any(f => f == path))
-                MediaFiles.Add(path);
-            MediaPath = Path.GetDirectoryName(path);
-            Pid = MediaPath.Split('\\').Last();
-            _dateDownloaded = File.GetLastWriteTime(path);
-        }
-
         public void RefreshAvInfo()
         {
             RaisePropertyChanged(nameof(Info));
@@ -199,21 +195,26 @@ namespace HappyHour.Model
                 .FirstOrDefaultAsync(i => i.Pid == Pid);
         }
 
-        public void UpdateFields()
+        void UpdateFields()
         {
             foreach (var file in Directory.GetFiles(MediaPath))
             {
                 UpdateField(file);
                 if (IsExcluded || IsDownload) return;
             }
+            _dateDownloaded = File.GetLastWriteTime(MediaPath);
             MediaFiles.Sort();
-            ReloadAvItem();
+            if (Subtitles != null)
+                Subtitles.Sort();
         }
 
         void UpdateField(string path)
         {
             string[] vexts = new string[] {
                 ".mp4", ".avi", ".mkv", ".ts", ".wmv", ".m4v"
+            };
+            string[] subs = new string[] {
+                ".smi", ".srt", ".sub"
             };
 
             string fname = Path.GetFileName(path);
@@ -223,6 +224,8 @@ namespace HappyHour.Model
             }
             else if (fname.Contains("screenshot"))
             {
+                if (Screenshots == null)
+                    Screenshots = new List<string>();
                 Screenshots.Add(path);
             }
             else if (fname.Contains("_poster."))
@@ -239,13 +242,19 @@ namespace HappyHour.Model
             }
             else if (fname.Contains("_cover."))
             {
-                UpdateMediaField(path);
+                MediaFiles.Add(path);
                 Poster = path;
+            }
+            else if (subs.Any(s => fname.EndsWith(s, StringComparison.OrdinalIgnoreCase)))
+            {
+                if (Subtitles == null)
+                    Subtitles = new List<string>();
+                Subtitles.Add(path);
             }
             else if (vexts.Any(s => fname.EndsWith(s, StringComparison.OrdinalIgnoreCase)))
             {
                 IsImage = false;
-                UpdateMediaField(path);
+                MediaFiles.Add(path);
                 if (AvItem == null)
                 {
                     ReloadAvItem();

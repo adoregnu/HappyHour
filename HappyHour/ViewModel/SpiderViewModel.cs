@@ -116,6 +116,8 @@ namespace HappyHour.ViewModel
             WebBrowser.LifeSpanHandler = new PopupHandler();
 
             WebBrowser.LoadingStateChanged += OnStateChanged;
+            WebBrowser.JavascriptMessageReceived += OnJavascriptMessageReceived;
+            WebBrowser.FrameLoadEnd += OnFrameLoaded;
             SelectedSpider.SetCookies();
         }
 
@@ -125,6 +127,16 @@ namespace HappyHour.ViewModel
             {
                 SelectedSpider.Scrap();
             }
+        }
+
+        void OnFrameLoaded(object sender, FrameLoadEndEventArgs e)
+        {
+            ExecJavaScript(App.ReadResource("Highlight.js"));
+        }
+
+        void OnJavascriptMessageReceived(object sender, JavascriptMessageReceivedEventArgs e)
+        {
+            Log.Print(e.Message.ToString());
         }
 
         public void ExecJavaScript(string s, IScrapItem item, string name)

@@ -9,10 +9,8 @@ using System.Windows.Input;
 using System.Windows.Threading;
 
 using GalaSoft.MvvmLight.Command;
-using GalaSoft.MvvmLight.Messaging;
 
 using HappyHour.Interfaces;
-using HappyHour.Utils;
 
 namespace HappyHour.ViewModel
 {

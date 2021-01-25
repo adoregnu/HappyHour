@@ -442,7 +442,7 @@ namespace HappyHour.ViewModel
 
             if (_mitemsToSearch.Count > 0)
             {
-                _mitemsToSearch[0].UpdateFields();
+                _mitemsToSearch[0].ReloadAvItem();
                 _mitemsToSearch.RemoveAt(0);
             }
             OnScrapAvInfo(spider);
