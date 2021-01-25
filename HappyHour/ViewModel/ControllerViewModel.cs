@@ -36,10 +36,12 @@ namespace HappyHour.ViewModel
         Visibility m_PlayButtonVisibility = Visibility.Visible;
         Visibility m_StopButtonVisibility = Visibility.Visible;
         Visibility m_CloseButtonVisibility = Visibility.Visible;
-        Visibility m_OpenButtonVisibility = Visibility.Visible;
+        //Visibility m_OpenButtonVisibility = Visibility.Visible;
         Visibility m_SeekBarVisibility = Visibility.Visible;
         Visibility m_BufferingProgressVisibility = Visibility.Visible;
         Visibility m_DownloadProgressVisibility = Visibility.Visible;
+        Visibility m_BackButtonVisibility = Visibility.Collapsed;
+        Visibility m_NextButtonVisibility = Visibility.Collapsed;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ControllerViewModel"/> class.
@@ -168,7 +170,16 @@ namespace HappyHour.ViewModel
             get => m_StopButtonVisibility;
             set => Set(ref m_StopButtonVisibility, value);
         }
-
+        public Visibility BackButtonVisibility
+        {
+            get => m_BackButtonVisibility;
+            set => Set(ref m_BackButtonVisibility, value);
+        }
+        public Visibility NextButtonVisibility
+        {
+            get => m_NextButtonVisibility;
+            set => Set(ref m_NextButtonVisibility, value);
+        }
         /// <summary>
         /// Gets or sets the close button visibility.
         /// </summary>
@@ -181,11 +192,11 @@ namespace HappyHour.ViewModel
         /// <summary>
         /// Gets or sets the open button visibility.
         /// </summary>
-        public Visibility OpenButtonVisibility
-        {
-            get => m_OpenButtonVisibility;
-            set => Set(ref m_OpenButtonVisibility, value);
-        }
+        ///public Visibility OpenButtonVisibility
+        //{
+        //    get => m_OpenButtonVisibility;
+        //    set => Set(ref m_OpenButtonVisibility, value);
+        //}
 
         /// <summary>
         /// Gets or sets the seek bar visibility.
@@ -336,8 +347,8 @@ namespace HappyHour.ViewModel
             nameof(_me.DownloadProgress),
             nameof(_me.IsLiveStream));
 
-            _me.WhenChanged(() => OpenButtonVisibility = _me.IsOpening == false ?
-                Visibility.Visible : Visibility.Hidden, nameof(_me.IsOpening));
+            //_me.WhenChanged(() => OpenButtonVisibility = _me.IsOpening == false ?
+            //    Visibility.Visible : Visibility.Hidden, nameof(_me.IsOpening));
 
             _me.WhenChanged(() => IsSpeedRatioEnabled = _me.IsOpening == false,
                 nameof(_me.IsOpen), nameof(_me.IsSeekable));

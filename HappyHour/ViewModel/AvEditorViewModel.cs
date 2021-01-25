@@ -121,7 +121,7 @@ namespace HappyHour.ViewModel
             {
                 Av = new AvItem
                 {
-                    Path = mediaItem.MediaFolder,
+                    Path = mediaItem.MediaPath,
                     Pid = mediaItem.Pid,
                 };
                 Actors = new ObservableCollection<AvActor>();

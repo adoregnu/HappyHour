@@ -226,7 +226,7 @@ namespace HappyHour.ViewModel
             var settings = new FolderBrowserDialogSettings
             {
                 Description = "Select Target folder",
-                SelectedPath = mitems[0].MediaFolder
+                SelectedPath = mitems[0].MediaPath
             };
             bool? success = MainView.DialogService.ShowFolderBrowserDialog(this, settings);
             if (success == null || success == false)
@@ -458,7 +458,7 @@ namespace HappyHour.ViewModel
                 MainView.StatusMessage = $"{_mitemsToSearch.Count} remained";
                 spider.ScrapCompleted += OnScrapCompleted;
                 spider.Keyword = _mitemsToSearch[0].Pid;
-                spider.DataPath = _mitemsToSearch[0].MediaFolder;
+                spider.DataPath = _mitemsToSearch[0].MediaPath;
                 spider.Navigate2();
             }
             else

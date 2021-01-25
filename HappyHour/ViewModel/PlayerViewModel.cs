@@ -16,6 +16,7 @@ using GalaSoft.MvvmLight.Command;
 using HappyHour.Model;
 using HappyHour.Extension;
 using HappyHour.Interfaces;
+using System.Windows;
 
 namespace HappyHour.ViewModel
 {
@@ -60,6 +61,17 @@ namespace HappyHour.ViewModel
             set => Set(ref _isPlaying, value);
         }
 
+        public string BackgroundImage
+        {
+            get
+            {
+                if (MediaPlayer.IsOpen && MediaItem != null)
+                    return MediaItem.Poster;
+                else
+                    return null;
+            }
+        }
+
         //public ICommand MouseEnterCommand { get; private set; }
         //public ICommand MouseLeaveCommand { get; private set; }
         public ICommand KeyDownCommand { get; private set; }
@@ -68,6 +80,8 @@ namespace HappyHour.ViewModel
         public ICommand PauseCommand { get; private set; }
         public ICommand StopCommand { get; private set; }
         public ICommand CloseCommand { get; private set; }
+        public ICommand BackCommand { get; private set; }
+        public ICommand NextCommand { get; private set; }
 
         IMediaList _mediaList;
         public IMediaList MediaList
@@ -95,48 +109,107 @@ namespace HappyHour.ViewModel
             };
             MediaPlayer.LoadedBehavior = MediaPlaybackState.Stop;
 
-            InitMediaEventHandler();
 
             KeyDownCommand = new RelayCommand<KeyEventArgs>(e => OnPKeyDown(e));
 
             PlayCommand = new RelayCommand(async () => await MediaPlayer.Play());
             PauseCommand = new RelayCommand(async () => await MediaPlayer.Pause());
             StopCommand = new RelayCommand(async () => await MediaPlayer.Stop());
-            CloseCommand = new RelayCommand(async () => await MediaPlayer.Close());
+            CloseCommand = new RelayCommand(() => Close());
+            BackCommand = new RelayCommand(() => Back());
+            NextCommand = new RelayCommand(() => Next());
             Controller = new ControllerViewModel(this);
             Controller.OnApplicationLoaded();
+            InitMediaEventHandler();
+
             IsPlayerLoaded = true;
         }
 
+        int _fileIndex = 0;
         void InitMediaEventHandler()
         {
             //MediaPlayer.MediaReady += OnMediaReady;
             //MediaPlayer.MediaInitializing += OnMediaInitializing;
+            MediaPlayer.MediaEnded += OnMediaEnded;
             MediaPlayer.MediaOpening += OnMediaOpening;
             MediaPlayer.WhenChanged(() =>  
                 IsPlaying = MediaPlayer.IsPlaying ||
                     MediaPlayer.IsSeeking ||
                     MediaPlayer.MediaState == MediaPlaybackState.Pause,
                 nameof(MediaPlayer.IsPlaying));
+            MediaPlayer.WhenChanged(() =>
+                RaisePropertyChanged(nameof(BackgroundImage)),
+                nameof(MediaPlayer.IsOpen));
+
+            this.WhenChanged(() =>
+            {
+                var numFiles = MediaItem != null
+                    ? MediaItem.MediaFiles.Count : 0;
+                Controller.BackButtonVisibility =
+                    (numFiles > 0 && _fileIndex > 0)
+                        ? Visibility.Visible : Visibility.Collapsed;
+                Controller.NextButtonVisibility =
+                    (numFiles > 0 && _fileIndex >= 0 && _fileIndex < numFiles - 1)
+                        ? Visibility.Visible : Visibility.Collapsed;
+            }, nameof(MediaItem));
         }
 
-        async public void SetMediaItem(MediaItem media)
+        public void SetMediaItem(MediaItem media)
         {
-            if (MediaPlayer.IsOpen)
-            {
-                await MediaPlayer.Close();
-            }
             if (media == null) return;
 
             MediaItem = media;
             IsSelected = true;
-            Title = Path.GetFileName(media.MediaFile);
-            await MediaPlayer.Open(new Uri(media.MediaFile));
+            _fileIndex = 0;
+            Open();
+        }
+
+        async void Open()
+        { 
+            if (MediaPlayer.IsOpen)
+            {
+                await MediaPlayer.Close();
+            }
+
+            var files = MediaItem.MediaFiles;
+            var file = Path.GetFileName(files[_fileIndex]);
+            Title = $"{file} ({_fileIndex + 1}/{files.Count})";
+            await MediaPlayer.Open(new Uri(files[_fileIndex]));
+            RaisePropertyChanged(nameof(MediaItem));
+        }
+
+        async void Close()
+        {
+            Title = "Player";
+            if (MediaPlayer.IsOpen)
+                await MediaPlayer.Close();
+            MediaItem = null;
+        }
+
+        void Back()
+        {
+            _fileIndex = (_fileIndex - 1) % MediaItem.MediaFiles.Count;
+            Open();
+        }
+
+        void Next()
+        {
+            _fileIndex = (_fileIndex + 1) % MediaItem.MediaFiles.Count;
+            Open();
         }
 
         void OnMediaOpening(object sender, MediaOpeningEventArgs e)
         {
             CurrentMediaOptions = e.Options;
+        }
+
+        void OnMediaEnded(object sendoer, EventArgs e)
+        {
+            var numFiles = MediaItem.MediaFiles.Count;
+            if (numFiles > 0 && _fileIndex >= 0 && _fileIndex < numFiles - 1)
+            {
+                Next();
+            }
         }
 
 #if false

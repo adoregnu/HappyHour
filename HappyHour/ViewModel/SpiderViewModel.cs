@@ -37,8 +37,7 @@ namespace HappyHour.ViewModel
             {
                 if (value != null)
                 {
-                    HeaderType = value.Name != "sehuatang" ? "spider" : "sehuatang";
-
+                    UpdateBrowserHeader(value.Name);
                     Set(ref _selectedSpider, value);
                     value.SetCookies();
                     if (string.IsNullOrEmpty(value.Keyword))
@@ -90,12 +89,22 @@ namespace HappyHour.ViewModel
                 new SpiderDmm(this),
                 new SpiderAVE(this),
                 new SpiderJavDb(this),
+                new SpiderJavBus(this),
                 new SpiderJavfree(this),
                 new SpiderPornav(this),
                 new SpiderAvsox(this),
             };
             SelectedSpider = Spiders[0];
             Address = SelectedSpider.URL;
+        }
+
+        void UpdateBrowserHeader(string spiderName)
+        {
+            HeaderType = spiderName switch
+            {
+                "sehuatang" or "JavBus" => spiderName,
+                _ => "spider",
+            };
         }
 
         protected override void InitBrowser()

@@ -4,12 +4,22 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:lm="clr-namespace:Itenso.Windows.Controls.ListViewLayout;assembly=Itenso.Windows.Controls.ListViewLayout"
+             xmlns:ei="clr-namespace:InplaceEditBoxLib.Views;assembly=InplaceEditBoxLib"
              xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:conv="clr-namespace:HappyHour.Converter"
+             xmlns:local="clr-namespace:HappyHour.View"
+             xmlns:ctrls="clr-namespace:HappyHour.View.Controls"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="400">
     <UserControl.Resources>
         <conv:FileSystemInfoToSizeConverter x:Key="SizeConverter"/>
+        <local:BindingProxy x:Key="VmContext"  Data="{Binding .}" />
+        <DataTemplate x:Key="NameTemplate">
+            <ctrls:EditBox
+                Value="{Binding Name}"
+                RenameCommand="{Binding Data.CmdRename,
+                    Source={StaticResource VmContext}}"/>
+        </DataTemplate>
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -50,16 +60,17 @@
         <ListView Grid.Row="1" lm:ListViewLayoutManager.Enabled="True"
                   ItemsSource="{Binding FileList}" Name="fileListView"
                   SelectedItem="{Binding SelectedFile}"
+                  SelectionMode="Extended"
                   KeyboardNavigation.DirectionalNavigation="Cycle">
             <ListView.InputBindings>
                 <KeyBinding Command="{Binding CmdDownToSubfolder}" Key="Enter"/>
                 <KeyBinding Command="{Binding CmdUpDir}" Key="Backspace"/>
             </ListView.InputBindings>
-        <i:Interaction.Triggers>
-            <i:EventTrigger EventName="MouseDoubleClick">
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="MouseDoubleClick">
                     <i:InvokeCommandAction Command="{Binding CmdDownToSubfolder}"/>
                 </i:EventTrigger>
-        </i:Interaction.Triggers>
+            </i:Interaction.Triggers>
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">
                     <Setter Property="FontFamily" Value="Courier New" />
@@ -68,9 +79,9 @@
             <ListView.View>
                 <GridView>
                     <GridViewColumn
-                        Header="Name" Width="Auto"
-                        DisplayMemberBinding="{Binding Name}"/>
-<!--
+                        Header="Name" Width="Auto" 
+                        CellTemplate="{StaticResource NameTemplate}"/>
+                    <!--
                     <GridViewColumn
                         Header="Date modified" Width="Auto"
                         DisplayMemberBinding="{Binding LastWriteTime,

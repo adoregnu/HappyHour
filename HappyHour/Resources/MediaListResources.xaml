@@ -116,12 +116,12 @@
                                     Source={StaticResource VmContext}}"/>
             </Grid.InputBindings>
             <Image HorizontalAlignment="Center" ToolTipService.ShowDuration="20000"
-                   Source="{Binding BgImagePath, Converter=
+                   Source="{Binding Poster, Converter=
                       {StaticResource PathToImageConverter}, ConverterParameter=200}">
                 <!--View Large Image on Image Control Tooltip-->
                 <Image.ToolTip>
                     <ToolTip>
-                        <Image Source="{Binding BgImagePath, Converter=
+                        <Image Source="{Binding Poster, Converter=
                             {StaticResource PathToImageConverter}}"/>
                     </ToolTip>
                 </Image.ToolTip>

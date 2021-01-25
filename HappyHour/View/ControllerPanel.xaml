@@ -247,12 +247,32 @@
 
                 <DockPanel Name="CenterControls" HorizontalAlignment="Center" Grid.Column="1">
                     <Button
+                        Visibility="{Binding Controller.BackButtonVisibility}"
+                        Style="{DynamicResource ModernButtonStyle}"
+                        Command="{Binding BackCommand}">
+                        <Path
+                            Stretch="Uniform"
+                            Data="{Binding Source={StaticResource BackIcon}, Path=Data}"
+                            Fill="{Binding Path=Foreground, RelativeSource=
+                                {RelativeSource AncestorType={x:Type Button}}}" />
+                    </Button>
+                    <Button
                         Visibility="{Binding Controller.PlayButtonVisibility}"
                         Style="{DynamicResource ModernButtonStyle}"
                         Command="{Binding PlayCommand}">
                         <Path
                             Stretch="Uniform"
                             Data="{Binding Source={StaticResource PlayIcon}, Path=Data}"
+                            Fill="{Binding Path=Foreground, RelativeSource=
+                                {RelativeSource AncestorType={x:Type Button}}}" />
+                    </Button>
+                    <Button
+                        Visibility="{Binding Controller.NextButtonVisibility}"
+                        Style="{DynamicResource ModernButtonStyle}"
+                        Command="{Binding NextCommand}">
+                        <Path
+                            Stretch="Uniform"
+                            Data="{Binding Source={StaticResource NextIcon}, Path=Data}"
                             Fill="{Binding Path=Foreground, RelativeSource=
                                 {RelativeSource AncestorType={x:Type Button}}}" />
                     </Button>

@@ -19,6 +19,7 @@
                 <ResourceDictionary Source="Resources\MediaListResources.xaml"/>
                 <ResourceDictionary Source="Resources\Resources.xaml"/>
                 <ResourceDictionary Source="Resources\Icons.xaml"/>
+                <ResourceDictionary Source="View\Controls\EditBox.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

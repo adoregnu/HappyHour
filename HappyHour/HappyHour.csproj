@@ -12,6 +12,7 @@
     <PackageReference Include="CefSharp.Wpf" Version="86.0.241" />
     <PackageReference Include="Dirkster.AvalonDock" Version="4.50.1" />
     <PackageReference Include="Dirkster.AvalonDock.Themes.VS2013" Version="4.50.1" />
+    <PackageReference Include="Dirkster.InplaceEditBoxLib" Version="1.4.0" />
     <PackageReference Include="FFME.Windows" Version="4.3.340" />
     <PackageReference Include="HtmlAgilityPack" Version="1.11.29" />
     <PackageReference Include="ini-parser-netstandard" Version="2.5.2" />

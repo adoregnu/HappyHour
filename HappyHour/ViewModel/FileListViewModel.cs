@@ -38,6 +38,17 @@ namespace HappyHour.ViewModel
             }
         }
 
+        string _newName;
+        public string NewName
+        {
+            get => _newName;
+            set
+            {
+                _newName = value;
+                Log.Print($"{SelectedFile.Name}, {value}");
+            }
+        }
+
         public DirectoryInfo CurrDirInfo
         {
             get => _currDirInfo;
@@ -69,6 +80,7 @@ namespace HappyHour.ViewModel
         public ICommand CmdUpDir { get; set; }
         public ICommand CmdRefreshDir { get; set; }
         public ICommand CmdDownToSubfolder { get; set; }
+        public ICommand CmdRename { get; set; }
         public FileListViewModel()
         {
             Title = "Files";
@@ -81,6 +93,7 @@ namespace HappyHour.ViewModel
                 DirChanged?.Invoke(this, CurrDirInfo);
             });
             CmdDownToSubfolder = new RelayCommand(() => EnterSubFolder());
+            CmdRename = new RelayCommand<object>(p => RenameFile(p));
 
             var lastDir = App.GConf["general"]["last_path"];
             var driveName = lastDir.Substring(0, 2);
@@ -194,6 +207,32 @@ namespace HappyHour.ViewModel
             foreach (var fi in CurrDirInfo.EnumerateFiles())
             {
                 FileList.Add(fi);
+            }
+        }
+
+        void RenameFile(object p)
+        {
+            if (p is not Tuple<string, object> tuple)
+                return;
+            if (SelectedFile == null)
+                return;
+
+            Log.Print($"{tuple.Item1}, {SelectedFile.Name}");
+            if (tuple.Item1 == SelectedFile.Name)
+                return;
+
+            try
+            {
+                string target = Path.GetDirectoryName(SelectedFile.FullName);
+                target += $"\\{tuple.Item1}";
+                if (SelectedFile is DirectoryInfo)
+                    Directory.Move(SelectedFile.FullName, target);
+                else
+                    File.Move(SelectedFile.FullName, target);
+            }
+            catch (Exception ex)
+            {
+                Log.Print(ex.Message);
             }
         }
     }

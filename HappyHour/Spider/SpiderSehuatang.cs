@@ -149,6 +149,7 @@ namespace HappyHour.Spider
         public override void Stop()
         {
             _scrapRunning = false;
+            ParsingState = -1;
         }
 
         public override void Scrap()

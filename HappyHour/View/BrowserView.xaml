@@ -18,6 +18,9 @@
         <ControlTemplate x:Key="BrowserHeaderSpider">
             <local:BrowserHeaderSpider/>
         </ControlTemplate>
+        <ControlTemplate x:Key="BrowserHeaderJavBus">
+            <local:BrowserHeaderJavBus/>
+        </ControlTemplate>
         <ControlTemplate x:Key="BrowserHeaderSehuatang">
             <local:BrowserHeaderSehuatang/>
         </ControlTemplate>
@@ -32,6 +35,9 @@
                 </DataTrigger>
                 <DataTrigger Binding="{Binding HeaderType, Mode=TwoWay}" Value="sehuatang">
                     <Setter Property="Template" Value="{StaticResource BrowserHeaderSehuatang}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding HeaderType, Mode=TwoWay}" Value="JavBus">
+                    <Setter Property="Template" Value="{StaticResource BrowserHeaderJavBus}"/>
                 </DataTrigger>
                 <DataTrigger Binding="{Binding HeaderType, Mode=TwoWay}" Value="googleEarth">
                     <Setter Property="Template" Value="{StaticResource BrowserHeaderGoogleEarth}"/>

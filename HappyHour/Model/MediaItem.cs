@@ -5,11 +5,6 @@ using System.Linq;
 
 using Microsoft.EntityFrameworkCore;
 
-using GalaSoft.MvvmLight;
-
-using HappyHour.Utils;
-using HappyHour.Model;
-
 namespace HappyHour.Model
 {
     public enum OrderType { 
@@ -18,14 +13,13 @@ namespace HappyHour.Model
         ByDateUpdated,
         ByDateDownload,
     };
-    public class MediaItem : ViewModelBase
+    public class MediaItem : NotifyPropertyChanged
     {
-        string _bgImagePath;
-        DateTime _dateDownloaded;
         static AvDbContext _dbContext;
 
-        public static OrderType OrderType { get; set; } = OrderType.ByDateReleased;
+        DateTime _dateDownloaded;
 
+        public static OrderType OrderType { get; set; } = OrderType.ByDateReleased;
         public DateTime DateTime
         {
             get
@@ -41,17 +35,14 @@ namespace HappyHour.Model
             }
         }
 
-        public string MediaName { get; private set; }
-        public string MediaFile { get; private set; }
-        public string MediaFolder { get; private set; }
-        public string Torrent { get; private set; }
-        public string BgImagePath
-        {
-            get => !string.IsNullOrEmpty(_bgImagePath) ?
-                        $"{MediaFolder}\\{_bgImagePath}" : null;
-            private set => Set(ref _bgImagePath, value);
-        }
         public string Pid { get; private set; }
+        public string MediaPath { get; private set; }
+        public string MediaFile => MediaFiles.Count > 0 ? MediaFiles[0] : null;
+        public string Torrent { get; private set; }
+        public string Poster { get; set; }
+
+        public List<string> MediaFiles = new List<string>();
+        public List<string> Screenshots { get; set; } = new List<string>();
 
         public bool IsDownload { get; private set; } = false;
         public bool IsExcluded { get; private set; } = false;
@@ -60,19 +51,15 @@ namespace HappyHour.Model
         {
             get { return !string.IsNullOrEmpty(MediaFile); }
         }
-        public List<string> Screenshots { get; private set; } = new List<string>();
-
-        readonly string[] VideoExts = new string[] {
-            ".mp4", ".avi", ".mkv", ".ts", ".wmv", ".m4v"
-        };
 
         public string Info
         {
             get
             {
-                if (AvItem == null) return Pid;
+                if (AvItem == null)
+                    return $"{Pid}\n" + _dateDownloaded.ToString("u");
                 var studio = AvItem.Studio != null ?
-                    AvItem.Studio.Name : "Studio Unknown";
+                    AvItem.Studio.Name : "Unknown Studio";
                 return $"{AvItem.Pid}\n{studio}";
             }
         }
@@ -95,7 +82,7 @@ namespace HappyHour.Model
                 Set(ref _avItem, value);
                 RaisePropertyChanged(nameof(Info));
                 RaisePropertyChanged(nameof(Actors));
-                RaisePropertyChanged(nameof(BgImagePath));
+                RaisePropertyChanged(nameof(Poster));
             }
         }
 
@@ -120,63 +107,34 @@ namespace HappyHour.Model
         {
             if (!string.IsNullOrEmpty(path))
             {
-                MediaFolder = path;
+                MediaPath = path;
                 UpdateFields();
             }
         }
 
-        static readonly SerialQueue _serialQueue = new SerialQueue();
         void OnMoveDone(string newPath, Action<MediaItem> OnComplete)
         {
-            MediaFolder = newPath;
+            MediaPath = newPath;
             if (AvItem != null)
             {
-                AvItem.Path = MediaFolder;
+                AvItem.Path = MediaPath;
                 _dbContext.SaveChanges();
             }
             OnComplete?.Invoke(this);
         }
 
-        void CopyFolder(string targetPath, Action<MediaItem> OnComplete)
-        {
-#if false
-            int prev = 0;
-            Log.Print($"move {MediaFolder} => {targetPath}");
-            var ret = FileTransferManager.CopyWithProgress(
-                MediaFolder, targetPath, p =>
-                {
-                    var curr = (int)p.Percentage;
-                    if (prev != curr && curr % 1 == 0)
-                    {
-                        Log.Print(string.Format("{0}%, {1:f2}Mb/sec",
-                            curr, p.BytesPerSecond / (1024 * 1024)));
-                        prev = (int)p.Percentage;
-                    }
-                }, false);
-
-            Log.Print(ret.ToString());
-            if (ret == TransferResult.Success)
-            {
-                Directory.Delete(MediaFolder, true);
-                OnMoveDone(targetPath + "\\" + Pid, OnComplete);
-            }
-#endif
-        }
         public bool MoveItem(string targetPath, Action<MediaItem> OnComplete = null)
         {
             try
             {
-                if (char.ToUpper(MediaFolder[0]) == char.ToUpper(targetPath[0]))
+                if (char.ToUpper(MediaPath[0]) == char.ToUpper(targetPath[0]))
                 {
                     targetPath += "\\" + Pid;
-                    Directory.Move(MediaFolder, targetPath);
+                    Directory.Move(MediaPath, targetPath);
                     OnMoveDone(targetPath, OnComplete);
+                    return true;
                 }
-                else
-                {
-                    _serialQueue.Enqueue(() => CopyFolder(targetPath, OnComplete));
-                }
-                return true;
+                //TODO: copy file if target is different drive
             }
             catch (Exception ex)
             {
@@ -195,7 +153,7 @@ namespace HappyHour.Model
                     _dbContext.SaveChanges();
                     AvItem = null;
                 }
-                Directory.Delete(MediaFolder, true);
+                Directory.Delete(MediaPath, true);
             }
             catch (Exception ex)
             {
@@ -217,18 +175,18 @@ namespace HappyHour.Model
 
         void UpdateMediaField(string path)
         {
-            MediaFile = path;
-            MediaFolder = Path.GetDirectoryName(path);
-            Pid = MediaFolder.Split('\\').Last();
+            if (!MediaFiles.Any(f => f == path))
+                MediaFiles.Add(path);
+            MediaPath = Path.GetDirectoryName(path);
+            Pid = MediaPath.Split('\\').Last();
             _dateDownloaded = File.GetLastWriteTime(path);
-            MediaName = $"{Pid}\n" + DateTime.ToString("u");
         }
 
         public void RefreshAvInfo()
         {
             RaisePropertyChanged(nameof(Info));
             RaisePropertyChanged(nameof(Actors));
-            RaisePropertyChanged(nameof(BgImagePath));
+            RaisePropertyChanged(nameof(Poster));
         }
 
         public async void ReloadAvItem()
@@ -243,16 +201,21 @@ namespace HappyHour.Model
 
         public void UpdateFields()
         {
-            foreach (var file in Directory.GetFiles(MediaFolder))
+            foreach (var file in Directory.GetFiles(MediaPath))
             {
                 UpdateField(file);
                 if (IsExcluded || IsDownload) return;
             }
+            MediaFiles.Sort();
             ReloadAvItem();
         }
 
-        public void UpdateField(string path)
+        void UpdateField(string path)
         {
+            string[] vexts = new string[] {
+                ".mp4", ".avi", ".mkv", ".ts", ".wmv", ".m4v"
+            };
+
             string fname = Path.GetFileName(path);
             if (fname.EndsWith("torrent"))
             {
@@ -264,22 +227,7 @@ namespace HappyHour.Model
             }
             else if (fname.Contains("_poster."))
             {
-                BgImagePath = fname;
-            }
-            else if (fname.Contains("-fanart."))
-            {
-                var ext = Path.GetExtension(fname);
-                var head = path.Substring(0, path.LastIndexOf('-'));
-                var target = $"{head}_poster{ext}";
-                if (!File.Exists(target))
-                {
-                    File.Move(path, target);
-                    BgImagePath = Path.GetFileName(target);
-                }
-            }
-            else if (string.IsNullOrEmpty(BgImagePath) && fname.Contains("_thumbnail."))
-            {
-                BgImagePath = fname;
+                Poster = path;
             }
             else if (fname.EndsWith(".downloaded"))
             {
@@ -292,8 +240,9 @@ namespace HappyHour.Model
             else if (fname.Contains("_cover."))
             {
                 UpdateMediaField(path);
+                Poster = path;
             }
-            else if (VideoExts.Any(s => fname.EndsWith(s, StringComparison.CurrentCultureIgnoreCase)))
+            else if (vexts.Any(s => fname.EndsWith(s, StringComparison.OrdinalIgnoreCase)))
             {
                 IsImage = false;
                 UpdateMediaField(path);

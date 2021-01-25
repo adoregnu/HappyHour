@@ -5,16 +5,12 @@ using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Security.Policy;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Data;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
-using HappyHour.Model;
 
 namespace HappyHour.Converter
 {
@@ -22,19 +18,17 @@ namespace HappyHour.Converter
     {
         public static BitmapImage ConvertBitmap(Bitmap bitmap, int width)
         {
-            using (MemoryStream ms = new MemoryStream())
-            {
-                bitmap.Save(ms, ImageFormat.Bmp);
-                BitmapImage image = new BitmapImage();
-                image.BeginInit();
-                if (width > 0)
-                    image.DecodePixelWidth = width;
-                image.CacheOption = BitmapCacheOption.OnLoad;
-                ms.Seek(0, SeekOrigin.Begin);
-                image.StreamSource = ms;
-                image.EndInit();
-                return image;
-            }
+            using MemoryStream ms = new MemoryStream();
+            bitmap.Save(ms, ImageFormat.Bmp);
+            BitmapImage image = new BitmapImage();
+            image.BeginInit();
+            if (width > 0)
+                image.DecodePixelWidth = width;
+            image.CacheOption = BitmapCacheOption.OnLoad;
+            ms.Seek(0, SeekOrigin.Begin);
+            image.StreamSource = ms;
+            image.EndInit();
+            return image;
         }
 
         public object Convert(object value_, Type targetType_,
@@ -46,7 +40,6 @@ namespace HappyHour.Converter
                 {
                     var width = parameter_ != null ?
                         int.Parse(parameter_.ToString()) : 0;
-                    // $"{App.CurrentPath}
                     if (width != 0 && width < 150)
                         path = "db\\" + path;
  
