@@ -21,6 +21,7 @@ using IniParser;
 using IniParser.Model;
 
 using HappyHour.Model;
+using System.Text;
 
 namespace HappyHour
 {
@@ -42,6 +43,11 @@ namespace HappyHour
         public static bool IsInDesignMode => !(Current is App) ||
             (bool)DesignerProperties.IsInDesignModeProperty
                 .GetMetadata(typeof(DependencyObject)).DefaultValue;
+
+        static App()
+        {
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+        }
 
         public static string ReadResource(string name)
         {
@@ -79,7 +85,6 @@ namespace HappyHour
             // performance enhancements have been detected.
             //Library.EnableWpfMultiThreadedVideo = !Debugger.IsAttached;
             // test with true and false
-
         }
 
         FileIniDataParser _iniParser;

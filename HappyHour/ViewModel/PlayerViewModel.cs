@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Media;
 using System.Windows.Input;
 using System.Windows.Threading;
@@ -12,11 +13,11 @@ using Unosquare.FFME;
 using Unosquare.FFME.Common;
 
 using GalaSoft.MvvmLight.Command;
+using href.Utils;
 
 using HappyHour.Model;
 using HappyHour.Extension;
 using HappyHour.Interfaces;
-using System.Windows;
 
 namespace HappyHour.ViewModel
 {
@@ -197,10 +198,43 @@ namespace HappyHour.ViewModel
             _fileIndex = (_fileIndex + 1) % MediaItem.MediaFiles.Count;
             Open();
         }
+#if false
+        Encoding DetectEncoding(string subPath)
+        {
+            char[] buffer = new char[200];
+            using StreamReader sr = new StreamReader(subPath,
+                Encoding.GetEncoding(949), true);
+            sr.Read(buffer, 0, buffer.Length);
+            string tmp = new string(buffer);
+            Encoding[] encodings = EncodingTools
+                .DetectOutgoingEncodings(
+                    tmp, EncodingTools.AllEncodings, true);
+
+            foreach (var enc in encodings)
+                Log.Print(enc.CodePage.ToString());
+            sr.Close();
+            return encodings[0];
+        }
+#endif
 
         void OnMediaOpening(object sender, MediaOpeningEventArgs e)
         {
             CurrentMediaOptions = e.Options;
+            var subs = MediaItem.Subtitles;
+            if (subs != null)
+            {
+                var currFile = Path.GetFileNameWithoutExtension(
+                    MediaItem.MediaFiles[_fileIndex]);
+                var sub = subs.FirstOrDefault(s =>
+                    Path.GetFileNameWithoutExtension(s)
+                        .StartsWith(currFile, StringComparison.OrdinalIgnoreCase));
+                if (sub != null)
+                {
+                    //DetectEncoding(sub);
+                    //CurrentMediaOptions.DecoderParams["sub_charenc "] = enc;
+                    e.Options.SubtitlesSource = sub;
+                }
+            }
         }
 
         void OnMediaEnded(object sendoer, EventArgs e)

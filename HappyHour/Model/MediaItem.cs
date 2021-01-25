@@ -214,7 +214,7 @@ namespace HappyHour.Model
                 ".mp4", ".avi", ".mkv", ".ts", ".wmv", ".m4v"
             };
             string[] subs = new string[] {
-                ".smi", ".srt", ".sub"
+                ".smi", ".srt", ".sub", ".ass", ".ssa"
             };
 
             string fname = Path.GetFileName(path);

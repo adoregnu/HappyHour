@@ -1,8 +1,8 @@
-﻿window.addEventListener('click', function (e) {
-    //console.log(e.target.textContent);
-    CefSharp.PostMessage(e.target.textContent);
-    return false;
-});
+﻿//window.addEventListener('click', function (e) {
+    //console.log(e.target);
+    //CefSharp.PostMessage(e.target.textContent);
+    //return false;
+//});
 
 window.addEventListener('mouseover',function(e) {
     applyMask(e.target);

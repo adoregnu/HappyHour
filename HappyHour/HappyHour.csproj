@@ -25,6 +25,7 @@
     <PackageReference Include="MvvmDialogs" Version="8.0.0" />
     <PackageReference Include="MvvmLightStd10" Version="5.4.1.2" />
     <PackageReference Include="Scriban" Version="3.3.2" />
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="5.0.0" />
     <PackageReference Include="VirtualizingWrapPanel" Version="1.5.3" />
     <PackageReference Include="WPF.ListViewLayoutManager" Version="2.0.0" />
   </ItemGroup>
@@ -79,6 +80,10 @@
   <ItemGroup>
     <Folder Include="Extension\" />
     <Folder Include="View\Pane\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EncodingTools\EncodingTools.csproj" />
   </ItemGroup>
 
   <ItemGroup>
