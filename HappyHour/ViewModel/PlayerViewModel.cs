@@ -13,7 +13,7 @@ using Unosquare.FFME;
 using Unosquare.FFME.Common;
 
 using GalaSoft.MvvmLight.Command;
-using href.Utils;
+using Ude;
 
 using HappyHour.Model;
 using HappyHour.Extension;
@@ -198,24 +198,22 @@ namespace HappyHour.ViewModel
             _fileIndex = (_fileIndex + 1) % MediaItem.MediaFiles.Count;
             Open();
         }
-#if false
-        Encoding DetectEncoding(string subPath)
-        {
-            char[] buffer = new char[200];
-            using StreamReader sr = new StreamReader(subPath,
-                Encoding.GetEncoding(949), true);
-            sr.Read(buffer, 0, buffer.Length);
-            string tmp = new string(buffer);
-            Encoding[] encodings = EncodingTools
-                .DetectOutgoingEncodings(
-                    tmp, EncodingTools.AllEncodings, true);
 
-            foreach (var enc in encodings)
-                Log.Print(enc.CodePage.ToString());
-            sr.Close();
-            return encodings[0];
+        string DetectEncoding(string subPath)
+        {
+            using FileStream fs = File.OpenRead(subPath);
+            ICharsetDetector cdet = new CharsetDetector();
+            cdet.Feed(fs);
+            cdet.DataEnd();
+            if (cdet.Charset != null)
+            {
+                Log.Print("Charset: {0}, confidence: {1}",
+                     cdet.Charset, cdet.Confidence);
+                return cdet.Charset;
+            }
+            return null;
         }
-#endif
+
 
         void OnMediaOpening(object sender, MediaOpeningEventArgs e)
         {
@@ -230,9 +228,10 @@ namespace HappyHour.ViewModel
                         .StartsWith(currFile, StringComparison.OrdinalIgnoreCase));
                 if (sub != null)
                 {
-                    //DetectEncoding(sub);
-                    //CurrentMediaOptions.DecoderParams["sub_charenc "] = enc;
-                    e.Options.SubtitlesSource = sub;
+                    string charset = DetectEncoding(sub);
+                    if (charset != "UTF-8")
+                        CurrentMediaOptions.DecoderParams["sub_charenc"] = charset;
+                    CurrentMediaOptions.SubtitlesSource = sub;
                 }
             }
         }
