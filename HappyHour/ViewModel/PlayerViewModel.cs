@@ -228,9 +228,9 @@ namespace HappyHour.ViewModel
                         .StartsWith(currFile, StringComparison.OrdinalIgnoreCase));
                 if (sub != null)
                 {
-                    string charset = DetectEncoding(sub);
-                    if (charset != "UTF-8")
-                        CurrentMediaOptions.DecoderParams["sub_charenc"] = charset;
+                    //string charset = DetectEncoding(sub);
+                    //if (charset != null && charset != "UTF-8")
+                    //    CurrentMediaOptions.DecoderParams["sub_charenc"] = charset;
                     CurrentMediaOptions.SubtitlesSource = sub;
                 }
             }

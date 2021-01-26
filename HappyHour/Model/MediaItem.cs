@@ -57,7 +57,7 @@ namespace HappyHour.Model
         {
             get
             {
-                string pid = $"{Pid}";
+                string pid = Pid;
                 if (Subtitles != null) pid += "(sub)";
                 if (AvItem == null)
                     return $"{pid}\n" + _dateDownloaded.ToString("u");
@@ -146,6 +146,29 @@ namespace HappyHour.Model
                 Log.Print(ex.Message);
             }
             return false;
+        }
+
+        public void Download()
+        {
+            try
+            {
+                var dir = Path.GetDirectoryName(MediaFile);
+                var torrent = Path.GetFileName(Torrent);
+                File.Copy(Torrent, App.GConf["general"]["torrent_path"] + torrent);
+                File.Create($"{dir}\\.downloaded").Dispose();
+                Log.Print($"Makrk downloaded {Torrent}");
+            }
+            catch (Exception ex)
+            {
+                Log.Print(ex.Message);
+            }
+        }
+
+        public void Exclude()
+        {
+            var dir = Path.GetDirectoryName(MediaFile);
+            File.Create($"{dir}\\.excluded").Dispose();
+            Log.Print($"Mark excluded {Torrent}");
         }
 
         public bool DeleteItem()

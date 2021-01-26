@@ -190,7 +190,7 @@ namespace HappyHour.ViewModel
         void OnRefreshTimerExpired(object sender, EventArgs e)
         { 
             _refreshTimer.Stop();
-            UiServices.Invoke(delegate { PopulateFiles(); }, true);
+            UiServices.Invoke(() => PopulateFiles(), true);
         }
 
         void PopulateFiles()

@@ -24,10 +24,6 @@ using HappyHour.View;
 
 namespace HappyHour.ViewModel
 {
-    enum MediaListMenuType
-    { 
-        excluded, downloaded, scrap
-    }
     class MediaListViewModel : Pane, IMediaList
     {
         readonly object _lock = new object();
@@ -148,9 +144,9 @@ namespace HappyHour.ViewModel
             BindingOperations.EnableCollectionSynchronization(MediaList, _lock);
 
             CmdExclude = new RelayCommand<MediaItem>(
-                p => OnContextMenu(p, MediaListMenuType.excluded));
+                p => { if (p != null) { p.Download(); MediaList.Remove(p); } });
             CmdDownload = new RelayCommand<MediaItem>(
-                p => OnContextMenu(p, MediaListMenuType.downloaded));
+                p => { if (p != null) { p.Exclude(); MediaList.Remove(p); } });
             CmdMoveItemTo = new RelayCommand<object>(
                 p => OnMoveItemTo(p.ToList<MediaItem>()));
             CmdDeleteItem = new RelayCommand<object>(
@@ -468,32 +464,5 @@ namespace HappyHour.ViewModel
                 spider.Reset();
             }
         }
-
-        void OnContextMenu(MediaItem item, MediaListMenuType type)
-        {
-            if (item == null) return;
-            var dir = Path.GetDirectoryName(item.MediaFile);
-            if (type == MediaListMenuType.downloaded)
-            {
-                try
-                {
-                    var torrent = Path.GetFileName(item.Torrent);
-                    File.Copy(item.Torrent, App.GConf["general"]["torrent_path"] + torrent);
-                    File.Create($"{dir}\\.{type}").Dispose();
-                    MediaList.Remove(item);
-                    Log.Print($"Makrk downloaded {item.Torrent}");
-                }
-                catch (Exception ex)
-                {
-                    Log.Print(ex.Message, ex);
-                }
-            }
-            else
-            { 
-                File.Create($"{dir}\\.{type}").Dispose();
-                MediaList.Remove(item);
-                Log.Print($"Mark excluded {item.Torrent}");
-            }
-        }
-    }
+     }
 }
