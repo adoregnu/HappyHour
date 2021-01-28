@@ -121,10 +121,13 @@ namespace HappyHour.Spider
 
         public void Reset()
         {
-            ParsingState = -1;
-            Keyword = null;
-            DataPath = null;
-            Log.Print($"Reset Spider : {Name}");
+            if (ParsingState >= 0)
+            {
+                ParsingState = -1;
+                Keyword = null;
+                DataPath = null;
+                Log.Print($"Reset Spider : {Name}");
+            }
         }
 
         protected void ParsePage(IScrapItem item)

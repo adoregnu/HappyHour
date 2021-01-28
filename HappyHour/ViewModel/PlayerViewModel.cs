@@ -204,14 +204,23 @@ namespace HappyHour.ViewModel
             ICharsetDetector cdet = new CharsetDetector();
             try
             {
-                var buff = File.ReadAllBytes(subPath);
-                cdet.Feed(buff, 0, buff.Length);
-                if (cdet.Charset != "EUC-KR")
+                using FileStream fs = new FileStream(subPath, FileMode.Open);
+                cdet.Feed(fs);
+                cdet.DataEnd();
+                if (cdet.Charset == "UTF-8")
+                {
+                    fs.Close();
                     return;
+                }
 
                 Log.Print("Charset: {0}, confidence: {1}",
                     cdet.Charset, cdet.Confidence);
-                var text = Encoding.GetEncoding("euc-kr").GetString(buff);
+
+                fs.Position = 0;
+                StreamReader sr = new StreamReader(fs,
+                    Encoding.GetEncoding("euc-kr"), true);
+                var text = sr.ReadToEnd();
+                sr.Close();
 
                 var attr = File.GetAttributes(subPath);
                 if (attr.HasFlag(FileAttributes.ReadOnly))
@@ -220,9 +229,9 @@ namespace HappyHour.ViewModel
                     File.SetAttributes(subPath, attr);
                 }
 
-                var sw = new StreamWriter(File.Open(subPath, FileMode.Create),
-                    Encoding.GetEncoding("utf-8"));
-                sw.Write(text, Encoding.UTF8);
+                var sw = new StreamWriter(File.Open(subPath, FileMode.Create));
+                sw.Write(text);
+                sw.Close();
             }
             catch (Exception ex)
             {
@@ -351,6 +360,7 @@ namespace HappyHour.ViewModel
                 return;
             }
         }
+
         void OnMediaFFmpegMessageLogged(object sender, MediaLogMessageEventArgs e)
         {
             if (e.MessageType != MediaLogMessageType.Warning &&

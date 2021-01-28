@@ -72,6 +72,7 @@ namespace HappyHour.ScrapItems
                 _actorPicturs.Add(_downloadUrls[e.OriginalUrl], e.SuggestedFileName);
                 e.SuggestedFileName = $"{_actorPicturePath}\\{e.SuggestedFileName}";
             }
+            Log.Print("OnBeforeDownload: " + e.SuggestedFileName);
         }
 
         void ParseDate(string strDate)

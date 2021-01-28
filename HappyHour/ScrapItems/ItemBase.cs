@@ -28,7 +28,7 @@ namespace HappyHour.ScrapItems
             {
                 if (value == null) return;
                 _elements = value;
-                _numItemsToScrap = value.Count;
+                NumItemsToScrap = value.Count;
             }
         }
 

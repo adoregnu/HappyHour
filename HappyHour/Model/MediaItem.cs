@@ -41,7 +41,7 @@ namespace HappyHour.Model
         public string Torrent { get; private set; }
         public string Poster { get; set; }
 
-        public List<string> MediaFiles = new List<string>();
+        public List<string> MediaFiles;
         public List<string> Subtitles;
         public List<string> Screenshots { get; set; }
 
@@ -83,9 +83,7 @@ namespace HappyHour.Model
             set
             {
                 Set(ref _avItem, value);
-                RaisePropertyChanged(nameof(Info));
-                RaisePropertyChanged(nameof(Actors));
-                RaisePropertyChanged(nameof(Poster));
+                RefreshAvInfo();
             }
         }
 
@@ -114,7 +112,7 @@ namespace HappyHour.Model
             }
             MediaPath = path;
             Pid = path.Split('\\').Last();
-            UpdateFields();
+            ReloadAvItem();
         }
 
         void OnMoveDone(string newPath, Action<MediaItem> OnComplete)
@@ -210,6 +208,10 @@ namespace HappyHour.Model
 
         public async void ReloadAvItem()
         {
+            UpdateFields();
+            if (IsImage)
+                return;
+
             AvItem = await _dbContext.Items
                 .Include(i => i.Studio)
                 .Include(i => i.Genres)
@@ -220,6 +222,8 @@ namespace HappyHour.Model
 
         void UpdateFields()
         {
+            MediaFiles = new List<string>();
+            Subtitles = null;
             foreach (var file in Directory.GetFiles(MediaPath))
             {
                 UpdateField(file);
@@ -278,10 +282,6 @@ namespace HappyHour.Model
             {
                 IsImage = false;
                 MediaFiles.Add(path);
-                if (AvItem == null)
-                {
-                    ReloadAvItem();
-                }
             }
         }
     }
