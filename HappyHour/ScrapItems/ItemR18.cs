@@ -16,7 +16,7 @@ using HappyHour.Extension;
 
 namespace HappyHour.ScrapItems
 {
-    class ItemR18 : AvItemBase, IScrapItem
+    class ItemR18 : AvItemBase
     {
         readonly string _actorPicturePath = $"{App.CurrentPath}\\db";
         readonly ConcurrentDictionary<string, string> _downloadUrls;
@@ -28,6 +28,21 @@ namespace HappyHour.ScrapItems
             _downloadUrls = new ConcurrentDictionary<string, string>();
             _actorPicturs = new Dictionary<string, string>();
             _actorNames = new List<AvActorName>();
+            Elements = new List<(string name, string element, ElementType type)>
+            {
+                ( "title",    "//meta[@property='og:title']/@content", ElementType.XPATH),
+                ( "releasedate", "//dt[contains(.,'Release Date:')]/following-sibling::dd[1]/text()", ElementType.XPATH),
+                ( "runtime",  "//dt[contains(.,'Runtime:')]/following-sibling::dd[1]/text()", ElementType.XPATH),
+                ( "director", "//dt[contains(.,'Director:')]/following-sibling::dd[1]/text()", ElementType.XPATH),
+                ( "set_url",  "//dt[contains(.,'Series:')]/following-sibling::dd[1]/a/@href", ElementType.XPATH),
+                ( "studio",   "//dt[contains(.,'Studio:')]/following-sibling::dd[1]/a/text()", ElementType.XPATH),
+                ( "label",    "//dt[contains(.,'Label:')]/following-sibling::dd[1]/text()", ElementType.XPATH),
+                ( "actor",    "//label[contains(.,'Actress(es):')]/following-sibling::div[1]/span/a/span/text()", ElementType.XPATH),
+                ( "genre",    "//label[contains(.,'Categories:')]/following-sibling::div[1]/a/text()", ElementType.XPATH),
+                ( "plot",     "//h1[contains(., 'Product Description')]/following-sibling::p/text()", ElementType.XPATH),
+                ( "cover",    "//div[contains(@class,'box01')]/img/@src", ElementType.XPATH),
+                ( "actor_thumb", "//ul[contains(@class,'cmn-list-product03')]//img", ElementType.XPATH),
+            };
         }
 
         protected override void UdpateAvItem()
@@ -150,7 +165,7 @@ namespace HappyHour.ScrapItems
             }
         }
 
-        void IScrapItem.OnJsResult(string name, List<object> items)
+        public override void OnJsResult(string name, List<object> items)
         {
             PrintItem(name, items);
             if (!items.IsNullOrEmpty())

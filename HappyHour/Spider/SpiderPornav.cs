@@ -13,26 +13,11 @@ namespace HappyHour.Spider
 {
     class SpiderPornav : SpiderBase
     {
-        readonly Dictionary<string, string> _xpathDic;
-
-        public override string SearchURL
-        {
-            get
-            {
-                return $"{URL}/en/search?q={Keyword}";
-            }
-        }
+        public override string SearchURL => $"{URL}/en/search?q={Keyword}";
         public SpiderPornav(SpiderViewModel browser) : base(browser)
         {
             Name = "PornAv";
             URL = "https://pornav.co";
-
-            _xpathDic = new Dictionary<string, string>
-            {
-                { "cover", XPath("//div[@class='col-md-7']/img/@src") },
-                { "title", XPath("//div[@class='col-md-5']/p[1]/text()") },
-                { "info", XPath("//div[@class='col-md-5']/p[2]//text()") },
-            };
         }
 
         public void OnMultiResult(object result)
@@ -72,10 +57,7 @@ namespace HappyHour.Spider
                         OnMultiResult);
                     break;
                 case 1:
-                    ParsePage(new ItemPornav(this)
-                    {
-                        NumItemsToScrap = _xpathDic.Count
-                    }, _xpathDic);
+                    ParsePage(new ItemPornav(this));
                     ParsingState = 2;
                     break;
             }

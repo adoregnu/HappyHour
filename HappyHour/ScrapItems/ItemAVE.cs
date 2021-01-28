@@ -17,11 +17,17 @@ using HappyHour.Spider;
 
 namespace HappyHour.ScrapItems
 {
-    class ItemAVE : AvItemBase, IScrapItem
+    class ItemAVE : AvItemBase
     {
         public ItemAVE(SpiderBase spider) : base(spider)
         { 
             _avItem.IsCensored = false;
+            Elements = new List<(string name, string element, ElementType type)>
+            { 
+                ( "cover", "//span[@class='grid-gallery']/a/@href", ElementType.XPATH),
+                ( "title", "//div[@class='section-title']/h3/text()", ElementType.XPATH),
+                ( "product-info", "//div[@class='single-info']", ElementType.XPATH),
+            };
         }
 
         protected override void OnBeforeDownload(object sender, DownloadItem e)
@@ -91,7 +97,7 @@ namespace HappyHour.ScrapItems
             }
         }
 
-        void IScrapItem.OnJsResult(string name, List<object> items)
+        public override void OnJsResult(string name, List<object> items)
         { 
             if (name != "product-info")
                 PrintItem(name, items);

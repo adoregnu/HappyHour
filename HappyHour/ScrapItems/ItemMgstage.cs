@@ -12,11 +12,22 @@ using HappyHour.Spider;
 
 namespace HappyHour.ScrapItems
 {
-    class ItemMgstage : AvItemBase, IScrapItem
+    class ItemMgstage : AvItemBase
     {
         int _numDownloadCnt = 0;
+
         public ItemMgstage(SpiderBase spider) : base(spider)
         {
+            Elements = new List<(string name, string element, ElementType type)>
+            {
+                ("title", "//div[@class='common_detail_cover']/h1[@class='tag']/text()", ElementType.XPATH),
+                ( "cover", "//a[@id='EnlargeImage']/@href", ElementType.XPATH),
+                ( "studio", "//th[contains(., 'メーカー：')]/following-sibling::td/a/@href", ElementType.XPATH),
+                ( "runtime", "//th[contains(., '収録時間：')]/following-sibling::td/text()", ElementType.XPATH),
+                ( "id", "//th[contains(., '品番：')]/following-sibling::td/text()", ElementType.XPATH),
+                ( "releasedate", "//th[contains(., '配信開始日：')]/following-sibling::td/text()", ElementType.XPATH),
+                ( "rating", "//th[contains(., '評価：')]/following-sibling::td//text()", ElementType.XPATH),
+            };
         }
 
         //protected override void UdpateAvItem() { }
@@ -45,7 +56,7 @@ namespace HappyHour.ScrapItems
             _spider.Download(url, ref _numItemsToScrap);
         }
 
-        void IScrapItem.OnJsResult(string name, List<object> items)
+        public override void OnJsResult(string name, List<object> items)
         {
             PrintItem(name, items);
             if (items != null && items.Count > 0)

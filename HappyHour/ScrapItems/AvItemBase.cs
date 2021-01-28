@@ -16,7 +16,7 @@ using HappyHour.Spider;
 
 namespace HappyHour.ScrapItems
 {
-    class AvItemBase : ItemBase
+    abstract class AvItemBase : ItemBase
     {
         readonly protected AvDbContext _context;
 
@@ -60,8 +60,7 @@ namespace HappyHour.ScrapItems
             if (_numScrapedItem != NumItemsToScrap)
                 return;
 
-            Log.Print($"items : {_numScrapedItem}/{NumItemsToScrap}" +
-                $", Link Count:{_links.Count}");
+            Log.Print($"items : {_numScrapedItem}/{NumItemsToScrap}, Link Count:{_links.Count}");
 
             lock (_links)
             {
@@ -184,10 +183,7 @@ namespace HappyHour.ScrapItems
 
         protected void UpdateActor2(List<List<AvActorName>> listOfNameList)
         {
-            UiServices.Invoke(delegate
-            {
-                UpdateActorInternal(listOfNameList);
-            });
+            UiServices.Invoke(() => UpdateActorInternal(listOfNameList));
         }
 
         protected virtual void UdpateAvItem()

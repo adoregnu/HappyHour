@@ -22,11 +22,7 @@ namespace HappyHour.Spider
         };
         public string SearchType { get; set; } = "censored";
 
-        public override string SearchURL
-        {
-            get => $"{URL}{SearchType}/search/{Keyword}&type=&" +
-                $"parent={_typeDic[SearchType]}";
-        }
+        public override string SearchURL => $"{URL}search/{Keyword}&type=&parent={_typeDic[SearchType]}";
 
         public SpiderJavBus(SpiderViewModel browser) : base(browser)
         {

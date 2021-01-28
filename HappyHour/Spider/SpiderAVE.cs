@@ -16,14 +16,9 @@ namespace HappyHour.Spider
 {
     class SpiderAVE : SpiderBase
     {
-        public override string SearchURL
-        {
-            get
-            {
-                return $"{URL}search_Products.aspx?languageID=1" +
-                $"&dept_id=29&keyword={Keyword}&searchby=keyword";
-            }
-        }
+        public override string SearchURL =>
+            $"{URL}search_Products.aspx?languageID=1" +
+            $"&dept_id=29&keyword={Keyword}&searchby=keyword";
 
         public SpiderAVE(SpiderViewModel browser) : base(browser)
         {
@@ -67,13 +62,6 @@ namespace HappyHour.Spider
 
         public override void Scrap()
         {
-            var xpathDic = new Dictionary<string, string>
-            {
-                { "cover", XPath("//span[@class='grid-gallery']/a/@href") },
-                { "title", XPath("//div[@class='section-title']/h3/text()") },
-                { "product-info", XPath("//div[@class='single-info']") },
-
-            };
             switch (ParsingState)
             {
                 case 0:
@@ -82,10 +70,7 @@ namespace HappyHour.Spider
                         OnMultiResult);
                     break;
                 case 1:
-                    ParsePage(new ItemAVE(this)
-                    {
-                        NumItemsToScrap = xpathDic.Count
-                    }, xpathDic);
+                    ParsePage(new ItemAVE(this));
                     ParsingState = 2;
                     break;
             }

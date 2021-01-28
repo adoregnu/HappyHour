@@ -35,16 +35,15 @@ namespace HappyHour.ViewModel
             get => _selectedSpider;
             set
             {
-                if (value != null)
-                {
-                    UpdateBrowserHeader(value.Name);
-                    Set(ref _selectedSpider, value);
-                    value.SetCookies();
-                    if (string.IsNullOrEmpty(value.Keyword))
-                        Address = value.URL;
-                    else
-                        Address = value.SearchURL;
-                }
+                if (value == null) return;
+
+                UpdateBrowserHeader(value.Name);
+                Set(ref _selectedSpider, value);
+                value.SetCookies();
+                if (string.IsNullOrEmpty(value.Keyword))
+                    Address = value.URL;
+                else
+                    Address = value.SearchURL;
             }
         }
         public DownloadHandler DownloadHandler { get; private set; }
@@ -116,8 +115,8 @@ namespace HappyHour.ViewModel
             WebBrowser.LifeSpanHandler = new PopupHandler();
 
             WebBrowser.LoadingStateChanged += OnStateChanged;
-            WebBrowser.JavascriptMessageReceived += OnJavascriptMessageReceived;
-            WebBrowser.FrameLoadEnd += OnFrameLoaded;
+            //WebBrowser.JavascriptMessageReceived += OnJavascriptMessageReceived;
+            //WebBrowser.FrameLoadEnd += OnFrameLoaded;
             SelectedSpider.SetCookies();
         }
 

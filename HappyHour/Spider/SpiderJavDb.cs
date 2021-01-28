@@ -13,29 +13,12 @@ namespace HappyHour.Spider
 {
     class SpiderJavDb : SpiderBase
     {
-        readonly Dictionary<string, string> _xpathDic;
-        public override string SearchURL
-        {
-            get
-            {
-                return $"{URL}search?q={Keyword}&f=all";
-            }
-        }
+        public override string SearchURL => $"{URL}search?q={Keyword}&f=all"; 
 
         public SpiderJavDb(SpiderViewModel browser) : base(browser)
         { 
             Name = "JavDB";
             URL = "https://javdb.com/";
-
-            _xpathDic = new Dictionary<string, string>
-            {
-                { "title", XPath("//h2[contains(@class, 'title')]/strong/text()") },
-                { "cover", XPath("//div[@class='column column-video-cover']/a/@href") },
-                { "date", XPath("//strong[contains(., 'Released Date')]/following-sibling::span/text()") },
-                { "studio", XPath("//strong[contains(., 'Maker')]/following-sibling::span/a/text()") },
-                { "actor", XPath("//strong[contains(., 'Actor')]/following-sibling::span/a/text()") },
-                { "genre", XPath("//strong[contains(., 'Tags')]/following-sibling::span/a/text()") },
-            };
         }
 
         public override List<Cookie> CreateCookie()
@@ -95,10 +78,7 @@ namespace HappyHour.Spider
                         OnMultiResult);
                     break;
                 case 1:
-                    ParsePage(new ItemJavDb(this)
-                    {
-                        NumItemsToScrap = _xpathDic.Count
-                    }, _xpathDic);
+                    ParsePage(new ItemJavDb(this));
                     ParsingState = 2;
                     break;
             }

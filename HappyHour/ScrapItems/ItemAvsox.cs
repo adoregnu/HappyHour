@@ -16,16 +16,25 @@ using HappyHour.Model;
 
 namespace HappyHour.ScrapItems
 {
-    class ItemAvsox : AvItemBase, IScrapItem
+    class ItemAvsox : AvItemBase
     {
-        List<AvActorName> _actorNames;
+        readonly List<AvActorName> _actorNames;
         readonly Dictionary<string, string> _actorPicturs;
         readonly string _actorPicturePath = $"{App.CurrentPath}\\db";
+
         public ItemAvsox(SpiderBase spider) : base(spider)
         {
             _avItem.IsCensored = false;
             _actorNames = new List<AvActorName>();
             _actorPicturs = new Dictionary<string, string>();
+
+            Elements = new List<(string name, string element, ElementType type)>
+            {
+                ( "cover", "//a[@class='bigImage']/@href", ElementType.XPATH),
+                ( "info", "//div[contains(@class, 'col-md-3')]", ElementType.XPATH),
+                ( "title", "//div[@class='container']/h3/text()", ElementType.XPATH),
+                ( "actor", "//a[@class='avatar-box']", ElementType.XPATH)
+            };
         }
 
         //protected override void UdpateAvItem() { }
@@ -100,7 +109,7 @@ namespace HappyHour.ScrapItems
             UpdateStudio(node.InnerText);
         }
 
-        void IScrapItem.OnJsResult(string name, List<object> items)
+        public override void OnJsResult(string name, List<object> items)
         { 
             PrintItem(name, items);
             if (!items.IsNullOrEmpty())

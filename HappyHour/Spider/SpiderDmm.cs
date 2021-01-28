@@ -14,13 +14,7 @@ namespace HappyHour.Spider
 {
     class SpiderDmm : SpiderBase
     {
-        public override string SearchURL
-        {
-            get
-            {
-                return $"{URL}mono/-/search/=/searchstr={Keyword}/";
-            }
-        }
+        public override string SearchURL => $"{URL}mono/-/search/=/searchstr={Keyword}/";
 
         public SpiderDmm(SpiderViewModel browser) : base(browser)
         {
@@ -95,7 +89,7 @@ namespace HappyHour.Spider
                         OnMultiResult);
                     break;
                 case 1:
-                    //Browser.StopScrapping(Media);
+                    OnScrapCompleted();
                     break;
             }
         }

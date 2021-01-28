@@ -13,11 +13,14 @@ using HappyHour.Extension;
 
 namespace HappyHour.ScrapItems
 {
-    class ItemJavfree : AvItemBase, IScrapItem
+    class ItemJavfree : AvItemBase
     {
         public ItemJavfree(SpiderBase spider) : base(spider)
-        { 
-
+        {
+            Elements = new List<(string name, string element, ElementType type)>
+            {
+                ( "cover", "//div[@class='entry-content']//img[1]/@src", ElementType.XPATH)
+            };
         }
 
         protected override void UdpateAvItem() { }
@@ -28,7 +31,7 @@ namespace HappyHour.ScrapItems
             e.SuggestedFileName = $"{PosterPath}{ext}";
         }
 
-        void IScrapItem.OnJsResult(string name, List<object> items)
+        public override void OnJsResult(string name, List<object> items)
         {
             PrintItem(name, items);
             if (!items.IsNullOrEmpty())

@@ -35,14 +35,7 @@ namespace HappyHour.Spider
                 { "censored",   XPath("//a[contains(., '亚洲有码原创')]/@href") },
                 { "uncensored", XPath("//a[contains(., '亚洲无码原创')]/@href") },
                 { "subtitle",   XPath("//a[contains(., '高清中文字幕')]/@href") },
-                { "articles",   XPath("//tbody[contains(@id, 'normalthread_')]" +
-                                    "/tr/td[1]/a/@href") },
-                { "pid",  XPath("//span[@id='thread_subject']/text()") },
-                { "date", XPath("(//em[contains(@id, 'authorposton')]" +
-                                    "/span/@title)[1]") },
-                { "files",  XPathClick("//a[contains(., '.torrent')]") },
-                { "images", XPath("(//td[contains(@id, 'postmessage_')])[1]" +
-                                    "//img[contains(@id, 'aimg_')]/@file") }
+                { "articles",   XPath("//tbody[contains(@id, 'normalthread_')]/tr/td[1]/a/@href") },
             };
             Boards = new List<string>
             {
@@ -62,17 +55,6 @@ namespace HappyHour.Spider
             }
 
             return base.GetConf(key);
-        }
-
-        void ParsePage()
-        {
-            string[] keys = { "pid", "date", "files", "images" };
-            var item = new ItemSehuatang(this) { NumItemsToScrap = keys.Length  };
-            var list = _xpathDic.Where(i => keys.Contains(i.Key));
-            foreach (var xpath in list)
-            {
-                Browser.ExecJavaScript(xpath.Value, item, xpath.Key);
-            }
         }
 
         string GetNextPage(string str)
@@ -165,7 +147,8 @@ namespace HappyHour.Spider
                     Browser.ExecJavaScript(_xpathDic["articles"], MoveArticle);
                     break;
                 case 2:
-                    ParsePage();
+                    DataPath = "dummy";
+                    ParsePage(new ItemSehuatang(this));
                     break;
             }
         }

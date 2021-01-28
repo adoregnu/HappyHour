@@ -16,34 +16,11 @@ namespace HappyHour.Spider
 {
     class SpiderR18 : SpiderBase
     {
-        Dictionary<string, string> _xpathDic;
-
-        public override string SearchURL
-        {
-            get
-            {
-                return $"{URL}common/search/searchword={Keyword}/";
-            }
-        }
+        public override string SearchURL => $"{URL}common/search/searchword={Keyword}/";
         public SpiderR18(SpiderViewModel browser) : base(browser)
         {
             Name = "R18";
             URL = "https://www.r18.com/";
-            _xpathDic = new Dictionary<string, string>
-            {
-                { "title",    XPath("//meta[@property='og:title']/@content") },
-                { "releasedate", XPath("//dt[contains(.,'Release Date:')]/following-sibling::dd[1]/text()") },
-                { "runtime",  XPath("//dt[contains(.,'Runtime:')]/following-sibling::dd[1]/text()") },
-                { "director", XPath("//dt[contains(.,'Director:')]/following-sibling::dd[1]/text()") },
-                { "set_url",  XPath("//dt[contains(.,'Series:')]/following-sibling::dd[1]/a/@href") },
-                { "studio",   XPath("//dt[contains(.,'Studio:')]/following-sibling::dd[1]/a/text()") },
-                { "label",    XPath("//dt[contains(.,'Label:')]/following-sibling::dd[1]/text()") },
-                { "actor",    XPath("//label[contains(.,'Actress(es):')]/following-sibling::div[1]/span/a/span/text()") },
-                { "genre",    XPath("//label[contains(.,'Categories:')]/following-sibling::div[1]/a/text()") },
-                { "plot",     XPath("//h1[contains(., 'Product Description')]/following-sibling::p/text()") },
-                { "cover",    XPath("//div[contains(@class,'box01')]/img/@src") },
-                { "actor_thumb", XPath("//ul[contains(@class,'cmn-list-product03')]//img") },
-            };
         }
 
         public override List<Cookie> CreateCookie()
@@ -117,22 +94,17 @@ namespace HappyHour.Spider
                         OnMultiResult);
                     break;
                 case 1:
-                    _item = new ItemR18(this)
-                    {
-                        NumItemsToScrap = _xpathDic.Count,
-                    };
-                    ParsePage(_item, _xpathDic);
+                    _item = new ItemR18(this);
+                    ParsePage(_item);
                     ParsingState = 2;
                     break;
                 case 2:
                     if (_linkName != "series") break;
-                    Dictionary<string, string> seriesXpath = new Dictionary<string, string>
-                    {
-                        { "series", XPath("//div[@class='cmn-ttl-tabMain01']/h1/text()") } 
+                    _item.Elements = new List<(string name, string element, ElementType type)>
+                    { 
+                        ("series", "//div[@class='cmn-ttl-tabMain01']/h1/text()", ElementType.XPATH)
                     };
-
-                    _item.NumItemsToScrap = seriesXpath.Count; 
-                    ParsePage(_item, seriesXpath);
+                    ParsePage(_item);
                     ParsingState = 3;
                     break;
             }

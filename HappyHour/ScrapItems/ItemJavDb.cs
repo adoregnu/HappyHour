@@ -16,11 +16,20 @@ using HappyHour.Spider;
 
 namespace HappyHour.ScrapItems
 {
-    class ItemJavDb : AvItemBase, IScrapItem
+    class ItemJavDb : AvItemBase
     {
         public ItemJavDb(SpiderBase spider) : base(spider)
         {
             _avItem.IsCensored = false;
+            Elements = new List<(string name, string element, ElementType type)>
+            {
+                ( "title", "//h2[contains(@class, 'title')]/strong/text()", ElementType.XPATH),
+                ( "cover", "//div[@class='column column-video-cover']/a/@href", ElementType.XPATH),
+                ( "date", "//strong[contains(., 'Released Date')]/following-sibling::span/text()", ElementType.XPATH),
+                ( "studio", "//strong[contains(., 'Maker')]/following-sibling::span/a/text()", ElementType.XPATH),
+                ( "actor", "//strong[contains(., 'Actor')]/following-sibling::span/a/text()", ElementType.XPATH),
+                ( "genre", "//strong[contains(., 'Tags')]/following-sibling::span/a/text()", ElementType.XPATH),
+            };
         }
 
         //protected override void UdpateAvItem() { }
@@ -43,7 +52,7 @@ namespace HappyHour.ScrapItems
             UpdateActor2(ll);
         }
 
-        void IScrapItem.OnJsResult(string name, List<object> items)
+        public override void OnJsResult(string name, List<object> items)
         {
             PrintItem(name, items);
 

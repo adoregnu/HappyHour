@@ -14,35 +14,15 @@ namespace HappyHour.Spider
 {
     class SpiderAvsox : SpiderBase
     {
-        readonly Dictionary<string, string> _xpathDic;
-
-        public override string SearchURL
-        {
-            get
-            {
-                return $"{URL}search/{Keyword}";
-            }
-        }
+        public override string SearchURL => $"{URL}search/{Keyword}";
 
         public SpiderAvsox(SpiderViewModel browser) : base(browser)
         {
             Name = "AVSOX";
             URL = "https://avsox.website/en/";
-
-            _xpathDic = new Dictionary<string, string>
-            {
-                { "cover", XPath("//a[@class='bigImage']/@href") },
-                { "info", XPath("//div[contains(@class, 'col-md-3')]") },
-                { "title", XPath("//div[@class='container']/h3/text()") },
-                //{ "release", XPath("//div[contains(@class, 'col-md-3')]/p[2]/text()") },
-                //{ "studio", XPath("//div[contains(@class, 'col-md-3')]/p[5]/a/text()") },
-                //{ "series", XPath("//div[contains(class, 'col-md-3')]/p[7]/a/text()") }
-                //{ "genre", XPath("//span[@class='genre']/a/text()") }
-                { "actor", XPath("//a[@class='avatar-box']") }
-            };
         }
 
-       void OnMultiResult(object result)
+        void OnMultiResult(object result)
         {
             if (!CheckResult(result, out List<string> list))
                 goto NotFound;
@@ -60,7 +40,7 @@ namespace HappyHour.Spider
             {
                 doc.LoadHtml(it);
                 var node = doc.DocumentNode.SelectSingleNode("//date[1]");
-                var innerText = node.InnerText.Trim().Replace('_','-');
+                var innerText = node.InnerText.Trim().Replace('_', '-');
                 if (innerText.IndexOf(pid, StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     anode = doc.DocumentNode.FirstChild;
@@ -91,10 +71,7 @@ namespace HappyHour.Spider
                         OnMultiResult);
                     break;
                 case 1:
-                    ParsePage(new ItemAvsox(this)
-                    {
-                        NumItemsToScrap = _xpathDic.Count
-                    }, _xpathDic);
+                    ParsePage(new ItemAvsox(this));
                     ParsingState = 2;
                     break;
             }

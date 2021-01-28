@@ -13,12 +13,24 @@ using HappyHour.Spider;
 
 namespace HappyHour.ScrapItems
 {
-    abstract class ItemBase
+    using ElementTupleList = List<(string name, string element, ElementType type)>;
+    abstract class ItemBase : IScrapItem
     {
-        public static CultureInfo enUS = new CultureInfo("en-US");
-
         readonly protected SpiderBase _spider;
+        ElementTupleList _elements;
         protected int _numItemsToScrap = 0;
+
+        public static CultureInfo enUS = new CultureInfo("en-US");
+        public ElementTupleList Elements
+        {
+            get => _elements;
+            set
+            {
+                if (value == null) return;
+                _elements = value;
+                _numItemsToScrap = value.Count;
+            }
+        }
 
         public int NumItemsToScrap
         {
@@ -63,5 +75,7 @@ namespace HappyHour.ScrapItems
                 Log.Print($"\t{name}: {it.Trim()}");
             }
         }
+
+        public abstract void OnJsResult(string name, List<object> items);
     }
 }

@@ -15,10 +15,22 @@ using HappyHour.Model;
 
 namespace HappyHour.ScrapItems
 {
-    class ItemJavlibrary : AvItemBase, IScrapItem
+    class ItemJavlibrary : AvItemBase
     {
         public ItemJavlibrary(SpiderBase spider) :base(spider)
         {
+            Elements = new List<(string name, string element, ElementType type)>
+            {
+                ( "title",  "//*[@id='video_title']/h3/a/text()", ElementType.XPATH),
+                ( "id",     "//*[@id='video_id']//td[2]/text()", ElementType.XPATH),
+                ( "date",   "//*[@id='video_date']//td[2]/text()", ElementType.XPATH),
+                ( "director", "//*[@id='video_director']//*[@class='director']/a/text()", ElementType.XPATH),
+                ( "studio", "//*[@id='video_maker']//*[@class='maker']/a/text()", ElementType.XPATH),
+                ( "cover",  "//*[@id='video_jacket_img']/@src", ElementType.XPATH),
+                ( "rating", "//*[@id='video_review']//*[@class='score']/text()", ElementType.XPATH),
+                ( "genre",  "//*[@id='video_genres']//*[@class='genre']//text()", ElementType.XPATH),
+                ( "actor",  "//*[@id='video_cast']//*[@class='cast']", ElementType.XPATH),
+            };
         }
 
         protected override void OnBeforeDownload(object sender, DownloadItem e)
@@ -70,7 +82,7 @@ namespace HappyHour.ScrapItems
                 date.Trim(), "yyyy-MM-dd", enUS);
         }
 
-        void IScrapItem.OnJsResult(string name, List<object> items)
+        public override void OnJsResult(string name, List<object> items)
         {
             PrintItem(name, items);
             if (!items.IsNullOrEmpty())
@@ -84,7 +96,7 @@ namespace HappyHour.ScrapItems
                 {
                     var title = (items[0] as string).Trim();
                     if (title.StartsWith(_spider.Keyword, StringComparison.OrdinalIgnoreCase))
-                        title = title.Substring(_spider.Keyword.Length+1);
+                        title = title[(_spider.Keyword.Length + 1)..];
 
                     UpdateTitle(title);
                 }

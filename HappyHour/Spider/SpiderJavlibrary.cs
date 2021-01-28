@@ -15,30 +15,11 @@ namespace HappyHour.Spider
 {
     class SpiderJavlibrary : SpiderBase
     {
-        Dictionary<string, string> _xpathDic;
-        public override string SearchURL
-        {
-            get
-            {
-                return $"{URL}vl_searchbyid.php?keyword={Keyword}";
-            }
-        }
+        public override string SearchURL => $"{URL}vl_searchbyid.php?keyword={Keyword}";
         public SpiderJavlibrary(SpiderViewModel browser) : base(browser)
         {
             Name = "Javlibrary";
             URL = "https://www.javlibrary.com/en/";
-            _xpathDic = new Dictionary<string, string>
-            {
-                { "title",  XPath("//*[@id='video_title']/h3/a/text()") },
-                { "id",     XPath("//*[@id='video_id']//td[2]/text()") },
-                { "date",   XPath("//*[@id='video_date']//td[2]/text()") },
-                { "director", XPath("//*[@id='video_director']//*[@class='director']/a/text()") },
-                { "studio", XPath("//*[@id='video_maker']//*[@class='maker']/a/text()") },
-                { "cover",  XPath("//*[@id='video_jacket_img']/@src") },
-                { "rating", XPath("//*[@id='video_review']//*[@class='score']/text()") },
-                { "genre",  XPath("//*[@id='video_genres']//*[@class='genre']//text()") },
-                { "actor",  XPath("//*[@id='video_cast']//*[@class='cast']") },
-            };
         }
         public override List<Cookie> CreateCookie()
         {
@@ -58,10 +39,7 @@ namespace HappyHour.Spider
         {
             if (!CheckResult(result, out List<string> list))
             {
-                ParsePage(new ItemJavlibrary(this)
-                {
-                    NumItemsToScrap = _xpathDic.Count
-                }, _xpathDic);
+                ParsePage(new ItemJavlibrary(this));
                 return;
             }
 
@@ -85,18 +63,15 @@ namespace HappyHour.Spider
         {
             switch (ParsingState)
             {
-            case 0:
-                Browser.ExecJavaScript(
-                    XPath("//div[@class='videos']/div/a"),
-                    OnMultiResult);
-                break;
-            case 1:
-                ParsePage(new ItemJavlibrary(this)
-                {
-                    NumItemsToScrap = _xpathDic.Count
-                }, _xpathDic);
-                ParsingState = 2;
-                break;
+                case 0:
+                    Browser.ExecJavaScript(
+                        XPath("//div[@class='videos']/div/a"),
+                        OnMultiResult);
+                    break;
+                case 1:
+                    ParsePage(new ItemJavlibrary(this));
+                    ParsingState = 2;
+                    break;
             }
         }
     }

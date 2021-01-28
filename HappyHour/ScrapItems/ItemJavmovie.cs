@@ -17,11 +17,19 @@ using HappyHour.Model;
 
 namespace HappyHour.ScrapItems
 {
-    class ItemJavmovie : AvItemBase, IScrapItem
+    class ItemJavmovie : AvItemBase
     {
         public ItemJavmovie(SpiderBase spider) : base(spider)
-        { 
-
+        {
+            Elements = new List<(string name, string element, ElementType type)>
+            {
+                ( "cover", "//div[@class='movie-cover']/img/@src", ElementType.XPATH),
+                ( "title", "//div[@class='mdm-info']/h1/text()", ElementType.XPATH),
+                ( "date", "//div[@class='mdm-info']//tr[2]/td[2]/text()", ElementType.XPATH),
+                ( "studio", "//div[@class='mdm-info']//tr[5]/td[2]//text()", ElementType.XPATH),
+                ( "actor", "//td[@class='list-actress']/a/text()", ElementType.XPATH),
+                ( "genre", "//td[@class='list-genre']/a/text()", ElementType.XPATH),
+            };
         }
 
         //protected override void UdpateAvItem() { }
@@ -55,7 +63,7 @@ namespace HappyHour.ScrapItems
             UpdateActor2(ll);
         }
 
-        void IScrapItem.OnJsResult(string name, List<object> items)
+        public override void OnJsResult(string name, List<object> items)
         {
             PrintItem(name, items);
             if (!items.IsNullOrEmpty())

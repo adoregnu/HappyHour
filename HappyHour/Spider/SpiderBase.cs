@@ -127,7 +127,7 @@ namespace HappyHour.Spider
             Log.Print($"Reset Spider : {Name}");
         }
 
-        protected void ParsePage(IScrapItem item, Dictionary<string, string> dic)
+        protected void ParsePage(IScrapItem item)
         {
             if (string.IsNullOrEmpty(DataPath))
             {
@@ -135,9 +135,12 @@ namespace HappyHour.Spider
                 return;
             }
 
-            foreach (var xpath in dic )
+            foreach (var (name, element, type) in item.Elements)
             {
-                Browser.ExecJavaScript(xpath.Value, item, xpath.Key);
+                if (type == ElementType.XPATH)
+                    Browser.ExecJavaScript(XPath(element), item, name);
+                else if (type == ElementType.XPATH_CLICK)
+                    Browser.ExecJavaScript(XPathClick(element), item, name);
             }
             _linkName = null;
         }

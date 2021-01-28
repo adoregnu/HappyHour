@@ -14,10 +14,16 @@ using HappyHour.Spider;
 
 namespace HappyHour.ScrapItems
 {
-    class ItemPornav : AvItemBase, IScrapItem
+    class ItemPornav : AvItemBase
     {
         public ItemPornav(SpiderBase spider) : base(spider)
-        { 
+        {
+            Elements = new List<(string name, string element, ElementType type)>
+            {
+                ( "cover", "//div[@class='col-md-7']/img/@src", ElementType.XPATH),
+                ( "title", "//div[@class='col-md-5']/p[1]/text()", ElementType.XPATH),
+                ( "info", "//div[@class='col-md-5']/p[2]//text()", ElementType.XPATH),
+            };
         }
 
         protected override void UdpateAvItem()
@@ -62,7 +68,7 @@ namespace HappyHour.ScrapItems
             }
         }
 
-        void IScrapItem.OnJsResult(string name, List<object> items)
+        public override void OnJsResult(string name, List<object> items)
         {
             if (!items.IsNullOrEmpty())
             {

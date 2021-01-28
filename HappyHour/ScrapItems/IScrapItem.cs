@@ -7,9 +7,16 @@ using System.Threading.Tasks;
 
 namespace HappyHour.ScrapItems
 {
+    using ElementTupleList = List<(string name, string element, ElementType type)>;
+
+    enum ElementType
+    {
+        XPATH, XPATH_CLICK, CSS
+    }
+
     interface IScrapItem
     {
-        //Dictionary<string, string> ItemSet { get; set; }
+        ElementTupleList Elements { get; set; }
         void OnJsResult(string name, List<object> items);
     }
 }

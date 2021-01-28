@@ -13,29 +13,11 @@ namespace HappyHour.Spider
 {
     class SpiderJavmoive : SpiderBase
     {
-        Dictionary<string, string> _xpathDic;
-
-        public override string SearchURL
-        {
-            get
-            {
-                return $"{URL}search.html?k={Keyword}";
-            }
-        }
+        public override string SearchURL => $"{URL}search.html?k={Keyword}";
         public SpiderJavmoive(SpiderViewModel browser) : base(browser)
         {
             Name = "JavMovie";
             URL = "http://javmovie.com/en/";
-
-            _xpathDic = new Dictionary<string, string>
-            {
-                { "cover", XPath("//div[@class='movie-cover']/img/@src") },
-                { "title", XPath("//div[@class='mdm-info']/h1/text()") },
-                { "date", XPath("//div[@class='mdm-info']//tr[2]/td[2]/text()") },
-                { "studio", XPath("//div[@class='mdm-info']//tr[5]/td[2]//text()") },
-                { "actor", XPath("//td[@class='list-actress']/a/text()") },
-                { "genre", XPath("//td[@class='list-genre']/a/text()") },
-            };
         }
 
         void OnMultiResult(object result)
@@ -55,7 +37,6 @@ namespace HappyHour.Spider
             }
         }
 
-        ItemJavmovie _item = null; 
         public override void Scrap()
         {
             switch (ParsingState)
@@ -66,10 +47,7 @@ namespace HappyHour.Spider
                         OnMultiResult);
                     break;
                 case 1:
-                    _item = new ItemJavmovie(this) {
-                        NumItemsToScrap = _xpathDic.Count
-                    };
-                    ParsePage(_item, _xpathDic);
+                    ParsePage(new ItemJavmovie(this));
                     ParsingState = 2;
                     break;
             }

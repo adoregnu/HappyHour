@@ -12,10 +12,7 @@ namespace HappyHour.Spider
 {
     class SpiderAvwiki : SpiderBase
     {
-        public override string SearchURL
-        {
-            get => $"{URL}?s={Keyword}";
-        }
+        public override string SearchURL => $"{URL}?s={Keyword}";
 
         public SpiderAvwiki(SpiderViewModel browser) : base(browser)
         {

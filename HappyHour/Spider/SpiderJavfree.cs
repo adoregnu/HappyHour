@@ -12,13 +12,7 @@ namespace HappyHour.Spider
 {
     class SpiderJavfree : SpiderBase
     {
-        public override string SearchURL
-        {
-            get
-            {
-                return $"{URL}?s={Keyword}";
-            }
-        }
+        public override string SearchURL => $"{URL}?s={Keyword}";
 
         public SpiderJavfree(SpiderViewModel browser) : base(browser)
         {
@@ -56,10 +50,6 @@ namespace HappyHour.Spider
 
         public override void Scrap()
         {
-            Dictionary<string, string> xpathDic = new Dictionary<string, string>
-            {
-                { "cover", XPath("//div[@class='entry-content']//img[1]/@src") }
-            };
             switch (ParsingState)
             {
                 case 0:
@@ -68,10 +58,7 @@ namespace HappyHour.Spider
                         OnMultiResult);
                     break;
                 case 1:
-                    ParsePage(new ItemJavfree(this)
-                    {
-                        NumItemsToScrap = xpathDic.Count
-                    }, xpathDic);
+                    ParsePage(new ItemJavfree(this));
                     ParsingState = 2;
                     break;
             }

@@ -13,7 +13,7 @@ using HappyHour.Extension;
 
 namespace HappyHour.ScrapItems
 {
-    class ItemSehuatang : ItemBase, IScrapItem
+    class ItemSehuatang : ItemBase
     {
         public DateTime DateTime;
 
@@ -25,6 +25,13 @@ namespace HappyHour.ScrapItems
 
         public ItemSehuatang(SpiderBase spider) : base(spider)
         {
+            Elements = new List<(string name, string element, ElementType type)>
+            {
+                ( "pid",  "//span[@id='thread_subject']/text()", ElementType.XPATH),
+                ( "date", "//em[contains(@id, 'authorposton')]/span/@title)[1]", ElementType.XPATH),
+                ( "files", "//a[contains(., '.torrent')]", ElementType.XPATH_CLICK),
+                ( "images", "//td[contains(@id, 'postmessage_')])[1]//img[contains(@id, 'aimg_')]/@file", ElementType.XPATH) 
+            };
         }
 
         void CheckCompleted()
@@ -46,7 +53,7 @@ namespace HappyHour.ScrapItems
         {
             if (e.SuggestedFileName.EndsWith("torrent"))
             {
-                e.SuggestedFileName = _outPath + e.SuggestedFileName;
+                e.SuggestedFileName = $"{_outPath}\\{e.SuggestedFileName}";
             }
             else
             {
@@ -57,7 +64,7 @@ namespace HappyHour.ScrapItems
                     postfix = "cover";
                 else
                     postfix = $"screenshot{idx}";
-                e.SuggestedFileName = _outPath + $"{_pid}_{postfix}{ext}";
+                e.SuggestedFileName = _outPath + $"\\{_pid}_{postfix}{ext}";
             }
             //Log.Print($"{_pid} file to store: {e.SuggestedFileName}");
         }
@@ -90,7 +97,7 @@ namespace HappyHour.ScrapItems
             }
 
             _pid = m.Groups[0].Value;
-            _outPath += _spider.GetConf("DataPath") + _pid + "\\";
+            _outPath += _spider.GetConf("DataPath") + _pid;
 
             var di = new DirectoryInfo(_outPath);
             if (!di.Exists)
@@ -139,7 +146,7 @@ namespace HappyHour.ScrapItems
                 return false;
         }
 #endif
-        void IScrapItem.OnJsResult(string name, List<object> items)
+        public override void OnJsResult(string name, List<object> items)
         {
             PrintItem(name, items);
 
