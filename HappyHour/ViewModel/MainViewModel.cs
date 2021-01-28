@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 
 using MvvmDialogs;
+using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 
 using HappyHour.View;
@@ -15,7 +16,7 @@ using HappyHour.Interfaces;
 
 namespace HappyHour.ViewModel
 {
-    class MainViewModel : GalaSoft.MvvmLight.ViewModelBase, IMainView
+    class MainViewModel : ViewModelBase, IMainView
     {
         string _status;
         bool _nasEnabled;

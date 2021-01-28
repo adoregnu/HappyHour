@@ -162,7 +162,7 @@ namespace HappyHour.ViewModel
             = new Dictionary<string, string>
             {
                 { "Pid", nameof(AvItemList) },
-                //{ "Actor", nameof(AvActorNameList) },
+                { "Actor", nameof(AvActorNameList) },
                 { "Studio", nameof(AvStudioList) },
                 { "Series", nameof(AvSeriesList) },
             };

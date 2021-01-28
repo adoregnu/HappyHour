@@ -161,9 +161,11 @@ namespace HappyHour.ViewModel
                 () => OnSearchEmptyActor());
             CmdDoubleClick = new RelayCommand(() =>
                 ItemDoubleClickedHandler?.Invoke(this, SelectedMedia));
-            CmdScrap = new RelayCommand<object>(p => OnScrapAvInfo(p as SpiderBase));
+            CmdScrap = new RelayCommand<object>(
+                p => OnScrapAvInfo(p as SpiderBase),
+                p => _mitemsToSearch == null);
             CmdStopBatchingScrap = new RelayCommand(
-                () => _mitemsToSearch.Clear(),
+                () => _mitemsToSearch = null,
                 () => _mitemsToSearch != null);
         }
 

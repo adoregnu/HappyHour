@@ -199,19 +199,35 @@ namespace HappyHour.ViewModel
             Open();
         }
 
-        string DetectEncoding(string subPath)
+        void ConvertEncodingIfNeeded(string subPath)
         {
-            using FileStream fs = File.OpenRead(subPath);
             ICharsetDetector cdet = new CharsetDetector();
-            cdet.Feed(fs);
-            cdet.DataEnd();
-            if (cdet.Charset != null)
+            try
             {
+                var buff = File.ReadAllBytes(subPath);
+                cdet.Feed(buff, 0, buff.Length);
+                if (cdet.Charset != "EUC-KR")
+                    return;
+
                 Log.Print("Charset: {0}, confidence: {1}",
-                     cdet.Charset, cdet.Confidence);
-                return cdet.Charset;
+                    cdet.Charset, cdet.Confidence);
+                var text = Encoding.GetEncoding("euc-kr").GetString(buff);
+
+                var attr = File.GetAttributes(subPath);
+                if (attr.HasFlag(FileAttributes.ReadOnly))
+                {
+                    attr &= ~FileAttributes.ReadOnly;
+                    File.SetAttributes(subPath, attr);
+                }
+
+                var sw = new StreamWriter(File.Open(subPath, FileMode.Create),
+                    Encoding.GetEncoding("utf-8"));
+                sw.Write(text, Encoding.UTF8);
             }
-            return null;
+            catch (Exception ex)
+            {
+                Log.Print(ex.Message);
+            }
         }
 
 
@@ -228,9 +244,7 @@ namespace HappyHour.ViewModel
                         .StartsWith(currFile, StringComparison.OrdinalIgnoreCase));
                 if (sub != null)
                 {
-                    //string charset = DetectEncoding(sub);
-                    //if (charset != null && charset != "UTF-8")
-                    //    CurrentMediaOptions.DecoderParams["sub_charenc"] = charset;
+                    ConvertEncodingIfNeeded(sub);
                     CurrentMediaOptions.SubtitlesSource = sub;
                 }
             }
