@@ -56,6 +56,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Resources\AvjamakLogin.js" />
     <None Remove="Resources\default-fallback-image.png" />
     <None Remove="Resources\ElementAt.js" />
     <None Remove="Resources\Highlight.js" />
@@ -68,6 +69,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Resources\AvjamakLogin.js" />
     <EmbeddedResource Include="Resources\ElementAt.js" />
     <EmbeddedResource Include="Resources\Highlight.js" />
     <EmbeddedResource Include="Resources\NasLogin.js" />

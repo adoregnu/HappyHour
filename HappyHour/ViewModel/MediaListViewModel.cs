@@ -213,10 +213,19 @@ namespace HappyHour.ViewModel
 
         public void AddMedia(string path)
         {
-            var item = MediaItem.Create(path);
-            if (item == null) return;
-
-            MediaList.InsertInPlace(item, i => i.DateTime);
+            var media = MediaList.FirstOrDefault(m => m.MediaPath == path);
+            if (media == null)
+            {
+                var item = MediaItem.Create(path);
+                if (item != null)
+                {
+                    MediaList.InsertInPlace(item, i => i.DateTime);
+                }
+            }
+            else
+            {
+                media.ReloadAvItem();
+            }
         }
 
         void OnMoveItemTo(List<MediaItem> mitems)

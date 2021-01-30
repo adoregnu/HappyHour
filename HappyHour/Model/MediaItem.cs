@@ -209,8 +209,7 @@ namespace HappyHour.Model
         public async void ReloadAvItem()
         {
             UpdateFields();
-            if (IsImage)
-                return;
+            if (IsImage) return;
 
             AvItem = await _dbContext.Items
                 .Include(i => i.Studio)
@@ -232,7 +231,9 @@ namespace HappyHour.Model
             _dateDownloaded = File.GetLastWriteTime(MediaPath);
             MediaFiles.Sort();
             if (Subtitles != null)
+            {
                 Subtitles.Sort();
+            }
         }
 
         void UpdateField(string path)
@@ -241,7 +242,7 @@ namespace HappyHour.Model
                 ".mp4", ".avi", ".mkv", ".ts", ".wmv", ".m4v"
             };
             string[] subs = new string[] {
-                ".smi", ".srt", ".sub", ".ass", ".ssa"
+                ".smi", ".srt", ".sub", ".ass", ".ssa", ".sup"
             };
 
             string fname = Path.GetFileName(path);

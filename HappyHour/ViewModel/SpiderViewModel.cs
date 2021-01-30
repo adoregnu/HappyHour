@@ -30,16 +30,23 @@ namespace HappyHour.ViewModel
             get => _keyword;
             set => Set(ref _keyword, value);
         }
+        public string DataPath { get; set; }
         public SpiderBase SelectedSpider
         {
             get => _selectedSpider;
             set
             {
                 if (value == null) return;
+                if (_selectedSpider != value)
+                {
+                    if (_selectedSpider != null)
+                        _selectedSpider.OnDeselect();
+                    value.OnSelected();
+                    UpdateBrowserHeader(value.Name);
+                    value.SetCookies();
+                    Set(ref _selectedSpider, value);
+                }
 
-                UpdateBrowserHeader(value.Name);
-                Set(ref _selectedSpider, value);
-                value.SetCookies();
                 if (string.IsNullOrEmpty(value.Keyword))
                     Address = value.URL;
                 else
@@ -63,7 +70,11 @@ namespace HappyHour.ViewModel
                 _mediaList.SpiderList = Spiders;
                 _mediaList.ItemSelectedHandler += (o, i) =>
                 {
-                    if (i != null) Keyword = i.Pid;
+                    if (i != null)
+                    {
+                        DataPath = i.MediaPath;
+                        Keyword = i.Pid;
+                    }
                 };
             }
         }
@@ -92,6 +103,8 @@ namespace HappyHour.ViewModel
                 new SpiderJavfree(this),
                 new SpiderPornav(this),
                 new SpiderAvsox(this),
+                new SpiderAvdbs(this),
+                new SpiderAvJamak(this),
             };
             SelectedSpider = Spiders[0];
             Address = SelectedSpider.URL;

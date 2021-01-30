@@ -53,6 +53,16 @@ namespace HappyHour.Spider
             Browser = br;
         }
 
+        public virtual void OnSelected()
+        {
+            Log.Print($"{Name} selected!");
+        }
+
+        public virtual void OnDeselect()
+        { 
+            Log.Print($"{Name} deselected!");
+        }
+
         public virtual string GetConf(string key)
         {
             throw new Exception("Unknown Config");
