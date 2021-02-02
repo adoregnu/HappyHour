@@ -28,9 +28,9 @@ namespace HappyHour.ScrapItems
             Elements = new List<(string name, string element, ElementType type)>
             {
                 ( "pid",  "//span[@id='thread_subject']/text()", ElementType.XPATH),
-                ( "date", "//em[contains(@id, 'authorposton')]/span/@title)[1]", ElementType.XPATH),
+                ( "date", "(//em[contains(@id, 'authorposton')]/span/@title)[1]", ElementType.XPATH),
                 ( "files", "//a[contains(., '.torrent')]", ElementType.XPATH_CLICK),
-                ( "images", "//td[contains(@id, 'postmessage_')])[1]//img[contains(@id, 'aimg_')]/@file", ElementType.XPATH) 
+                ( "images", "(//td[contains(@id, 'postmessage_')])[1]//img[contains(@id, 'aimg_')]/@file", ElementType.XPATH) 
             };
         }
 

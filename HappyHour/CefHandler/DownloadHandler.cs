@@ -14,6 +14,8 @@ namespace HappyHour.CefHandler
         public event EventHandler<DownloadItem> OnBeforeDownloadFired;
         public event EventHandler<DownloadItem> OnDownloadUpdatedFired;
 
+        public bool ShowDialog { get; set; } = false;
+
         //string _basePath;
         public DownloadHandler()
         {
@@ -33,7 +35,7 @@ namespace HappyHour.CefHandler
             using (callback)
             {
                 //Log.Print("Before Download: " + downloadItem.SuggestedFileName);
-                callback.Continue(downloadItem.SuggestedFileName, showDialog:false);
+                callback.Continue(downloadItem.SuggestedFileName, showDialog: ShowDialog);
             }
         }
 

@@ -19,6 +19,7 @@ namespace HappyHour.ScrapItems
         readonly protected SpiderBase _spider;
         ElementTupleList _elements;
         protected int _numItemsToScrap = 0;
+        bool _isHandlerInit = false;
 
         public static CultureInfo enUS = new CultureInfo("en-US");
         public ElementTupleList Elements
@@ -49,13 +50,21 @@ namespace HappyHour.ScrapItems
         public ItemBase(SpiderBase spider)
         {
             _spider = spider;
-            var dh = _spider.Browser.DownloadHandler;
-            dh.OnBeforeDownloadFired += OnBeforeDownload;
-            dh.OnDownloadUpdatedFired += OnDownloadUpdated;
         }
 
         protected virtual void OnBeforeDownload(object sender, DownloadItem e) { }
         protected virtual void OnDownloadUpdated(object sender, DownloadItem e) { }
+
+        public virtual void Init()
+        {
+            if (!_isHandlerInit)
+            {
+                var dh = _spider.Browser.DownloadHandler;
+                dh.OnBeforeDownloadFired += OnBeforeDownload;
+                dh.OnDownloadUpdatedFired += OnDownloadUpdated;
+                _isHandlerInit = true;
+            }
+        }
 
         protected virtual void Clear()
         {

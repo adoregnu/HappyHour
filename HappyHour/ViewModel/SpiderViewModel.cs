@@ -75,6 +75,11 @@ namespace HappyHour.ViewModel
                         DataPath = i.MediaPath;
                         Keyword = i.Pid;
                     }
+                    else
+                    { 
+                        DataPath = null;
+                        Keyword = null;
+                    }
                 };
             }
         }

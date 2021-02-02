@@ -41,10 +41,7 @@ namespace HappyHour.ViewModel
             get => _selectedMedia;
             set
             {
-                if (value != null && _selectedMedia != value)
-                {
-                    ItemSelectedHandler?.Invoke(this, value);
-                }
+                ItemSelectedHandler?.Invoke(this, value);
                 Set(ref _selectedMedia, value);
             }
         }
@@ -144,9 +141,9 @@ namespace HappyHour.ViewModel
             BindingOperations.EnableCollectionSynchronization(MediaList, _lock);
 
             CmdExclude = new RelayCommand<MediaItem>(
-                p => { if (p != null) { p.Download(); MediaList.Remove(p); } });
-            CmdDownload = new RelayCommand<MediaItem>(
                 p => { if (p != null) { p.Exclude(); MediaList.Remove(p); } });
+            CmdDownload = new RelayCommand<MediaItem>(
+                p => { if (p != null) { p.Download(); MediaList.Remove(p); } });
             CmdMoveItemTo = new RelayCommand<object>(
                 p => OnMoveItemTo(p.ToList<MediaItem>()));
             CmdDeleteItem = new RelayCommand<object>(

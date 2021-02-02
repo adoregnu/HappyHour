@@ -147,7 +147,7 @@ namespace HappyHour.Spider
                 OnScrapCompleted();
                 return;
             }
-
+            (item as ItemBase).Init();
             foreach (var (name, element, type) in item.Elements)
             {
                 if (type == ElementType.XPATH)

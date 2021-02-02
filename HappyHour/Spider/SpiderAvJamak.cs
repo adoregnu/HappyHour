@@ -26,14 +26,20 @@ namespace HappyHour.Spider
         void OnBeforeDownload(object sender, DownloadItem e)
         {
             var ext = Path.GetExtension(e.SuggestedFileName);
-            e.SuggestedFileName = $"{Browser.DataPath}//{Browser.Keyword}{ext}";
+            string savePath;
+            if (!string.IsNullOrEmpty(Browser.DataPath))
+                savePath = Browser.DataPath + "\\";
+            else
+                savePath = App.GConf["general"]["data_path"];
+
+            e.SuggestedFileName = $"{savePath}{Browser.Keyword}{ext}";
         }
 
         void OnDownloadUpdated(object sender, DownloadItem e)
         {
             if (e.IsComplete)
             {
-                Log.Print($"{Name}: Download Completed! {e.SuggestedFileName}");
+                Log.Print($"{Name}: {e.SuggestedFileName} download completed!");
                 Browser.MediaList.AddMedia(Browser.DataPath);
             }
         }
