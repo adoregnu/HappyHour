@@ -1,4 +1,5 @@
 ﻿using CefSharp;
+using Scriban;
 
 namespace HappyHour.ViewModel
 {
@@ -26,7 +27,7 @@ namespace HappyHour.ViewModel
 
             _numLoading++;
             if (_numLoading == 4)
-                WebBrowser.ExecuteScriptAsync(App.ReadResource("NasLogin.js"));
+                Login("NasLogin.js");
         }
     }
 }

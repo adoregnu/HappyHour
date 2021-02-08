@@ -5,6 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows.Input;
+
+using GalaSoft.MvvmLight.Command;
 
 using HappyHour.ViewModel;
 using HappyHour.ScrapItems;
@@ -26,6 +29,7 @@ namespace HappyHour.Spider
         public string SelectedBoard { set; get; } = "censored";
         public bool StopOnExistingId { get; set; } = true;
 
+        public ICommand CmdStop { get; private set; }
         public SpiderSehuatang(SpiderViewModel browser) : base(browser)
         {
             Name = "sehuatang";
@@ -41,6 +45,7 @@ namespace HappyHour.Spider
             {
                 "censored", "uncensored", "subtitle"
             };
+            CmdStop = new RelayCommand(() => Stop());
         }
 
         public override string GetConf(string key)

@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
+using Scriban;
 using CefSharp;
 using CefSharp.Wpf;
 
@@ -117,6 +118,17 @@ namespace HappyHour.ViewModel
                 }
                 callback?.Invoke(response.Result);
             });
+        }
+
+        public void Login(string jsTpl)
+        {
+            var tpl = Template.Parse(App.ReadResource(jsTpl));
+            var js = tpl.Render(new
+            {
+                UserId = App.GConf["general"]["user_id"],
+                Password = App.GConf["general"]["password"]
+            });
+            WebBrowser.ExecuteScriptAsync(js);
         }
 
         public override void Cleanup()

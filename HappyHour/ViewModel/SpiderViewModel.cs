@@ -1,14 +1,8 @@
-﻿using System;
-using System.IO;
-using System.Linq;
+﻿using System.Linq;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Windows.Input;
 
 using CefSharp;
-
-using GalaSoft.MvvmLight.Command;
 
 using HappyHour.Spider;
 using HappyHour.ScrapItems;
@@ -20,17 +14,10 @@ namespace HappyHour.ViewModel
 {
     class SpiderViewModel : BrowserBase
     {
-        string _keyword;
         IMediaList _mediaList;
         SpiderBase _selectedSpider;
 
         public List<SpiderBase> Spiders { get; set; }
-        public string Keyword
-        { 
-            get => _keyword;
-            set => Set(ref _keyword, value);
-        }
-        public string DataPath { get; set; }
         public SpiderBase SelectedSpider
         {
             get => _selectedSpider;
@@ -70,15 +57,16 @@ namespace HappyHour.ViewModel
                 _mediaList.SpiderList = Spiders;
                 _mediaList.ItemSelectedHandler += (o, i) =>
                 {
+                    if (SelectedSpider == null) return;
                     if (i != null)
                     {
-                        DataPath = i.MediaPath;
-                        Keyword = i.Pid;
+                        SelectedSpider.DataPath = i.MediaPath;
+                        SelectedSpider.Keyword = i.Pid;
                     }
                     else
                     { 
-                        DataPath = null;
-                        Keyword = null;
+                        SelectedSpider.DataPath = null;
+                        SelectedSpider.Keyword = null;
                     }
                 };
             }
@@ -86,13 +74,6 @@ namespace HappyHour.ViewModel
 
         public SpiderViewModel() : base()
         {
-            CmdStart = new RelayCommand(() =>
-            {
-                SelectedSpider.Keyword = Keyword;
-                SelectedSpider.Navigate2();
-            });
-            CmdStop = new RelayCommand(() => SelectedSpider.Stop());
-
             Spiders = new List<SpiderBase>
             {
                 new SpiderSehuatang(this),

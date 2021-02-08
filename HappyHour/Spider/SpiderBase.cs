@@ -9,6 +9,8 @@ using System.Windows.Input;
 using Scriban;
 using CefSharp;
 
+using GalaSoft.MvvmLight.Command;
+
 using HappyHour.ViewModel;
 using HappyHour.ScrapItems;
 using HappyHour.Extension;
@@ -33,24 +35,18 @@ namespace HappyHour.Spider
         public string DataPath { get; set; }
         public virtual string SearchURL { get => URL; }
 
-        public bool IsRunning
-        {
-            get => !string.IsNullOrEmpty(Keyword);
-        }
-
         public string Keyword
         {
             get => _keyword;
-            set
-            {
-                Set(ref _keyword, value);
-                RaisePropertyChanged(nameof(IsRunning));
-            }
+            set => Set(ref _keyword, value);
         }
+
+        public ICommand CmdSearch { get; private set; }
 
         public SpiderBase(SpiderViewModel br)
         {
             Browser = br;
+            CmdSearch = new RelayCommand(() => Navigate2());
         }
 
         public virtual void OnSelected()

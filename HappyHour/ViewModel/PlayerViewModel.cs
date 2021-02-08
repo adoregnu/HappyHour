@@ -217,8 +217,7 @@ namespace HappyHour.ViewModel
                     cdet.Charset, cdet.Confidence);
 
                 fs.Position = 0;
-                StreamReader sr = new StreamReader(fs,
-                    Encoding.GetEncoding("euc-kr"), true);
+                StreamReader sr = new StreamReader(fs, Encoding.GetEncoding("euc-kr"), true);
                 var text = sr.ReadToEnd();
                 sr.Close();
 

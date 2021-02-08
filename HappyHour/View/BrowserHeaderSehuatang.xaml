@@ -24,7 +24,7 @@
         <StackPanel Grid.Column="3" Orientation="Horizontal">
             <CheckBox Margin="5,0,0,0" VerticalAlignment="Center"
                       IsChecked="{Binding SelectedSpider.StopOnExistingId}"/>
-            <Button Margin="5,0,0,0" Command="{Binding CmdStart}"
+            <Button Margin="5,0,0,0" Command="{Binding SelectedSpider.CmdSearch}"
                     Style="{DynamicResource ModernButtonStyle2}">
                 <Path Stretch="Uniform"
                       Data="{Binding Source={StaticResource SearchStartIcon}, Path=Data}"
@@ -32,7 +32,7 @@
                             {RelativeSource AncestorType={x:Type Button}}}" />
             </Button>
             <Button Style="{DynamicResource ModernButtonStyle2}"
-                    Command="{Binding CmdStop}">
+                    Command="{Binding SelectedSpider.CmdStop}">
                 <Path Stretch="Uniform"
                     Data="{Binding Source={StaticResource SearchStopIcon}, Path=Data}"
                     Fill="{Binding Path=Foreground, RelativeSource=

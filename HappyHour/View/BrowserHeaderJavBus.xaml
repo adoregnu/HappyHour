@@ -21,7 +21,7 @@
             <TextBlock Margin="5,0,0,0" Text="PID:" VerticalAlignment="Center"/>
             <TextBox Text="{Binding Keyword}" Width="100" Margin="5,0,0,0"/>
             <Button Style="{DynamicResource ModernButtonStyle2}"
-                        Command="{Binding CmdStart}" Margin="5,0,0,0">
+                    Command="{Binding SelectedSpider.CmdSearch}" Margin="5,0,0,0">
                 <Path Stretch="Uniform"
                       Data="{Binding Source={StaticResource SearchStartIcon}, Path=Data}"
                       Fill="{Binding Path=Foreground, RelativeSource=

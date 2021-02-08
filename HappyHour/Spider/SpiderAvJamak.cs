@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using CefSharp;
+using Scriban;
 using HtmlAgilityPack;
 using HappyHour.ViewModel;
 
@@ -27,12 +24,12 @@ namespace HappyHour.Spider
         {
             var ext = Path.GetExtension(e.SuggestedFileName);
             string savePath;
-            if (!string.IsNullOrEmpty(Browser.DataPath))
-                savePath = Browser.DataPath + "\\";
+            if (!string.IsNullOrEmpty(DataPath))
+                savePath = DataPath + "\\";
             else
                 savePath = App.GConf["general"]["data_path"];
 
-            e.SuggestedFileName = $"{savePath}{Browser.Keyword}{ext}";
+            e.SuggestedFileName = $"{savePath}{Keyword}{ext}";
         }
 
         void OnDownloadUpdated(object sender, DownloadItem e)
@@ -40,7 +37,7 @@ namespace HappyHour.Spider
             if (e.IsComplete)
             {
                 Log.Print($"{Name}: {e.SuggestedFileName} download completed!");
-                Browser.MediaList.AddMedia(Browser.DataPath);
+                Browser.MediaList.AddMedia(DataPath);
             }
         }
         public override void OnSelected()
@@ -91,7 +88,7 @@ namespace HappyHour.Spider
             if (result is List<object> list && list.Count > 0)
             {
                 ParsingState = 1;
-                Browser.ExecJavaScript(App.ReadResource("AvjamakLogin.js"));
+                Browser.Login("AvjamakLogin.js");
                 return;
             }
             if (ParsingState == -1)

@@ -60,7 +60,7 @@ namespace HappyHour.ScrapItems
             if (_numScrapedItem != NumItemsToScrap)
                 return;
 
-            Log.Print($"items : {_numScrapedItem}/{NumItemsToScrap}, Link Count:{_links.Count}");
+            //Log.Print($"items : {_numScrapedItem}/{NumItemsToScrap}, Link Count:{_links.Count}");
             lock (_links)
             {
                 Log.Print($"Num valid items: {_numValidItems}");
