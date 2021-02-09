@@ -28,6 +28,7 @@ namespace HappyHour.ViewModel
             set => Set(ref _isSelected, value);
         }
         public bool CanHide { get; set; }
+        public bool CanClose { get; set; } = false;
 
         public virtual void OnKeyDown(KeyEventArgs e)
         { 

@@ -1,6 +1,5 @@
 ﻿using System.Linq;
 using System.Collections.Generic;
-using System.Windows.Input;
 
 using CefSharp;
 
@@ -41,9 +40,6 @@ namespace HappyHour.ViewModel
             }
         }
         public DownloadHandler DownloadHandler { get; private set; }
-
-        public ICommand CmdStart { get; private set; }
-        public ICommand CmdStop { get; private set; }
 
         public IMainView MainView { get; set; }
         public IMediaList MediaList
