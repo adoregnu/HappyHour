@@ -2,7 +2,6 @@
 using System.IO;
 
 using CefSharp;
-using Scriban;
 using HtmlAgilityPack;
 using HappyHour.ViewModel;
 
