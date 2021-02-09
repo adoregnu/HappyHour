@@ -17,10 +17,10 @@ namespace HappyHour.CefHandler
 {
     class MenuHandler : IContextMenuHandler
     {
-        readonly SpiderViewModel _spider;
+        readonly SpiderViewModel _browser;
         public MenuHandler(SpiderViewModel spider = null)
         {
-            _spider = spider;
+            _browser = spider;
         }
 
         const int CefUserCommand = 26503;
@@ -50,12 +50,12 @@ namespace HappyHour.CefHandler
             model.AddItem((CefMenuCommand)cefCmdId++, "Google");
             model.AddItem((CefMenuCommand)cefCmdId++, "Google Translate");
 
-            if (_spider != null)
+            if (_browser != null)
             {
                 // Add a separator
                 model.AddSeparator();
                 // Add another example item
-                foreach (var spider in _spider.Spiders)
+                foreach (var spider in _browser.Spiders)
                 {
                     model.AddItem((CefMenuCommand)cefCmdId++, spider.Name);
                 }
@@ -229,31 +229,31 @@ namespace HappyHour.CefHandler
                     browser.GetHost().CloseDevTools();
                     break;
                 case (CefMenuCommand)(CefUserCommand):
-                    _spider.ExecJavaScript(App.ReadResource("SearchText.js"),
+                    _browser.ExecJavaScript(App.ReadResource("SearchText.js"),
                         (o) => UiServices.Invoke(() =>
                         {
                             var query = o.ToString().Replace(' ', '+');
-                            _spider.Address = "https://www.google.com/" +
+                            _browser.Address = "https://www.google.com/" +
                                 "search?as_epq=" + query;
                         }));
                     break;
                 case (CefMenuCommand)(CefUserCommand+1):
-                    _spider.ExecJavaScript(App.ReadResource("SearchText.js"),
+                    _browser.ExecJavaScript(App.ReadResource("SearchText.js"),
                         (o) => UiServices.Invoke(() =>
                         {
-                            _spider.Address = "https://translate.google.com/" +
+                            _browser.Address = "https://translate.google.com/" +
                                 $"?hl=ko&tab=rT&sl=auto&tl=ko&text={o}&op=translate";
                         }));
                     break;
                 default:
-                    if (_spider != null)
+                    if (_browser != null)
                     {
-                        var sp = _spider.Spiders[(int)item.Item2 - CefUserCommand - 2];
-                        _spider.ExecJavaScript( App.ReadResource("SearchText.js"),
+                        var sp = _browser.Spiders[(int)item.Item2 - CefUserCommand - 2];
+                        _browser.ExecJavaScript( App.ReadResource("SearchText.js"),
                             (o) => UiServices.Invoke(() =>
                             {
                                 sp.Keyword = o.ToString();
-                                _spider.SelectedSpider = sp;
+                                _browser.SelectedSpider = sp;
                             }));
                     }
                     break;
