@@ -46,7 +46,6 @@ namespace HappyHour.ViewModel
                 if (value == true)
                 {
                     mv.MediaList = _mediaListMv;
-                    mv.MainView = this;
                 }
             }
         }
@@ -69,11 +68,7 @@ namespace HappyHour.ViewModel
             DialogService = dialogService;
 
             _fileListMv = new FileListViewModel();
-            _mediaListMv = new MediaListViewModel
-            {
-                FileList = _fileListMv,
-                MainView = this,
-            };
+            _mediaListMv = new MediaListViewModel { FileList = _fileListMv, };
 
             Anchors.Add(_fileListMv);
             Anchors.Add(new DbViewModel { MediaList = _mediaListMv });
@@ -91,6 +86,37 @@ namespace HappyHour.ViewModel
 
             //for update media list
             _fileListMv.DirChanged?.Invoke(this, _fileListMv.CurrDirInfo);
+            Docs.CollectionChanged += OnCollectionChanged;
+        }
+
+        void OnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            //Log.Print("Docs.CollectionChanged : " + e.Action.ToString());
+            switch (e.Action)
+            {
+                case NotifyCollectionChangedAction.Add:
+                    foreach (Pane pane in e.NewItems)
+                    {
+                        pane.MainView = this;
+                    }
+                    break;
+                case NotifyCollectionChangedAction.Remove:
+                    foreach (Pane pane in e.OldItems)
+                    {
+                        pane.Cleanup();
+                    }
+                    break;
+            }
+        }
+
+        public void NewBrowser(string url)
+        {
+            Docs.Add(new BrowserBase
+            {
+                Address = url,
+                CanClose = true,
+                IsSelected = true
+            });
         }
 
         VMType OnPaneEnabled<VMType>(bool enabled) where VMType : Pane
@@ -108,7 +134,6 @@ namespace HappyHour.ViewModel
                 if (pane != null)
                 {
                     Docs.Remove(pane);
-                    pane.Cleanup();
                 }
             }
             return (VMType)pane;

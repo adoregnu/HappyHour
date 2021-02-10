@@ -28,6 +28,9 @@ namespace HappyHour.Spider
             else
                 savePath = App.GConf["general"]["data_path"];
 
+            if (!Directory.Exists(savePath))
+                Log.Print($"{savePath} does not exist.");
+
             e.SuggestedFileName = $"{savePath}{Keyword}{ext}";
         }
 

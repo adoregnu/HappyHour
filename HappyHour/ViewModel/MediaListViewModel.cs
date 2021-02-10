@@ -102,7 +102,6 @@ namespace HappyHour.ViewModel
             }
         }
 
-        public IMainView MainView { get; set; }
         public IFileList FileList
         {
             get => _fileList;
