@@ -66,6 +66,7 @@ namespace HappyHour.ViewModel
         public MainViewModel(IDialogService dialogService)
         {
             DialogService = dialogService;
+            Docs.CollectionChanged += OnCollectionChanged;
 
             _fileListMv = new FileListViewModel();
             _mediaListMv = new MediaListViewModel { FileList = _fileListMv, };
@@ -86,12 +87,11 @@ namespace HappyHour.ViewModel
 
             //for update media list
             _fileListMv.DirChanged?.Invoke(this, _fileListMv.CurrDirInfo);
-            Docs.CollectionChanged += OnCollectionChanged;
         }
 
         void OnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            //Log.Print("Docs.CollectionChanged : " + e.Action.ToString());
+            Log.Print("Docs.CollectionChanged : " + e.Action.ToString());
             switch (e.Action)
             {
                 case NotifyCollectionChangedAction.Add:

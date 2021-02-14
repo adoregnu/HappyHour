@@ -129,19 +129,14 @@ namespace HappyHour.Spider
             if (ParsingState >= 0)
             {
                 ParsingState = -1;
-                Keyword = null;
-                DataPath = null;
+                //Keyword = null;
+                //DataPath = null;
                 Log.Print($"Reset Spider : {Name}");
             }
         }
 
         protected void ParsePage(IScrapItem item)
         {
-            if (string.IsNullOrEmpty(DataPath))
-            {
-                OnScrapCompleted();
-                return;
-            }
             (item as ItemBase).Init();
             foreach (var (name, element, type) in item.Elements)
             {

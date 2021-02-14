@@ -250,7 +250,10 @@ namespace HappyHour.ViewModel
                 var sub = subs.FirstOrDefault(s =>
                     Path.GetFileNameWithoutExtension(s)
                         .StartsWith(currFile, StringComparison.OrdinalIgnoreCase));
-                if (sub != null)
+
+                string[] exts = { ".smi", ".srt" };
+                if (sub != null && exts.Any(e => e.Contains(Path.GetExtension(sub),
+                    StringComparison.OrdinalIgnoreCase)))
                 {
                     ConvertEncodingIfNeeded(sub);
                     CurrentMediaOptions.SubtitlesSource = sub;

@@ -26,9 +26,11 @@ namespace HappyHour.ViewModel
                 if (_selectedSpider != value)
                 {
                     if (_selectedSpider != null)
+                    {
                         _selectedSpider.OnDeselect();
+                        value.Keyword = _selectedSpider.Keyword;
+                    }
                     value.OnSelected();
-                    value.Keyword = _selectedSpider.Keyword;
                     UpdateBrowserHeader(value.Name);
                     value.SetCookies();
                     Set(ref _selectedSpider, value);

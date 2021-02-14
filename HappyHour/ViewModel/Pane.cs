@@ -19,7 +19,6 @@ namespace HappyHour.ViewModel
         }
 
         private string _title = null;
-        [Browsable(false)]
         public string Title
         {
             get => _title;
@@ -27,7 +26,6 @@ namespace HappyHour.ViewModel
         }
 
         private bool _isSelected = false;
-        [Browsable(false)]
         public bool IsSelected
         {
             get => _isSelected;
