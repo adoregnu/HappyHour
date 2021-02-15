@@ -121,9 +121,14 @@ namespace HappyHour.Spider
 
         public override void OnScrapCompleted()
         {
-            Browser.MediaList.AddMedia(DataPath);
-            if(_scrapRunning)
+            if (!string.IsNullOrEmpty(DataPath))
+            {
+                Browser.MediaList.AddMedia(DataPath);
+            }
+            if (_scrapRunning)
+            {
                 MoveArticle(null);
+            }
         }
 
         public override void Navigate2()

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "HappyHour": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}

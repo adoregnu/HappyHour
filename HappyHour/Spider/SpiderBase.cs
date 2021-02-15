@@ -29,6 +29,7 @@ namespace HappyHour.Spider
         public SpiderViewModel Browser { get; private set; }
         public ScrapCompletedHandler ScrapCompleted { get; set; }
 
+        public bool SaveDb { get; set; } = true;
         public string URL = null;
         public string Name { get; protected set; } = "";
         public string DataPath { get; set; }
@@ -45,7 +46,7 @@ namespace HappyHour.Spider
         public SpiderBase(SpiderViewModel br)
         {
             Browser = br;
-            CmdSearch = new RelayCommand(() => Navigate2());
+            CmdSearch = new RelayCommand(() => { SaveDb = false;  Navigate2(); });
         }
 
         public virtual void OnSelected()
@@ -128,6 +129,7 @@ namespace HappyHour.Spider
         {
             if (ParsingState >= 0)
             {
+                SaveDb = true;
                 ParsingState = -1;
                 //Keyword = null;
                 //DataPath = null;

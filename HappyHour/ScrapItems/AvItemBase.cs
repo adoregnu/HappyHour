@@ -39,8 +39,10 @@ namespace HappyHour.ScrapItems
                 Path = spider.DataPath,
                 IsCensored = true,
             };
-            _context = App.DbContext;
-
+            if (spider.SaveDb)
+            {
+                _context = App.DbContext;
+            }
             if (bool.TryParse(App.GConf["spider"]["overwrite_image"], out bool bOverwrite))
                 OverwriteImage = bOverwrite;
         }
@@ -88,6 +90,8 @@ namespace HappyHour.ScrapItems
         List<AvGenre> _genres;
         protected void UpdateGenre(List<object> items)
         {
+            if (_context == null) return;
+
             _genres = new List<AvGenre>();
             foreach (string item in items)
             {
@@ -108,6 +112,7 @@ namespace HappyHour.ScrapItems
         AvStudio _studio;
         protected void UpdateStudio(string studio)
         {
+            if (_context == null) return;
             if (string.IsNullOrEmpty(studio)) return;
 
             UiServices.Invoke(delegate
@@ -127,6 +132,7 @@ namespace HappyHour.ScrapItems
         AvSeries _series;
         protected void UpdateSeries(string series)
         {
+            if (_context == null) return;
             if (string.IsNullOrEmpty(series)) return;
             UiServices.Invoke(delegate
             {
@@ -140,6 +146,7 @@ namespace HappyHour.ScrapItems
         List<AvActor> _actors = new List<AvActor>();
         void UpdateActorInternal(List<List<AvActorName>> listOfNameList)
         {
+            if (_context == null) return;
             foreach (var list in listOfNameList)
             {
                 AvActorName aan = null;
@@ -182,6 +189,7 @@ namespace HappyHour.ScrapItems
 
         protected void UpdateActor2(List<List<AvActorName>> listOfNameList)
         {
+            if (_context == null) return;
             UiServices.Invoke(() => UpdateActorInternal(listOfNameList));
         }
 
