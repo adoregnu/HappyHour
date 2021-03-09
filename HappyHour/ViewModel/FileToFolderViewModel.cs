@@ -66,18 +66,18 @@ namespace HappyHour.ViewModel
             {
                 "1pon", "carib", "mu"
             };
-            var file = Path.GetFileName(path);
+            var file = Path.GetFileNameWithoutExtension(path);
             file = file.ToLower();
             if (!studios.Any(s => file.EndsWith(s)))
             {
                 return false;
             }
 
-            var ext = Path.GetExtension(file);
+            var ext = Path.GetExtension(path);
             var folder = file.Substring(0, file.LastIndexOf('-'));
             Files.Add(new FileItem
             {
-                SourceName = file,
+                SourceName = Path.GetFileName(path),
                 TargetPath = $"{folder}\\{folder}{ext}",
                 MediaPath = Path.GetDirectoryName(path)
             });

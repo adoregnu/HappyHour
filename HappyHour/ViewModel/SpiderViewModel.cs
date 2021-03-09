@@ -28,7 +28,7 @@ namespace HappyHour.ViewModel
                     if (_selectedSpider != null)
                     {
                         _selectedSpider.OnDeselect();
-                        value.Keyword = _selectedSpider.Keyword;
+                        //value.Keyword = _selectedSpider.Keyword;
                     }
                     value.OnSelected();
                     UpdateBrowserHeader(value.Name);

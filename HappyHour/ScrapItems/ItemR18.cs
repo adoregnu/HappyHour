@@ -47,6 +47,7 @@ namespace HappyHour.ScrapItems
 
         protected override void UdpateAvItem()
         {
+            if (_context == null) return;
             foreach (var pic in _actorPicturs)
             {
                 var actorName = _actorNames.FirstOrDefault(x => x.Name == pic.Key);

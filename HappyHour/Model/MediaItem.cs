@@ -110,6 +110,10 @@ namespace HappyHour.Model
             {
                 throw new ArgumentNullException(nameof(path));
             }
+            if (!Directory.Exists(path))
+            {
+                throw new DirectoryNotFoundException("Not found " + path);
+            }
             MediaPath = path;
             Pid = path.Split('\\').Last();
             ReloadAvItem();
@@ -228,7 +232,10 @@ namespace HappyHour.Model
                 UpdateField(file);
                 if (IsExcluded || IsDownload) return;
             }
-            _dateDownloaded = File.GetLastWriteTime(MediaPath);
+            if (MediaFile == null)
+                return;
+
+            _dateDownloaded = File.GetLastWriteTime(MediaFile);
             MediaFiles.Sort();
             if (Subtitles != null)
             {

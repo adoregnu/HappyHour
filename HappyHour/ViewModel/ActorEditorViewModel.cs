@@ -310,7 +310,8 @@ namespace HappyHour.ViewModel
                         .Include(name => name.Actor)
                             .ThenInclude(a => a.Names)
                         .Where(n => n.Actor != null)
-                        .OrderBy(n => n.Name)
+                        //.OrderBy(n => n.Name)
+                        .OrderBy(n => n.Actor.DateAdded)
                         .ToListAsync();
 
                     var allActors = allNames.Select(n => n.Actor).Distinct();

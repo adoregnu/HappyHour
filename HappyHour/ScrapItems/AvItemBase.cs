@@ -195,6 +195,8 @@ namespace HappyHour.ScrapItems
 
         protected virtual void UdpateAvItem()
         {
+            if (_context == null) return;
+
             UiServices.Invoke(delegate
             {
                 var item = _context.Items

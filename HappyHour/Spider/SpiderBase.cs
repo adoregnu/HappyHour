@@ -133,6 +133,7 @@ namespace HappyHour.Spider
                 ParsingState = -1;
                 //Keyword = null;
                 //DataPath = null;
+                Browser.MediaList.AddMedia(DataPath);
                 Log.Print($"Reset Spider : {Name}");
             }
         }
