@@ -20,27 +20,7 @@ namespace HappyHour.ViewModel
         public SpiderBase SelectedSpider
         {
             get => _selectedSpider;
-            set
-            {
-                if (value == null) return;
-                if (_selectedSpider != value)
-                {
-                    if (_selectedSpider != null)
-                    {
-                        _selectedSpider.OnDeselect();
-                        //value.Keyword = _selectedSpider.Keyword;
-                    }
-                    value.OnSelected();
-                    UpdateBrowserHeader(value.Name);
-                    value.SetCookies();
-                    Set(ref _selectedSpider, value);
-                }
-
-                if (string.IsNullOrEmpty(value.Keyword))
-                    Address = value.URL;
-                else
-                    Address = value.SearchURL;
-            }
+            set => SetSpider(value);
         }
         public DownloadHandler DownloadHandler { get; private set; }
 
@@ -92,6 +72,31 @@ namespace HappyHour.ViewModel
             };
             SelectedSpider = Spiders[0];
             Address = SelectedSpider.URL;
+        }
+
+        public void SetSpider(SpiderBase spider, bool fromUI = true)
+        {
+            if (spider == null) return;
+            if (_selectedSpider != spider)
+            {
+                if (_selectedSpider != null)
+                {
+                    _selectedSpider.OnDeselect();
+                    if (fromUI)
+                    {
+                        spider.Keyword = _selectedSpider.Keyword;
+                    }
+                }
+                spider.OnSelected();
+                UpdateBrowserHeader(spider.Name);
+                spider.SetCookies();
+                Set(ref _selectedSpider, spider);
+            }
+
+            if (string.IsNullOrEmpty(spider.Keyword))
+                Address = spider.URL;
+            else
+                Address = spider.SearchURL;
         }
 
         void UpdateBrowserHeader(string spiderName)
