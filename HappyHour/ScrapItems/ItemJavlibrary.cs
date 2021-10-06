@@ -71,7 +71,7 @@ namespace HappyHour.ScrapItems
         void ParseCover(string url)
         {
             var ext = url.Split('.').Last();
-            if (File.Exists($"{PosterPath}.{ext}")) return;
+            if (!OverwriteImage && File.Exists($"{PosterPath}.{ext}")) return;
 
             _spider.Download(url, ref _numItemsToScrap);
         }

@@ -16,7 +16,6 @@ namespace HappyHour.Spider
         {
             Name = "MGStage";
             URL = "https://www.mgstage.com/";
-
         }
 
         public override List<Cookie> CreateCookie()

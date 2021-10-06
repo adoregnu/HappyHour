@@ -47,6 +47,7 @@
                       Fill="{Binding Path=Foreground, RelativeSource=
                         {RelativeSource AncestorType={x:Type ToggleButton}}}"/>
             </ToggleButton>
+<!--
             <ToggleButton
                 Style="{DynamicResource ModernToggleButtonStyle3}"
                 IsChecked="{Binding NasEnabled, Mode=TwoWay}"
@@ -56,6 +57,7 @@
                       Fill="{Binding Path=Foreground, RelativeSource=
                         {RelativeSource AncestorType={x:Type ToggleButton}}}"/>
             </ToggleButton>
+-->
         </ToolBar>
         <view:DockView Grid.Row="1" x:Name="Dock"/>
         <StatusBar  Grid.Row="2">

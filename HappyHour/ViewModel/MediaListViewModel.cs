@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -112,10 +110,10 @@ namespace HappyHour.ViewModel
                     _fileList = value;
                     _fileList.DirChanged += OnDirChanged;
                     _fileList.DirModifed += OnDirModifed;
+                    _fileList.FileSelected += OnFileSelected;
                 }
             }
         }
-
         public ICommand CmdExclude { get; set; }
         public ICommand CmdDownload { get; set; }
         public ICommand CmdMoveItemTo { get; set; }
@@ -195,6 +193,15 @@ namespace HappyHour.ViewModel
                         MediaList.Remove(media);
                     break;
                 }
+            }
+        }
+
+        void OnFileSelected(object sender, FileSystemInfo e)
+        {
+            var media = MediaList.FirstOrDefault(m => m.MediaPath == e.FullName);
+            if (media != null)
+            {
+                SelectedMedia = media;
             }
         }
 
@@ -445,7 +452,7 @@ namespace HappyHour.ViewModel
 
             if (_mitemsToSearch.Count > 0)
             {
-                _mitemsToSearch[0].ReloadAvItem();
+                //_mitemsToSearch[0].ReloadAvItem();
                 _mitemsToSearch.RemoveAt(0);
             }
             OnScrapAvInfo(spider);

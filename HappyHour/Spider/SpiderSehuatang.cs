@@ -21,6 +21,8 @@ namespace HappyHour.Spider
         bool _isPageChanged = false;
         bool _scrapRunning = false;
         string _currentPage = null;
+
+        ItemSehuatang _currItem = null;
         List<object> _articlesInPage = null;
         Dictionary<string, string> _xpathDic;
 
@@ -30,6 +32,7 @@ namespace HappyHour.Spider
         public bool StopOnExistingId { get; set; } = true;
 
         public ICommand CmdStop { get; private set; }
+        public ICommand CmdNext { get; private set; }
         public SpiderSehuatang(SpiderViewModel browser) : base(browser)
         {
             Name = "sehuatang";
@@ -46,6 +49,7 @@ namespace HappyHour.Spider
                 "censored", "uncensored", "subtitle"
             };
             CmdStop = new RelayCommand(() => Stop());
+            CmdNext = new RelayCommand(() => Next());
         }
 
         public override string GetConf(string key)
@@ -95,6 +99,8 @@ namespace HappyHour.Spider
                 //Log.Print("Move Page to " + Browser.Address);
                 Browser.Address = URL + _currentPage;
             }
+            else
+                _currItem = null;
         }
 
         public void MoveArticle(object result)
@@ -136,12 +142,23 @@ namespace HappyHour.Spider
             ParsingState = 0;
             _pageNum = 1;
             _scrapRunning = true;
+            if (Browser.Address == URL)
+            {
+                Browser.Address = "";
+            }
             Browser.Address = URL;
         }
+
         public override void Stop()
         {
             _scrapRunning = false;
             ParsingState = -1;
+        }
+
+        public void Next()
+        {
+            if (_currItem != null) 
+                _currItem.Clear();
         }
 
         public override void Scrap()
@@ -158,7 +175,8 @@ namespace HappyHour.Spider
                     break;
                 case 2:
                     DataPath = "dummy";
-                    ParsePage(new ItemSehuatang(this));
+                    _currItem = new ItemSehuatang(this);
+                    ParsePage(_currItem);
                     break;
             }
         }

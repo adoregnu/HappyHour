@@ -20,7 +20,7 @@ namespace HappyHour.ScrapItems
     {
         readonly List<AvActorName> _actorNames;
         readonly Dictionary<string, string> _actorPicturs;
-        readonly string _actorPicturePath = $"{App.CurrentPath}\\db";
+        readonly string _actorPicturePath = $"{App.LocalAppData}\\db";
 
         public ItemAvsox(SpiderBase spider) : base(spider)
         {

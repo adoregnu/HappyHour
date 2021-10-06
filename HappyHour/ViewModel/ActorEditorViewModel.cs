@@ -68,8 +68,7 @@ namespace HappyHour.ViewModel
             }
         }
 
-        ObservableCollection<AvActor> _actors
-            = new ObservableCollection<AvActor>();
+        ObservableCollection<AvActor> _actors = new ();
         public ObservableCollection<AvActor> Actors
         {
             get => _actors;
@@ -198,7 +197,7 @@ namespace HappyHour.ViewModel
             try
             {
                 var fileName = Path.GetFileName(settings.FileName);
-                File.Copy(settings.FileName, $"{App.CurrentPath}\\db\\{fileName}", true);
+                File.Copy(settings.FileName, $"{App.LocalAppData}\\db\\{fileName}", true);
                 return settings.FileName;
             }
             catch (Exception ex)
@@ -286,7 +285,7 @@ namespace HappyHour.ViewModel
                 RaisePropertyChanged(nameof(SelectedActor));
                 NewName = "";
                 NameListOfOneActor.Clear();
-                NameListOfOneActor.Concat(_actor.Names);
+                //NameListOfOneActor.Concat(_actor.Names);
             }
             catch (Exception ex)
             {

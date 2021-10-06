@@ -8,7 +8,6 @@ using System.Windows.Controls;
 using CefSharp;
 using CefSharp.Wpf;
 
-using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 
 using HappyHour.ViewModel;
@@ -41,14 +40,19 @@ namespace HappyHour.CefHandler
 
             model.AddItem((CefMenuCommand)26501, "Show DevTools");
             model.AddItem((CefMenuCommand)26502, "Close DevTools");
-
             //To disable context mode then clear
             // model.Clear();
             int cefCmdId = CefUserCommand;
 
+            if (string.IsNullOrEmpty(parameters.SelectionText))
+            {
+                return;
+            }
+
             model.AddSeparator();
             model.AddItem((CefMenuCommand)cefCmdId++, "Google");
             model.AddItem((CefMenuCommand)cefCmdId++, "Google Translate");
+            model.AddItem((CefMenuCommand)cefCmdId++, "Search PID");
 
             if (_browser != null)
             {
@@ -83,7 +87,6 @@ namespace HappyHour.CefHandler
 
             return false;
         }
-
         void IContextMenuHandler.OnContextMenuDismissed(
             IWebBrowser chromiumWebBrowser,
             IBrowser browser,
@@ -116,7 +119,7 @@ namespace HappyHour.CefHandler
             //IMenuModel is only valid in the context of this method,
             // so need to read the values before invoking on the UI thread
             var menuItems = GetMenuItems(model).ToList();
-
+            
             webBrowser.Dispatcher.Invoke(() =>
             {
                 var menu = new ContextMenu
@@ -228,7 +231,7 @@ namespace HappyHour.CefHandler
                 case (CefMenuCommand)26502:
                     browser.GetHost().CloseDevTools();
                     break;
-                case (CefMenuCommand)(CefUserCommand):
+                case (CefMenuCommand)CefUserCommand:
                     _browser.ExecJavaScript(App.ReadResource("SearchText.js"),
                         (o) => UiServices.Invoke(() =>
                         {
@@ -245,15 +248,23 @@ namespace HappyHour.CefHandler
                                 $"?hl=ko&tab=rT&sl=auto&tl=ko&text={o}&op=translate";
                         }));
                     break;
+                case (CefMenuCommand)(CefUserCommand + 2):
+                    _browser.ExecJavaScript(App.ReadResource("SearchText.js"),
+                        (o) => UiServices.Invoke(() =>
+                        {
+                            _browser.DbView.SearchText = o.ToString().Trim();
+                        }, true));
+                    break;
                 default:
                     if (_browser != null)
                     {
-                        var sp = _browser.Spiders[(int)item.Item2 - CefUserCommand - 2];
+                        var sp = _browser.Spiders[(int)item.Item2 - CefUserCommand - 3];
                         _browser.ExecJavaScript( App.ReadResource("SearchText.js"),
                             (o) => UiServices.Invoke(() =>
                             {
                                 sp.Keyword = o.ToString();
-                                _browser.SetSpider(sp, false);
+                                sp.OverrideKeyword = false;
+                                _browser.SelectedSpider = sp;
                             }));
                     }
                     break;

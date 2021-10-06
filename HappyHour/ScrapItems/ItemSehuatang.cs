@@ -43,7 +43,6 @@ namespace HappyHour.ScrapItems
                 if (_numScrapedItem == NumItemsToScrap)
                 {
                     _spider.DataPath = _outPath;
-                    _spider.OnScrapCompleted();
                     Clear();
                 }
             }
@@ -126,6 +125,7 @@ namespace HappyHour.ScrapItems
             int i = 0;
             foreach (string f in items)
             {
+                if (f.Contains("magnet:?")) continue;
                 _images.Add(f.Split('/').Last(), i);
                 string url = f;
                 if (!f.StartsWith("http"))

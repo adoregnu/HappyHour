@@ -7,27 +7,33 @@
     <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <WarningLevel>2</WarningLevel>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningsAsErrors />
+  </PropertyGroup>
+
   <ItemGroup>
-    <PackageReference Include="AvalonEdit" Version="6.0.1" />
-    <PackageReference Include="CefSharp.Wpf" Version="86.0.241" />
-    <PackageReference Include="Dirkster.AvalonDock" Version="4.50.1" />
-    <PackageReference Include="Dirkster.AvalonDock.Themes.VS2013" Version="4.50.1" />
-    <PackageReference Include="FFME.Windows" Version="4.3.340" />
-    <PackageReference Include="HtmlAgilityPack" Version="1.11.29" />
+    <PackageReference Include="AvalonEdit" Version="6.1.2.30" />
+    <PackageReference Include="CefSharp.Wpf.NETCore" Version="93.1.140" />
+    <PackageReference Include="Dirkster.AvalonDock" Version="4.60.0" />
+    <PackageReference Include="Dirkster.AvalonDock.Themes.VS2013" Version="4.60.0" />
+    <PackageReference Include="FFME.Windows" Version="4.4.350" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.36" />
     <PackageReference Include="ini-parser-netstandard" Version="2.5.2" />
     <PackageReference Include="log4net" Version="2.0.12" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.1" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.1">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.10" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.10">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.31" />
+    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.37" />
     <PackageReference Include="MvvmDialogs" Version="8.0.0" />
     <PackageReference Include="MvvmLightStd10" Version="5.4.1.2" />
-    <PackageReference Include="Scriban" Version="3.3.2" />
+    <PackageReference Include="Scriban" Version="4.0.2" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="5.0.0" />
     <PackageReference Include="Ude.NET" Version="1.0.0" />
-    <PackageReference Include="VirtualizingWrapPanel" Version="1.5.3" />
+    <PackageReference Include="VirtualizingWrapPanel" Version="1.5.4" />
     <PackageReference Include="WPF.ListViewLayoutManager" Version="2.0.0" />
   </ItemGroup>
 
@@ -65,6 +71,7 @@
     <None Remove="Resources\XPathClick.sbn.js" />
     <None Remove="Resources\XPathClickSIngle.sbn.js" />
     <None Remove="Resources\XPathMulti.sbn.js" />
+    <None Remove="Resources\XPathMultiLazy.sbn.js" />
     <None Remove="Resources\XPathSingle.sbn.js" />
   </ItemGroup>
 
@@ -76,6 +83,7 @@
     <EmbeddedResource Include="Resources\SearchText.js" />
     <EmbeddedResource Include="Resources\XPathClickSingle.sbn.js" />
     <EmbeddedResource Include="Resources\XPathClick.sbn.js" />
+    <EmbeddedResource Include="Resources\XPathMultiLazy.sbn.js" />
     <EmbeddedResource Include="Resources\XPathMulti.sbn.js" />
     <EmbeddedResource Include="Resources\XPathSingle.sbn.js" />
   </ItemGroup>
@@ -87,6 +95,18 @@
 
   <ItemGroup>
     <Resource Include="Resources\default-fallback-image.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="chromiumembeddedframework.runtime.win-x64" Version="94.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="chromiumembeddedframework.runtime.win-x86" Version="94.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="chromiumembeddedframework.runtime.win-arm64" Version="94.3.0" />
   </ItemGroup>
 
 </Project>

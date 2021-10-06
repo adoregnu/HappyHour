@@ -18,14 +18,17 @@ namespace HappyHour.Converter
     {
         public static BitmapImage ConvertBitmap(Bitmap bitmap, int width)
         {
-            using MemoryStream ms = new MemoryStream();
+            using MemoryStream ms = new();
+            bitmap.SetResolution(48, 48);
             bitmap.Save(ms, ImageFormat.Bmp);
-            BitmapImage image = new BitmapImage();
+            BitmapImage image = new();
             image.BeginInit();
             if (width > 0)
+            {
                 image.DecodePixelWidth = width;
+            }
             image.CacheOption = BitmapCacheOption.OnLoad;
-            ms.Seek(0, SeekOrigin.Begin);
+            _ = ms.Seek(0, SeekOrigin.Begin);
             image.StreamSource = ms;
             image.EndInit();
             return image;
@@ -40,8 +43,10 @@ namespace HappyHour.Converter
                 {
                     var width = parameter_ != null ?
                         int.Parse(parameter_.ToString()) : 0;
-                    if (width != 0 && width < 150)
-                        path = "db\\" + path;
+                    if (width is not 0 and < 150)
+                    {
+                        path = $"{App.LocalAppData}\\db\\" + path;
+                    }
  
                     using var bmpTemp = new Bitmap(path);
                     return ConvertBitmap(bmpTemp, width);

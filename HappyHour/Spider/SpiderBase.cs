@@ -23,13 +23,15 @@ namespace HappyHour.Spider
         bool _isCookieSet = false;
         string _keyword;
 
-        protected int ParsingState = -1;
+        public int ParsingState = -1;
         protected string _linkName;
 
         public SpiderViewModel Browser { get; private set; }
         public ScrapCompletedHandler ScrapCompleted { get; set; }
 
+        public bool IsScrapDone { get; set; } = false;
         public bool SaveDb { get; set; } = true;
+        public bool OverrideKeyword = true;
         public string URL = null;
         public string Name { get; protected set; } = "";
         public string DataPath { get; set; }
@@ -66,8 +68,8 @@ namespace HappyHour.Spider
 
         static string XPath(string xpath, string jsPath)
         {
-            var template = Template.Parse(App.ReadResource(jsPath));
-            var result = template.Render(new { XPath = xpath });
+            Template template = Template.Parse(App.ReadResource(jsPath));
+            string result = template.Render(new { XPath = xpath });
             return result;
         }
 
@@ -92,6 +94,7 @@ namespace HappyHour.Spider
                 return;
             }
             ParsingState = 0;
+            IsScrapDone = false;
             Browser.SelectedSpider = this;
         }
 
@@ -105,12 +108,18 @@ namespace HappyHour.Spider
 
         public void SetCookies()
         {
-            if (_isCookieSet) return;
-            var cookies = CreateCookie();
-            if (cookies == null) return;
+            if (_isCookieSet)
+            {
+                return;
+            }
+            List<Cookie> cookies = CreateCookie();
+            if (cookies == null)
+            {
+                return;
+            }
 
-            var cookieManager = Cef.GetGlobalCookieManager();
-            foreach (var cookie in cookies)
+            ICookieManager cookieManager = Cef.GetGlobalCookieManager();
+            foreach (Cookie cookie in cookies)
             {
                 cookieManager.SetCookieAsync(URL, cookie);
             }
@@ -120,9 +129,10 @@ namespace HappyHour.Spider
         public virtual void OnScrapCompleted()
         {
             if (ScrapCompleted != null)
+            {
                 UiServices.Invoke(() => ScrapCompleted?.Invoke(this), true);
-            else
-                Reset();
+            }
+            Reset();
         }
 
         public void Reset()
@@ -141,7 +151,7 @@ namespace HappyHour.Spider
         protected void ParsePage(IScrapItem item)
         {
             (item as ItemBase).Init();
-            foreach (var (name, element, type) in item.Elements)
+            foreach ((string name, string element, ElementType type) in item.Elements)
             {
                 if (type == ElementType.XPATH)
                     Browser.ExecJavaScript(XPath(element), item, name);
@@ -155,11 +165,11 @@ namespace HappyHour.Spider
         public virtual void Stop() { }
         public virtual void Download(string url, ref int itemToScrap)
         {
-            Interlocked.Increment(ref itemToScrap);
+            _ = Interlocked.Increment(ref itemToScrap);
             Browser.Download(url);
         }
 
-        protected bool CheckResult(object result, out List<string> list)
+        static protected bool CheckResult(object result, out List<string> list)
         {
             list = result.ToList<string>();
             if (list.IsNullOrEmpty())

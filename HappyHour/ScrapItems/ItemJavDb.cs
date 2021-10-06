@@ -25,6 +25,7 @@ namespace HappyHour.ScrapItems
             {
                 ( "title", "//h2[contains(@class, 'title')]/strong/text()", ElementType.XPATH),
                 ( "cover", "//div[@class='column column-video-cover']/a/@href", ElementType.XPATH),
+                ( "cover2", "//div[@class='column column-video-cover']/a/img/@src", ElementType.XPATH),
                 ( "date", "//strong[contains(., 'Released Date')]/following-sibling::span/text()", ElementType.XPATH),
                 ( "studio", "//strong[contains(., 'Maker')]/following-sibling::span/a/text()", ElementType.XPATH),
                 ( "actor", "//strong[contains(., 'Actor')]/following-sibling::span/a/text()", ElementType.XPATH),
@@ -59,13 +60,16 @@ namespace HappyHour.ScrapItems
             if (!items.IsNullOrEmpty())
             {
                 Interlocked.Increment(ref _numValidItems);
-                if (name == "cover")
+                if (name == "cover" || name == "cover2")
                 {
                     var url = items[0] as string;
-                    var ext = url.Split('.').Last();
-                    if (!File.Exists($"{PosterPath}.{ext}"))
+                    if (url.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase))
                     {
-                        _spider.Download(url, ref _numItemsToScrap);
+                        var ext = url.Split('.').Last();
+                        if (!File.Exists($"{PosterPath}.{ext}"))
+                        {
+                            _spider.Download(url, ref _numItemsToScrap);
+                        }
                     }
                 }
                 else if (name == "title")

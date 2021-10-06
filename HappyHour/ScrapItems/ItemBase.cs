@@ -66,15 +66,16 @@ namespace HappyHour.ScrapItems
             }
         }
 
-        protected virtual void Clear()
+        public virtual void Clear()
         {
             var dh = _spider.Browser.DownloadHandler;
             dh.OnBeforeDownloadFired -= OnBeforeDownload;
             dh.OnDownloadUpdatedFired -= OnDownloadUpdated;
+            _spider.OnScrapCompleted();
             Log.Print("ItemBase::Clear()");
         }
 
-        protected void PrintItem(string name, List<object> items)
+        static protected void PrintItem(string name, List<object> items)
         {
             Log.Print("{0} : scrapped {1}", name,
                 items != null ? items.Count : 0);

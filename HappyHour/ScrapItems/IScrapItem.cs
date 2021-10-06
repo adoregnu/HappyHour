@@ -11,7 +11,7 @@ namespace HappyHour.ScrapItems
 
     enum ElementType
     {
-        XPATH, XPATH_CLICK, CSS
+        XPATH, XPATH_LAZY, XPATH_CLICK, CSS
     }
 
     interface IScrapItem

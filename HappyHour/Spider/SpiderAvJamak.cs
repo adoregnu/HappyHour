@@ -79,7 +79,6 @@ namespace HappyHour.Spider
 
         void CheckSearchReulst()
         { 
-            ParsingState = 3;
             Browser.ExecJavaScript(XPath("//div[@class='media-body']/" +
                 "a[contains(@href, 'table=jamak') or" +
                 " contains(@href,'table=bigsub')]/@href"), OnResult);
@@ -107,18 +106,9 @@ namespace HappyHour.Spider
             {
                 case -1:
                 case 0:
-                    Browser.ExecJavaScript(
-                        XPath("//form[@id='basic_outlogin']"), CheckLogin);
+                    Browser.ExecJavaScript(XPath("//form[@id='basic_outlogin']"), CheckLogin);
                     return;
                 case 1:
-                    ParsingState = 2;
-                    if (!string.IsNullOrEmpty(Keyword))
-                    {
-                        Browser.Address = SearchURL;
-                        return;
-                    };
-                    break;
-                case 2:
                     CheckSearchReulst();
                     return;
             }

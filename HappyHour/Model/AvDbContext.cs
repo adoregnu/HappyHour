@@ -1,30 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using Microsoft.EntityFrameworkCore;
 
 namespace HappyHour.Model
 {
-    //using  DbInitializer = SqliteDropCreateDatabaseWhenModelChanges<AvDbContext>;
     public class AvDbContext : DbContext
     {
-        //public AvDbContext(string nameOrConnectionString)
-        //    : base(nameOrConnectionString)
         protected override void OnConfiguring(DbContextOptionsBuilder optionbuilder)
         {
-            optionbuilder.UseSqlite(@"Data Source=db\AvDb.db");
+            optionbuilder.UseSqlite($@"Data Source={App.LocalAppData}\db\AvDb.db");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             AvModelConfig.Config(modelBuilder);
-
-            //var initilizer = new DbInitializer(modelBuilder);
-            //Database.SetInitializer(initilizer);
             base.OnModelCreating(modelBuilder);
         }
         public override int SaveChanges()

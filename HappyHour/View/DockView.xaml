@@ -68,11 +68,9 @@
                 </pane:PanesTemplateSelector.DbViewTemplate>
             </pane:PanesTemplateSelector>
         </ad:DockingManager.LayoutItemTemplateSelector>
-
         <ad:DockingManager.LayoutUpdateStrategy>
             <pane:LayoutUpdateStrategy />
         </ad:DockingManager.LayoutUpdateStrategy>
-
         <ad:LayoutRoot x:Name="_layoutRoot">
             <ad:LayoutPanel Orientation="Vertical">
                 <ad:LayoutPanel Orientation="Horizontal">
@@ -90,10 +88,10 @@
                     <Style TargetType="{x:Type ad:LayoutItem}">
                         <Setter Property="Title" Value="{Binding Model.Title}"/>
                         <Setter Property="CanClose" Value="{Binding Model.CanClose}"/>
-                        <Setter Property="CanFloat" Value="False"/>
                         <Setter Property="IsSelected" Value="{Binding Model.IsSelected, Mode=TwoWay}"/>
                         <Setter Property="CloseCommand" Value="{Binding Model.CmdClose, Mode=TwoWay}"/>
                         <!--
+                        <Setter Property="CanFloat" Value="False"/>
                         <Setter Property="ContentId" Value="{Binding ContentId}"/>
                         <Setter Property="IconSource" Value="{Binding Model.IconSource}"/>
                         -->
@@ -102,7 +100,6 @@
                 <pane:PanesStyleSelector.AnchorStyle>
                     <Style TargetType="{x:Type ad:LayoutItem}">
                         <Setter Property="Title" Value="{Binding Model.Title}"/>
-                        <!--<Setter Property="IconSource" Value="{Binding Model.IconSource}"/>-->
                         <Setter Property="CanClose" Value="False"/>
                     </Style>
                 </pane:PanesStyleSelector.AnchorStyle>

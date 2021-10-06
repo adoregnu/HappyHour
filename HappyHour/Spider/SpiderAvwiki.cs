@@ -41,7 +41,6 @@ namespace HappyHour.Spider
 
         NotFound:
             OnScrapCompleted();
-            ParsingState = -1;
         }
 
         public override void Scrap()

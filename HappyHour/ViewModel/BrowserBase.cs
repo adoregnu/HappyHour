@@ -123,9 +123,19 @@ namespace HappyHour.ViewModel
         public void Login(string jsTpl)
         {
             var tpl = Template.Parse(App.ReadResource(jsTpl));
+            if (!App.GConf.Sections.ContainsSection("general"))
+            {
+                return;
+            }
+            if (!App.GConf["general"].ContainsKey("userid") ||
+                !App.GConf["general"].ContainsKey("password"))
+            {
+                return;
+            }
+
             var js = tpl.Render(new
             {
-                Userid = App.GConf["general"]["user_id"],
+                Userid = App.GConf["general"]["userid"],
                 Password = App.GConf["general"]["password"]
             });
             WebBrowser.ExecuteScriptAsync(js);

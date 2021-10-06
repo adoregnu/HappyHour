@@ -42,10 +42,11 @@ namespace HappyHour.ViewModel
             set
             {
                 Set(ref _spiderEnabled, value);
-                var mv = OnPaneEnabled<SpiderViewModel>(value);
-                if (value == true)
+                var vm = OnPaneEnabled<SpiderViewModel>(value);
+                if (value)
                 {
-                    mv.MediaList = _mediaListMv;
+                    vm.MediaList = _mediaListMv;
+                    vm.DbView = _dbViewMode;
                 }
             }
         }
@@ -62,6 +63,7 @@ namespace HappyHour.ViewModel
         public IDialogService DialogService { get; set; }
         readonly FileListViewModel _fileListMv;
         readonly MediaListViewModel _mediaListMv;
+        readonly DbViewModel _dbViewMode;
 
         public MainViewModel(IDialogService dialogService)
         {
@@ -70,9 +72,11 @@ namespace HappyHour.ViewModel
 
             _fileListMv = new FileListViewModel();
             _mediaListMv = new MediaListViewModel { FileList = _fileListMv, };
+            _dbViewMode = new DbViewModel { MediaList = _mediaListMv };
+            _fileListMv.MediaList = _mediaListMv;
 
             Anchors.Add(_fileListMv);
-            Anchors.Add(new DbViewModel { MediaList = _mediaListMv });
+            Anchors.Add(_dbViewMode);
 
             Anchors.Add(new DebugLogViewModel());
             Anchors.Add(new StatusLogViewModel());
@@ -91,7 +95,6 @@ namespace HappyHour.ViewModel
 
         void OnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            Log.Print("Docs.CollectionChanged : " + e.Action.ToString());
             switch (e.Action)
             {
                 case NotifyCollectionChangedAction.Add:
@@ -104,6 +107,10 @@ namespace HappyHour.ViewModel
                     foreach (Pane pane in e.OldItems)
                     {
                         pane.Cleanup();
+                        if (pane is SpiderViewModel)
+                        {
+                            SpiderEnabled = false;
+                        }
                     }
                     break;
             }

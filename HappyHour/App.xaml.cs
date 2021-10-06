@@ -30,12 +30,10 @@ namespace HappyHour
     /// </summary>
     public partial class App : Application
     {
-        public static string CurrentPath { get; set; }
-        public static string DataPath { get; set; }
-        public static string JavPath { get; set; }
         public static string LocalAppData { get; set; }
         public static AvDbContext DbContext { get; set; }
         public static IniData GConf { get; private set; }
+        public const string Name = "HappyHour";
 
         /// <summary>
         /// Determines if the Application is in design mode.
@@ -58,13 +56,13 @@ namespace HappyHour
             resourcePath = assembly.GetManifestResourceNames()
                 .Single(str => str.EndsWith(name));
             if (string.IsNullOrEmpty(resourcePath))
-                return null;
-
-            using (Stream stream = assembly.GetManifestResourceStream(resourcePath))
-            using (StreamReader reader = new StreamReader(stream))
             {
-                return reader.ReadToEnd();
+                return null;
             }
+
+            using Stream stream = assembly.GetManifestResourceStream(resourcePath);
+            using StreamReader reader = new (stream);
+            return reader.ReadToEnd();
         }
 
         public App()
@@ -72,8 +70,8 @@ namespace HappyHour
             // Load configuration
             var logRepository = LogManager.GetRepository(Assembly.GetEntryAssembly());
             XmlConfigurator.Configure(logRepository, new FileInfo("log4net.config"));
-            CurrentPath = Directory.GetCurrentDirectory();
-            LocalAppData = Environment.ExpandEnvironmentVariables(@"%LOCALAPPDATA%\");
+            LocalAppData = Environment.ExpandEnvironmentVariables(@"%LOCALAPPDATA%");
+            LocalAppData += $"\\{Name}";
             // Change the default location of the ffmpeg binaries 
             // (same directory as application)
             Library.FFmpegDirectory = @"ffmpeg" +
@@ -91,9 +89,9 @@ namespace HappyHour
         void InitDefaultConf()
         {
             _iniParser = new FileIniDataParser();
-            if (File.Exists("gconf.ini"))
+            if (File.Exists(@$"{LocalAppData}\gconf.ini"))
             {
-                GConf = _iniParser.ReadFile("gconf.ini");
+                GConf = _iniParser.ReadFile(@$"{LocalAppData}\gconf.ini");
             }
             else
             {
@@ -110,7 +108,7 @@ namespace HappyHour
             }
         }
 
-        void InitCefSharp()
+        static void InitCefSharp()
         {
             var settings = new CefSettings
             {
@@ -139,7 +137,7 @@ namespace HappyHour
             //settings.CefCommandLineArgs.Add("mute-audio", "true");
             //The location where cache data will be stored on disk. If empty an in-memory cache will be used for some features and a temporary disk cache for others.
             //HTML5 databases such as localStorage will only persist across sessions if a cache path is specified. 
-            settings.CachePath = LocalAppData + "CEF\\cache";
+            settings.CachePath = LocalAppData + "\\CEF\\cache";
 
             //This must be set before Cef.Initialized is called
             CefSharpSettings.FocusedNodeChangedEnabled = true;
@@ -197,7 +195,7 @@ namespace HappyHour
         }
         protected override void OnExit(ExitEventArgs e)
         {
-            _iniParser.WriteFile("gconf.ini", GConf);
+            _iniParser.WriteFile($@"{LocalAppData}\gconf.ini", GConf);
             base.OnExit(e);
         }
 
@@ -242,7 +240,7 @@ namespace HappyHour
             };
         }
 
-        private void LogUnhandledException(Exception exception, string source)
+        static void LogUnhandledException(Exception exception, string source)
         {
             string message = $"Unhandled exception ({source})";
             try

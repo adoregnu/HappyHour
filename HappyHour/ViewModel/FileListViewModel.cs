@@ -11,6 +11,7 @@ using System.Windows.Threading;
 using GalaSoft.MvvmLight.Command;
 
 using HappyHour.Interfaces;
+using HappyHour.Model;
 
 namespace HappyHour.ViewModel
 {
@@ -19,8 +20,11 @@ namespace HappyHour.ViewModel
         string _currPath;
         DriveInfo _currDrive;
         DirectoryInfo _currDirInfo;
+        FileSystemInfo _selectedFile;
         FileSystemWatcher _fsWatcher;
-        DispatcherTimer _refreshTimer; 
+        DispatcherTimer _refreshTimer;
+        IMediaList _mediaList;
+        bool _selecFromMediaList = false;
 
         public string CurrPath
         {
@@ -71,9 +75,34 @@ namespace HappyHour.ViewModel
 
         public ObservableCollection<FileSystemInfo> FileList { get; private set; }
         public ObservableCollection<DriveInfo> Drives { get; private set; }
-        public FileSystemInfo SelectedFile { get; set; }
+        public FileSystemInfo SelectedFile
+        {
+            get => _selectedFile;
+            set
+            {
+                Set(ref _selectedFile, value);
+                if (!_selecFromMediaList && value != null)
+                {
+                    FileSelected?.Invoke(this, value);
+                }
+            }
+        }
         public FileListDirChangeEventHandler DirChanged { get; set; }
         public FileListWatcherEventHandler DirModifed { get; set; }
+        public FileListFileSelectEventHandler FileSelected { get; set; }
+
+        public IMediaList MediaList
+        {
+            get => _mediaList;
+            set
+            {
+                if (_mediaList != value)
+                {
+                    _mediaList = value;
+                    _mediaList.ItemSelectedHandler += OnMediaSelected;
+                }
+            }
+        }
 
         public ICommand CmdUpDir { get; set; }
         public ICommand CmdRefreshDir { get; set; }
@@ -231,6 +260,17 @@ namespace HappyHour.ViewModel
             catch (Exception ex)
             {
                 Log.Print(ex.Message);
+            }
+        }
+
+        void OnMediaSelected(object sender, MediaItem item)
+        {
+            var fi = FileList.FirstOrDefault(f => f.FullName == item.MediaPath);
+            if (fi != null)
+            {
+                _selecFromMediaList = true;
+                SelectedFile = fi;
+                _selecFromMediaList = false;
             }
         }
     }

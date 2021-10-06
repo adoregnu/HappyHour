@@ -1,10 +1,10 @@
 ﻿
 using System;
+using System.Timers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 using CefSharp;
 using HtmlAgilityPack;
@@ -16,11 +16,20 @@ namespace HappyHour.Spider
 {
     class SpiderR18 : SpiderBase
     {
+        Timer _timerPageLoaded = null;
+
         public override string SearchURL => $"{URL}common/search/searchword={Keyword}/";
         public SpiderR18(SpiderViewModel browser) : base(browser)
         {
             Name = "R18";
             URL = "https://www.r18.com/";
+
+            _timerPageLoaded = new Timer(500)
+            {
+                AutoReset = false
+            };
+            _timerPageLoaded.Elapsed += (s, e) => OnPageLoadTimerExpired();
+
         }
 
         public override List<Cookie> CreateCookie()
@@ -63,14 +72,15 @@ namespace HappyHour.Spider
                     matchCount++;
                 }
             }
-            if (matchCount == 0)
+            if (list.Count == 1 && matchCount == 0)
+                exactUrl = list[0];
+            else if (matchCount == 0)
                 goto NotFound;
 
+            ParsingState++;
             if (matchCount == 1)
             {
-                ParsingState = 1;
-                var url = HtmlEntity.DeEntitize(exactUrl);
-                Browser.Address = url;
+                Browser.Address = HtmlEntity.DeEntitize(exactUrl);
             }
             else
             {
@@ -83,9 +93,17 @@ namespace HappyHour.Spider
             OnScrapCompleted();
         }
 
-        ItemR18 _item = null;
+        ItemR18V2 _item = null;
+        void OnPageLoadTimerExpired()
+        { 
+            _item = new ItemR18V2(this);
+            ParsePage(_item);
+            ParsingState++;
+        }
+
         public override void Scrap()
         {
+            Log.Print($"{Name}: ParsingState : {ParsingState}");
             switch (ParsingState)
             {
                 case 0:
@@ -94,18 +112,21 @@ namespace HappyHour.Spider
                         OnMultiResult);
                     break;
                 case 1:
-                    _item = new ItemR18(this);
-                    ParsePage(_item);
-                    ParsingState = 2;
+                    Browser.ExecJavaScript(
+                        "window.scrollTo(0,document.body.scrollHeight/2);",
+                        (r) => _timerPageLoaded.Start());
                     break;
                 case 2:
-                    if (_linkName != "series") break;
+                    if (_linkName != "series")
+                    {
+                        break;
+                    }
                     _item.Elements = new List<(string name, string element, ElementType type)>
                     { 
                         ("series", "//div[@class='cmn-ttl-tabMain01']/h1/text()", ElementType.XPATH)
                     };
                     ParsePage(_item);
-                    ParsingState = 3;
+                    ParsingState++;
                     break;
             }
         }

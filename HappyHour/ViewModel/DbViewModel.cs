@@ -11,12 +11,32 @@ using HappyHour.Interfaces;
 
 namespace HappyHour.ViewModel
 {
-    class DbViewModel : Pane
+    class DbViewModel : Pane, IDbView
     {
         string _selectedType = "Pid";
         string _searchText;
 
-        public IMediaList MediaList { get; set; }
+        IMediaList _mediaList;
+
+        public IMediaList MediaList
+        {
+            get => _mediaList;
+            set
+            {
+                if (_mediaList != null) return;
+
+                Set(ref _mediaList, value);
+                _mediaList.ItemSelectedHandler += (o, i) =>
+                {
+                    if (i == null) return;
+                    if (SelectedType != "Pid")
+                    {
+                        SelectedType = "Pid";
+                    }
+                    SearchText = i.Pid;
+                };
+            }
+        }
 
         public string SearchText
         {

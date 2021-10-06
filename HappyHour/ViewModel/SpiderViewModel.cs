@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Timers;
 using System.Collections.Generic;
 
 using CefSharp;
@@ -20,7 +21,11 @@ namespace HappyHour.ViewModel
         public SpiderBase SelectedSpider
         {
             get => _selectedSpider;
-            set => SetSpider(value);
+            set
+            {
+                SetSpider(value);
+                Set(ref _selectedSpider, value);
+            }
         }
         public DownloadHandler DownloadHandler { get; private set; }
 
@@ -42,13 +47,15 @@ namespace HappyHour.ViewModel
                         SelectedSpider.Keyword = i.Pid;
                     }
                     else
-                    { 
+                    {
                         SelectedSpider.DataPath = null;
                         SelectedSpider.Keyword = null;
                     }
                 };
             }
         }
+
+        public IDbView DbView { get; set; }
 
         public SpiderViewModel() : base()
         {
@@ -74,7 +81,7 @@ namespace HappyHour.ViewModel
             Address = SelectedSpider.URL;
         }
 
-        public void SetSpider(SpiderBase spider, bool fromUI = true)
+        public void SetSpider(SpiderBase spider)
         {
             if (spider == null) return;
             if (_selectedSpider != spider)
@@ -82,21 +89,33 @@ namespace HappyHour.ViewModel
                 if (_selectedSpider != null)
                 {
                     _selectedSpider.OnDeselect();
-                    if (fromUI)
+                    if (spider.OverrideKeyword && !string.IsNullOrEmpty(_selectedSpider.Keyword))
                     {
                         spider.Keyword = _selectedSpider.Keyword;
                     }
                 }
                 spider.OnSelected();
-                UpdateBrowserHeader(spider.Name);
                 spider.SetCookies();
-                Set(ref _selectedSpider, spider);
+                UpdateBrowserHeader(spider.Name);
             }
 
+            string newUrl;
             if (string.IsNullOrEmpty(spider.Keyword))
-                Address = spider.URL;
+            {
+                newUrl = spider.URL;
+            }
             else
-                Address = spider.SearchURL;
+            {
+                newUrl = spider.SearchURL;
+            }
+
+            if (Address == newUrl)
+            {
+                Address = "";
+            }
+            Log.Print($"Set new url : {newUrl}");
+            Address = newUrl;
+            spider.OverrideKeyword = true;
         }
 
         void UpdateBrowserHeader(string spiderName)
@@ -120,19 +139,32 @@ namespace HappyHour.ViewModel
             //WebBrowser.JavascriptMessageReceived += OnJavascriptMessageReceived;
             //WebBrowser.FrameLoadEnd += OnFrameLoaded;
             SelectedSpider.SetCookies();
+            _timer = new Timer(100)
+            {
+                AutoReset = false
+            };
+            _timer.Elapsed += (s, e) => SelectedSpider.Scrap();
         }
 
+        Timer _timer;
         void OnStateChanged(object sender, LoadingStateChangedEventArgs e)
         {
             if (!e.IsLoading)
             {
-                SelectedSpider.Scrap();
+                Log.Print($"Loading Done. Number of frames:{e.Browser.GetFrameCount()}");
+                if (_timer.Enabled)
+                {
+                    Log.Print("Timer already enabled!");
+                    _timer.Stop();
+                }
+                _timer.Start();
             }
         }
 
         void OnFrameLoaded(object sender, FrameLoadEndEventArgs e)
         {
-            ExecJavaScript(App.ReadResource("Highlight.js"));
+            //ExecJavaScript(App.ReadResource("Highlight.js"));
+            //Log.Print($"FrameLoaded isMain:{e.Frame.IsMain}");
         }
 
         void OnJavascriptMessageReceived(object sender, JavascriptMessageReceivedEventArgs e)

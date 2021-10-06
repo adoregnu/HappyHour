@@ -38,6 +38,13 @@
                     Fill="{Binding Path=Foreground, RelativeSource=
                         {RelativeSource AncestorType={x:Type Button}}}" />
             </Button>
+            <Button Style="{DynamicResource ModernButtonStyle2}"
+                    Command="{Binding SelectedSpider.CmdNext}">
+                <Path Stretch="Uniform"
+                    Data="{Binding Source={StaticResource NextIcon}, Path=Data}"
+                    Fill="{Binding Path=Foreground, RelativeSource=
+                        {RelativeSource AncestorType={x:Type Button}}}" />
+            </Button>
         </StackPanel>
     </Grid>
 </UserControl>

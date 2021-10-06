@@ -44,18 +44,32 @@ namespace HappyHour.Spider
             }
 
             HtmlDocument doc = new HtmlDocument();
+            string href = null;
+            int mcount = 0;
             foreach (string url in list)
             {
                 doc.LoadHtml(url);
                 var div = doc.DocumentNode.SelectSingleNode("//div[@class='id']").InnerText;
                 if (div.Trim().Equals(Keyword, StringComparison.OrdinalIgnoreCase))
                 {
-                    var href = doc.DocumentNode.FirstChild.Attributes["href"].Value;
-                    ParsingState = 1;
-                    Browser.Address = $"{URL}{href}";
-                    return;
+                    href = doc.DocumentNode.FirstChild.Attributes["href"].Value;
+                    mcount++;
                 }
             }
+            if (mcount == 0)
+                goto NotFound;
+
+            if (mcount > 1)
+                Log.Print("Ambiguous match! Select manually!");
+            else
+            {
+                ParsingState = 1;
+                Browser.Address = $"{URL}{href}";
+            }
+            return;
+
+        NotFound:
+            Log.Print($"No exact matched ID");
             OnScrapCompleted();
         }
 

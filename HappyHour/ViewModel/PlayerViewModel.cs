@@ -199,12 +199,12 @@ namespace HappyHour.ViewModel
             Open();
         }
 
-        void ConvertEncodingIfNeeded(string subPath)
+        static void ConvertEncodingIfNeeded(string subPath)
         {
             ICharsetDetector cdet = new CharsetDetector();
             try
             {
-                using FileStream fs = new FileStream(subPath, FileMode.Open);
+                using FileStream fs = new (subPath, FileMode.Open);
                 cdet.Feed(fs);
                 cdet.DataEnd();
                 if (cdet.Charset == "UTF-8")
@@ -213,11 +213,10 @@ namespace HappyHour.ViewModel
                     return;
                 }
 
-                Log.Print("Charset: {0}, confidence: {1}",
-                    cdet.Charset, cdet.Confidence);
+                Log.Print("Charset: {0}, confidence: {1}", cdet.Charset, cdet.Confidence);
 
                 fs.Position = 0;
-                StreamReader sr = new StreamReader(fs, Encoding.GetEncoding("euc-kr"), true);
+                StreamReader sr = new (fs, Encoding.GetEncoding("euc-kr"), true);
                 var text = sr.ReadToEnd();
                 sr.Close();
 
@@ -383,8 +382,9 @@ namespace HappyHour.ViewModel
                 MediaPlayer.RemoveSubscripion();
                 MediaPlayer.Dispose();
                 IsDisposed = true;
+                Log.Print("MediaPlayer.Dispose");
             }
             IsDisposed = true;
         }
-    }
+      }
 }

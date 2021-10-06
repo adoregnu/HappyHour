@@ -18,7 +18,7 @@ namespace HappyHour.ScrapItems
 {
     class ItemR18 : AvItemBase
     {
-        readonly string _actorPicturePath = $"{App.CurrentPath}\\db";
+        readonly string _actorPicturePath = $"{App.LocalAppData}\\db";
         readonly ConcurrentDictionary<string, string> _downloadUrls;
         readonly Dictionary<string, string> _actorPicturs;
         readonly List<AvActorName> _actorNames;
@@ -104,7 +104,7 @@ namespace HappyHour.ScrapItems
         /// <param name="items"></param>
         void ParseActorName(List<object> items)
         {
-            List<List<AvActorName>> ll = new List<List<AvActorName>>();
+            List<List<AvActorName>> ll = new ();
             foreach (string item in items)
             {
                 var name = item.Trim();
@@ -132,7 +132,7 @@ namespace HappyHour.ScrapItems
 
         void ParseActorThumb(List<object> items)
         {
-            Regex regex = new Regex(@"alt=""([\w\s]+)"" src=""(.+)"" width");
+            Regex regex = new (@"alt=""([\w\s]+)"" src=""(.+)"" width");
             foreach (string img in items)
             {
                 var m = regex.Match(img);

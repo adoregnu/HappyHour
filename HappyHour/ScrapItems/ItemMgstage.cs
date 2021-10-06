@@ -22,7 +22,7 @@ namespace HappyHour.ScrapItems
             {
                 ("title", "//div[@class='common_detail_cover']/h1[@class='tag']/text()", ElementType.XPATH),
                 ( "cover", "//a[@id='EnlargeImage']/@href", ElementType.XPATH),
-                ( "studio", "//th[contains(., 'メーカー：')]/following-sibling::td/a/@href", ElementType.XPATH),
+                ( "studio", "//th[contains(., 'メーカー：')]/following-sibling::td/a/text()", ElementType.XPATH),
                 ( "runtime", "//th[contains(., '収録時間：')]/following-sibling::td/text()", ElementType.XPATH),
                 ( "id", "//th[contains(., '品番：')]/following-sibling::td/text()", ElementType.XPATH),
                 ( "releasedate", "//th[contains(., '配信開始日：')]/following-sibling::td/text()", ElementType.XPATH),
@@ -46,7 +46,7 @@ namespace HappyHour.ScrapItems
         void ParseCover(string url)
         {
             var ext = url.Split('.').Last();
-            if (File.Exists($"{PosterPath}.{ext}"))
+            if (!OverwriteImage && File.Exists($"{PosterPath}.{ext}"))
                 return;
 
             if (!url.StartsWith("http"))
@@ -68,11 +68,11 @@ namespace HappyHour.ScrapItems
                 }
                 else if (name == "studio")
                 {
-                    var m = Regex.Match(items[0] as string, @"\]=([\w\d]+)");
-                    if (m.Success)
+                    //var m = Regex.Match(items[0] as string, @"\]=([\w\d]+)");
+                    //if (m.Success)
                     {
                         //Log.Print($"\tstudio:{m.Groups[1].Value}");
-                        UpdateStudio(m.Groups[1].Value);
+                        UpdateStudio(items[0] as string);
                     }
                 }
                 else if (name == "title")
