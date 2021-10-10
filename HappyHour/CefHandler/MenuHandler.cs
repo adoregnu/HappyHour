@@ -263,7 +263,6 @@ namespace HappyHour.CefHandler
                             (o) => UiServices.Invoke(() =>
                             {
                                 sp.Keyword = o.ToString();
-                                sp.OverrideKeyword = false;
                                 _browser.SelectedSpider = sp;
                             }));
                     }

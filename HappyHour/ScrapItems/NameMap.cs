@@ -33,7 +33,7 @@ namespace HappyHour.ScrapItems
                 { "MAX-A", "Max A"},
                 { "Saidobi-", "Nagae Style" },
                 { "Das !", "Das"},
-                { "一本道", "1pondo" },
+                //{ "一本道", "1pondo" },
                 { "Bi", "Chijo Heaven"},
             };
         public static string StudioName(string name)

@@ -63,7 +63,6 @@ namespace HappyHour.ViewModel
                 MessengerInstance.Send(new CefStatusMsg(e, "log"));
             };
             WebBrowser.MenuHandler = new MenuHandler();
-            //Address = "https://www.google.com";
         }
 
         protected virtual void OnAddressChanged()

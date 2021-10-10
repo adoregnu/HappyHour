@@ -15,11 +15,11 @@
 
   <ItemGroup>
     <PackageReference Include="AvalonEdit" Version="6.1.2.30" />
-    <PackageReference Include="CefSharp.Wpf.NETCore" Version="93.1.140" />
+    <PackageReference Include="CefSharp.Wpf.NETCore" Version="94.4.50" />
     <PackageReference Include="Dirkster.AvalonDock" Version="4.60.0" />
     <PackageReference Include="Dirkster.AvalonDock.Themes.VS2013" Version="4.60.0" />
     <PackageReference Include="FFME.Windows" Version="4.4.350" />
-    <PackageReference Include="HtmlAgilityPack" Version="1.11.36" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.37" />
     <PackageReference Include="ini-parser-netstandard" Version="2.5.2" />
     <PackageReference Include="log4net" Version="2.0.12" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.10" />
@@ -98,15 +98,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="chromiumembeddedframework.runtime.win-x64" Version="94.3.0" />
+    <PackageReference Update="chromiumembeddedframework.runtime.win-x64" Version="94.4.5" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="chromiumembeddedframework.runtime.win-x86" Version="94.3.0" />
+    <PackageReference Update="chromiumembeddedframework.runtime.win-x86" Version="94.4.5" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="chromiumembeddedframework.runtime.win-arm64" Version="94.3.0" />
+    <PackageReference Update="chromiumembeddedframework.runtime.win-arm64" Version="94.4.5" />
   </ItemGroup>
 
 </Project>

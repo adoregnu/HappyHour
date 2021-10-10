@@ -51,7 +51,11 @@ namespace HappyHour.ViewModel
         public string SelectedType
         {
             get => _selectedType;
-            set => Set(ref _selectedType, value);
+            set
+            {
+                SearchText = "";
+                Set(ref _selectedType, value);
+            }
         }
         public List<string> ListType { get; set; }
 

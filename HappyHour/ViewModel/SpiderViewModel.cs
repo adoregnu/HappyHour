@@ -89,10 +89,6 @@ namespace HappyHour.ViewModel
                 if (_selectedSpider != null)
                 {
                     _selectedSpider.OnDeselect();
-                    if (spider.OverrideKeyword && !string.IsNullOrEmpty(_selectedSpider.Keyword))
-                    {
-                        spider.Keyword = _selectedSpider.Keyword;
-                    }
                 }
                 spider.OnSelected();
                 spider.SetCookies();
@@ -115,7 +111,6 @@ namespace HappyHour.ViewModel
             }
             Log.Print($"Set new url : {newUrl}");
             Address = newUrl;
-            spider.OverrideKeyword = true;
         }
 
         void UpdateBrowserHeader(string spiderName)
@@ -152,12 +147,15 @@ namespace HappyHour.ViewModel
             if (!e.IsLoading)
             {
                 Log.Print($"Loading Done. Number of frames:{e.Browser.GetFrameCount()}");
-                if (_timer.Enabled)
+                if (SelectedSpider.CanScrap(e))
                 {
-                    Log.Print("Timer already enabled!");
-                    _timer.Stop();
+                    if (_timer.Enabled)
+                    {
+                        Log.Print("Timer already enabled!");
+                        _timer.Stop();
+                    }
+                    _timer.Start();
                 }
-                _timer.Start();
             }
         }
 

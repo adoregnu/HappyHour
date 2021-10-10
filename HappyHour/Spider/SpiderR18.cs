@@ -45,6 +45,11 @@ namespace HappyHour.Spider
             };
         }
 
+        public override bool CanScrap(LoadingStateChangedEventArgs e)
+        {
+            return e.Browser.GetFrameCount() == 1;
+        }
+
         void OnMultiResult(object result)
         {
             if (!CheckResult(result, out List<string> list))

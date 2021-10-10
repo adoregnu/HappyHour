@@ -21,7 +21,7 @@ namespace HappyHour.Spider
     abstract class SpiderBase : NotifyPropertyChanged
     {
         bool _isCookieSet = false;
-        string _keyword;
+        static string _keyword;
 
         public int ParsingState = -1;
         protected string _linkName;
@@ -29,9 +29,7 @@ namespace HappyHour.Spider
         public SpiderViewModel Browser { get; private set; }
         public ScrapCompletedHandler ScrapCompleted { get; set; }
 
-        public bool IsScrapDone { get; set; } = false;
         public bool SaveDb { get; set; } = true;
-        public bool OverrideKeyword = true;
         public string URL = null;
         public string Name { get; protected set; } = "";
         public string DataPath { get; set; }
@@ -94,7 +92,6 @@ namespace HappyHour.Spider
                 return;
             }
             ParsingState = 0;
-            IsScrapDone = false;
             Browser.SelectedSpider = this;
         }
 
@@ -184,6 +181,11 @@ namespace HappyHour.Spider
         public override string ToString()
         {
             return URL;
+        }
+
+        public virtual bool CanScrap(LoadingStateChangedEventArgs e)
+        {
+            return true;
         }
     }
 }

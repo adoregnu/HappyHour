@@ -116,7 +116,7 @@ namespace HappyHour.ScrapItems
         /// <param name="items"></param>
         private void ParseActorName(List<object> items)
         {
-            List<List<AvActorName>> ll = new List<List<AvActorName>>();
+            List<List<AvActorName>> ll = new();
             foreach (string item in items)
             {
                 string name = item.Trim();
