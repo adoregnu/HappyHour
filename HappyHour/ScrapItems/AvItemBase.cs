@@ -166,7 +166,7 @@ namespace HappyHour.ScrapItems
             });
         }
 
-        private List<AvActor> _actors = new List<AvActor>();
+        private List<AvActor> _actors = new();
         private void UpdateActorInternal(List<List<AvActorName>> listOfNameList)
         {
             foreach (List<AvActorName> list in listOfNameList)

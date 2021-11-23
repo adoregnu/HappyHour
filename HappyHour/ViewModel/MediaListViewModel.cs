@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 using System.Windows.Data;
 
@@ -19,12 +20,13 @@ using HappyHour.Model;
 using HappyHour.Spider;
 using HappyHour.Interfaces;
 using HappyHour.View;
+using System.Diagnostics;
 
 namespace HappyHour.ViewModel
 {
     class MediaListViewModel : Pane, IMediaList
     {
-        readonly object _lock = new object();
+        readonly object _lock = new();
 
         MediaItem _selectedMedia = null;
         bool _isBrowsing = false;
@@ -114,6 +116,8 @@ namespace HappyHour.ViewModel
                 }
             }
         }
+        public ICommand CmdExternalPlayer { get; set; }
+        public ICommand CmdCopyPath { get; set; }
         public ICommand CmdExclude { get; set; }
         public ICommand CmdDownload { get; set; }
         public ICommand CmdMoveItemTo { get; set; }
@@ -136,6 +140,21 @@ namespace HappyHour.ViewModel
             SelectedMedias = new ObservableCollection<MediaItem>();
 
             BindingOperations.EnableCollectionSynchronization(MediaList, _lock);
+
+            CmdExternalPlayer = new RelayCommand<MediaItem>(
+                p => {
+                    if (p != null) {
+                        new Process
+                        {
+                            StartInfo = new ProcessStartInfo(p.MediaFile)
+                            {
+                                UseShellExecute = true
+                            }
+                        }.Start();
+                    } 
+                });
+            CmdCopyPath = new RelayCommand<MediaItem>(
+                p => Clipboard.SetText(p.MediaPath));
 
             CmdExclude = new RelayCommand<MediaItem>(
                 p => { if (p != null) { p.Exclude(); MediaList.Remove(p); } });

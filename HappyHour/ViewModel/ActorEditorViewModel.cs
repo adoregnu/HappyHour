@@ -305,15 +305,14 @@ namespace HappyHour.ViewModel
                 }
                 if (isSelected)
                 {
-                    var allNames = await App.DbContext.ActorNames
-                        .Include(name => name.Actor)
-                            .ThenInclude(a => a.Names)
-                        .Where(n => n.Actor != null)
-                        //.OrderBy(n => n.Name)
-                        .OrderBy(n => n.Actor.DateAdded)
+                    var allActors = await App.DbContext.Actors
+                        .Include(a => a.Names)
+                        //.Include(a => a.Items)
+                        .Where(a => a.Items.Count > 0)
+                        .OrderByDescending(a => a.DateAdded)
                         .ToListAsync();
 
-                    var allActors = allNames.Select(n => n.Actor).Distinct();
+                    //var allActors = allNames.Select(n => n.Actor).Distinct();
                     Actors = new ObservableCollection<AvActor>(allActors);
                 }
                 else

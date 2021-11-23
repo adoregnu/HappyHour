@@ -27,6 +27,8 @@ namespace HappyHour.ViewModel
         string _headerType;
         IWpfWebBrowser _webBrowser;
 
+        public bool IsAddressChanged = false;
+
         public string HeaderType
         {
             get => _headerType;
@@ -69,6 +71,7 @@ namespace HappyHour.ViewModel
         {
             //Title = Address;
             Log.Print("Address changed: " + Address);
+            IsAddressChanged = true;
         }
 
         void OnPropertyChanged(object sender, PropertyChangedEventArgs e)

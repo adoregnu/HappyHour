@@ -16,7 +16,8 @@ namespace HappyHour.Spider
         public SpiderAvJamak(SpiderViewModel browser) : base(browser)
         {
             Name = "av-jamak";
-            URL = "https://av-jamak.com/";
+            //URL = "https://av-jamak.com/";
+            URL = "https://avjamak01.com/";
         }
 
         void OnBeforeDownload(object sender, DownloadItem e)

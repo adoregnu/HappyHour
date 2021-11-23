@@ -16,20 +16,11 @@ namespace HappyHour.Spider
 {
     class SpiderR18 : SpiderBase
     {
-        Timer _timerPageLoaded = null;
-
         public override string SearchURL => $"{URL}common/search/searchword={Keyword}/";
         public SpiderR18(SpiderViewModel browser) : base(browser)
         {
             Name = "R18";
             URL = "https://www.r18.com/";
-
-            _timerPageLoaded = new Timer(500)
-            {
-                AutoReset = false
-            };
-            _timerPageLoaded.Elapsed += (s, e) => OnPageLoadTimerExpired();
-
         }
 
         public override List<Cookie> CreateCookie()
@@ -43,11 +34,6 @@ namespace HappyHour.Spider
                     Path = "/",
                 }
             };
-        }
-
-        public override bool CanScrap(LoadingStateChangedEventArgs e)
-        {
-            return e.Browser.GetFrameCount() == 1;
         }
 
         void OnMultiResult(object result)
@@ -99,8 +85,10 @@ namespace HappyHour.Spider
         }
 
         ItemR18V2 _item = null;
-        void OnPageLoadTimerExpired()
-        { 
+        public override void OnJsMessageReceived(JavascriptMessageReceivedEventArgs msg)
+        {
+            //base.OnJsMessageReceived(msg);
+            Log.Print(msg.Message.ToString());
             _item = new ItemR18V2(this);
             ParsePage(_item);
             ParsingState++;
@@ -117,9 +105,7 @@ namespace HappyHour.Spider
                         OnMultiResult);
                     break;
                 case 1:
-                    Browser.ExecJavaScript(
-                        "window.scrollTo(0,document.body.scrollHeight/2);",
-                        (r) => _timerPageLoaded.Start());
+                    Browser.ExecJavaScript(App.ReadResource("R18ShowActor.js"));
                     break;
                 case 2:
                     if (_linkName != "series")

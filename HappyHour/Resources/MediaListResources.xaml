@@ -76,7 +76,14 @@
                             </DataTemplate>
                         </MenuItem.ItemTemplate>
                     </MenuItem>
-
+                    <MenuItem Header="External Player" 
+                        Command="{Binding Data.CmdExternalPlayer,
+                            Source={StaticResource VmContext}}"
+                        CommandParameter="{Binding}"/>
+                    <MenuItem Header="Copy Path" 
+                        Command="{Binding Data.CmdCopyPath,
+                            Source={StaticResource VmContext}}"
+                        CommandParameter="{Binding}"/>
                     <MenuItem
                         Header="MoveTo"
                         Command="{Binding Data.CmdMoveItemTo,

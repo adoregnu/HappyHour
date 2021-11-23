@@ -125,11 +125,11 @@ namespace HappyHour.Spider
 
         public virtual void OnScrapCompleted()
         {
+            Reset();
             if (ScrapCompleted != null)
             {
                 UiServices.Invoke(() => ScrapCompleted?.Invoke(this), true);
             }
-            Reset();
         }
 
         public void Reset()
@@ -166,6 +166,10 @@ namespace HappyHour.Spider
             Browser.Download(url);
         }
 
+        public virtual void OnJsMessageReceived(JavascriptMessageReceivedEventArgs msg)
+        { 
+        }
+
         static protected bool CheckResult(object result, out List<string> list)
         {
             list = result.ToList<string>();
@@ -181,11 +185,6 @@ namespace HappyHour.Spider
         public override string ToString()
         {
             return URL;
-        }
-
-        public virtual bool CanScrap(LoadingStateChangedEventArgs e)
-        {
-            return true;
         }
     }
 }

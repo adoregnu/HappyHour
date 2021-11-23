@@ -54,6 +54,7 @@ namespace HappyHour.View.Pane
         public void AfterInsertDocument(LayoutRoot layout,
             LayoutDocument anchorableShown)
         {
+#if true
             if (//anchorableShown.Content is SpiderViewModel ||
                 //anchorableShown.Content is BrowserViewModel ||
                 anchorableShown.Content is PlayerViewModel)
@@ -89,6 +90,7 @@ namespace HappyHour.View.Pane
                 anchorableShown.IsActive = true;
                 //anchorableShown.Root.CollectGarbage();
             }
+#endif
         }
     }
 }

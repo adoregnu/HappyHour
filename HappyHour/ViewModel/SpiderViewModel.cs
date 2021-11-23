@@ -131,10 +131,10 @@ namespace HappyHour.ViewModel
             WebBrowser.LifeSpanHandler = new PopupHandler();
 
             WebBrowser.LoadingStateChanged += OnStateChanged;
-            //WebBrowser.JavascriptMessageReceived += OnJavascriptMessageReceived;
+            WebBrowser.JavascriptMessageReceived += OnJavascriptMessageReceived;
             //WebBrowser.FrameLoadEnd += OnFrameLoaded;
             SelectedSpider.SetCookies();
-            _timer = new Timer(100)
+            _timer = new Timer(210)
             {
                 AutoReset = false
             };
@@ -147,8 +147,9 @@ namespace HappyHour.ViewModel
             if (!e.IsLoading)
             {
                 Log.Print($"Loading Done. Number of frames:{e.Browser.GetFrameCount()}");
-                if (SelectedSpider.CanScrap(e))
+                if (IsAddressChanged)
                 {
+                    IsAddressChanged = false;
                     if (_timer.Enabled)
                     {
                         Log.Print("Timer already enabled!");
@@ -167,7 +168,8 @@ namespace HappyHour.ViewModel
 
         void OnJavascriptMessageReceived(object sender, JavascriptMessageReceivedEventArgs e)
         {
-            Log.Print(e.Message.ToString());
+            //Log.Print(e.Message.ToString());
+            SelectedSpider.OnJsMessageReceived(e);
         }
 
         public void ExecJavaScript(string s, IScrapItem item, string name)

@@ -21,7 +21,7 @@ namespace HappyHour.ScrapItems
         protected int _numItemsToScrap = 0;
         bool _isHandlerInit = false;
 
-        public static CultureInfo enUS = new CultureInfo("en-US");
+        public static CultureInfo enUS = new("en-US");
         public ElementTupleList Elements
         {
             get => _elements;
@@ -71,8 +71,8 @@ namespace HappyHour.ScrapItems
             var dh = _spider.Browser.DownloadHandler;
             dh.OnBeforeDownloadFired -= OnBeforeDownload;
             dh.OnDownloadUpdatedFired -= OnDownloadUpdated;
-            _spider.OnScrapCompleted();
             Log.Print("ItemBase::Clear()");
+            _spider.OnScrapCompleted();
         }
 
         static protected void PrintItem(string name, List<object> items)
