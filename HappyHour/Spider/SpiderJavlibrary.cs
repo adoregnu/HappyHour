@@ -73,14 +73,35 @@ namespace HappyHour.Spider
             OnScrapCompleted();
         }
 
+        public override void OnJsMessageReceived(JavascriptMessageReceivedEventArgs msg)
+        {
+            //base.OnJsMessageReceived(msg);
+            dynamic d = msg.Message;
+            Log.Print($"{d.type} : {d.data}");
+            if (d.type == "url")
+            {
+                Browser.Address = d.data;
+            }
+            else if (d.data == 0)
+            {
+                Log.Print($"No exact matched ID");
+                OnScrapCompleted();
+            }
+        }
+
         public override void Scrap()
         {
+            if (ParsingState >= 0)
+            {
+                Browser.ExecJavaScript(GetScript("JavLibrary.js"));
+                return;
+            }
+
             switch (ParsingState)
             {
                 case 0:
-                    Browser.ExecJavaScript(
-                        XPath("//div[@class='videos']/div/a"),
-                        OnMultiResult);
+                    //Browser.ExecJavaScript(App.ReadResource("JavLibrary.js"));
+                    Browser.ExecJavaScript(XPath("//div[@class='videos']/div/a"), OnMultiResult);
                     break;
                 case 1:
                     ParsePage(new ItemJavlibrary(this));

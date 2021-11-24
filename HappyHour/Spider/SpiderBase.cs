@@ -71,6 +71,12 @@ namespace HappyHour.Spider
             return result;
         }
 
+        protected string GetScript(string name)
+        { 
+            Template template = Template.Parse(App.ReadResource(name));
+            return template.Render(new { Pid = Keyword });
+        }
+
         public static string XPath(string xpath)
         { 
             return XPath(xpath, @"XPathMulti.sbn.js");

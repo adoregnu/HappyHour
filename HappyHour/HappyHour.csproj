@@ -66,6 +66,7 @@
     <None Remove="Resources\default-fallback-image.png" />
     <None Remove="Resources\ElementAt.js" />
     <None Remove="Resources\Highlight.js" />
+    <None Remove="Resources\JavLibrary.js" />
     <None Remove="Resources\NasLogin.js" />
     <None Remove="Resources\R18ShowActor.js" />
     <None Remove="Resources\SearchText.js" />
@@ -84,6 +85,7 @@
     <EmbeddedResource Include="Resources\XPathClickSingle.sbn.js" />
     <EmbeddedResource Include="Resources\XPathClick.sbn.js" />
     <EmbeddedResource Include="Resources\R18ShowActor.js" />
+    <EmbeddedResource Include="Resources\JavLibrary.js" />
     <EmbeddedResource Include="Resources\XPathMulti.sbn.js" />
     <EmbeddedResource Include="Resources\XPathSingle.sbn.js" />
   </ItemGroup>

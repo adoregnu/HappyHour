@@ -24,7 +24,7 @@ namespace HappyHour.View.Behavior
             if (AssociatedObject != null)
             {
                 AssociatedObject.TextChanged += AssociatedObjectOnTextChanged;
-                //AssociatedObject.DataContextChanged += DataContextChanged;
+                AssociatedObject.DataContextChanged += DataContextChanged;
                 SearchPanel.Install(AssociatedObject);
             }
         }
@@ -35,21 +35,28 @@ namespace HappyHour.View.Behavior
             if (AssociatedObject != null)
             {
                 AssociatedObject.TextChanged -= AssociatedObjectOnTextChanged;
-                //AssociatedObject.DataContextChanged -= DataContextChanged;
+                AssociatedObject.DataContextChanged -= DataContextChanged;
             }
         }
-#if false
+
+        bool _autoscroll = true;
         private void DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            if (e.NewValue is TextViewModel)
+            if (e.NewValue is ConsoleLogViewModel)
             {
-                var editor = sender as TextEditor;
-                (e.NewValue as TextViewModel).AddElementGenerator(editor.TextArea.TextView);
+                //var editor = sender as TextEditor;
+                //(e.NewValue as TextViewModel).AddElementGenerator(editor.TextArea.TextView);
+                _autoscroll = false;
+            }
+            else
+            {
+                _autoscroll = true;
             }
         }
-#endif
         private void AssociatedObjectOnTextChanged(object sender, EventArgs eventArgs)
         {
+            if (!_autoscroll)
+                return;
             var textEditor = sender as TextEditor;
 
             if (textEditor != null && _prevLineCount != textEditor.LineCount)
