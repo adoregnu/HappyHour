@@ -31,21 +31,21 @@ function _parseActorThumb(xpath) {
         null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
 
     var array = [];
+    var reName = new RegExp('([\w\s]+)(?:\s)\((.+)\)', 'i');
+    var reAlias = new RegExp('([\w\s]+),?', 'ig');
     while (node = result.iterateNext()) {
         var actorInfo = {};
-        var m = '/([\w\s]+)(?:\s)\((.+)\)/i'.exec(node.alt);
+        var m = reName.exec(node.alt);
         if (m == null) {
             actorInfo['name'] = node.alt;
         } else {
             actorInfo['name'] = m[1];
             var arr;
             var alias = [];
-            while ((arr = '/([\w\s]+),?/ig'.exec(m[2])) !== null) {
+            while ((arr = reAlias.exec(m[2])) !== null) {
                 alias.push(arr[1]);
             }
-            if (alias.length > 0) {
-                actorInfo['alias'] = alias;
-            }
+            actorInfo['alias'] = alias;
         }
         actorInfo['thumb'] = node.src;
         array.push(actorInfo);
@@ -58,6 +58,46 @@ let is_scrolled = false;
 function _scrollToActor() {
     window.scrollTo(0, document.body.scrollHeight / 2);
     is_scrolled = true;
+}
+
+function _parsePage() {
+    var items = {
+        title: { xpath: "//meta[@property='og:title']/@content" },
+        date: { xpath: "//h3[contains(.,'Release date')]/following-sibling::div//text()" },
+        //runtime: { xpath: "//h3[contains(.,'Runtime')]/following-sibling::div/text()" },
+        //director: { xpath: "//h3[contains(.,'Director')]/following-sibling::div/text()" },
+        series: { xpath: "//h3[contains(.,'Series')]/following-sibling::div//a/text()" },
+        studio: { xpath: "//h3[contains(.,'Studio')]/following-sibling::div/a/text()" },
+        genre: {
+            xpath: "//h3[contains(.,'Categories')]/following-sibling::div/span//text()",
+            handler: _parseMultiNode
+        },
+        plot: { xpath: "//h3[contains(.,'synosis')]/following-sibling::p/text()" },
+        cover: { xpath: "//div[@class='sc-cTJmaU BaBOz']/img/@src" },
+        cover2: { xpath: "//div[@class='sc-cTJmaU bAAnmR']/img/@src" },
+        actor: {
+            xpath: "//div[contains(@class,'actress-switching')]//img",
+            handler: _parseActorThumb
+        },
+    };
+
+    var msg = { type : 'items'}
+    var num_item = 0;
+    for (var key in items) {
+        var item = items[key];
+        if (key == 'cover2') key = 'cover';
+        if (msg[key] != null) continue;
+
+        if (item['handler'] == null) {
+            msg[key] = _parseSingleNode(item['xpath']);
+        } else {
+            msg[key] = item['handler'](item['xpath']);
+        }
+        num_item += 1;
+    }
+    msg['data'] = num_item;
+    console.log(JSON.stringify(msg));
+    CefSharp.PostMessage(msg);
 }
 
 function _multiResult() {
@@ -87,50 +127,12 @@ function _multiResult() {
         return 'notfound';
 }
 
-function _parsePage() {
-    var items = {
-        title: { xpath: "//meta[@property='og:title']/@content" },
-        releasedate: { xpath: "//h3[contains(.,'Release date')]/following-sibling::div//text()" },
-        runtime: { xpath: "//h3[contains(.,'Runtime')]/following-sibling::div/text()" },
-        director: { xpath: "//h3[contains(.,'Director')]/following-sibling::div/text()" },
-        series: { xpath: "//h3[contains(.,'Series')]/following-sibling::div//a/text()" },
-        studio: { xpath: "//h3[contains(.,'Studio')]/following-sibling::div/a/text()" },
-        genre: {
-            xpath: "//h3[contains(.,'Categories')]/following-sibling::div/span//text()",
-            handler: _parseMultiNode
-        },
-        plot: { xpath: "//h3[contains(.,'synosis')]/following-sibling::p/text()" },
-        cover: { xpath: "//div[@class='sc-cTJmaU BaBOz']/img/@src" },
-        cover2: { xpath: "//div[@class='sc-cTJmaU bAAnmR']/img/@src" },
-        actor: {
-            xpath: "//div[contains(@class,'actress-switching')]//img",
-            handler: _parseActorThumb
-        },
-    };
-
-    var msg = { type : 'items'}
-    var num_item = 0;
-    for (var key in items) {
-        var item = items[key];
-        if (key == 'cover2') key = 'cover';
-        if (msg[key] !== null) continue;
-
-        if (item['handler'] == null) {
-            msg[key] = _parseSingleNode(item['xpath']);
-        } else {
-            msg[key] = item['handler'](item['xpath']);
-        }
-        num_item += 1;
-    }
-    msg['data'] = num_item;
-    CefSharp.PostMessage(msg);
-}
-
 (function () {
 
     if (_multiResult() != 'notfound') {
         return;
     }
+    var num_loaded = 0;
 
     // Callback function to execute when mutations are observed
     var observer = new MutationObserver(function (mutations) {
@@ -140,14 +142,17 @@ function _parsePage() {
                 return;
             }
             mutation.addedNodes.forEach(function (node) {
+                //console.log(node.nodeName + ' class=' + node.className);
                 if (node.nodeName == 'DIV' && node.className == INFO_CLASS_NAME) {
                     console.log(node.className)
                     _scrollToActor();
                 }
             })
-            if (is_scrolled && mutation.addedNodes.length > 5) {
+            //console.log('addedNodes:' + mutation.addedNodes.length);
+            if (is_scrolled && num_loaded == 5) {
                 _parsePage();
             }
+            num_loaded += 1;
         });
     });
 

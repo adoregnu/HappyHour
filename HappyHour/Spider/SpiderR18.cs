@@ -88,14 +88,30 @@ namespace HappyHour.Spider
         public override void OnJsMessageReceived(JavascriptMessageReceivedEventArgs msg)
         {
             //base.OnJsMessageReceived(msg);
-            Log.Print(msg.Message.ToString());
-            _item = new ItemR18V2(this);
-            ParsePage(_item);
-            ParsingState++;
+            //Log.Print(msg.Message.ToString());
+            //_item = new ItemR18V2(this);
+            //ParsePage(_item);
+            //ParsingState++;
+            dynamic d = msg.Message;
+            Log.Print($"{d.type} : {d.data}");
+            if (d.type == "url")
+            {
+                Browser.Address = d.data;
+            }
+            else if (d.data == 0)
+            {
+                Log.Print($"No exact matched ID");
+                OnScrapCompleted();
+            }
         }
 
         public override void Scrap()
         {
+            if (ParsingState >= 0)
+            {
+                Browser.ExecJavaScript(GetScript("R18.js"));
+                return;
+            }
             Log.Print($"{Name}: ParsingState : {ParsingState}");
             switch (ParsingState)
             {
@@ -105,7 +121,7 @@ namespace HappyHour.Spider
                         OnMultiResult);
                     break;
                 case 1:
-                    Browser.ExecJavaScript(App.ReadResource("R18.js"));
+                    //Browser.ExecJavaScript(App.ReadResource("R18.js"));
                     break;
                 case 2:
                     if (_linkName != "series")

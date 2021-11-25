@@ -30,19 +30,25 @@ function _parseActorName(xpath) {
 
     var array = [];
     while (node = result.iterateNext()) {
-        var nameResult = document.evaluate('//span/span', node, null,
-            XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
-        var names = {};
-        while (nameNode = nameResult.iterateNext()) {
-            if (nameNode.class.contains('icn_')) continue;
+        //console.log('node : ' + node.nodeName + ', class:' + node.className);
+        var names = { alias: [] };
+        var children = node.childNodes;
+        //console.log('num children :' + children.length);
+        for (var i = 0; i < children.length; i++) {
+            var nameNode = children[i];
+            if (nameNode.nodeName != 'SPAN') continue;
+            if (nameNode.className.includes('icn_')) continue;
+            //console.log('nodeName: ' + nameNode.nodeName + ', class : ' + nameNode.className);
             var name = nameNode.textContent.trim().split(' ').reverse().join(' ');
             if (names['name'] == null) {
                 names['name'] = name;
             } else {
-                names['alias'] = name;
+                names['alias'].push(name);
             }
             array.push(names);
         }
+        //if (names['alias'].length == 0) names['alias'] = null;
+        //console.log(JSON.stringify(names));
     }
     return array;
 }
@@ -93,7 +99,7 @@ function _multiResult() {
     var msg = { type : 'items' }
     var num_item = 0;
     for (var key in items) {
-        var item = items[key];//[1](items[key][0]);
+        var item = items[key];
         if (item["handler"] == null)
             msg[key] = _parseSingleNode(item['xpath']);
         else
@@ -102,5 +108,6 @@ function _multiResult() {
         num_item += 1;
     }
     msg['data'] = num_item;
+    console.log(JSON.stringify(msg));
     CefSharp.PostMessage(msg);
 }) ();
