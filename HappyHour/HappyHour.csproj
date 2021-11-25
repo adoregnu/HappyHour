@@ -66,9 +66,11 @@
     <None Remove="Resources\default-fallback-image.png" />
     <None Remove="Resources\ElementAt.js" />
     <None Remove="Resources\Highlight.js" />
+    <None Remove="Resources\JavDb.js" />
     <None Remove="Resources\JavLibrary.js" />
+    <None Remove="Resources\Mgstage.js" />
     <None Remove="Resources\NasLogin.js" />
-    <None Remove="Resources\R18ShowActor.js" />
+    <None Remove="Resources\R18.js" />
     <None Remove="Resources\SearchText.js" />
     <None Remove="Resources\XPathClick.sbn.js" />
     <None Remove="Resources\XPathClickSIngle.sbn.js" />
@@ -80,11 +82,13 @@
     <EmbeddedResource Include="Resources\AvjamakLogin.js" />
     <EmbeddedResource Include="Resources\ElementAt.js" />
     <EmbeddedResource Include="Resources\Highlight.js" />
+    <EmbeddedResource Include="Resources\JavDb.js" />
+    <EmbeddedResource Include="Resources\Mgstage.js" />
     <EmbeddedResource Include="Resources\NasLogin.js" />
     <EmbeddedResource Include="Resources\SearchText.js" />
     <EmbeddedResource Include="Resources\XPathClickSingle.sbn.js" />
     <EmbeddedResource Include="Resources\XPathClick.sbn.js" />
-    <EmbeddedResource Include="Resources\R18ShowActor.js" />
+    <EmbeddedResource Include="Resources\R18.js" />
     <EmbeddedResource Include="Resources\JavLibrary.js" />
     <EmbeddedResource Include="Resources\XPathMulti.sbn.js" />
     <EmbeddedResource Include="Resources\XPathSingle.sbn.js" />

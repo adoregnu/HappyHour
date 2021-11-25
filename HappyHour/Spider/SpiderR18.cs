@@ -105,7 +105,7 @@ namespace HappyHour.Spider
                         OnMultiResult);
                     break;
                 case 1:
-                    Browser.ExecJavaScript(App.ReadResource("R18ShowActor.js"));
+                    Browser.ExecJavaScript(App.ReadResource("R18.js"));
                     break;
                 case 2:
                     if (_linkName != "series")
