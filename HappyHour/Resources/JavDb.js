@@ -35,7 +35,31 @@ function _parseActor(xpath) {
     return array;
 }
 
+function _multiResult() {
+    var result = document.evaluate("//a[@class='box']",
+        document.body, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+    var num_result = 0;
+    while (node = result.iterateNext()) {
+        var pidResult = document.evaluate("//div[@class='uid']", node,
+            null, XPathResult.FIRST_ORDERED_NODE_TYPE, result);
+        var pid = pidResult.singleNodeValue.textContent.trim();
+        if (pid.localeCompare(_PID, undefined, { sensitivity: 'accent' }) == 0) {
+            CefSharp.PostMessage({ type: 'url', data: node.href });
+            return 'redirected';
+        }
+        num_result += 1;
+    }
+    if (num_result > 0) {
+        return 'ambiguous';
+    } else
+        return 'notfound';
+}
+
 (function () {
+    if (_multiResult() != 'notfound') {
+        return;
+    }
+
     var items = {
         title: { xpath: "//h2[contains(@class, 'title')]/strong/text()" },
         cover: { xpath: "//div[@class='column column-video-cover']/a/@href" },
@@ -57,7 +81,7 @@ function _parseActor(xpath) {
     for (var key in items) {
         var item = items[key];
         if (key == 'cover2') key = 'cover';
-        if (msg[key] !== 'null') continue;
+        if (msg[key] != null) continue;
 
         if (item["handler"] == null)
             msg[key] = _parseSingleNode(item['xpath']);
@@ -67,5 +91,6 @@ function _parseActor(xpath) {
         num_item += 1;
     }
     msg['data'] = num_item;
+    console.log(JSON.stringify(msg));
     CefSharp.PostMessage(msg);
 }) ();

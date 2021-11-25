@@ -85,6 +85,7 @@ namespace HappyHour.Spider
         }
 
         ItemR18V2 _item = null;
+#if false
         public override void OnJsMessageReceived(JavascriptMessageReceivedEventArgs msg)
         {
             //base.OnJsMessageReceived(msg);
@@ -104,7 +105,7 @@ namespace HappyHour.Spider
                 OnScrapCompleted();
             }
         }
-
+#endif
         public override void Scrap()
         {
             if (ParsingState >= 0)

@@ -70,6 +70,12 @@ namespace HappyHour.Spider
 
         public override void Scrap()
         {
+            if (ParsingState >= 0)
+            {
+                Browser.ExecJavaScript(GetScript("JavDb.js"));
+                return;
+            }
+
             switch (ParsingState)
             {
                 case 0:

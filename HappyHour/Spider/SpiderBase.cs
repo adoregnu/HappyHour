@@ -173,7 +173,18 @@ namespace HappyHour.Spider
         }
 
         public virtual void OnJsMessageReceived(JavascriptMessageReceivedEventArgs msg)
-        { 
+        {
+            dynamic d = msg.Message;
+            Log.Print($"{d.type} : {d.data}");
+            if (d.type == "url")
+            {
+                Browser.Address = d.data;
+            }
+            else if (d.data == 0)
+            {
+                Log.Print($"No exact matched ID");
+                OnScrapCompleted();
+            }
         }
 
         static protected bool CheckResult(object result, out List<string> list)
