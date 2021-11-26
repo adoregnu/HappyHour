@@ -62,12 +62,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Resources\AVE.js" />
+    <None Remove="Resources\AvJamak.js" />
     <None Remove="Resources\AvjamakLogin.js" />
     <None Remove="Resources\default-fallback-image.png" />
     <None Remove="Resources\ElementAt.js" />
     <None Remove="Resources\Highlight.js" />
     <None Remove="Resources\JavDb.js" />
+    <None Remove="Resources\Javfree.js" />
     <None Remove="Resources\JavLibrary.js" />
+    <None Remove="Resources\Javmovie.js" />
     <None Remove="Resources\Mgstage.js" />
     <None Remove="Resources\NasLogin.js" />
     <None Remove="Resources\R18.js" />
@@ -79,10 +83,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Resources\Javfree.js" />
+    <EmbeddedResource Include="Resources\JavMovie.js" />
     <EmbeddedResource Include="Resources\AvjamakLogin.js" />
     <EmbeddedResource Include="Resources\ElementAt.js" />
     <EmbeddedResource Include="Resources\Highlight.js" />
     <EmbeddedResource Include="Resources\JavDb.js" />
+    <EmbeddedResource Include="Resources\AVE.js" />
+    <EmbeddedResource Include="Resources\AvJamak.js" />
     <EmbeddedResource Include="Resources\Mgstage.js" />
     <EmbeddedResource Include="Resources\NasLogin.js" />
     <EmbeddedResource Include="Resources\SearchText.js" />

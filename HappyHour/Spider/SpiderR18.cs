@@ -21,6 +21,7 @@ namespace HappyHour.Spider
         {
             Name = "R18";
             URL = "https://www.r18.com/";
+            ScriptName = "R18.js";
         }
 
         public override List<Cookie> CreateCookie()
@@ -36,6 +37,7 @@ namespace HappyHour.Spider
             };
         }
 
+#if false
         void OnMultiResult(object result)
         {
             if (!CheckResult(result, out List<string> list))
@@ -85,7 +87,6 @@ namespace HappyHour.Spider
         }
 
         ItemR18V2 _item = null;
-#if false
         public override void OnJsMessageReceived(JavascriptMessageReceivedEventArgs msg)
         {
             //base.OnJsMessageReceived(msg);
@@ -105,7 +106,6 @@ namespace HappyHour.Spider
                 OnScrapCompleted();
             }
         }
-#endif
         public override void Scrap()
         {
             if (ParsingState >= 0)
@@ -138,5 +138,6 @@ namespace HappyHour.Spider
                     break;
             }
         }
+#endif
     }
 }

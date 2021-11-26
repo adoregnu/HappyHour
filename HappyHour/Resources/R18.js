@@ -1,16 +1,12 @@
 ﻿const _PID = '{{pid}}';
 const INFO_CLASS_NAME = 'sc-cQDEqr jBzZAk'
 
-function _parseSingleNode(_xpath, _getter) {
+function _parseSingleNode(_xpath) {
     var result = document.evaluate(_xpath, document.body,
         null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
     var node = result.singleNodeValue;
     if (node != null) {
-        if (_getter == null) {
-            return node.textContent.trim();
-        } else {
-            return _getter(node);
-        }
+        return node.textContent.trim();
     }
     return null;
 }
@@ -45,7 +41,9 @@ function _parseActorThumb(xpath) {
             while ((arr = reAlias.exec(m[2])) !== null) {
                 alias.push(arr[1]);
             }
-            actorInfo['alias'] = alias;
+            if (alias.length > 0) {
+                actorInfo['alias'] = alias;
+            }
         }
         actorInfo['thumb'] = node.src;
         array.push(actorInfo);

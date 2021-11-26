@@ -18,8 +18,9 @@ namespace HappyHour.Spider
         {
             Name = "Javfree";
             URL = "https://javfree.me/";
+            ScriptName = "Javfre.js";
         }
-
+#if false
         public void OnMultiResult(object result)
         {
             if (!CheckResult(result, out List<string> list))
@@ -63,5 +64,6 @@ namespace HappyHour.Spider
                     break;
             }
         }
+#endif
     }
 }

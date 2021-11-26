@@ -20,7 +20,9 @@ namespace HappyHour.Spider
         {
             Name = "Javlibrary";
             URL = "https://www.javlibrary.com/en/";
+            ScriptName = "JavLibrary.js";
         }
+
         public override List<Cookie> CreateCookie()
         {
             return new List<Cookie>
@@ -35,6 +37,7 @@ namespace HappyHour.Spider
             };
         }
 
+#if false
         void OnMultiResult(object result)
         {
             if (!CheckResult(result, out List<string> list))
@@ -72,7 +75,6 @@ namespace HappyHour.Spider
             Log.Print($"No exact matched ID");
             OnScrapCompleted();
         }
-#if false
         public override void OnJsMessageReceived(JavascriptMessageReceivedEventArgs msg)
         {
             //base.OnJsMessageReceived(msg);
@@ -88,7 +90,6 @@ namespace HappyHour.Spider
                 OnScrapCompleted();
             }
         }
-#endif
         public override void Scrap()
         {
             if (ParsingState >= 0)
@@ -109,5 +110,6 @@ namespace HappyHour.Spider
                     break;
             }
         }
+#endif
     }
 }

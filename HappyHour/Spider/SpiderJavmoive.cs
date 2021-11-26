@@ -18,8 +18,9 @@ namespace HappyHour.Spider
         {
             Name = "JavMovie";
             URL = "http://javmovie.com/en/";
+            ScriptName = "JavMovie.js";
         }
-
+#if false
         void OnMultiResult(object result)
         {
             if (!CheckResult(result, out List<string> list))
@@ -52,5 +53,6 @@ namespace HappyHour.Spider
                     break;
             }
         }
+#endif
     }
 }

@@ -80,9 +80,9 @@ function _multiResult() {
 
     var items = {
         title: { xpath: "//*[@id='video_title']/h3/a" },
-        id: { xpath: "//*[@id='video_id']//td[2]" },
+        //id: { xpath: "//*[@id='video_id']//td[2]" },
         date: { xpath: "//*[@id='video_date']//td[2]" },
-        director: { xpath: "//*[@id='video_director']//*[@class='director']/a" },
+        //director: { xpath: "//*[@id='video_director']//*[@class='director']/a" },
         studio: { xpath: "//*[@id='video_maker']//*[@class='maker']/a" },
         cover: { xpath: "//*[@id='video_jacket_img']/@src" },
         rating: { xpath: "//*[@id='video_review']//*[@class='score']" },

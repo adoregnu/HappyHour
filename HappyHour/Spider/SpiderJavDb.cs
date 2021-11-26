@@ -19,6 +19,7 @@ namespace HappyHour.Spider
         { 
             Name = "JavDB";
             URL = "https://javdb.com/";
+            ScriptName = "JavDb.js";
         }
 
         public override List<Cookie> CreateCookie()
@@ -39,7 +40,7 @@ namespace HappyHour.Spider
                 },
             };
         }
-
+#if false
         void OnMultiResult(object result)
         {
             if (!CheckResult(result, out List<string> list))
@@ -89,5 +90,6 @@ namespace HappyHour.Spider
                     break;
             }
         }
+#endif
     }
 }

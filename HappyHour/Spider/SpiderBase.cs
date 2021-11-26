@@ -33,6 +33,7 @@ namespace HappyHour.Spider
         public string URL = null;
         public string Name { get; protected set; } = "";
         public string DataPath { get; set; }
+        public string ScriptName { get; set; }
         public virtual string SearchURL { get => URL; }
 
         public string Keyword
@@ -164,7 +165,14 @@ namespace HappyHour.Spider
             _linkName = null;
         }
 
-        public abstract void Scrap();
+        public virtual void Scrap()
+        {
+            if (ParsingState >= 0)
+            {
+                Browser.ExecJavaScript(GetScript(ScriptName));
+                return;
+            }
+        }
         public virtual void Stop() { }
         public virtual void Download(string url, ref int itemToScrap)
         {
@@ -186,6 +194,8 @@ namespace HappyHour.Spider
                 OnScrapCompleted();
             }
         }
+
+        protected virtual void StoreDb(dynamic data) { }
 
         static protected bool CheckResult(object result, out List<string> list)
         {
