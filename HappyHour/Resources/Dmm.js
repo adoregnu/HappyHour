@@ -10,29 +10,30 @@ function _parseSingleNode(_xpath) {
     return null;
 }
 
-function _parseRating(xpath) {
-    var txt = _parseSingleNode(xpath);
-    if (txt != null) {
-        var re = new RegExp('[0-9.]+');
-        var m = re.exec(txt);
-        if (m != null) {
-            return m[0];
+function _multiResult() {
+    var result = document.evaluate("//p[@class='tmb']/a",
+        document.body, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+
+    const re = new RegExp('cid=(h_)?(\d+)?' + _PID.split('-')[0], 'i');
+    for (var i = 0; i < result.snapshotLength; i++) {
+        var node = result.snapshotItem(i);
+        if (re.test(node.href)) {
+            CefSharp.PostMessage({ type: 'url', data: node.href});
+            return 'redirected';
         }
     }
-    return null;
+    if (result.snapshotLength > 1) {
+        return 'ambiguous';
+    }
+    return 'notfound';
 }
 
 (function () {
+    if (_multiResult() != 'notfound') {
+        return;
+    }
+
     var items = {
-        //id: { xpath: "//th[contains(., '品番：')]/following-sibling::td" },
-        title: { xpath: "//div[@class='common_detail_cover']/h1[@class='tag']" },
-        cover: { xpath: "//a[@id='EnlargeImage']/@href" },
-        studio: { xpath: "//th[contains(., 'メーカー：')]/following-sibling::td/a" },
-        date: { xpath: "//th[contains(., '配信開始日：')]/following-sibling::td" },
-        rating: {
-            xpath: "//th[contains(., '評価：')]/following-sibling::td",
-            handler: _parseRating
-        },
     };
 
     var msg = { type : 'items' }

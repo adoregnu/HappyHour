@@ -1,19 +1,27 @@
 ﻿const _PID = '{{pid}}';
 
-function _parseSingleNode(_xpath, _getter) {
+function _parseSingleNode(_xpath) {
     var result = document.evaluate(_xpath, document.body,
         null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
     var node = result.singleNodeValue;
     if (node != null) {
-        if (_getter == null) {
-            return node.textContent.trim();
-        } else {
-            return _getter(node);
-        }
+        return node.textContent.trim();
     }
     return null;
 }
-function _parseMultiNode(xpath, _getter) {
+
+function _parseRating(xpath) {
+    var rating = _parseSingleNode(xpath);
+    if (rating != null && rating.length > 0) {
+        //console.log('JavLibrary: rating:' + rating);
+        var re = new RegExp('([0-9.]+)', 'i');
+        var m = re.exec(rating);
+        if (m != null) return m[1];
+    }
+    return null;
+}
+
+function _parseMultiNode(xpath) {
     var result = document.evaluate(xpath, document.body,
         null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
 
@@ -31,7 +39,8 @@ function _parseActorName(xpath) {
     var array = [];
     while (node = result.iterateNext()) {
         //console.log('node : ' + node.nodeName + ', class:' + node.className);
-        var names = { alias: [] };
+        var names = { };
+        var alias = [];
         var children = node.childNodes;
         //console.log('num children :' + children.length);
         for (var i = 0; i < children.length; i++) {
@@ -43,11 +52,13 @@ function _parseActorName(xpath) {
             if (names['name'] == null) {
                 names['name'] = name;
             } else {
-                names['alias'].push(name);
+                alias.push(name);
             }
-            array.push(names);
         }
-        //if (names['alias'].length == 0) names['alias'] = null;
+        if (alias.length > 0) {
+            names['alias'] = alias;
+        }
+        array.push(names);
         //console.log(JSON.stringify(names));
     }
     return array;
@@ -85,7 +96,10 @@ function _multiResult() {
         //director: { xpath: "//*[@id='video_director']//*[@class='director']/a" },
         studio: { xpath: "//*[@id='video_maker']//*[@class='maker']/a" },
         cover: { xpath: "//*[@id='video_jacket_img']/@src" },
-        rating: { xpath: "//*[@id='video_review']//*[@class='score']" },
+        rating: {
+            xpath: "//*[@id='video_review']//*[@class='score']",
+            handler: _parseRating
+        },
         genre: {
             xpath: "//*[@id='video_genres']//*[@class='genre']//text()",
             handler: _parseMultiNode
@@ -100,10 +114,14 @@ function _multiResult() {
     var num_item = 0;
     for (var key in items) {
         var item = items[key];
-        if (item["handler"] == null)
+        if (item["handler"] == null) {
             msg[key] = _parseSingleNode(item['xpath']);
-        else
+        } else {
             msg[key] = item['handler'](item['xpath']);
+        }
+        if (msg[key] == null) {
+            continue;
+        }
         //console.log(key + ': ' + msg[key]);
         num_item += 1;
     }

@@ -1,34 +1,39 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
 using GalaSoft.MvvmLight.Command;
 
+using Scriban;
+
+using CefSharp;
+
 using HappyHour.ViewModel;
-using HappyHour.ScrapItems;
+using HappyHour.CefHandler;
 
 namespace HappyHour.Spider
 {
-    class SpiderSehuatang : SpiderBase
+    internal class SpiderSehuatang : SpiderBase
     {
-        int _pageNum = 1;
-        int _index = 0;
-        bool _isPageChanged = false;
-        bool _scrapRunning = false;
-        string _currentPage = null;
+        private int _pageNum = 1;
+        private int _index;
+        private bool _scrapRunning;
+        private bool _skipDownload;
 
-        ItemSehuatang _currItem = null;
-        List<object> _articlesInPage = null;
-        Dictionary<string, string> _xpathDic;
+        private string _pid;
+        private string _outPath;
+        private DateTime _updateTime;
+        private dynamic _currPage;
 
-        public int NumPage { get; set; }  = 1;
+        private readonly string _dataPath;
+        private readonly Dictionary<string, string> _images;
+
+        public int NumPage { get; set; } = 1;
         public List<string> Boards { get; set; }
         public string SelectedBoard { set; get; } = "censored";
+        public string StopPid { get; set; }
         public bool StopOnExistingId { get; set; } = true;
 
         public ICommand CmdStop { get; private set; }
@@ -37,104 +42,182 @@ namespace HappyHour.Spider
         {
             Name = "sehuatang";
             URL = "https://www.sehuatang.org/";
-            _xpathDic = new Dictionary<string, string>
-            {
-                { "censored",   XPath("//a[contains(., '亚洲有码原创')]/@href") },
-                { "uncensored", XPath("//a[contains(., '亚洲无码原创')]/@href") },
-                { "subtitle",   XPath("//a[contains(., '高清中文字幕')]/@href") },
-                { "articles",   XPath("//tbody[contains(@id, 'normalthread_')]/tr/td[1]/a/@href") },
-            };
+            ScriptName = "Sehuatang.js";
+
             Boards = new List<string>
             {
                 "censored", "uncensored", "subtitle"
             };
-            CmdStop = new RelayCommand(() => Stop());
-            CmdNext = new RelayCommand(() => Next());
+            CmdStop = new RelayCommand(() => _scrapRunning = false);
+            //CmdNext = new RelayCommand(() => Next());
+
+            _dataPath = GetConf("DataPath");
+
+            _images = new Dictionary<string, string>();
         }
 
-        public override string GetConf(string key)
+        protected override string GetScript(string name)
+        {
+            Template template = Template.Parse(App.ReadResource(name));
+            return template.Render(new { Pid = Keyword, Board = SelectedBoard });
+        }
+
+        private void UpdateMedia()
+        {
+            DataPath = _outPath; // 
+            Browser.MediaList.AddMedia(_outPath);
+        }
+
+        private void CreateDir()
+        {
+            _skipDownload = false;
+            DirectoryInfo di = new(_outPath);
+            if (!di.Exists)
+            {
+                Directory.CreateDirectory(_outPath);
+                return;
+            }
+            _skipDownload = true;
+            Log.Print($"{Name}: Already downloaded! {_outPath}");
+            if (StopOnExistingId)
+            {
+                _scrapRunning = false;
+            }
+        }
+
+        private int _numDownloaded;
+        private int _toDownload;
+        private void DownloadFiles(dynamic article)
+        {
+            if (_toDownload != _numDownloaded)
+            {
+                Log.Print($"{Name}: Previous downloading is not completed!");
+                return;
+            }
+            List<object> files = article.images;
+
+            int i = 0;
+            _images.Clear();
+            _numDownloaded = 0;
+            _toDownload = files.Count + ((List<object>)article.files).Count;
+            Log.Print($"{Name}: toDownload : {_toDownload }");
+
+            foreach (string file in files)
+            {
+                string ext = Path.GetExtension(file);
+                string postfix = (i == 0) ? "cover" : $"screenshot{i}";
+                string target = _outPath + $"\\{_pid}_{postfix}{ext}";
+
+                _images.Add(file, target);
+                Browser.Download(file);
+                i++;
+            }
+        }
+
+        private bool NextPage()
+        {
+            Match m = Regex.Match(_currPage.curr_url, @"-(?<page>\d+)\.html");
+            if (!m.Success)
+            {
+                Log.Print($"{Name}: Invalid page url format! {0}", _currPage.curr_ur);
+                return false;
+            }
+            _pageNum = int.Parse(m.Groups["page"].Value, enUS) + 1;
+            if (_pageNum > NumPage)
+            {
+                Log.Print($"{Name}: Parsing done!!");
+                return false;
+            }
+
+            Browser.Address = Regex.Replace(_currPage.curr_url,
+                @"\d+\.html", $"{_pageNum}.html");
+            return true;
+        }
+
+        private void NextItem()
+        {
+            List<object> list = _currPage.data;
+            if (list.Count > _index)
+            {
+                dynamic item = list[_index++];
+                if (!string.IsNullOrEmpty(StopPid) &&
+                    _pid.Equals(StopPid, StringComparison.OrdinalIgnoreCase))
+                {
+                    _scrapRunning = false;
+                }
+                else
+                {
+                    _pid = item.pid;
+                    _outPath = _dataPath + item.pid;
+                    CreateDir();
+                }
+                if (_scrapRunning)
+                {
+                    Browser.MainView.StatusMessage =
+                        $"Article:{_index}/{list.Count}, Page:{_pageNum}/{NumPage}";
+                    Browser.Address = item.url;
+                }
+            }
+            else
+            {
+                _scrapRunning = NextPage();
+            }
+
+            if (!_scrapRunning)
+            {
+                OnScrapCompleted();
+            }
+        }
+
+        public override void OnJsMessageReceived(
+            JavascriptMessageReceivedEventArgs msg)
+        {
+            dynamic d = msg.Message;
+            if (d.type == "url")
+            {
+                Browser.Address = d.data;
+            }
+            else if (d.type == "url_list")
+            {
+                Log.Print($"{Name}: current page:{d.curr_url}, miss:{d.miss}");
+                _index = 0;
+                _currPage = d;
+                NextItem();
+            }
+            else if (d.type == "items")
+            {
+                Log.Print($"{Name}: article {_pid}={d.pid}");
+                _updateTime = DateTime.Parse(d.date);
+                if (!_skipDownload)
+                {
+                    DownloadFiles(d);
+                }
+                else
+                {
+                    UpdateMedia();
+                    NextItem();
+                }
+            }
+        }
+
+        private string GetConf(string key)
         {
             if (key == "DataPath")
             {
-                return $"{App.GConf["general"]["data_path"]}sehuatang\\{SelectedBoard}\\";
+                if (!App.GConf.Sections.ContainsSection("general"))
+                {
+                    return null;
+                }
+                var general = App.GConf["general"];
+
+                return !general.ContainsKey("data_path") ?
+                    null : $"{general["data_path"]}sehuatang\\{SelectedBoard}\\";
             }
             else if (key == "StopOnExist")
             {
                 return StopOnExistingId.ToString();
             }
-
-            return base.GetConf(key);
-        }
-
-        string GetNextPage(string str)
-        {
-            var m = Regex.Match(str, @"-(?<page>\d+)\.html");
-            if (!m.Success)
-            {
-                Log.Print("Invalid page url format! {0}", str);
-                return null;
-            }
-            _pageNum = int.Parse(m.Groups["page"].Value) + 1;
-            if (_pageNum > NumPage)
-                return null;
-            return Regex.Replace(str, @"\d+\.html", $"{_pageNum}.html");
-        }
-
-        void MovePage(object result)
-        {
-            ParsingState = 1;
-            _index = 0;
-            _isPageChanged = true;
-            if (result is List<object> items && items.Count == 1)
-            {
-                _currentPage = items[0].ToString();
-            }
-            else
-            {
-                _currentPage = GetNextPage(_currentPage);
-            }
-
-            if (!string.IsNullOrEmpty(_currentPage))
-            {
-                //Log.Print("Move Page to " + Browser.Address);
-                Browser.Address = URL + _currentPage;
-            }
-            else
-                _currItem = null;
-        }
-
-        public void MoveArticle(object result)
-        {
-            if (_isPageChanged)
-            {
-                _articlesInPage = result as List<object>;
-                _isPageChanged = false;
-            }
-            Browser.MainView.StatusMessage =
-                $"{_index}/{_articlesInPage.Count}, {_pageNum}/{NumPage}";
-
-            if (_articlesInPage.Count > _index)
-            {
-                ParsingState = 2;
-                string article = _articlesInPage[_index++].ToString();
-                Browser.Address = URL + article;
-            }
-            else
-            {
-                MovePage(null);
-            }
-        }
-
-        public override void OnScrapCompleted()
-        {
-            if (!string.IsNullOrEmpty(DataPath))
-            {
-                Browser.MediaList.AddMedia(DataPath);
-            }
-            if (_scrapRunning)
-            {
-                MoveArticle(null);
-            }
+            return null;
         }
 
         public override void Navigate2()
@@ -149,36 +232,53 @@ namespace HappyHour.Spider
             Browser.Address = URL;
         }
 
-        public override void Stop()
+        private void OnBeforeDownload(object sender, DownloadItem e)
         {
-            _scrapRunning = false;
-            ParsingState = -1;
+            e.SuggestedFileName = !e.SuggestedFileName.EndsWith("torrent", StringComparison.OrdinalIgnoreCase) ?
+                _images[e.OriginalUrl] : $"{_outPath}\\{e.SuggestedFileName}";
         }
 
-        public void Next()
+        private void OnDownloadUpdated(object sender, DownloadItem e)
         {
-            if (_currItem != null) 
-                _currItem.Clear();
-        }
-
-        public override void Scrap()
-        {
-            if (!_scrapRunning) return;
-
-            switch (ParsingState)
+            if (!e.IsComplete)
             {
-                case 0:
-                    Browser.ExecJavaScript(_xpathDic[SelectedBoard], MovePage);
-                    break;
-                case 1:
-                    Browser.ExecJavaScript(_xpathDic["articles"], MoveArticle);
-                    break;
-                case 2:
-                    DataPath = "dummy";
-                    _currItem = new ItemSehuatang(this);
-                    ParsePage(_currItem);
-                    break;
+                return;
             }
+
+            _numDownloaded++;
+            Log.Print($"{Name}: download completed({_numDownloaded}/{_toDownload}):" +
+                $" {e.FullPath}");
+            try
+            {
+                File.SetLastWriteTime(e.FullPath, _updateTime);
+            }
+            catch (Exception ex)
+            {
+                Log.Print(ex.Message);
+            }
+            if (_toDownload == _numDownloaded)
+            {
+                UpdateMedia();
+                NextItem();
+            }
+        }
+
+        public override void OnSelected()
+        {
+            //base.OnSelected();
+            Log.Print($"{Name} selected!");
+            DownloadHandler dh = Browser.DownloadHandler;
+            dh.OnBeforeDownloadFired += OnBeforeDownload;
+            dh.OnDownloadUpdatedFired += OnDownloadUpdated;
+        }
+
+        public override void OnDeselect()
+        {
+            Log.Print($"{Name} deselected!");
+            //base.OnDeselect();
+            DownloadHandler dh = Browser.DownloadHandler;
+            dh.OnBeforeDownloadFired -= OnBeforeDownload;
+            dh.OnDownloadUpdatedFired -= OnDownloadUpdated;
         }
     }
 }

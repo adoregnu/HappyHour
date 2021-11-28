@@ -35,6 +35,16 @@ function _parseActor(xpath) {
     return array;
 }
 
+function _parseRating(xpath) {
+    var rating = _parseSingleNode(xpath);
+    if (rating != null && rating.length > 0) {
+        var re = new RegExp('([0-9.]+),', 'i');
+        var m = re.exec(rating);
+        if (m != null) return m[1];
+    }
+    return null;
+}
+
 function _multiResult() {
     var result = document.evaluate("//a[@class='box']",
         document.body, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
@@ -49,10 +59,9 @@ function _multiResult() {
         }
         num_result += 1;
     }
-    if (num_result > 0) {
+    if (num_result > 0) 
         return 'ambiguous';
-    } else
-        return 'notfound';
+    return 'notfound';
 }
 
 (function () {
@@ -66,6 +75,10 @@ function _multiResult() {
         cover2: { xpath: "//div[@class='column column-video-cover']/a/img/@src" },
         date: { xpath: "//strong[contains(., 'Released Date')]/following-sibling::span/text()" },
         studio: { xpath: "//strong[contains(., 'Maker')]/following-sibling::span/a/text()" },
+        rating: {
+            xpath: "//span[@class='score-stars']/following-sibling::text()",
+            handler: _parseRating
+        },
         actor: {
             xpath: "//strong[contains(., 'Actor')]/following-sibling::span/a/text()",
             handler: _parseActor
@@ -83,10 +96,14 @@ function _multiResult() {
         if (key == 'cover2') key = 'cover';
         if (msg[key] != null) continue;
 
-        if (item["handler"] == null)
+        if (item["handler"] == null) {
             msg[key] = _parseSingleNode(item['xpath']);
-        else
+        } else {
             msg[key] = item['handler'](item['xpath']);
+        }
+        if (msg[key] == null) {
+            continue;
+        }
         //console.log(key + ': ' + msg[key]);
         num_item += 1;
     }

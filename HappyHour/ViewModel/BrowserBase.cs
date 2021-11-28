@@ -121,7 +121,7 @@ namespace HappyHour.ViewModel
                 callback?.Invoke(response.Result);
             });
         }
-
+#if false
         public void Login(string jsTpl)
         {
             var tpl = Template.Parse(App.ReadResource(jsTpl));
@@ -142,7 +142,7 @@ namespace HappyHour.ViewModel
             });
             WebBrowser.ExecuteScriptAsync(js);
         }
-
+#endif
         public override void Cleanup()
         {
             PropertyChanged -= OnPropertyChanged;

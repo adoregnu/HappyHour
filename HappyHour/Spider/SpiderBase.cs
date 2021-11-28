@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
 using System.Windows.Input;
+using System.Globalization;
 
 using Scriban;
 using CefSharp;
@@ -12,19 +10,18 @@ using GalaSoft.MvvmLight.Command;
 
 using HappyHour.ViewModel;
 using HappyHour.ScrapItems;
-using HappyHour.Extension;
 
 namespace HappyHour.Spider
 {
     delegate void ScrapCompletedHandler(SpiderBase spider);
 
-    abstract class SpiderBase : NotifyPropertyChanged
+    class SpiderBase : NotifyPropertyChanged
     {
-        bool _isCookieSet = false;
         static string _keyword;
+        public static CultureInfo enUS = new("en-US");
 
+        bool _isCookieSet = false;
         public int ParsingState = -1;
-        protected string _linkName;
 
         public SpiderViewModel Browser { get; private set; }
         public ScrapCompletedHandler ScrapCompleted { get; set; }
@@ -53,62 +50,34 @@ namespace HappyHour.Spider
         public virtual void OnSelected()
         {
             Log.Print($"{Name} selected!");
+            Browser.ImageDownloader.Enable(true);
         }
 
         public virtual void OnDeselect()
         { 
             Log.Print($"{Name} deselected!");
+            Browser.ImageDownloader.Enable(false);
         }
 
-        public virtual string GetConf(string key)
-        {
-            throw new Exception("Unknown Config");
-        }
-
-        static string XPath(string xpath, string jsPath)
-        {
-            Template template = Template.Parse(App.ReadResource(jsPath));
-            string result = template.Render(new { XPath = xpath });
-            return result;
-        }
-
-        protected string GetScript(string name)
+        protected virtual string GetScript(string name)
         { 
             Template template = Template.Parse(App.ReadResource(name));
             return template.Render(new { Pid = Keyword });
-        }
-
-        public static string XPath(string xpath)
-        { 
-            return XPath(xpath, @"XPathMulti.sbn.js");
-        }
-        public static string XPathClick(string xpath)
-        { 
-            return XPath(xpath, @"XPathClick.sbn.js");
-        }
-        public static string XPathClickSingle(string xpath)
-        { 
-            return XPath(xpath, @"XPathClickSingle.sbn.js");
         }
 
         public virtual void Navigate2()
         {
             if (string.IsNullOrEmpty(Keyword))
             {
-                Log.Print("Empty keyword!");
+                Log.Print($"{Name}: Empty keyword!");
                 return;
             }
             ParsingState = 0;
             Browser.SelectedSpider = this;
         }
 
-        public virtual void Navigate(string name, string url)
-        {
-            _linkName = name;
-            Browser.Address = url;
-        }
 
-        public virtual List<Cookie> CreateCookie() { return null; }
+        protected virtual List<Cookie> CreateCookie() { return null; }
 
         public void SetCookies()
         {
@@ -130,16 +99,7 @@ namespace HappyHour.Spider
             _isCookieSet = true;
         }
 
-        public virtual void OnScrapCompleted()
-        {
-            Reset();
-            if (ScrapCompleted != null)
-            {
-                UiServices.Invoke(() => ScrapCompleted?.Invoke(this), true);
-            }
-        }
-
-        public void Reset()
+        protected virtual void OnScrapCompleted()
         {
             if (ParsingState >= 0)
             {
@@ -147,66 +107,62 @@ namespace HappyHour.Spider
                 ParsingState = -1;
                 //Keyword = null;
                 //DataPath = null;
-                Browser.MediaList.AddMedia(DataPath);
-                Log.Print($"Reset Spider : {Name}");
+                Log.Print($"{Name}: Reset Spider");
             }
-        }
 
-        protected void ParsePage(IScrapItem item)
-        {
-            (item as ItemBase).Init();
-            foreach ((string name, string element, ElementType type) in item.Elements)
+            if (ScrapCompleted != null)
             {
-                if (type == ElementType.XPATH)
-                    Browser.ExecJavaScript(XPath(element), item, name);
-                else if (type == ElementType.XPATH_CLICK)
-                    Browser.ExecJavaScript(XPathClick(element), item, name);
+                UiServices.Invoke(() => ScrapCompleted?.Invoke(this), true);
             }
-            _linkName = null;
         }
 
         public virtual void Scrap()
         {
-            if (ParsingState >= 0)
+            if (ParsingState >= 0 && !string.IsNullOrEmpty(ScriptName))
             {
                 Browser.ExecJavaScript(GetScript(ScriptName));
                 return;
             }
         }
-        public virtual void Stop() { }
-        public virtual void Download(string url, ref int itemToScrap)
-        {
-            _ = Interlocked.Increment(ref itemToScrap);
-            Browser.Download(url);
-        }
 
         public virtual void OnJsMessageReceived(JavascriptMessageReceivedEventArgs msg)
         {
             dynamic d = msg.Message;
-            Log.Print($"{d.type} : {d.data}");
+            //Log.Print($"{d.type} : {d.data}");
             if (d.type == "url")
             {
                 Browser.Address = d.data;
             }
-            else if (d.data == 0)
+            else if (d.type == "items")
             {
-                Log.Print($"No exact matched ID");
-                OnScrapCompleted();
+                if (d.data == 0)
+                {
+                    Log.Print($"{Name}: No exact matched ID");
+                    return;
+                }
+                try
+                {
+                    Browser.ImageDownloader.DownloadFiles(this, d);
+                }
+                catch (Exception ex)
+                {
+                    Log.Print($"{Name}:", ex);
+                }
             }
         }
 
-        protected virtual void StoreDb(dynamic data) { }
-
-        static protected bool CheckResult(object result, out List<string> list)
+        protected virtual void UpdateDb(IDictionary<string, object> items)
         {
-            list = result.ToList<string>();
-            if (list.IsNullOrEmpty())
+            new ItemBase2(this).UpdateItems(items);
+        }
+
+        public void UpdateItems(IDictionary<string, object> items)
+        {
+            if (SaveDb)
             {
-                Log.Print("CheckResult: result is empty or null!");
-                return false;
+                UiServices.Invoke(() => UpdateDb(items));
             }
-            Log.Print($"CheckResult: {list.Count} items found!");
-            return true;
+            OnScrapCompleted();
         }
 
         public override string ToString()

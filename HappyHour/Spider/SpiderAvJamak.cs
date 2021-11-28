@@ -2,22 +2,53 @@
 using System.IO;
 
 using CefSharp;
-using HtmlAgilityPack;
+using Scriban;
+
 using HappyHour.ViewModel;
 
 namespace HappyHour.Spider
 {
     class SpiderAvJamak : SpiderBase
     {
-        public override string SearchURL =>
-            $"{URL}bbs/search.php?url=https%3A%2F%2Fav-jamak.com%2Fbbs%2Fsearch.php" +
-            $"&stx={Keyword}";
+        //public override string SearchURL =>
+        //    $"{URL}bbs/search.php?url=https%3A%2F%2Fav-jamak.com%2Fbbs%2Fsearch.php" +
+        //    $"&stx={Keyword}";
+        public override string SearchURL => $"{URL}/bbs/search.php" +
+            $"?srows=10&gr_id=jamak&sfl=wr_subject&stx={Keyword}&sop=and";
 
         public SpiderAvJamak(SpiderViewModel browser) : base(browser)
         {
             Name = "av-jamak";
             //URL = "https://av-jamak.com/";
+            //URL = "https://av-jamack.com/";
             URL = "https://avjamak01.com/";
+            ScriptName = "AvJamak.js";
+        }
+
+        protected override string GetScript(string name)
+        {
+            string userid = "";
+            string password = "";
+            if (App.GConf.Sections.ContainsSection("avjamak"))
+            {
+                var avjamak = App.GConf["avjamak"];
+                if (avjamak.ContainsKey("userid") &&
+                    avjamak.ContainsKey("password"))
+                {
+                    userid = avjamak["userid"];
+                    password = avjamak["password"];
+                }
+            } 
+ 
+            Template template = Template.Parse(App.ReadResource(name));
+            return template.Render(new {
+                Pid = Keyword, Userid = userid, Password = password
+            });
+        }
+
+        public override void Scrap()
+        {
+            Browser.ExecJavaScript(GetScript(ScriptName));
         }
 
         void OnBeforeDownload(object sender, DownloadItem e)
@@ -45,7 +76,7 @@ namespace HappyHour.Spider
         }
         public override void OnSelected()
         {
-            base.OnSelected();
+            Log.Print($"{Name} selected!");
             var dh = Browser.DownloadHandler;
             dh.OnBeforeDownloadFired += OnBeforeDownload;
             dh.OnDownloadUpdatedFired += OnDownloadUpdated;
@@ -53,67 +84,10 @@ namespace HappyHour.Spider
 
         public override void OnDeselect()
         {
-            base.OnDeselect();
+            Log.Print($"{Name} deselected!");
             var dh = Browser.DownloadHandler;
             dh.OnBeforeDownloadFired -= OnBeforeDownload;
             dh.OnDownloadUpdatedFired -= OnDownloadUpdated;
-        }
-
-        void OnResult(object result)
-        {
-            if (result is not List<object> list || list.Count == 0)
-            {
-                Log.Print($"{Name}: No result");
-            }
-            else if (list.Count > 1)
-            {
-                Log.Print($"{Name}: Multiple result! select manually");
-            }
-            else
-            {
-                var url = HtmlEntity.DeEntitize(list[0] as string);
-                Browser.Address = URL + $"bbs/{url[2..]}"; //remove './'
-                return;
-            }
-            OnScrapCompleted();
-        }
-
-        void CheckSearchReulst()
-        { 
-            Browser.ExecJavaScript(XPath("//div[@class='media-body']/" +
-                "a[contains(@href, 'table=jamak') or" +
-                " contains(@href,'table=bigsub')]/@href"), OnResult);
-        }
-
-        void CheckLogin(object result)
-        {
-            if (result is List<object> list && list.Count > 0)
-            {
-                ParsingState = 1;
-                Browser.Login("AvjamakLogin.js");
-                return;
-            }
-            if (ParsingState == -1)
-            {
-                OnScrapCompleted();
-                return;
-            }
-            CheckSearchReulst();
-        }
-
-        public override void Scrap()
-        {
-            switch (ParsingState)
-            {
-                case -1:
-                case 0:
-                    Browser.ExecJavaScript(XPath("//form[@id='basic_outlogin']"), CheckLogin);
-                    return;
-                case 1:
-                    CheckSearchReulst();
-                    return;
-            }
-            OnScrapCompleted();
         }
     }
 }

@@ -18,10 +18,5 @@ namespace HappyHour.Spider
             Name = "Avdbs";
             URL = "https://www.avdbs.com/";
         }
-
-        public override void Scrap()
-        {
-            OnScrapCompleted();
-        }
     }
 }

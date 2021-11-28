@@ -18,52 +18,7 @@ namespace HappyHour.Spider
         {
             Name = "Javfree";
             URL = "https://javfree.me/";
-            ScriptName = "Javfre.js";
+            ScriptName = "Javfree.js";
         }
-#if false
-        public void OnMultiResult(object result)
-        {
-            if (!CheckResult(result, out List<string> list))
-                goto NotFound;
-
-            var regex = new Regex($@"{Keyword.ToLower()}");
-            string exactUrl = null;
-            foreach (string url in list)
-            {
-                var m = regex.Match(url);
-                if (m.Success)
-                {
-                    exactUrl = url;
-                    break;
-                }
-            }
-            if (exactUrl == null)
-                goto NotFound;
-
-            ParsingState = 1;
-            Browser.Address = exactUrl;
-            return;
-
-        NotFound:
-            Log.Print("No matched Pid!");
-            OnScrapCompleted();
-        }
-
-        public override void Scrap()
-        {
-            switch (ParsingState)
-            {
-                case 0:
-                    Browser.ExecJavaScript(
-                        XPath("//h2[@class='entry-title']/a/@href"),
-                        OnMultiResult);
-                    break;
-                case 1:
-                    ParsePage(new ItemJavfree(this));
-                    ParsingState = 2;
-                    break;
-            }
-        }
-#endif
     }
 }

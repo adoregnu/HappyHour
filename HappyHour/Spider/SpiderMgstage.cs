@@ -16,9 +16,10 @@ namespace HappyHour.Spider
         {
             Name = "MGStage";
             URL = "https://www.mgstage.com/";
+            ScriptName = "Mgstage.js";
         }
 
-        public override List<Cookie> CreateCookie()
+        protected override List<Cookie> CreateCookie()
         {
             return new List<Cookie> {
                 new Cookie
@@ -29,11 +30,6 @@ namespace HappyHour.Spider
                     Path = "/"
                 }
             };
-        }
-
-        public override void Scrap()
-        {
-            ParsePage(new ItemMgstage(this));
         }
     }
 }

@@ -10,13 +10,24 @@ function _parseSingleNode(_xpath) {
     return null;
 }
 
+function _parseMultiNode(xpath) {
+    var result = document.evaluate(xpath, document.body,
+        null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+
+    var array = [];
+    while (node = result.iterateNext()) {
+        array.push(node.textContent.trim());
+    }
+    return array;
+}
+
 function _parseActor(xpath) {
     var result = document.evaluate(xpath, document.body,
         null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
 
     var reName = new RegExp('([\w\s]+) \((.+)\)', 'i');
     var reAlias = new RegExp('([\w\s]+),?', 'ig');
-    var array = {};
+    var array = [];
     while (node = result.iterateNext()) {
         var actor = {};
         var m = reName.exec(node.textContent);
@@ -28,10 +39,13 @@ function _parseActor(xpath) {
             while ((arr = reAlias.exec(m[2])) !== null) {
                 alias.push(arr[1]);
             }
-            actor['alias'] = alias;
+            if (alias.length > 0) {
+                actor['alias'] = alias;
+            }
         }
         array.push(actor);
     }
+    return array;
 }
 
 function _multiResult() {
@@ -60,20 +74,28 @@ function _multiResult() {
             xpath: "//td[@class='list-actress']/a/text()",
             handler: _parseActor
         },
-        genre: { xpath: "//td[@class='list-genre']/a/text()" },
+        genre: {
+            xpath: "//td[@class='list-genre']/a",
+            handler: _parseMultiNode
+        },
     };
 
     var msg = { type : 'items' }
     var num_item = 0;
     for (var key in items) {
         var item = items[key];
-        if (item["handler"] == null)
+        if (item["handler"] == null) {
             msg[key] = _parseSingleNode(item['xpath']);
-        else
+        } else {
             msg[key] = item['handler'](item['xpath']);
+        }
+        if (msg[key] == null) {
+            continue;
+        }
         //console.log(key + ': ' + msg[key]);
         num_item += 1;
     }
     msg['data'] = num_item;
+    console.log(JSON.stringify(msg));
     CefSharp.PostMessage(msg);
 }) ();

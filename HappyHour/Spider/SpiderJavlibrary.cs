@@ -23,7 +23,7 @@ namespace HappyHour.Spider
             ScriptName = "JavLibrary.js";
         }
 
-        public override List<Cookie> CreateCookie()
+        protected override List<Cookie> CreateCookie()
         {
             return new List<Cookie>
             {
@@ -36,80 +36,5 @@ namespace HappyHour.Spider
                 }
             };
         }
-
-#if false
-        void OnMultiResult(object result)
-        {
-            if (!CheckResult(result, out List<string> list))
-            {
-                ParsePage(new ItemJavlibrary(this));
-                return;
-            }
-
-            HtmlDocument doc = new HtmlDocument();
-            string href = null;
-            int mcount = 0;
-            foreach (string url in list)
-            {
-                doc.LoadHtml(url);
-                var div = doc.DocumentNode.SelectSingleNode("//div[@class='id']").InnerText;
-                if (div.Trim().Equals(Keyword, StringComparison.OrdinalIgnoreCase))
-                {
-                    href = doc.DocumentNode.FirstChild.Attributes["href"].Value;
-                    mcount++;
-                }
-            }
-            if (mcount == 0)
-                goto NotFound;
-
-            if (mcount > 1)
-                Log.Print("Ambiguous match! Select manually!");
-            else
-            {
-                ParsingState = 1;
-                Browser.Address = $"{URL}{href}";
-            }
-            return;
-
-        NotFound:
-            Log.Print($"No exact matched ID");
-            OnScrapCompleted();
-        }
-        public override void OnJsMessageReceived(JavascriptMessageReceivedEventArgs msg)
-        {
-            //base.OnJsMessageReceived(msg);
-            dynamic d = msg.Message;
-            Log.Print($"{d.type} : {d.data}");
-            if (d.type == "url")
-            {
-                Browser.Address = d.data;
-            }
-            else if (d.data == 0)
-            {
-                Log.Print($"No exact matched ID");
-                OnScrapCompleted();
-            }
-        }
-        public override void Scrap()
-        {
-            if (ParsingState >= 0)
-            {
-                Browser.ExecJavaScript(GetScript("JavLibrary.js"));
-                return;
-            }
-
-            switch (ParsingState)
-            {
-                case 0:
-                    //Browser.ExecJavaScript(App.ReadResource("JavLibrary.js"));
-                    Browser.ExecJavaScript(XPath("//div[@class='videos']/div/a"), OnMultiResult);
-                    break;
-                case 1:
-                    ParsePage(new ItemJavlibrary(this));
-                    ParsingState = 2;
-                    break;
-            }
-        }
-#endif
     }
 }

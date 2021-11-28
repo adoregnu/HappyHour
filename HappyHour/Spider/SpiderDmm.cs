@@ -20,9 +20,10 @@ namespace HappyHour.Spider
         {
             Name = "DMM";
             URL = "http://www.dmm.co.jp/";
+            ScriptName = "Dmm.js";
         }
 
-        public override List<Cookie> CreateCookie()
+        protected override List<Cookie> CreateCookie()
         {
             return new List<Cookie> { 
                 new Cookie
@@ -40,58 +41,6 @@ namespace HappyHour.Spider
                     Path = "/"
                 }
             };
-        }
-
-        void OnMultiResult(object result)
-        {
-            if (!CheckResult(result, out List<string> list))
-                goto NotFound;
-
-            var apid = Keyword.Split('-');
-            var regex = new Regex($@"cid=(h_)?(\d+)?{apid[0].ToLower()}");
-            int matchCount = 0;
-            string exactUrl = null;
-            foreach (string url in list)
-            {
-                var m = regex.Match(url);
-                if (m.Success)
-                {
-                    exactUrl = url;
-                    matchCount++;
-                }
-            }
-            if (matchCount == 0)
-                goto NotFound;
-
-            if (matchCount == 1)
-            {
-                ParsingState = 1;
-                Browser.Address = exactUrl;
-            }
-            else if (matchCount > 1)
-            {
-                Log.Print("Ambguous match! Select manually!");
-            }
-            return;
-
-        NotFound:
-            Log.Print("No Exact match ID");
-            OnScrapCompleted();
-        }
-
-        public override void Scrap()
-        {
-            switch (ParsingState)
-            {
-                case 0:
-                    Browser.ExecJavaScript(
-                        XPath("//p[@class='tmb']/a/@href"),
-                        OnMultiResult);
-                    break;
-                case 1:
-                    OnScrapCompleted();
-                    break;
-            }
         }
     }
 }

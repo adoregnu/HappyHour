@@ -28,6 +28,7 @@ namespace HappyHour.ViewModel
             }
         }
         public DownloadHandler DownloadHandler { get; private set; }
+        public Downloader ImageDownloader { get; set; }
 
         public IMediaList MediaList
         {
@@ -72,13 +73,11 @@ namespace HappyHour.ViewModel
                 new SpiderJavDb(this),
                 new SpiderJavBus(this),
                 new SpiderJavfree(this),
-                new SpiderPornav(this),
+                //new SpiderPornav(this),
                 new SpiderAvsox(this),
                 new SpiderAvdbs(this),
                 new SpiderAvJamak(this),
             };
-            SelectedSpider = Spiders[0];
-            Address = SelectedSpider.URL;
         }
 
         public void SetSpider(SpiderBase spider)
@@ -133,16 +132,20 @@ namespace HappyHour.ViewModel
             WebBrowser.LoadingStateChanged += OnStateChanged;
             WebBrowser.JavascriptMessageReceived += OnJavascriptMessageReceived;
             //WebBrowser.FrameLoadEnd += OnFrameLoaded;
+            SelectedSpider = Spiders[0];
             SelectedSpider.SetCookies();
+            Address = SelectedSpider.URL;
+
             _timer = new Timer(210)
             {
                 AutoReset = false
             };
             _timer.Elapsed += (s, e) => SelectedSpider.Scrap();
+            ImageDownloader = new Downloader(this);
         }
 
-        Timer _timer;
-        void OnStateChanged(object sender, LoadingStateChangedEventArgs e)
+        private Timer _timer;
+        private void OnStateChanged(object sender, LoadingStateChangedEventArgs e)
         {
             if (!e.IsLoading)
             {
@@ -160,16 +163,17 @@ namespace HappyHour.ViewModel
             }
         }
 
-        void OnFrameLoaded(object sender, FrameLoadEndEventArgs e)
-        {
-            //ExecJavaScript(App.ReadResource("Highlight.js"));
-            //Log.Print($"FrameLoaded isMain:{e.Frame.IsMain}");
-        }
-
-        void OnJavascriptMessageReceived(object sender, JavascriptMessageReceivedEventArgs e)
+        private void OnJavascriptMessageReceived(object sender,
+            JavascriptMessageReceivedEventArgs e)
         {
             //Log.Print(e.Message.ToString());
             SelectedSpider.OnJsMessageReceived(e);
+        }
+#if false
+        void OnFrameLoaded(object sender, FrameLoadEndEventArgs e)
+        {
+            ExecJavaScript(App.ReadResource("Highlight.js"));
+            Log.Print($"FrameLoaded isMain:{e.Frame.IsMain}");
         }
 
         public void ExecJavaScript(string s, IScrapItem item, string name)
@@ -186,7 +190,7 @@ namespace HappyHour.ViewModel
                 item.OnJsResult(name, x.Result.Result.ToList<object>());
             });
         }
-
+#endif
         public override void Cleanup()
         {
             base.Cleanup();

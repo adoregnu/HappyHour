@@ -469,6 +469,7 @@ namespace HappyHour.ViewModel
             Log.Print($"{_mitemsToSearch[0].Pid} Scrap completed ");
             spider.ScrapCompleted -= OnScrapCompleted;
 
+            AddMedia(spider.DataPath);
             if (_mitemsToSearch.Count > 0)
             {
                 //_mitemsToSearch[0].ReloadAvItem();
@@ -494,7 +495,6 @@ namespace HappyHour.ViewModel
             {
                 MainView.StatusMessage = "";
                 _mitemsToSearch = null;
-                spider.Reset();
             }
         }
      }

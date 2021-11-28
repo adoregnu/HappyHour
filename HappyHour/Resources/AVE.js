@@ -1,6 +1,7 @@
 ﻿const _PID = '{{pid}}';
 
 function _parseSingleNode(_xpath) {
+    //console.log(_xpath);
     var result = document.evaluate(_xpath, document.body,
         null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
     var node = result.singleNodeValue;
@@ -10,11 +11,54 @@ function _parseSingleNode(_xpath) {
     return null;
 }
 
+function _parseMultiNode(xpath) {
+    var result = document.evaluate(xpath, document.body,
+        null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+
+    var array = [];
+    while (node = result.iterateNext()) {
+        array.push(node.textContent.trim());
+    }
+    return array;
+}
+function _parseActor(xpath) {
+    var array = _parseMultiNode(xpath);
+    if (array.length == 0) {
+        return null;
+    }
+
+    var actors = [];
+    array.forEach(function (a) {
+        actors.push({ name: a });
+    })
+    return actors;
+}
+
+
+function _parseDate(xpath) {
+    var txt = _parseSingleNode(xpath);
+    if (txt != null) {
+        var m = /[\d/]+/i.exec(txt);
+        if (m != null) {
+            var tmp = m[0].replace(/(\d+)/ig, function (d) {
+                if (d.length == 1) {
+                    return d.padStart(2, '0');
+                }
+                return d;
+            })
+            //console.log(m[0] + ', ' + tmp);
+            return tmp.replace(/(\d+)\/(\d+)\/(\d+)/i, '$3-$1-$2');
+        }
+    }
+    return null;
+}
+
 function _multiResult() {
-    var result = document.evaluate("//p[@class='product-title']/a/@href",
+    var result = document.evaluate("//div[contains(@class, 'shop-product-wrap')]//p[@class='product-title']/a",
         document.body, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
     if (result.snapshotLength == 1) {
-        CefSharp.PostMessage({ type: 'url', data: result.snapshotItem(0) });
+        var node = result.snapshotItem(0);
+        CefSharp.PostMessage({ type: 'url', data: node.href });
         return 'redirected';
     } else if (result.snapshotLength > 1) {
         return 'ambiguous';
@@ -28,22 +72,44 @@ function _multiResult() {
     }
 
     var items = {
-        title: { xpath: "//div[@class='section-title']/h3/text()" },
         cover: { xpath: "//span[@class='grid-gallery']/a/@href" },
-        //info: { xpath: "//div[@class='single-info']" },
+        title: { xpath: "//div[@class='section-title']/h3/text()" },
+        actor: {
+            xpath: "//span[contains(.,'Starring')]/following-sibling::span//text()",
+            handler: _parseActor
+        },
+        studio: {
+            xpath: "//span[contains(.,'Studio')]/following-sibling::span//text()",
+        },
+        genre: {
+            xpath: "//span[contains(., 'Category')]/following-sibling::span/a/text()",
+            handler: _parseMultiNode
+        },
+        series: {
+            xpath: "//span[contains(., 'Series')]/following-sibling::span//text()"
+        },
+        date: {
+            xpath: "//div[@class='single-info']/span[contains(.,'Date')]/following-sibling::span//text()",
+            handler: _parseDate
+        }
     };
 
     var msg = { type : 'items' }
     var num_item = 0;
     for (var key in items) {
         var item = items[key];
-        if (item["handler"] == null)
+        if (item["handler"] == null) {
             msg[key] = _parseSingleNode(item['xpath']);
-        else
+        } else {
             msg[key] = item['handler'](item['xpath']);
+        }
+        if (msg[key] == null) {
+            continue;
+        }
         //console.log(key + ': ' + msg[key]);
         num_item += 1;
     }
     msg['data'] = num_item;
+    console.log(JSON.stringify(msg));
     CefSharp.PostMessage(msg);
 }) ();

@@ -27,7 +27,7 @@ namespace HappyHour.Spider
             ScriptName = "AVE.js";
         }
 
-        public override List<Cookie> CreateCookie()
+        protected override List<Cookie> CreateCookie()
         {
             return new List<Cookie> 
             {
@@ -40,42 +40,5 @@ namespace HappyHour.Spider
                 }
             };
         }
-#if false
-        void OnMultiResult(object result)
-        {
-            if (!CheckResult(result, out List<string> list))
-            {
-                OnScrapCompleted();
-                return;
-            }
-            
-            ParsingState = 1;
-            if (list.Count > 1)
-            {
-                Log.Print("Multiple matched. Select manually!");
-            }
-            else
-            {
-                var url = HtmlEntity.DeEntitize(list[0]);
-                Browser.Address = url;
-            }
-        }
-
-        public override void Scrap()
-        {
-            switch (ParsingState)
-            {
-                case 0:
-                    Browser.ExecJavaScript(
-                        XPath("//p[@class='product-title']/a/@href"),
-                        OnMultiResult);
-                    break;
-                case 1:
-                    ParsePage(new ItemAVE(this));
-                    ParsingState = 2;
-                    break;
-            }
-        }
-#endif
     }
 }

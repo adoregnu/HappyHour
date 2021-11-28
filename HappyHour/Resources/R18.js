@@ -51,17 +51,25 @@ function _parseActorThumb(xpath) {
     return array;
 }
 
-let is_scrolled = false;
-
-function _scrollToActor() {
-    window.scrollTo(0, document.body.scrollHeight / 2);
-    is_scrolled = true;
+function _parseDate(xpath) {
+    var strdate = _parseSingleNode(xpath);
+    if (strdate == null) {
+        return null;
+    }
+    return strdate.replace(/([\w.]+) (\d+), (\d+)/i,
+        function (m, p1, p2, p3, off, str) {
+            return p1.substring(0, 3) + ' ' + p2 + ' ' + p3;
+        });
 }
+
 
 function _parsePage() {
     var items = {
         title: { xpath: "//meta[@property='og:title']/@content" },
-        date: { xpath: "//h3[contains(.,'Release date')]/following-sibling::div//text()" },
+        date: {
+            xpath: "//h3[contains(.,'Release date')]/following-sibling::div//text()",
+            handler: _parseDate
+        },
         //runtime: { xpath: "//h3[contains(.,'Runtime')]/following-sibling::div/text()" },
         //director: { xpath: "//h3[contains(.,'Director')]/following-sibling::div/text()" },
         series: { xpath: "//h3[contains(.,'Series')]/following-sibling::div//a/text()" },
@@ -86,10 +94,13 @@ function _parsePage() {
         if (key == 'cover2') key = 'cover';
         if (msg[key] != null) continue;
 
-        if (item['handler'] == null) {
+        if (item["handler"] == null) {
             msg[key] = _parseSingleNode(item['xpath']);
         } else {
             msg[key] = item['handler'](item['xpath']);
+        }
+        if (msg[key] == null) {
+            continue;
         }
         num_item += 1;
     }
@@ -131,26 +142,36 @@ function _multiResult() {
         return;
     }
     var num_loaded = 0;
+    let is_scrolled = false;
+
+    function scroll() {
+        is_scrolled = true;
+        window.scrollTo(0, document.body.scrollHeight / 2);
+    }
 
     // Callback function to execute when mutations are observed
     var observer = new MutationObserver(function (mutations) {
         mutations.forEach(function (mutation) {
             //console.log(mutation.type);
-            if (mutation.type != 'childList') {
-                return;
+            if (mutation.type != 'childList') return;
+
+            var is_div_added = false;
+            for (var i = 0; i < mutation.addedNodes.length; i++){
+                var node = mutation.addedNodes[i];
+                if (node.nodeName == 'DIV') {
+                    //console.log(node.nodeName + ' class=' + node.className);
+                    num_loaded += 1;
+                    is_div_added = true;
+                    if (node.className == INFO_CLASS_NAME) {
+                        scroll();
+                    }
+                } 
             }
-            mutation.addedNodes.forEach(function (node) {
-                //console.log(node.nodeName + ' class=' + node.className);
-                if (node.nodeName == 'DIV' && node.className == INFO_CLASS_NAME) {
-                    console.log(node.className)
-                    _scrollToActor();
-                }
-            })
-            //console.log('addedNodes:' + mutation.addedNodes.length);
-            if (is_scrolled && num_loaded == 5) {
+            if (!is_div_added) return;
+            if (is_scrolled && num_loaded == 6) {
                 _parsePage();
             }
-            num_loaded += 1;
+            console.log('num_loaded: ' + num_loaded);
         });
     });
 
@@ -159,11 +180,10 @@ function _multiResult() {
 
     // Start observing the target node for configured mutations
     observer.observe(document.body, config);
+    console.log('observer started');
 
     var info = document.getElementsByClassName(INFO_CLASS_NAME);
-    if (info.length > 0) {
-        _scrollToActor();
-    }
+    if (info.length > 0) scroll();
     // Later, you can stop observing
     //observer.disconnect();
 }) ();

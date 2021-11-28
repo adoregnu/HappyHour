@@ -26,8 +26,7 @@ namespace HappyHour.ViewModel
             if (Address != _nasUrl) return;
 
             _numLoading++;
-            if (_numLoading == 4)
-                Login("NasLogin.js");
+            //if (_numLoading == 4) Login("NasLogin.js");
         }
     }
 }
