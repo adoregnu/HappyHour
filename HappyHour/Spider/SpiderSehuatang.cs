@@ -95,7 +95,7 @@ namespace HappyHour.Spider
                 return;
             }
             List<object> images = article.images;
-            List<dynamic> files = article.files;
+            List<object> files = article.files;
 
             int i = 0;
             _images.Clear();
@@ -112,7 +112,7 @@ namespace HappyHour.Spider
                 Browser.Download(file);
                 i++;
             }
-            files.ForEach(f => f());
+            files.ForEach(f => ((IJavascriptCallback)f).ExecuteAsync());
         }
 
         private bool MoveNextPage()

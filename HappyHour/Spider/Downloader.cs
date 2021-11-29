@@ -120,11 +120,10 @@ namespace HappyHour.Spider
                     var actors = (List<object>)item.Value;
                     foreach (IDictionary<string, object> actor in actors)
                     {
-                        if (!actor.ContainsKey("thumb"))
+                        if (actor.ContainsKey("thumb"))
                         {
-                            continue;
+                            Download(actor["thumb"].ToString(), actor);
                         }
-                        Download(actor["thumb"].ToString(), actor);
                     }
                 }
             }

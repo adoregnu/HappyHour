@@ -4,7 +4,7 @@
     if (text.length > 0) {
         var message = {
             type: "text",
-            data: text,
+            data: text.trim(),
             action: "{{action}}",
             spider: "{{spider}}"
         };

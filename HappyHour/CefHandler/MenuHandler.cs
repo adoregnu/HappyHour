@@ -170,7 +170,7 @@ namespace HappyHour.CefHandler
 
         static private string GetScript(string action, string spider = "")
         {
-            Template template = Template.Parse(App.ReadResource("SearchText"));
+            Template template = Template.Parse(App.ReadResource("SearchText.js"));
             return template.Render(new { Action = action, Spider = spider });
         }
 

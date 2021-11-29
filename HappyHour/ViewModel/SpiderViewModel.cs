@@ -135,7 +135,7 @@ namespace HappyHour.ViewModel
             SelectedSpider.SetCookies();
             Address = SelectedSpider.URL;
 
-            _timer = new Timer(210)
+            _timer = new Timer(10)
             {
                 AutoReset = false
             };

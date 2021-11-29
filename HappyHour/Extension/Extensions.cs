@@ -12,9 +12,12 @@ namespace HappyHour.Extension
         public static void ForEach(this IDictionary<string, object> dic,
             Func<string, bool> action)
         {
-            foreach (var item in dic) {
-                if (item.Key == "thumb") continue;
-                if (item.Value == null) continue;
+            foreach (var item in dic)
+            {
+                if (item.Key == "thumb" || item.Value == null)
+                {
+                    continue;
+                }
                 if (action(item.Value.ToString()))
                 {
                     break;

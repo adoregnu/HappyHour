@@ -40,8 +40,6 @@ function _parseFiles(xpath) {
     var array = [];
     if (anodes != null) {
         anodes.forEach(function (n) {
-            //array.push(n.textContent);
-            //n.click();
             array.push(function () { n.click(); });
         });
     }

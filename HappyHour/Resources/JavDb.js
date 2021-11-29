@@ -22,17 +22,15 @@ function _parseMultiNode(xpath) {
 }
 
 function _parseActor(xpath) {
-    var result = document.evaluate(xpath, document.body,
-        null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
-
-    var array = [];
-    while (node = result.iterateNext()) {
-        var names = {};
-        names['name'] = node.textContent.trim();
-        array.push(names);
+    var array = _parseMultiNode(xpath);
+    if (array.length == 0) {
+        return null;
     }
-
-    return array;
+    var names = [];
+    array.forEach(function (txt) {
+        names.push({ name: txt});
+    });
+    return names;
 }
 
 function _parseRating(xpath) {

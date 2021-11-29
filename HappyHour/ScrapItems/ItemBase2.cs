@@ -111,7 +111,8 @@ namespace HappyHour.ScrapItems
 
         void UpdateSeries(string series)
         {
-             _series = _context.Series.FirstOrDefault(x => x.Name == series);
+             _series = _context.Series.FirstOrDefault(
+                 x => x.Name.ToLower() == series.ToLower());
             if (_series == null)
             {
                 _series = _context.Series.Add(new AvSeries { Name = series }).Entity;
@@ -126,7 +127,7 @@ namespace HappyHour.ScrapItems
                 actor.ForEach(val => {
                     dbName = _context.ActorNames
                         .Include(n => n.Actor)
-                        .Where(n => n.Name== val)
+                        .Where(n => n.Name.ToLower()== val.ToLower())
                         .Where(n => n.Actor != null)
                         .FirstOrDefault();
                     return dbName != null;
@@ -137,10 +138,10 @@ namespace HappyHour.ScrapItems
                 {
                     dbActor = dbName.Actor;
                     actor.ForEach(name => {
-                        if (!dbActor.Names.Any(n => n.Name == name))
+                        if (!dbActor.Names.Any(n => n.Name.ToLower() == name.ToLower()))
                         {
-                            dbActor.Names.Add(new AvActorName {
-                                Name = name, Actor = dbActor });
+                            dbActor.Names.Add(
+                                new AvActorName { Name = name, Actor = dbActor } );
                         }
                         return false;
                     });
@@ -163,8 +164,8 @@ namespace HappyHour.ScrapItems
                 if (actor.ContainsKey("thumb"))
                 {
                     dbActor.PicturePath = actor["thumb"].ToString();
-                    _actors.Add(dbActor);
                 }
+                _actors.Add(dbActor);
              }
         }
 
@@ -186,8 +187,7 @@ namespace HappyHour.ScrapItems
  
             foreach (var item in items)
             {
-                Log.Print($"{item.Key} : {item.Value?.ToString()}");
-
+                //Log.Print($"{item.Key} : {item.Value?.ToString()}");
                 if (updater.ContainsKey(item.Key) && item.Value != null)
                 {
                     updater[item.Key].DynamicInvoke(item.Value);

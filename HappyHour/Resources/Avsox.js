@@ -18,7 +18,10 @@ function _parseMultiNode(xpath) {
     while (node = result.iterateNext()) {
         array.push(node.textContent.trim());
     }
-    return array;
+    if (array.length > 0) {
+        return array;
+    } 
+    return null;
 }
 
 function _parseActor(xpath) {
@@ -40,7 +43,11 @@ function _parseActor(xpath) {
         actor["name"] = tnode.textContent.trim();
         array.push(actor);
     }
-    return array;
+
+    if (array.length > 0) {
+        return array;
+    }
+    return null;
 }
 
 function _convertPid() {
@@ -60,7 +67,7 @@ function _multiResult() {
         var anode = result.snapshotItem(i);
         var pid = _parseSingleNode("//date[1]", anode, result);
         console.log('PID: ' + pid);
-        if (pid != null && re.test(pid.replace('_', '-'))) {
+        if (pid != null || re.test(pid.replace('_', '-'))) {
             CefSharp.PostMessage({ type: 'url', data: anode.href });
             return 'redirected';
         }
@@ -73,6 +80,11 @@ function _multiResult() {
 
 (function () {
     if (_multiResult() != 'notfound') {
+        return;
+    }
+    if (elm = document.querySelector('body > div.container-fluid > div.alert.alert-danger > h4')) {
+        console.log(elm.textContent);
+        CefSharp.PostMessage({ type:'items', data:0 });
         return;
     }
 

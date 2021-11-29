@@ -165,10 +165,10 @@ function _multiResult() {
                 } 
             }
             if (!is_div_added) return;
-            if (is_scrolled && num_loaded == 6) {
+            if (is_scrolled && num_loaded == 10) {
                 _parsePage();
             }
-            console.log('num_loaded: ' + num_loaded);
+            //console.log('num_loaded: ' + num_loaded);
         });
     });
 
@@ -177,7 +177,7 @@ function _multiResult() {
 
     // Start observing the target node for configured mutations
     observer.observe(document.body, config);
-    console.log('observer started');
+    //console.log('observer started');
 
     var info = document.getElementsByClassName(INFO_CLASS_NAME);
     if (info.length > 0) scroll();
