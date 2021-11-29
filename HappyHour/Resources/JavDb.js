@@ -1,8 +1,8 @@
 ﻿const _PID = '{{pid}}';
 
-function _parseSingleNode(_xpath) {
-    var result = document.evaluate(_xpath, document.body,
-        null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+function _parseSingleNode(_xpath, _node = document.body, _result = null) {
+    var result = document.evaluate(_xpath, _node,
+        null, XPathResult.FIRST_ORDERED_NODE_TYPE, _result);
     var node = result.singleNodeValue;
     if (node != null) {
         return node.textContent.trim();
@@ -38,8 +38,7 @@ function _parseActor(xpath) {
 function _parseRating(xpath) {
     var rating = _parseSingleNode(xpath);
     if (rating != null && rating.length > 0) {
-        var re = new RegExp('([0-9.]+),', 'i');
-        var m = re.exec(rating);
+        var m = /([0-9.]+),/i.exec(rating);
         if (m != null) return m[1];
     }
     return null;
@@ -50,9 +49,10 @@ function _multiResult() {
         document.body, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
     var num_result = 0;
     while (node = result.iterateNext()) {
-        var pidResult = document.evaluate("//div[@class='uid']", node,
-            null, XPathResult.FIRST_ORDERED_NODE_TYPE, result);
-        var pid = pidResult.singleNodeValue.textContent.trim();
+        //var pidResult = document.evaluate("//div[@class='uid']", node,
+        //    null, XPathResult.FIRST_ORDERED_NODE_TYPE, result);
+        var pid = _parseSingleNode("//div[@class='uid']", node, result);
+        //var pid = pidResult.singleNodeValue.textContent.trim();
         if (pid.localeCompare(_PID, undefined, { sensitivity: 'accent' }) == 0) {
             CefSharp.PostMessage({ type: 'url', data: node.href });
             return 'redirected';

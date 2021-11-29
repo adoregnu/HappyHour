@@ -8,6 +8,8 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using System.ComponentModel;
+using System.Text;
+using System.Globalization;
 
 using log4net;
 using log4net.Config;
@@ -21,7 +23,6 @@ using IniParser;
 using IniParser.Model;
 
 using HappyHour.Model;
-using System.Text;
 
 namespace HappyHour
 {
@@ -30,6 +31,7 @@ namespace HappyHour
     /// </summary>
     public partial class App : Application
     {
+        public static CultureInfo enUS = new("en-US");
         public static string LocalAppData { get; set; }
         public static AvDbContext DbContext { get; set; }
         public static IniData GConf { get; private set; }

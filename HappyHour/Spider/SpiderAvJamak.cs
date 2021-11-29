@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 
 using CefSharp;
 using Scriban;
@@ -10,19 +9,17 @@ namespace HappyHour.Spider
 {
     class SpiderAvJamak : SpiderBase
     {
-        //public override string SearchURL =>
-        //    $"{URL}bbs/search.php?url=https%3A%2F%2Fav-jamak.com%2Fbbs%2Fsearch.php" +
-        //    $"&stx={Keyword}";
         public override string SearchURL => $"{URL}/bbs/search.php" +
             $"?srows=10&gr_id=jamak&sfl=wr_subject&stx={Keyword}&sop=and";
 
         public SpiderAvJamak(SpiderViewModel browser) : base(browser)
         {
-            Name = "av-jamak";
+            Name = "AvJamak";
             //URL = "https://av-jamak.com/";
             //URL = "https://av-jamack.com/";
             URL = "https://avjamak01.com/";
             ScriptName = "AvJamak.js";
+            ParsingState = 0;
         }
 
         protected override string GetScript(string name)
@@ -44,11 +41,6 @@ namespace HappyHour.Spider
             return template.Render(new {
                 Pid = Keyword, Userid = userid, Password = password
             });
-        }
-
-        public override void Scrap()
-        {
-            Browser.ExecJavaScript(GetScript(ScriptName));
         }
 
         void OnBeforeDownload(object sender, DownloadItem e)

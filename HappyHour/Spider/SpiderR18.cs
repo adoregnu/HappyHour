@@ -31,11 +31,5 @@ namespace HappyHour.Spider
                 }
             };
         }
-#if false
-        protected override void UpdateDb(IDictionary<string, object> items)
-        {
-            new ItemR18V3(this).UpdateItems(items);
-        }
-#endif
     }
 }

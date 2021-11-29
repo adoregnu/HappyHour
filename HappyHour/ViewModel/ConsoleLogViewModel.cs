@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿using log4net;
 using CefSharp;
 using GalaSoft.MvvmLight.Messaging;
 
@@ -11,6 +6,7 @@ namespace HappyHour.ViewModel
 {
     class ConsoleLogViewModel : TextViewModel
     {
+        static ILog logger = LogManager.GetLogger("CefConsoleLogger");
         public ConsoleLogViewModel()
         {
             Title = "CEF Console Log";
@@ -27,6 +23,7 @@ namespace HappyHour.ViewModel
             UiServices.Invoke(delegate ()
             {
                 AppendText(e.Message + "\n");
+                logger.Info(e.Message);
             }, true);
         }
     }

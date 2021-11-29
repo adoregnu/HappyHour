@@ -15,17 +15,14 @@ function _parseSingleNode(_xpath, _getter = null) {
 }
 
 function _parseActor(xpath) {
-
     var node = _parseSingleNode(xpath, function (n) { return n; });
     if (node == null) {
         return null;
     }
-    const re = new RegExp('av-actress/([a-z-]+)', 'i');
-
     console.log('href : ' + node.href);
     var array = [];
     var actor = {};
-    var m = re.exec(node.href);
+    var m = /av-actress\/([a-z-]+)/i.exec(node.href);
     if (m != null) {
         actor['name'] = m[1].replace('-', ' ');
         actor['name'] = actor['name'].replace(/^([a-z])| ([a-z])/gi,
@@ -38,7 +35,6 @@ function _parseActor(xpath) {
 }
 
 (function () {
-
     var result = document.evaluate("//article[contains(@class,'archive-list')]",
         document.body, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
     console.log('snapshotLength: ' + result.snapshotLength);

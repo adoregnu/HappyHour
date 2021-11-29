@@ -17,8 +17,8 @@ namespace HappyHour.Spider
 {
     internal class SpiderSehuatang : SpiderBase
     {
-        private int _pageNum = 1;
         private int _index;
+        private int _pageNum = 1;
         private bool _scrapRunning;
         private bool _skipDownload;
 
@@ -94,27 +94,28 @@ namespace HappyHour.Spider
                 Log.Print($"{Name}: Previous downloading is not completed!");
                 return;
             }
-            List<object> files = article.images;
+            List<object> images = article.images;
+            List<dynamic> files = article.files;
 
             int i = 0;
             _images.Clear();
             _numDownloaded = 0;
-            _toDownload = files.Count + ((List<object>)article.files).Count;
+            _toDownload = images.Count + files.Count;
             Log.Print($"{Name}: toDownload : {_toDownload }");
 
-            foreach (string file in files)
+            foreach (string file in images)
             {
-                string ext = Path.GetExtension(file);
                 string postfix = (i == 0) ? "cover" : $"screenshot{i}";
-                string target = _outPath + $"\\{_pid}_{postfix}{ext}";
+                string target = _outPath + $"\\{_pid}_{postfix}{Path.GetExtension(file)}";
 
                 _images.Add(file, target);
                 Browser.Download(file);
                 i++;
             }
+            files.ForEach(f => f());
         }
 
-        private bool NextPage()
+        private bool MoveNextPage()
         {
             Match m = Regex.Match(_currPage.curr_url, @"-(?<page>\d+)\.html");
             if (!m.Success)
@@ -122,7 +123,7 @@ namespace HappyHour.Spider
                 Log.Print($"{Name}: Invalid page url format! {0}", _currPage.curr_ur);
                 return false;
             }
-            _pageNum = int.Parse(m.Groups["page"].Value, enUS) + 1;
+            _pageNum = int.Parse(m.Groups["page"].Value, App.enUS) + 1;
             if (_pageNum > NumPage)
             {
                 Log.Print($"{Name}: Parsing done!!");
@@ -134,7 +135,7 @@ namespace HappyHour.Spider
             return true;
         }
 
-        private void NextItem()
+        private void MoveNextItem()
         {
             List<object> list = _currPage.data;
             if (list.Count > _index)
@@ -160,7 +161,7 @@ namespace HappyHour.Spider
             }
             else
             {
-                _scrapRunning = NextPage();
+                _scrapRunning = MoveNextPage();
             }
 
             if (!_scrapRunning)
@@ -182,11 +183,11 @@ namespace HappyHour.Spider
                 Log.Print($"{Name}: current page:{d.curr_url}, miss:{d.miss}");
                 _index = 0;
                 _currPage = d;
-                NextItem();
+                MoveNextItem();
             }
             else if (d.type == "items")
             {
-                Log.Print($"{Name}: article {_pid}={d.pid}");
+                Log.Print($"{Name}: article {_pid} = {d.pid}");
                 _updateTime = DateTime.Parse(d.date);
                 if (!_skipDownload)
                 {
@@ -195,7 +196,7 @@ namespace HappyHour.Spider
                 else
                 {
                     UpdateMedia();
-                    NextItem();
+                    MoveNextItem();
                 }
             }
         }
@@ -208,14 +209,10 @@ namespace HappyHour.Spider
                 {
                     return null;
                 }
-                var general = App.GConf["general"];
 
+                var general = App.GConf["general"];
                 return !general.ContainsKey("data_path") ?
                     null : $"{general["data_path"]}sehuatang\\{SelectedBoard}\\";
-            }
-            else if (key == "StopOnExist")
-            {
-                return StopOnExistingId.ToString();
             }
             return null;
         }
@@ -259,7 +256,7 @@ namespace HappyHour.Spider
             if (_toDownload == _numDownloaded)
             {
                 UpdateMedia();
-                NextItem();
+                MoveNextItem();
             }
         }
 

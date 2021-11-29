@@ -5,10 +5,9 @@ using System.Collections.Generic;
 using CefSharp;
 
 using HappyHour.Spider;
-using HappyHour.ScrapItems;
 using HappyHour.CefHandler;
-using HappyHour.Extension;
 using HappyHour.Interfaces;
+using System;
 
 namespace HappyHour.ViewModel
 {
@@ -155,10 +154,35 @@ namespace HappyHour.ViewModel
                     IsAddressChanged = false;
                     if (_timer.Enabled)
                     {
-                        Log.Print("Timer already enabled!");
                         _timer.Stop();
                     }
                     _timer.Start();
+                }
+            }
+        }
+        private void SearchText(dynamic d)
+        {
+            if (d.action == "google_search")
+            {
+                string query = d.data.Replace(' ', '+');
+                Address = $"https://www.google.com/search?as_epq={query}";
+            }
+            else if (d.action == "google_translate")
+            {
+                Address = "https://translate.google.com/" +
+                    $"?hl=ko&tab=rT&sl=auto&tl=ko&text={d.data}&op=translate";
+            }
+            else if (d.action == "pid_search_in_db")
+            {
+                DbView.SearchText = d.data;
+            }
+            else if (d.action == "pid_search_in_spider")
+            {
+                var spider = Spiders.FirstOrDefault(s => s.Name == d.spider);
+                if (spider != null)
+                {
+                    spider.Keyword = d.data;
+                    SelectedSpider = spider;
                 }
             }
         }
@@ -167,28 +191,28 @@ namespace HappyHour.ViewModel
             JavascriptMessageReceivedEventArgs e)
         {
             //Log.Print(e.Message.ToString());
-            SelectedSpider.OnJsMessageReceived(e);
+            try
+            {
+                dynamic d = e.Message;
+                if (d.type == "text")
+                {
+                    UiServices.Invoke(() => SearchText(d));
+                }
+                else
+                { 
+                    SelectedSpider.OnJsMessageReceived(e);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Print("Error in parsing js message", ex);
+            }
         }
 #if false
         void OnFrameLoaded(object sender, FrameLoadEndEventArgs e)
         {
             ExecJavaScript(App.ReadResource("Highlight.js"));
             Log.Print($"FrameLoaded isMain:{e.Frame.IsMain}");
-        }
-
-        public void ExecJavaScript(string s, IScrapItem item, string name)
-        {
-            if (!CanExecuteJS()) return;
-
-            WebBrowser.EvaluateScriptAsync(s).ContinueWith(x =>
-            {
-                if (!x.Result.Success)
-                {
-                    Log.Print(x.Result.Message);
-                    return;
-                }
-                item.OnJsResult(name, x.Result.Result.ToList<object>());
-            });
         }
 #endif
         public override void Cleanup()

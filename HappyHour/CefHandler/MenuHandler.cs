@@ -11,6 +11,7 @@ using CefSharp.Wpf;
 using GalaSoft.MvvmLight.Command;
 
 using HappyHour.ViewModel;
+using Scriban;
 
 namespace HappyHour.CefHandler
 {
@@ -166,6 +167,13 @@ namespace HappyHour.CefHandler
 
             return true;
         }
+
+        static private string GetScript(string action, string spider = "")
+        {
+            Template template = Template.Parse(App.ReadResource("SearchText"));
+            return template.Render(new { Action = action, Spider = spider });
+        }
+
         void ProcessMenu(Tuple<string, CefMenuCommand, bool> item,
             IBrowser browser, IContextMenuParams parameters)
         {
@@ -232,40 +240,16 @@ namespace HappyHour.CefHandler
                     browser.GetHost().CloseDevTools();
                     break;
                 case (CefMenuCommand)CefUserCommand:
-                    _browser.ExecJavaScript(App.ReadResource("SearchText.js"),
-                        (o) => UiServices.Invoke(() =>
-                        {
-                            var query = o.ToString().Replace(' ', '+');
-                            _browser.Address = "https://www.google.com/" +
-                                "search?as_epq=" + query;
-                        }));
+                    _browser.ExecJavaScript(GetScript("google_search"));
                     break;
                 case (CefMenuCommand)(CefUserCommand+1):
-                    _browser.ExecJavaScript(App.ReadResource("SearchText.js"),
-                        (o) => UiServices.Invoke(() =>
-                        {
-                            _browser.Address = "https://translate.google.com/" +
-                                $"?hl=ko&tab=rT&sl=auto&tl=ko&text={o}&op=translate";
-                        }));
+                    _browser.ExecJavaScript(GetScript("google_translate"));
                     break;
                 case (CefMenuCommand)(CefUserCommand + 2):
-                    _browser.ExecJavaScript(App.ReadResource("SearchText.js"),
-                        (o) => UiServices.Invoke(() =>
-                        {
-                            _browser.DbView.SearchText = o.ToString().Trim();
-                        }, true));
+                    _browser.ExecJavaScript(GetScript("pid_search_in_db"));
                     break;
                 default:
-                    if (_browser != null)
-                    {
-                        var sp = _browser.Spiders[(int)item.Item2 - CefUserCommand - 3];
-                        _browser.ExecJavaScript( App.ReadResource("SearchText.js"),
-                            (o) => UiServices.Invoke(() =>
-                            {
-                                sp.Keyword = o.ToString();
-                                _browser.SelectedSpider = sp;
-                            }));
-                    }
+                    _browser.ExecJavaScript(GetScript("pid_search_in_spider", item.Item1));
                     break;
             }
         }

@@ -27,18 +27,16 @@ function _parseActorThumb(xpath) {
         null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
 
     var array = [];
-    var reName = new RegExp('([\w\s]+)(?:\s)\((.+)\)', 'i');
-    var reAlias = new RegExp('([\w\s]+),?', 'ig');
     while (node = result.iterateNext()) {
         var actorInfo = {};
-        var m = reName.exec(node.alt);
+        var m = /([\w\s]+)(?:\s)\((.+)\)/i.exec(node.alt);
         if (m == null) {
             actorInfo['name'] = node.alt;
         } else {
             actorInfo['name'] = m[1];
             var arr;
             var alias = [];
-            while ((arr = reAlias.exec(m[2])) !== null) {
+            while ((arr = /([\w\s]+),?/ig.exec(m[2])) !== null) {
                 alias.push(arr[1]);
             }
             if (alias.length > 0) {
@@ -61,7 +59,6 @@ function _parseDate(xpath) {
             return p1.substring(0, 3) + ' ' + p2 + ' ' + p3;
         });
 }
-
 
 function _parsePage() {
     var items = {

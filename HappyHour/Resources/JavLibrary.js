@@ -47,7 +47,6 @@ function _parseActorName(xpath) {
             var nameNode = children[i];
             if (nameNode.nodeName != 'SPAN') continue;
             if (nameNode.className.includes('icn_')) continue;
-            //console.log('nodeName: ' + nameNode.nodeName + ', class : ' + nameNode.className);
             var name = nameNode.textContent.trim().split(' ').reverse().join(' ');
             if (names['name'] == null) {
                 names['name'] = name;
@@ -91,9 +90,7 @@ function _multiResult() {
 
     var items = {
         title: { xpath: "//*[@id='video_title']/h3/a" },
-        //id: { xpath: "//*[@id='video_id']//td[2]" },
         date: { xpath: "//*[@id='video_date']//td[2]" },
-        //director: { xpath: "//*[@id='video_director']//*[@class='director']/a" },
         studio: { xpath: "//*[@id='video_maker']//*[@class='maker']/a" },
         cover: { xpath: "//*[@id='video_jacket_img']/@src" },
         rating: {
@@ -122,7 +119,6 @@ function _multiResult() {
         if (msg[key] == null) {
             continue;
         }
-        //console.log(key + ': ' + msg[key]);
         num_item += 1;
     }
     msg['data'] = num_item;

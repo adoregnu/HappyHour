@@ -25,18 +25,16 @@ function _parseActor(xpath) {
     var result = document.evaluate(xpath, document.body,
         null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
 
-    var reName = new RegExp('([\w\s]+) \((.+)\)', 'i');
-    var reAlias = new RegExp('([\w\s]+),?', 'ig');
     var array = [];
     while (node = result.iterateNext()) {
         var actor = {};
-        var m = reName.exec(node.textContent);
+        var m = /([\w\s]+) \((.+)\)/i.exec(node.textContent);
         if (m == null) {
             actor['name'] = node.textContent.trim();
         } else {
             actor['name'] = m[1];
             var alias = [];
-            while ((arr = reAlias.exec(m[2])) !== null) {
+            while ((arr = /([\w\s]+),?/ig.exec(m[2])) !== null) {
                 alias.push(arr[1]);
             }
             if (alias.length > 0) {

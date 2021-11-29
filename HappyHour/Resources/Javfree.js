@@ -41,7 +41,7 @@ function _actor(txt, msg) {
 function _studio(txt, msg) {
     const kw = 'レーベル:'
     if (txt.includes(kw)) {
-        msg['studiio'] = txt.substring(txt.indexOf(kw) + kw.length);
+        msg['studio'] = txt.substring(txt.indexOf(kw) + kw.length);
         return true;
     }
     return false;

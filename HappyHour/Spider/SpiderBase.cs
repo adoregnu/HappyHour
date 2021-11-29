@@ -18,7 +18,6 @@ namespace HappyHour.Spider
     class SpiderBase : NotifyPropertyChanged
     {
         static string _keyword;
-        public static CultureInfo enUS = new("en-US");
 
         bool _isCookieSet = false;
         public int ParsingState = -1;
@@ -76,7 +75,6 @@ namespace HappyHour.Spider
             Browser.SelectedSpider = this;
         }
 
-
         protected virtual List<Cookie> CreateCookie() { return null; }
 
         public void SetCookies()
@@ -125,7 +123,8 @@ namespace HappyHour.Spider
             }
         }
 
-        public virtual void OnJsMessageReceived(JavascriptMessageReceivedEventArgs msg)
+        public virtual void OnJsMessageReceived(
+            JavascriptMessageReceivedEventArgs msg)
         {
             dynamic d = msg.Message;
             //Log.Print($"{d.type} : {d.data}");
@@ -153,7 +152,14 @@ namespace HappyHour.Spider
 
         protected virtual void UpdateDb(IDictionary<string, object> items)
         {
-            new ItemBase2(this).UpdateItems(items);
+            try
+            {
+                new ItemBase2(this).UpdateItems(items);
+            }
+            catch (Exception ex)
+            {
+                Log.Print($"{Name}: UpdateDb failed.", ex);
+            }
         }
 
         public void UpdateItems(IDictionary<string, object> items)

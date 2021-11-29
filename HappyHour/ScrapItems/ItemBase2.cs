@@ -1,26 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Globalization;
 using System.ComponentModel.DataAnnotations;
 
 using Microsoft.EntityFrameworkCore;
 
-using CefSharp;
-
 using HappyHour.Model;
 using HappyHour.Spider;
 using HappyHour.Extension;
-using System.Text.RegularExpressions;
 
 namespace HappyHour.ScrapItems
 {
     class ItemBase2
     {
-        public static CultureInfo enUS = new("en-US");
-
         readonly AvDbContext _context;
         readonly SpiderBase _spider;
 
@@ -76,7 +68,7 @@ namespace HappyHour.ScrapItems
                     try
                     {
                         _avItem.DateReleased = DateTime.ParseExact(
-                            date, pattern, enUS);
+                            date, pattern, App.enUS);
                         break;
                     }
                     catch { }

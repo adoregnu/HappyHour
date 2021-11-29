@@ -104,7 +104,7 @@ namespace HappyHour
         }
         public static void ExitApp(string msg, Exception e)
         {
-            Log.MessageBox(Log.Tag.Error, msg, e);
+            Log.Print(msg, e);
             Application.Current.Shutdown();
         }
     }
