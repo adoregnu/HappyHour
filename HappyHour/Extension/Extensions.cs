@@ -18,9 +18,23 @@ namespace HappyHour.Extension
                 {
                     continue;
                 }
-                if (action(item.Value.ToString()))
+                if (item.Key == "alias")
                 {
-                    break;
+                    var alias = (List<object>)item.Value;
+                    foreach (string a in alias)
+                    {
+                        if (action(a.ToString()))
+                        {
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    if (action(item.Value.ToString()))
+                    {
+                        break;
+                    }
                 }
             }
         }
