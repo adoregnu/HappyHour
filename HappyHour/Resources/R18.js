@@ -29,6 +29,7 @@ function _parseActorThumb(xpath) {
     var array = [];
     while (node = result.iterateNext()) {
         var actorInfo = {};
+        //console.log('alt: ' + node.alt);
         var m = /([\w\s]+)(?:\s)\((.+)\)/i.exec(node.alt);
         if (m == null) {
             actorInfo['name'] = node.alt;
@@ -36,8 +37,10 @@ function _parseActorThumb(xpath) {
             actorInfo['name'] = m[1];
             var arr;
             var alias = [];
-            while ((arr = /([\w\s]+),?/ig.exec(m[2])) !== null) {
-                alias.push(arr[1]);
+            console.log('alias: ' + m[2]);
+            var re = /([\w\s]+),?/ig;
+            while ((arr = re.exec(m[2])) !== null) {
+                alias.push(arr[1].trim());
             }
             if (alias.length > 0) {
                 actorInfo['alias'] = alias;
@@ -46,7 +49,9 @@ function _parseActorThumb(xpath) {
         actorInfo['thumb'] = node.src;
         array.push(actorInfo);
     }
-    return array;
+    if (array.length > 0)
+        return array;
+    return null;
 }
 
 function _parseDate(xpath) {
@@ -162,13 +167,13 @@ function _multiResult() {
                     if (node.className == INFO_CLASS_NAME) {
                         scroll();
                     }
-                } 
+                }
             }
             if (!is_div_added) return;
             if (is_scrolled && num_loaded == 10) {
                 _parsePage();
             }
-            //console.log('num_loaded: ' + num_loaded);
+            console.log('num_loaded: ' + num_loaded);
         });
     });
 
@@ -177,7 +182,7 @@ function _multiResult() {
 
     // Start observing the target node for configured mutations
     observer.observe(document.body, config);
-    //console.log('observer started');
+    console.log('observer started');
 
     var info = document.getElementsByClassName(INFO_CLASS_NAME);
     if (info.length > 0) scroll();
