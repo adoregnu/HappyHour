@@ -103,8 +103,6 @@ namespace HappyHour.Spider
             {
                 SaveDb = true;
                 ParsingState = -1;
-                //Keyword = null;
-                //DataPath = null;
                 Log.Print($"{Name}: Reset Spider");
             }
 
@@ -137,6 +135,7 @@ namespace HappyHour.Spider
                 if (d.data == 0)
                 {
                     Log.Print($"{Name}: No exact matched ID");
+                    OnScrapCompleted();
                     return;
                 }
                 try

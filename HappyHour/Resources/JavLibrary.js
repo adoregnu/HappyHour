@@ -88,8 +88,21 @@ function _multiResult() {
     return 'notfound';
 }
 
+function _checkResult() {
+    var result = _parseSingleNode('//*[@id="rightcolumn"]/p/em');
+    if (result == 'Search returned no result.') {
+        console.log(result);
+        CefSharp.PostMessage({ type: 'items', data: 0 });
+        return false;
+    }
+    return true;
+}
+
 (function () {
     if (_multiResult() != 'notfound') {
+        return;
+    }
+    if (!_checkResult()) {
         return;
     }
 

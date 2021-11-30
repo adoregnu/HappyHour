@@ -68,7 +68,14 @@ function _parseDate(xpath) {
         });
 }
 
+var _parsing_done = false;
+
 function _parsePage() {
+    if (_parsing_done) {
+        return;
+    }
+    _parsing_done = true;
+
     var items = {
         title: { xpath: "//meta[@property='og:title']/@content" },
         date: {
@@ -79,6 +86,7 @@ function _parsePage() {
         //director: { xpath: "//h3[contains(.,'Director')]/following-sibling::div/text()" },
         series: { xpath: "//h3[contains(.,'Series')]/following-sibling::div//a/text()" },
         studio: { xpath: "//h3[contains(.,'Studio')]/following-sibling::div/a/text()" },
+        label: { xpath: "//h3[contains(.,'Label')]/following-sibling::div//a/text()" },
         genre: {
             xpath: "//h3[contains(.,'Categories')]/following-sibling::div/span//text()",
             handler: _parseMultiNode
@@ -99,6 +107,11 @@ function _parsePage() {
         if (key == 'cover2') key = 'cover';
         if (msg[key] != null) continue;
 
+        //in case of empty studio but not empty label
+        if (key == 'label' && msg['studio'] == null) {
+            key = 'studio';
+        }
+    
         if (item["handler"] == null) {
             msg[key] = _parseSingleNode(item['xpath']);
         } else {
@@ -137,8 +150,70 @@ function _multiResult() {
     }
     if (num_result > 0) {
         return 'ambiguous';
-    } else
-        return 'notfound';
+    }
+    return 'notfound';
+}
+
+function _checkResult() {
+    var result = _parseSingleNode('//*[@id="contents"]/div[2]/section/ul/li[1]/div/div');
+    if (result == '0 titles found') {
+        CefSharp.PostMessage({ type: 'items', data: 0 });
+        return false;
+    }
+    return true;
+}
+
+var _div_loaded = 0;
+var _is_scrolled = false;
+var _actor_exists = false;
+
+function _scroll() {
+    _is_scrolled = true;
+    window.scrollTo(0, document.body.scrollHeight / 2);
+    var actor = _parseSingleNode("//span[contains(.,'Appearing in this movie')]");
+    if (actor == null) {
+        console.log("no actresses in this movie.");
+    } else {
+        _actor_exists = true;
+    }
+}
+
+function mutationCallback(mutations) {
+    var thumb_loaded = false;
+    for (var i = 0; i < mutations.length; i++) {
+        var mutation = mutations[i];
+        //console.log(mutation.type);
+        if (mutation.type != 'childList') {
+            continue;
+        }
+
+        mutation.addedNodes.forEach(function (node) {
+            if (node.nodeName == 'DIV') {
+                //console.log(node.nodeName + ' class=' + node.className);
+                _div_loaded += 1;
+                if (node.className == INFO_CLASS_NAME) {
+                    _scroll();
+                }
+            }
+            if (node.nodeName != "IMG") {
+                return;
+            }
+
+            var ppp = node.parentNode.parentNode.parentNode;
+            if (ppp.className != null && ppp.className.includes('actress-switch')) {
+                //console.log(ppp.className);
+                thumb_loaded = true;
+            }
+        });
+        //console.log('_div_loaded: ' + _div_loaded);
+    }
+
+    if (_is_scrolled) {
+        if ((!_actor_exists && _div_loaded == 6) ||
+            (_actor_exists && thumb_loaded)) {
+            _parsePage();
+        }
+    }
 }
 
 (function () {
@@ -146,49 +221,19 @@ function _multiResult() {
     if (_multiResult() != 'notfound') {
         return;
     }
-    var num_loaded = 0;
-    let is_scrolled = false;
 
-    function scroll() {
-        is_scrolled = true;
-        window.scrollTo(0, document.body.scrollHeight / 2);
+    if (!_checkResult()) {
+        return;
     }
 
-    // Callback function to execute when mutations are observed
-    var observer = new MutationObserver(function (mutations) {
-        mutations.forEach(function (mutation) {
-            //console.log(mutation.type);
-            if (mutation.type != 'childList') return;
-
-            var is_div_added = false;
-            for (var i = 0; i < mutation.addedNodes.length; i++){
-                var node = mutation.addedNodes[i];
-                if (node.nodeName == 'DIV') {
-                    //console.log(node.nodeName + ' class=' + node.className);
-                    num_loaded += 1;
-                    is_div_added = true;
-                    if (node.className == INFO_CLASS_NAME) {
-                        scroll();
-                    }
-                }
-            }
-            if (!is_div_added) return;
-            if (is_scrolled && num_loaded == 10) {
-                _parsePage();
-            }
-            //console.log('num_loaded: ' + num_loaded);
-        });
-    });
-
-    // Options for the observer (which mutations to observe)
     const config = { attributes: true, childList: true, subtree: true };
-
-    // Start observing the target node for configured mutations
+    var observer = new MutationObserver(mutationCallback);
     observer.observe(document.body, config);
-    console.log('observer started');
 
     var info = document.getElementsByClassName(INFO_CLASS_NAME);
-    if (info.length > 0) scroll();
+    if (info.length > 0) {
+        _scroll();
+    }
     // Later, you can stop observing
     //observer.disconnect();
 }) ();
