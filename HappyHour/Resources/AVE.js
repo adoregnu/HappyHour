@@ -19,11 +19,14 @@ function _parseMultiNode(xpath) {
     while (node = result.iterateNext()) {
         array.push(node.textContent.trim());
     }
-    return array;
+    if (array.length) {
+        return array;
+    }
+    return null;
 }
 function _parseActor(xpath) {
     var array = _parseMultiNode(xpath);
-    if (array.length == 0) {
+    if (array == null) {
         return null;
     }
 
@@ -31,7 +34,10 @@ function _parseActor(xpath) {
     array.forEach(function (a) {
         actors.push({ name: a });
     })
-    return actors;
+    if (actors.length > 0) {
+        return actors;
+    }
+    return null;
 }
 
 

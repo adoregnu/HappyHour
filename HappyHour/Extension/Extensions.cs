@@ -9,36 +9,6 @@ namespace HappyHour.Extension
 {
     static class Extensions
     {
-        public static void ForEach(this IDictionary<string, object> dic,
-            Func<string, bool> action)
-        {
-            foreach (var item in dic)
-            {
-                if (item.Key == "thumb" || item.Value == null)
-                {
-                    continue;
-                }
-                if (item.Key == "alias")
-                {
-                    var alias = (List<object>)item.Value;
-                    foreach (string a in alias)
-                    {
-                        if (action(a.ToString()))
-                        {
-                            break;
-                        }
-                    }
-                }
-                else
-                {
-                    if (action(item.Value.ToString()))
-                    {
-                        break;
-                    }
-                }
-            }
-        }
-
         public static int FindItem<TItem, TKey>(this IList<TItem> collection,
             TItem itemToAdd, Func<TItem, TKey> keyGetter)
         {

@@ -18,7 +18,10 @@ function _parseMultiNode(xpath) {
     while (node = result.iterateNext()) {
         array.push(node.textContent.trim());
     }
-    return array;
+    if (array.length > 0) {
+        return array;
+    }
+    return null;
 }
 
 function _parseActor(xpath) {

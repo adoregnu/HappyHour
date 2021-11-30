@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 
 using HappyHour.Model;
 using HappyHour.Spider;
-using HappyHour.Extension;
 
 namespace HappyHour.ScrapItems
 {
@@ -119,12 +118,53 @@ namespace HappyHour.ScrapItems
             }
         }
 
+        /// <summary>
+        /// dic { name : string, thumb: string, alias: List<object> }
+        /// </summary>
+        /// <param name="dict"></param>
+        /// <param name="action"></param>
+        static void ForEachActor(IDictionary<string, object> dict,
+            Func<string, bool> action)
+        {
+            foreach (var item in dict)
+            {
+                if (item.Key == "thumb" || item.Value == null)
+                {
+                    continue;
+                }
+                if (item.Key == "alias")
+                {
+                    bool exitLoop = false;
+                    var alias = (List<object>)item.Value;
+                    foreach (string a in alias)
+                    {
+                        if (action(a.ToString()))
+                        {
+                            exitLoop = true;
+                            break;
+                        }
+                    }
+                    if (exitLoop)
+                    {
+                        break;
+                    }
+                }
+                else
+                {
+                    if (action(item.Value.ToString()))
+                    {
+                        break;
+                    }
+                }
+            }
+        }
+
         void UpdateActor(List<object> actors)
         {
             foreach (IDictionary<string, object> actor in actors)
             {
                 AvActorName dbName = null;
-                actor.ForEach(val => {
+                ForEachActor(actor, val => {
                     dbName = _context.ActorNames
                         .Include(n => n.Actor)
                         .Where(n => n.Name.ToLower()== val.ToLower())
@@ -137,7 +177,7 @@ namespace HappyHour.ScrapItems
                 if (dbName != null)
                 {
                     dbActor = dbName.Actor;
-                    actor.ForEach(name => {
+                    ForEachActor(actor, name => {
                         if (!dbActor.Names.Any(n => n.Name.ToLower() == name.ToLower()))
                         {
                             dbActor.Names.Add(
@@ -151,7 +191,7 @@ namespace HappyHour.ScrapItems
                     dbActor = new();
                     List<AvActorName> list = new();
 
-                    actor.ForEach(name => {
+                    ForEachActor(actor, name => {
                         list.Add(new AvActorName { Name = name, Actor = dbActor });
                         return false;
                     });

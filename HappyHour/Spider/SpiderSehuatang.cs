@@ -103,6 +103,7 @@ namespace HappyHour.Spider
             _toDownload = images.Count + files.Count;
             Log.Print($"{Name}: toDownload : {_toDownload }");
 
+            files.ForEach(f => ((IJavascriptCallback)f).ExecuteAsync());
             foreach (string file in images)
             {
                 string postfix = (i == 0) ? "cover" : $"screenshot{i}";
@@ -112,7 +113,6 @@ namespace HappyHour.Spider
                 Browser.Download(file);
                 i++;
             }
-            files.ForEach(f => ((IJavascriptCallback)f).ExecuteAsync());
         }
 
         private bool MoveNextPage()

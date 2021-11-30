@@ -19,7 +19,10 @@ function _parseMultiNode(xpath) {
     while (node = result.iterateNext()) {
         array.push(node.textContent.trim());
     }
-    return array;
+    if (array.length > 0) {
+        return array;
+    }
+    return null;
 }
 
 function _parseActorThumb(xpath) {
@@ -173,7 +176,7 @@ function _multiResult() {
             if (is_scrolled && num_loaded == 10) {
                 _parsePage();
             }
-            console.log('num_loaded: ' + num_loaded);
+            //console.log('num_loaded: ' + num_loaded);
         });
     });
 

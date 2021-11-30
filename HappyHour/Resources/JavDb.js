@@ -18,19 +18,25 @@ function _parseMultiNode(xpath) {
     while (node = result.iterateNext()) {
         array.push(node.textContent.trim());
     }
-    return array;
+    if (array.length > 0) {
+        return array;
+    }
+    return null;
 }
 
 function _parseActor(xpath) {
     var array = _parseMultiNode(xpath);
-    if (array.length == 0) {
+    if (array == null) {
         return null;
     }
     var names = [];
     array.forEach(function (txt) {
         names.push({ name: txt});
     });
-    return names;
+    if (names.length > 0) {
+        return names;
+    }
+    return null;
 }
 
 function _parseRating(xpath) {

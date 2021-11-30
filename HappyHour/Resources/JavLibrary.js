@@ -29,7 +29,10 @@ function _parseMultiNode(xpath) {
     while (node = result.iterateNext()) {
         array.push(node.textContent.trim());
     }
-    return array;
+    if (array.length > 0) {
+        return array;
+    }
+    return null;
 }
 
 function _parseActorName(xpath) {
@@ -58,9 +61,11 @@ function _parseActorName(xpath) {
             names['alias'] = alias;
         }
         array.push(names);
-        //console.log(JSON.stringify(names));
     }
-    return array;
+    if (array.length > 0) {
+        return array;
+    }
+    return null;
 }
 
 function _multiResult() {
@@ -77,10 +82,10 @@ function _multiResult() {
             return 'redirected';
         }
     }
-    if (num_item > 0)
+    if (num_item > 0) {
         return 'ambiguous';
-    else
-        return 'notfound';
+    }
+    return 'notfound';
 }
 
 (function () {
