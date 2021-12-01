@@ -9,17 +9,17 @@ using HappyHour.Interfaces;
 
 namespace HappyHour.Model
 {
-    static class AvMediaManager
+    internal static class AvMediaManager
     {
-        const string tag = "AvMediaManager::";
-        static public void Download(IAvMedia media)
+        private const string tag = "AvMediaManager::";
+        public static void Download(IAvMedia media)
         {
             try
             {
-                var dir = Path.GetDirectoryName(media.Path);
-                foreach (var file in media.GetFiles())
+                string dir = Path.GetDirectoryName(media.Path);
+                foreach (string file in media.GetFiles())
                 {
-                    var torrent = Path.GetFileName(file);
+                    string torrent = Path.GetFileName(file);
                     File.Copy(torrent, App.GConf["general"]["torrent_path"] + torrent);
                 }
                 File.Create($"{dir}\\.downloaded").Dispose();
@@ -31,21 +31,21 @@ namespace HappyHour.Model
             }
         }
 
-        static public void Exclude(IAvMedia media)
+        public static void Exclude(IAvMedia media)
         {
             try
             {
-                var dir = Path.GetDirectoryName(media.Path);
+                string dir = Path.GetDirectoryName(media.Path);
                 File.Create($"{dir}\\.excluded").Dispose();
                 Log.Print($"{tag}Mark excluded {media.Path}");
             }
             catch (Exception ex)
-            { 
+            {
                 Log.Print($"{tag}", ex.Message);
             }
         }
 
-        static public void Delete(IAvMedia media)
+        public static void Delete(IAvMedia media)
         {
             try
             {
@@ -57,19 +57,19 @@ namespace HappyHour.Model
             }
         }
 
-        static public bool Move(IAvMedia media, string target, Action<IAvMedia> OnCompleted)
+        public static bool Move(IAvMedia media, string target, Action<IAvMedia> OnCompleted)
         {
             return true;
         }
 
-        static public IAvMedia Create(string path)
+        public static IAvMedia Create(string path)
         {
             string[] video_exts = new string[] {
                 ".mp4", ".avi", ".mkv", ".ts", ".wmv", ".m4v"
             };
 
             IAvMedia media = null;
-            var files = Directory.GetFiles(path);
+            string[] files = Directory.GetFiles(path);
             if (files.Length > 20)
             {
                 Log.Print("Too many files in media folder!");
@@ -84,22 +84,18 @@ namespace HappyHour.Model
                 media = new AvMovie(path);
             }
 
-            foreach (var file in files)
+            foreach (string file in files)
             {
-                if (file.Contains("_poster."))
+                if (file.Contains("_poster.") || file.Contains("_cover."))
                 {
                     media.Poster = file;
-                }
-                else if (file.Contains("screenshot"))
-                {
-                    media.ScreenShots.Add(file);
                 }
                 else
                 {
                     media.UpdateInfo(file);
                 }
             }
-            return null;
+            return media;
         }
     }
 }

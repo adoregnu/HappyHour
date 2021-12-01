@@ -38,6 +38,7 @@ namespace HappyHour.ViewModel
 
                 _mediaList = value;
                 _mediaList.SpiderList = Spiders;
+#if false
                 _mediaList.ItemSelectedHandler += (o, i) =>
                 {
                     if (SelectedSpider == null) return;
@@ -52,6 +53,7 @@ namespace HappyHour.ViewModel
                         SelectedSpider.Keyword = null;
                     }
                 };
+#endif
             }
         }
 

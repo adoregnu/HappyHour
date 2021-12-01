@@ -130,8 +130,8 @@ namespace HappyHour.ViewModel
         public ICommand CmdScrap { get; private set; }
         public ICommand CmdStopBatchingScrap { get; set; }
 
-        public MediaListItemSelectedEventHandler ItemSelectedHandler { get; set; }
-        public MediaListItemSelectedEventHandler ItemDoubleClickedHandler { get; set; }
+        public MediaListItemSelected ItemSelectedHandler { get; set; }
+        public MediaListItemSelected ItemDoubleClickedHandler { get; set; }
 
         public MediaListViewModel()
         {

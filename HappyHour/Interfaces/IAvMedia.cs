@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace HappyHour.Interfaces
 {
-    enum MediaType { Torrent, Movie }
-    enum DateType { Released, Added, Updated }
+    internal enum MediaType { Torrent, Movie }
+    internal enum DateType { Released, Added, Updated }
 
-    interface IAvMedia
+    internal interface IAvMedia
     {
         string Pid { get; set; }
         string Path { get; set; }
@@ -17,9 +17,8 @@ namespace HappyHour.Interfaces
         DateTime Date { get; set; }
         MediaType Type { get; set; }
         DateType DateType { get; set; }
-        public List<string> ScreenShots { get; set; }
 
-        string[] GetFiles();
+        List<string> GetFiles();
         void UpdateInfo(string file);
     }
 }

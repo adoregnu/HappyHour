@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 using HappyHour.Interfaces;
 
 namespace HappyHour.Model
 {
-    class AvTorrent : NotifyPropertyChanged, IAvMedia
+    internal class AvTorrent : NotifyPropertyChanged, IAvMedia
     {
         public string Pid { get; set; }
         public string Path { get; set; }
@@ -30,21 +29,21 @@ namespace HappyHour.Model
             Pid = path.Split('\\').Last();
         }
 
-        public string[] GetFiles()
+        public List<string> GetFiles()
         {
             return null;
         }
         public void UpdateInfo(string file)
         {
-            if (file.EndsWith(".downloaded"))
+            if (file.EndsWith(".downloaded", StringComparison.OrdinalIgnoreCase))
             {
                 Downloaded = true;
             }
-            else if (file.EndsWith(".excluded"))
+            else if (file.EndsWith(".excluded", StringComparison.OrdinalIgnoreCase))
             {
                 Excluded = true;
             }
-            else if (file.EndsWith("torrent"))
+            else if (file.EndsWith("torrent", StringComparison.OrdinalIgnoreCase))
             {
                 Torrents.Add(file);
             }

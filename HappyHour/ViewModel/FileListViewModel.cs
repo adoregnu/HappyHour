@@ -15,16 +15,16 @@ using HappyHour.Model;
 
 namespace HappyHour.ViewModel
 {
-    class FileListViewModel : Pane, IFileList
+    internal class FileListViewModel : Pane, IFileList
     {
-        string _currPath;
-        DriveInfo _currDrive;
-        DirectoryInfo _currDirInfo;
-        FileSystemInfo _selectedFile;
-        FileSystemWatcher _fsWatcher;
-        DispatcherTimer _refreshTimer;
-        IMediaList _mediaList;
-        bool _selecFromMediaList = false;
+        private string _currPath;
+        private DriveInfo _currDrive;
+        private DirectoryInfo _currDirInfo;
+        private FileSystemInfo _selectedFile;
+        private FileSystemWatcher _fsWatcher;
+        private readonly DispatcherTimer _refreshTimer;
+        private IMediaList _mediaList;
+        private bool _selecFromMediaList;
 
         public string CurrPath
         {
@@ -237,25 +237,35 @@ namespace HappyHour.ViewModel
             }
         }
 
-        void RenameFile(object p)
+        private void RenameFile(object p)
         {
             if (p is not Tuple<string, object> tuple)
+            {
                 return;
+            }
             if (SelectedFile == null)
+            {
                 return;
+            }
 
             Log.Print($"{tuple.Item1}, {SelectedFile.Name}");
             if (tuple.Item1 == SelectedFile.Name)
+            {
                 return;
+            }
 
             try
             {
                 string target = Path.GetDirectoryName(SelectedFile.FullName);
                 target += $"\\{tuple.Item1}";
                 if (SelectedFile is DirectoryInfo)
+                {
                     Directory.Move(SelectedFile.FullName, target);
+                }
                 else
+                {
                     File.Move(SelectedFile.FullName, target);
+                }
             }
             catch (Exception ex)
             {
@@ -263,9 +273,9 @@ namespace HappyHour.ViewModel
             }
         }
 
-        void OnMediaSelected(object sender, MediaItem item)
+        private void OnMediaSelected(object _, MediaItem avMedia)
         {
-            var fi = FileList.FirstOrDefault(f => f.FullName == item.MediaPath);
+            FileSystemInfo fi = FileList.FirstOrDefault(f => f.FullName == avMedia.MediaPath);
             if (fi != null)
             {
                 _selecFromMediaList = true;
