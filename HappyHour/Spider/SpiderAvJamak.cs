@@ -7,7 +7,7 @@ using HappyHour.ViewModel;
 
 namespace HappyHour.Spider
 {
-    class SpiderAvJamak : SpiderBase
+    internal class SpiderAvJamak : SpiderBase
     {
         public override string SearchURL => $"{URL}/bbs/search.php" +
             $"?srows=10&gr_id=jamak&sfl=wr_subject&stx={Keyword}&sop=and";
@@ -35,35 +35,38 @@ namespace HappyHour.Spider
                     userid = avjamak["userid"];
                     password = avjamak["password"];
                 }
-            } 
- 
+            }
+
             Template template = Template.Parse(App.ReadResource(name));
-            return template.Render(new {
-                Pid = Keyword, Userid = userid, Password = password
+            return template.Render(new
+            {
+                Pid = Keyword,
+                Userid = userid,
+                Password = password
             });
         }
 
-        void OnBeforeDownload(object sender, DownloadItem e)
+        private void OnBeforeDownload(object sender, DownloadItem e)
         {
-            var ext = Path.GetExtension(e.SuggestedFileName);
-            string savePath;
-            if (!string.IsNullOrEmpty(DataPath))
-                savePath = DataPath + "\\";
-            else
-                savePath = App.GConf["general"]["data_path"];
-
+            string ext = Path.GetExtension(e.SuggestedFileName);
+            string savePath = SelectedMedia != null ?
+                SelectedMedia.MediaPath : App.GConf["general"]["data_path"];
             if (!Directory.Exists(savePath))
+            {
                 Log.Print($"{savePath} does not exist.");
-
-            e.SuggestedFileName = $"{savePath}{Keyword}{ext}";
+            }
+            e.SuggestedFileName = $"{savePath}\\{SelectedMedia.Pid}{ext}";
         }
 
-        void OnDownloadUpdated(object sender, DownloadItem e)
+        private void OnDownloadUpdated(object sender, DownloadItem e)
         {
             if (e.IsComplete)
             {
                 Log.Print($"{Name}: {e.SuggestedFileName} download completed!");
-                Browser.MediaList.AddMedia(DataPath);
+                if (SelectedMedia != null)
+                {
+                    SelectedMedia.ReloadAvItem();
+                }
             }
         }
         public override void OnSelected()

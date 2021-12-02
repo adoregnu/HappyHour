@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 using HappyHour.Interfaces;
 
@@ -19,6 +18,8 @@ namespace HappyHour.Model
         public List<string> Movies { get; set; } = new();
         public List<string> SubTitles { get; set; } = new();
 
+        public AvItem MovieInfo { get; set; }
+
         public AvMovie(string path)
         {
             Type = MediaType.Movie;
@@ -28,7 +29,7 @@ namespace HappyHour.Model
 
         public List<string> GetFiles()
         {
-            return null;
+            return Movies;
         }
 
         private readonly string[] sub_exts = new string[] {
@@ -40,7 +41,11 @@ namespace HappyHour.Model
 
         public void UpdateInfo(string file)
         {
-            if (sub_exts.Any(s => file.EndsWith(s, StringComparison.OrdinalIgnoreCase)))
+            if (file.Contains("_poster."))
+            {
+                Poster = file;
+            }
+            else if (sub_exts.Any(s => file.EndsWith(s, StringComparison.OrdinalIgnoreCase)))
             {
                 SubTitles.Add(file);
             }

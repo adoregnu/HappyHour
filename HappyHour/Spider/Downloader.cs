@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using CefSharp;
 
 using HappyHour.ViewModel;
+using HappyHour.Model;
 
 namespace HappyHour.Spider
 {
@@ -58,7 +59,8 @@ namespace HappyHour.Spider
             var dic = _urls[e.OriginalUrl];
             if (dic.ContainsKey("cover"))
             {
-                e.SuggestedFileName =  $"{_spider.DataPath}\\{_spider.Keyword}_poster{ext}";
+                MediaItem item = _spider.SearchMedia;
+                e.SuggestedFileName =  $"{item.MediaPath}\\{item.Pid}_poster{ext}";
                 dic["cover"] = e.SuggestedFileName;
             }
             else

@@ -28,7 +28,8 @@ namespace HappyHour.ViewModel
         IWpfWebBrowser _webBrowser;
 
         public bool IsAddressChanged = false;
-
+        public bool IsEnabled { get; set; } = true;
+            
         public string HeaderType
         {
             get => _headerType;
@@ -108,7 +109,10 @@ namespace HappyHour.ViewModel
 
         public void ExecJavaScript(string s, OnJsResult callback = null)
         {
-            if (!CanExecuteJS()) return;
+            if (!CanExecuteJS())
+            {
+                return;
+            }
 
             WebBrowser.EvaluateScriptAsync(s).ContinueWith(x =>
             {

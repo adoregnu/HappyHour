@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using System.Timers;
 using System.Collections.Generic;
 
 using CefSharp;
@@ -11,10 +10,10 @@ using System;
 
 namespace HappyHour.ViewModel
 {
-    class SpiderViewModel : BrowserBase
+    internal class SpiderViewModel : BrowserBase
     {
-        IMediaList _mediaList;
-        SpiderBase _selectedSpider;
+        private IMediaList _mediaList;
+        private SpiderBase _selectedSpider;
 
         public List<SpiderBase> Spiders { get; set; }
         public SpiderBase SelectedSpider
@@ -26,6 +25,7 @@ namespace HappyHour.ViewModel
                 Set(ref _selectedSpider, value);
             }
         }
+
         public DownloadHandler DownloadHandler { get; private set; }
         public Downloader ImageDownloader { get; set; }
 
@@ -34,26 +34,21 @@ namespace HappyHour.ViewModel
             get => _mediaList;
             set
             {
-                if (value == null) return;
+                if (value == null)
+                {
+                    return;
+                }
 
                 _mediaList = value;
                 _mediaList.SpiderList = Spiders;
-#if false
                 _mediaList.ItemSelectedHandler += (o, i) =>
                 {
-                    if (SelectedSpider == null) return;
-                    if (i != null)
+                    if (SelectedSpider == null)
                     {
-                        SelectedSpider.DataPath = i.MediaPath;
-                        SelectedSpider.Keyword = i.Pid;
+                        return;
                     }
-                    else
-                    {
-                        SelectedSpider.DataPath = null;
-                        SelectedSpider.Keyword = null;
-                    }
+                    SelectedSpider.SelectedMedia = i ?? null;
                 };
-#endif
             }
         }
 
@@ -83,7 +78,11 @@ namespace HappyHour.ViewModel
 
         public void SetSpider(SpiderBase spider)
         {
-            if (spider == null) return;
+            if (spider == null)
+            {
+                return;
+            }
+
             if (_selectedSpider != spider)
             {
                 if (_selectedSpider != null)
@@ -95,16 +94,7 @@ namespace HappyHour.ViewModel
                 UpdateBrowserHeader(spider.Name);
             }
 
-            string newUrl;
-            if (string.IsNullOrEmpty(spider.Keyword))
-            {
-                newUrl = spider.URL;
-            }
-            else
-            {
-                newUrl = spider.SearchURL;
-            }
-
+            string newUrl = string.IsNullOrEmpty(spider.Keyword) ? spider.URL : spider.SearchURL;
             if (Address == newUrl)
             {
                 Address = "";
@@ -113,7 +103,7 @@ namespace HappyHour.ViewModel
             Address = newUrl;
         }
 
-        void UpdateBrowserHeader(string spiderName)
+        private void UpdateBrowserHeader(string spiderName)
         {
             HeaderType = spiderName switch
             {
@@ -136,16 +126,17 @@ namespace HappyHour.ViewModel
             SelectedSpider = Spiders[0];
             SelectedSpider.SetCookies();
             Address = SelectedSpider.URL;
-
+#if false
             _timer = new Timer(10)
             {
                 AutoReset = false
             };
             _timer.Elapsed += (s, e) => SelectedSpider.Scrap();
+#endif
             ImageDownloader = new Downloader(this);
         }
 
-        private Timer _timer;
+        //private Timer _timer;
         private void OnStateChanged(object sender, LoadingStateChangedEventArgs e)
         {
             if (!e.IsLoading)
@@ -154,11 +145,14 @@ namespace HappyHour.ViewModel
                 if (IsAddressChanged)
                 {
                     IsAddressChanged = false;
+                    SelectedSpider.Scrap();
+#if false
                     if (_timer.Enabled)
                     {
                         _timer.Stop();
                     }
                     _timer.Start();
+#endif
                 }
             }
         }
@@ -180,7 +174,7 @@ namespace HappyHour.ViewModel
             }
             else if (d.action == "pid_search_in_spider")
             {
-                var spider = Spiders.FirstOrDefault(s => s.Name == d.spider);
+                SpiderBase spider = Spiders.FirstOrDefault(s => s.Name == d.spider);
                 if (spider != null)
                 {
                     spider.Keyword = d.data;
@@ -201,7 +195,7 @@ namespace HappyHour.ViewModel
                     UiServices.Invoke(() => SearchText(d));
                 }
                 else
-                { 
+                {
                     SelectedSpider.OnJsMessageReceived(e);
                 }
             }

@@ -15,9 +15,8 @@ namespace HappyHour.Model
     };
     public class MediaItem : NotifyPropertyChanged
     {
-        static AvDbContext _dbContext;
-
-        DateTime _dateDownloaded;
+        private static AvDbContext _dbContext;
+        private DateTime _dateDownloaded;
 
         public static OrderType OrderType { get; set; } = OrderType.ByDateReleased;
         public DateTime DateTime
@@ -25,13 +24,22 @@ namespace HappyHour.Model
             get
             {
                 if (_avItem == null)
+                {
                     return _dateDownloaded;
+                }
                 else if (OrderType == OrderType.ByDateReleased)
+                {
                     return _avItem.DateReleased;
+                }
                 else if (OrderType == OrderType.ByDateAdded)
+                {
                     return _avItem.DateAdded;
-                else // OrderType.ByDateUpdated
+                }
+                else
+                {
+                    // OrderType.ByDateUpdated
                     return _avItem.DateModifed;
+                }
             }
         }
 
@@ -45,38 +53,32 @@ namespace HappyHour.Model
         public List<string> Subtitles;
         public List<string> Screenshots { get; set; }
 
-        public bool IsDownload { get; private set; } = false;
-        public bool IsExcluded { get; private set; } = false;
+        public bool IsDownload { get; private set; }
+        public bool IsExcluded { get; private set; }
         public bool IsImage { get; private set; } = true;
-        public bool IsMediaFolder
-        {
-            get { return !string.IsNullOrEmpty(MediaFile); }
-        }
+        public bool IsMediaFolder => !string.IsNullOrEmpty(MediaFile);
 
         public string Info
         {
             get
             {
                 string pid = Pid;
-                if (Subtitles != null) pid += "(sub)";
+                if (Subtitles != null)
+                {
+                    pid += "(sub)";
+                }
                 if (AvItem == null)
+                {
                     return $"{pid}\n" + _dateDownloaded.ToString("u");
-                var studio = AvItem.Studio != null ?
-                    AvItem.Studio.Name : "Unknown Studio";
+                }
+                string studio = AvItem.Studio != null ? AvItem.Studio.Name : "Unknown Studio";
                 return $"{pid}\n{studio}";
             }
         }
 
-        public string Actors
-        {
-            get
-            {
-                if (AvItem == null) return "Not Scrapped";
-                return AvItem.ActorsName();
-            }
-        }
+        public string Actors => AvItem == null ? "Not Scrapped" : AvItem.ActorsName();
 
-        AvItem _avItem = null;
+        private AvItem _avItem;
         public AvItem AvItem
         {
             get => _avItem;
@@ -92,10 +94,14 @@ namespace HappyHour.Model
             try
             {
                 if (_dbContext == null)
+                {
                     _dbContext = App.DbContext;//new AvDbContext();
-                var item = new MediaItem(path);
+                }
+                MediaItem item = new(path);
                 if (!item.IsExcluded && !item.IsDownload && item.IsMediaFolder)
+                {
                     return item;
+                }
             }
             catch (Exception ex)
             {
@@ -104,7 +110,7 @@ namespace HappyHour.Model
             return null;
         }
 
-        MediaItem(string path)
+        private MediaItem(string path)
         {
             if (string.IsNullOrEmpty(path))
             {
@@ -119,7 +125,7 @@ namespace HappyHour.Model
             ReloadAvItem();
         }
 
-        void OnMoveDone(string newPath, Action<MediaItem> OnComplete)
+        private void OnMoveDone(string newPath, Action<MediaItem> OnComplete)
         {
             MediaPath = newPath;
             if (AvItem != null)
@@ -130,16 +136,15 @@ namespace HappyHour.Model
             OnComplete?.Invoke(this);
         }
 
-        public bool MoveItem(string targetPath, Action<MediaItem> OnComplete = null)
+        public void MoveItem(string targetPath, Action<MediaItem> OnComplete = null)
         {
             try
             {
-                if (char.ToUpper(MediaPath[0]) == char.ToUpper(targetPath[0]))
+                if (char.ToUpper(MediaPath[0], App.enUS) == char.ToUpper(targetPath[0], App.enUS))
                 {
                     targetPath += "\\" + Pid;
                     Directory.Move(MediaPath, targetPath);
                     OnMoveDone(targetPath, OnComplete);
-                    return true;
                 }
                 //TODO: copy file if target is different drive
             }
@@ -147,15 +152,14 @@ namespace HappyHour.Model
             {
                 Log.Print(ex.Message);
             }
-            return false;
         }
 
         public void Download()
         {
             try
             {
-                var dir = Path.GetDirectoryName(MediaFile);
-                var torrent = Path.GetFileName(Torrent);
+                string dir = Path.GetDirectoryName(MediaFile);
+                string torrent = Path.GetFileName(Torrent);
                 File.Copy(Torrent, App.GConf["general"]["torrent_path"] + torrent);
                 File.Create($"{dir}\\.downloaded").Dispose();
                 Log.Print($"Makrk downloaded {Torrent}");
@@ -168,7 +172,7 @@ namespace HappyHour.Model
 
         public void Exclude()
         {
-            var dir = Path.GetDirectoryName(MediaFile);
+            string dir = Path.GetDirectoryName(MediaFile);
             File.Create($"{dir}\\.excluded").Dispose();
             Log.Print($"Mark excluded {Torrent}");
         }
@@ -213,7 +217,10 @@ namespace HappyHour.Model
         public async void ReloadAvItem()
         {
             UpdateFields();
-            if (IsImage) return;
+            if (IsImage)
+            {
+                return;
+            }
 
             AvItem = await _dbContext.Items
                 .Include(i => i.Studio)
@@ -223,17 +230,22 @@ namespace HappyHour.Model
                 .FirstOrDefaultAsync(i => i.Pid == Pid);
         }
 
-        void UpdateFields()
+        private void UpdateFields()
         {
             MediaFiles = new List<string>();
             Subtitles = null;
-            foreach (var file in Directory.GetFiles(MediaPath))
+            foreach (string file in Directory.GetFiles(MediaPath))
             {
                 UpdateField(file);
-                if (IsExcluded || IsDownload) return;
+                if (IsExcluded || IsDownload)
+                {
+                    return;
+                }
             }
             if (MediaFile == null)
+            {
                 return;
+            }
 
             _dateDownloaded = File.GetLastWriteTime(MediaFile);
             MediaFiles.Sort();
@@ -243,7 +255,7 @@ namespace HappyHour.Model
             }
         }
 
-        void UpdateField(string path)
+        private void UpdateField(string path)
         {
             string[] vexts = new string[] {
                 ".mp4", ".avi", ".mkv", ".ts", ".wmv", ".m4v"
@@ -253,25 +265,27 @@ namespace HappyHour.Model
             };
 
             string fname = Path.GetFileName(path);
-            if (fname.EndsWith("torrent"))
+            if (fname.EndsWith("torrent", StringComparison.OrdinalIgnoreCase))
             {
                 Torrent = path;
             }
             else if (fname.Contains("screenshot"))
             {
                 if (Screenshots == null)
+                {
                     Screenshots = new List<string>();
+                }
                 Screenshots.Add(path);
             }
             else if (fname.Contains("_poster."))
             {
                 Poster = path;
             }
-            else if (fname.EndsWith(".downloaded"))
+            else if (fname.EndsWith(".downloaded", StringComparison.OrdinalIgnoreCase))
             {
                 IsDownload = true;
             }
-            else if (fname.EndsWith(".excluded"))
+            else if (fname.EndsWith(".excluded", StringComparison.OrdinalIgnoreCase))
             {
                 IsExcluded = true;
             }
@@ -283,7 +297,9 @@ namespace HappyHour.Model
             else if (subs.Any(s => fname.EndsWith(s, StringComparison.OrdinalIgnoreCase)))
             {
                 if (Subtitles == null)
+                {
                     Subtitles = new List<string>();
+                }
                 Subtitles.Add(path);
             }
             else if (vexts.Any(s => fname.EndsWith(s, StringComparison.OrdinalIgnoreCase)))

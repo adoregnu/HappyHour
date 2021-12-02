@@ -12,6 +12,7 @@ using CefSharp;
 
 using HappyHour.ViewModel;
 using HappyHour.CefHandler;
+using HappyHour.Model;
 
 namespace HappyHour.Spider
 {
@@ -64,7 +65,7 @@ namespace HappyHour.Spider
 
         private void UpdateMedia()
         {
-            DataPath = _outPath; // 
+            //DataPath = _outPath; // 
             Browser.MediaList.AddMedia(_outPath);
         }
 
@@ -166,12 +167,11 @@ namespace HappyHour.Spider
 
             if (!_scrapRunning)
             {
-                OnScrapCompleted();
+                OnScrapCompleted(false);
             }
         }
 
-        public override void OnJsMessageReceived(
-            JavascriptMessageReceivedEventArgs msg)
+        public override void OnJsMessageReceived(JavascriptMessageReceivedEventArgs msg)
         {
             dynamic d = msg.Message;
             if (d.type == "url")
@@ -217,7 +217,7 @@ namespace HappyHour.Spider
             return null;
         }
 
-        public override void Navigate2()
+        public override void Navigate2(MediaItem _)
         {
             ParsingState = 0;
             _pageNum = 1;
@@ -243,8 +243,7 @@ namespace HappyHour.Spider
             }
 
             _numDownloaded++;
-            Log.Print($"{Name}: download completed({_numDownloaded}/{_toDownload}):" +
-                $" {e.FullPath}");
+            Log.Print($"{Name}: download completed({_numDownloaded}/{_toDownload}): {e.FullPath}");
             try
             {
                 File.SetLastWriteTime(e.FullPath, _updateTime);

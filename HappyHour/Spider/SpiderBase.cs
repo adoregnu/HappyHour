@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Windows.Input;
-using System.Globalization;
 
 using Scriban;
 using CefSharp;
@@ -10,27 +9,40 @@ using GalaSoft.MvvmLight.Command;
 
 using HappyHour.ViewModel;
 using HappyHour.ScrapItems;
+using HappyHour.Model;
 
 namespace HappyHour.Spider
 {
-    delegate void ScrapCompletedHandler(SpiderBase spider);
+    internal delegate void ScrapCompletedHandler(SpiderBase spider);
 
-    class SpiderBase : NotifyPropertyChanged
+    internal class SpiderBase : NotifyPropertyChanged
     {
-        static string _keyword;
+        private static string _keyword;
+        private bool _isCookieSet;
+        private MediaItem _selectedMedia;
 
-        bool _isCookieSet = false;
         public int ParsingState = -1;
 
         public SpiderViewModel Browser { get; private set; }
         public ScrapCompletedHandler ScrapCompleted { get; set; }
+        public MediaItem SelectedMedia
+        {
+            get => _selectedMedia;
+            set
+            {
+                if (value != null)
+                {
+                    Keyword = value.Pid;
+                }
+                _selectedMedia = value;
+            }
+        }
+        public MediaItem SearchMedia { get; set; }
 
-        public bool SaveDb { get; set; } = true;
-        public string URL = null;
-        public string Name { get; protected set; } = "";
-        public string DataPath { get; set; }
+        public string URL;
+        public string Name { get; protected set; } = "Base";
         public string ScriptName { get; set; }
-        public virtual string SearchURL { get => URL; }
+        public virtual string SearchURL => URL;
 
         public string Keyword
         {
@@ -43,7 +55,7 @@ namespace HappyHour.Spider
         public SpiderBase(SpiderViewModel br)
         {
             Browser = br;
-            CmdSearch = new RelayCommand(() => { SaveDb = false;  Navigate2(); });
+            CmdSearch = new RelayCommand(() => { Navigate2(); });
         }
 
         public virtual void OnSelected()
@@ -53,26 +65,15 @@ namespace HappyHour.Spider
         }
 
         public virtual void OnDeselect()
-        { 
+        {
             Log.Print($"{Name} deselected!");
             Browser.ImageDownloader.Enable(false);
         }
 
         protected virtual string GetScript(string name)
-        { 
+        {
             Template template = Template.Parse(App.ReadResource(name));
             return template.Render(new { Pid = Keyword });
-        }
-
-        public virtual void Navigate2()
-        {
-            if (string.IsNullOrEmpty(Keyword))
-            {
-                Log.Print($"{Name}: Empty keyword!");
-                return;
-            }
-            ParsingState = 0;
-            Browser.SelectedSpider = this;
         }
 
         protected virtual List<Cookie> CreateCookie() { return null; }
@@ -97,19 +98,31 @@ namespace HappyHour.Spider
             _isCookieSet = true;
         }
 
-        protected virtual void OnScrapCompleted()
+        public virtual void Navigate2(MediaItem searchMedia = null)
+        {
+            if (string.IsNullOrEmpty(Keyword) && searchMedia == null)
+            {
+                Log.Print($"{Name}: Empty keyword!");
+                return;
+            }
+            SearchMedia = searchMedia;
+            Browser.SelectedSpider = this;
+        }
+
+        protected virtual void OnScrapCompleted(bool bUpdated)
         {
             if (ParsingState >= 0)
             {
-                SaveDb = true;
                 ParsingState = -1;
                 Log.Print($"{Name}: Reset Spider");
             }
 
-            if (ScrapCompleted != null)
+            if (bUpdated && SearchMedia != null)
             {
-                UiServices.Invoke(() => ScrapCompleted?.Invoke(this), true);
+                SearchMedia.ReloadAvItem();
             }
+            SearchMedia = null;
+            ScrapCompleted?.Invoke(this);
         }
 
         public virtual void Scrap()
@@ -121,8 +134,7 @@ namespace HappyHour.Spider
             }
         }
 
-        public virtual void OnJsMessageReceived(
-            JavascriptMessageReceivedEventArgs msg)
+        public virtual void OnJsMessageReceived(JavascriptMessageReceivedEventArgs msg)
         {
             dynamic d = msg.Message;
             //Log.Print($"{d.type} : {d.data}");
@@ -135,12 +147,15 @@ namespace HappyHour.Spider
                 if (d.data == 0)
                 {
                     Log.Print($"{Name}: No exact matched ID");
-                    OnScrapCompleted();
+                    UiServices.Invoke(() => OnScrapCompleted(false));
                     return;
                 }
                 try
                 {
-                    Browser.ImageDownloader.DownloadFiles(this, d);
+                    if (SearchMedia != null)
+                    {
+                        Browser.ImageDownloader.DownloadFiles(this, d);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -153,7 +168,7 @@ namespace HappyHour.Spider
         {
             try
             {
-                new ItemBase2(this).UpdateItems(items);
+                new ItemBase2(SearchMedia).UpdateItems(items);
             }
             catch (Exception ex)
             {
@@ -163,11 +178,11 @@ namespace HappyHour.Spider
 
         public void UpdateItems(IDictionary<string, object> items)
         {
-            if (SaveDb)
+            UiServices.Invoke(() =>
             {
-                UiServices.Invoke(() => UpdateDb(items));
-            }
-            OnScrapCompleted();
+                UpdateDb(items);
+                OnScrapCompleted(true);
+            });
         }
 
         public override string ToString()

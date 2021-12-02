@@ -31,7 +31,7 @@ namespace HappyHour.Model
 
         public List<string> GetFiles()
         {
-            return null;
+            return Torrents;
         }
         public void UpdateInfo(string file)
         {

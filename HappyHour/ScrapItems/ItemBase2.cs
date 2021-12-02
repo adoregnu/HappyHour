@@ -6,48 +6,47 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 
 using HappyHour.Model;
-using HappyHour.Spider;
 
 namespace HappyHour.ScrapItems
 {
-    class ItemBase2
+    internal class ItemBase2
     {
-        readonly AvDbContext _context;
-        readonly SpiderBase _spider;
+        private readonly AvDbContext _context;
+        private readonly MediaItem _mediaItem;
 
         protected AvItem _avItem;
-        AvStudio _studio;
-        AvSeries _series;
-        List<AvActor> _actors = new();
-        List<AvGenre> _genres;
+        private AvStudio _studio;
+        private AvSeries _series;
+        private List<AvActor> _actors = new();
+        private List<AvGenre> _genres;
 
-        public ItemBase2(SpiderBase spider)
+        public ItemBase2(MediaItem mediaItem)
         {
-            _spider = spider;
+            _mediaItem = mediaItem;
             _context = App.DbContext;
             _avItem = new AvItem
             {
-                Pid = spider.Keyword,
-                Path = spider.DataPath,
+                Pid = _mediaItem.Pid,
+                Path = _mediaItem.MediaPath,
                 IsCensored = true,
             };
         }
 
-        void UpdateTitle(string title)
+        private void UpdateTitle(string title)
         {
             _avItem.Title = title;
         }
 
-        void UpdatePlot(string plot)
+        private void UpdatePlot(string plot)
         {
             _avItem.Plot = plot;
         }
 
-        void UpdateRating(string rating)
+        private void UpdateRating(string rating)
         {
             try
             {
-                _avItem.Rating = float.Parse(rating);
+                _avItem.Rating = float.Parse(rating, App.enUS);
             }
             catch (Exception ex)
             {
@@ -79,13 +78,13 @@ namespace HappyHour.ScrapItems
             }
         }
 
-        void UpdateGenre(List<object> genres)
+        private void UpdateGenre(List<object> genres)
         {
             _genres = new List<AvGenre>();
             foreach (string genre in genres)
             {
                 AvGenre entity = _context.Genres.FirstOrDefault(
-                    x => x.Name.ToLower() == genre.ToLower());
+                    x => x.Name.ToLower(App.enUS) == genre.ToLower(App.enUS));
                 if (entity == null)
                 {
                     entity = _context.Genres.Add(new AvGenre { Name = genre }).Entity;
@@ -94,24 +93,21 @@ namespace HappyHour.ScrapItems
             }
         }
 
-        void UpdateStudio(string studio)
+        private void UpdateStudio(string studio)
         {
-            if (_spider.Name == "Javlibrary")
-            {
-                studio = NameMap.StudioName(studio);
-            }
+            studio = NameMap.StudioName(studio);
             _studio = _context.Studios.FirstOrDefault(
-                x => x.Name.ToLower() == studio.ToLower());
+                x => x.Name.ToLower(App.enUS) == studio.ToLower(App.enUS));
             if (_studio == null)
             {
                 _studio = _context.Studios.Add(new AvStudio { Name = studio }).Entity;
             }
         }
 
-        void UpdateSeries(string series)
+        private void UpdateSeries(string series)
         {
-             _series = _context.Series.FirstOrDefault(
-                 x => x.Name.ToLower() == series.ToLower());
+            _series = _context.Series.FirstOrDefault(
+                 x => x.Name.ToLower(App.enUS) == series.ToLower(App.enUS));
             if (_series == null)
             {
                 _series = _context.Series.Add(new AvSeries { Name = series }).Entity;
@@ -123,7 +119,7 @@ namespace HappyHour.ScrapItems
         /// </summary>
         /// <param name="dict"></param>
         /// <param name="action"></param>
-        static void ForEachActor(IDictionary<string, object> dict,
+        private static void ForEachActor(IDictionary<string, object> dict,
             Func<string, bool> action)
         {
             foreach (var item in dict)
@@ -159,15 +155,16 @@ namespace HappyHour.ScrapItems
             }
         }
 
-        void UpdateActor(List<object> actors)
+        private void UpdateActor(List<object> actors)
         {
             foreach (IDictionary<string, object> actor in actors)
             {
                 AvActorName dbName = null;
-                ForEachActor(actor, val => {
+                ForEachActor(actor, val =>
+                {
                     dbName = _context.ActorNames
                         .Include(n => n.Actor)
-                        .Where(n => n.Name.ToLower()== val.ToLower())
+                        .Where(n => n.Name.ToLower(App.enUS) == val.ToLower(App.enUS))
                         .Where(n => n.Actor != null)
                         .FirstOrDefault();
                     return dbName != null;
@@ -177,11 +174,11 @@ namespace HappyHour.ScrapItems
                 if (dbName != null)
                 {
                     dbActor = dbName.Actor;
-                    ForEachActor(actor, name => {
-                        if (!dbActor.Names.Any(n => n.Name.ToLower() == name.ToLower()))
+                    ForEachActor(actor, name =>
+                    {
+                        if (!dbActor.Names.Any(n => n.Name.ToLower(App.enUS) == name.ToLower(App.enUS)))
                         {
-                            dbActor.Names.Add(
-                                new AvActorName { Name = name, Actor = dbActor } );
+                            dbActor.Names.Add(new AvActorName { Name = name, Actor = dbActor });
                         }
                         return false;
                     });
@@ -190,8 +187,8 @@ namespace HappyHour.ScrapItems
                 {
                     dbActor = new();
                     List<AvActorName> list = new();
-
-                    ForEachActor(actor, name => {
+                    ForEachActor(actor, name =>
+                    {
                         list.Add(new AvActorName { Name = name, Actor = dbActor });
                         return false;
                     });
@@ -206,21 +203,21 @@ namespace HappyHour.ScrapItems
                     dbActor.PicturePath = actor["thumb"].ToString();
                 }
                 _actors.Add(dbActor);
-             }
+            }
         }
 
         public void UpdateItems(IDictionary<string, object> items)
         {
-            var updater = new Dictionary<string, Delegate>
+            Dictionary<string, Delegate> updater = new()
             {
-                { "title",  (Action<string>)UpdateTitle },
+                { "title", (Action<string>)UpdateTitle },
                 { "genre", (Action<List<object>>)UpdateGenre },
-                { "studio",  (Action<string>)UpdateStudio },
-                { "series",  (Action<string>)UpdateSeries },
-                { "actor", (Action<List<object>>)UpdateActor},
-                { "date",  (Action<string>)UpdateDate },
-                { "plot",  (Action<string>)UpdatePlot },
-                { "rating",  (Action<string>)UpdateRating },
+                { "studio", (Action<string>)UpdateStudio },
+                { "series", (Action<string>)UpdateSeries },
+                { "actor", (Action<List<object>>)UpdateActor },
+                { "date", (Action<string>)UpdateDate },
+                { "plot", (Action<string>)UpdatePlot },
+                { "rating", (Action<string>)UpdateRating },
 
                 //{ "cover",  (Action<string>)UpdateCover },
             };
@@ -237,7 +234,7 @@ namespace HappyHour.ScrapItems
             UpdateDb();
         }
 
-        void UpdateDb()
+        private void UpdateDb()
         {
             AvItem item = _context.Items
                 .Include("Studio")
