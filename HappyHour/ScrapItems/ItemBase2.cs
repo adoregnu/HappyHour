@@ -59,7 +59,7 @@ namespace HappyHour.ScrapItems
             try
             {
                 string[] patterns = new string[] {
-                    "yyyy-MM-dd", "yyyy/MM/dd", "yyyyy.MM.dd", "MMM d yyyy"
+                    "yyyy-MM-dd", "yyyy/MM/dd", "yyyy.MM.dd", "MMM d yyyy"
                 };
                 foreach (string pattern in patterns)
                 {
@@ -84,7 +84,7 @@ namespace HappyHour.ScrapItems
             foreach (string genre in genres)
             {
                 AvGenre entity = _context.Genres.FirstOrDefault(
-                    x => x.Name.ToLower(App.enUS) == genre.ToLower(App.enUS));
+                    x => x.Name.ToLower() == genre.ToLower());
                 if (entity == null)
                 {
                     entity = _context.Genres.Add(new AvGenre { Name = genre }).Entity;
@@ -97,7 +97,7 @@ namespace HappyHour.ScrapItems
         {
             studio = NameMap.StudioName(studio);
             _studio = _context.Studios.FirstOrDefault(
-                x => x.Name.ToLower(App.enUS) == studio.ToLower(App.enUS));
+                x => x.Name.ToLower() == studio.ToLower());
             if (_studio == null)
             {
                 _studio = _context.Studios.Add(new AvStudio { Name = studio }).Entity;
@@ -107,7 +107,7 @@ namespace HappyHour.ScrapItems
         private void UpdateSeries(string series)
         {
             _series = _context.Series.FirstOrDefault(
-                 x => x.Name.ToLower(App.enUS) == series.ToLower(App.enUS));
+                 x => x.Name.ToLower() == series.ToLower());
             if (_series == null)
             {
                 _series = _context.Series.Add(new AvSeries { Name = series }).Entity;
@@ -164,7 +164,7 @@ namespace HappyHour.ScrapItems
                 {
                     dbName = _context.ActorNames
                         .Include(n => n.Actor)
-                        .Where(n => n.Name.ToLower(App.enUS) == val.ToLower(App.enUS))
+                        .Where(n => n.Name.ToLower() == val.ToLower())
                         .Where(n => n.Actor != null)
                         .FirstOrDefault();
                     return dbName != null;
@@ -176,7 +176,7 @@ namespace HappyHour.ScrapItems
                     dbActor = dbName.Actor;
                     ForEachActor(actor, name =>
                     {
-                        if (!dbActor.Names.Any(n => n.Name.ToLower(App.enUS) == name.ToLower(App.enUS)))
+                        if (!dbActor.Names.Any(n => n.Name.ToLower() == name.ToLower()))
                         {
                             dbActor.Names.Add(new AvActorName { Name = name, Actor = dbActor });
                         }

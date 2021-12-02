@@ -5,13 +5,14 @@ using CefSharp;
 
 using HappyHour.ViewModel;
 using HappyHour.Model;
+using System;
 
 namespace HappyHour.Spider
 {
     internal class Downloader
     {
-        private int _numDownloading;
-        private int _numDownloadDone;
+        private int _numDownload;
+        private int _numDownloaded;
         private bool _downloadOngoing;
         private bool _isEnabled;
         private readonly string _actorPicturePath;
@@ -75,47 +76,30 @@ namespace HappyHour.Spider
         {
             if (e.IsComplete)
             {
-                Log.Print($"Download Completed: {e.FullPath}");
-                _numDownloadDone++;
-                if (_downloadOngoing == false && _numDownloadDone == _numDownloading)
+                _numDownloaded++;
+                Log.Print($"{_spider.SearchMedia.Pid} : Download Completed: " +
+                    $"({_numDownloaded}/{_numDownload}){e.FullPath}");
+                if (_downloadOngoing == false && _numDownloaded == _numDownload)
                 {
                     _spider.UpdateItems(_items);
                 }
             }
         }
 
-        private void Download(string url, IDictionary<string, object> item)
-        {
-            _numDownloading++;
-            _urls.Add(url, item);
-            _browser.Download(url);
-        }
-
-        public void DownloadFiles(SpiderBase spider, IDictionary<string, object> items)
-        {
-            if (_numDownloading != _numDownloadDone || _downloadOngoing)
-            {
-                Log.Print("download is ongoing...");
-                return;
-            }
-            _numDownloading = 0;
-            _numDownloadDone = 0;
-            _downloadOngoing = true;
-            _urls.Clear();
-
-            _spider = spider;
-            _items = items;
-
+        private static void IterateItems(IDictionary<string, object> items,
+            Action<string, IDictionary<string, object>> action)
+        { 
             foreach (var item in items)
             {
                 if (item.Value == null)
                 {
                     continue;
                 }
-                Log.Print($"{spider.Keyword} : {item.Key} = {item.Value?.ToString()}");
+                //Log.Print($"{spider.Keyword} : {item.Key} = {item.Value?.ToString()}");
                 if (item.Key == "cover")
                 {
-                    Download(item.Value.ToString(), items);
+                    //Download(item.Value.ToString(), items);
+                    action(item.Value.ToString(), items);
                 }
                 else if (item.Key == "actor")
                 {
@@ -124,12 +108,35 @@ namespace HappyHour.Spider
                     {
                         if (actor.ContainsKey("thumb"))
                         {
-                            Download(actor["thumb"].ToString(), actor);
+                            //Download(actor["thumb"].ToString(), actor);
+                            action(actor["thumb"].ToString(), actor);
                         }
                     }
                 }
             }
-            if (_numDownloading == 0)
+        }
+
+        public void DownloadFiles(SpiderBase spider, IDictionary<string, object> items)
+        {
+            if (_numDownload != _numDownloaded || _downloadOngoing)
+            {
+                Log.Print("download is ongoing...");
+                return;
+            }
+            _numDownload = 0;
+            _numDownloaded = 0;
+            _downloadOngoing = true;
+            _urls.Clear();
+
+            _spider = spider;
+            _items = items;
+            IterateItems(items, (key, val) => _numDownload++);
+            IterateItems(items, (key, val) =>
+            {
+                _urls.Add(key, val);
+                _browser.Download(key);
+            });
+            if (_numDownload == 0)
             {
                 spider.UpdateItems(items);
             }

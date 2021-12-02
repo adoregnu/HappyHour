@@ -20,6 +20,7 @@ namespace HappyHour.Spider
         private static string _keyword;
         private bool _isCookieSet;
         private MediaItem _selectedMedia;
+        private MediaItem _searchMedia;
 
         public int ParsingState = -1;
 
@@ -37,7 +38,22 @@ namespace HappyHour.Spider
                 _selectedMedia = value;
             }
         }
-        public MediaItem SearchMedia { get; set; }
+        public MediaItem SearchMedia
+        {
+            get => _searchMedia;
+            set
+            { 
+                if (value != null)
+                {
+                    Keyword = value.Pid;
+                }
+                else
+                {
+                    Keyword = null;
+                }
+                _searchMedia = value;
+            }
+        }
 
         public string URL;
         public string Name { get; protected set; } = "Base";
@@ -105,24 +121,25 @@ namespace HappyHour.Spider
                 Log.Print($"{Name}: Empty keyword!");
                 return;
             }
-            SearchMedia = searchMedia;
+            ParsingState = 0;
+            if (searchMedia != null)
+            {
+                SearchMedia = searchMedia;
+            }
             Browser.SelectedSpider = this;
         }
 
         protected virtual void OnScrapCompleted(bool bUpdated)
         {
-            if (ParsingState >= 0)
-            {
-                ParsingState = -1;
-                Log.Print($"{Name}: Reset Spider");
-            }
+            ParsingState = -1;
+            Log.Print($"{Name}: {Keyword} ScrapCompleted");
 
             if (bUpdated && SearchMedia != null)
             {
-                SearchMedia.ReloadAvItem();
+                UiServices.Invoke(() => SearchMedia.ReloadAvItem());
             }
             SearchMedia = null;
-            ScrapCompleted?.Invoke(this);
+            UiServices.Invoke(() => ScrapCompleted?.Invoke(this));
         }
 
         public virtual void Scrap()
@@ -137,7 +154,7 @@ namespace HappyHour.Spider
         public virtual void OnJsMessageReceived(JavascriptMessageReceivedEventArgs msg)
         {
             dynamic d = msg.Message;
-            //Log.Print($"{d.type} : {d.data}");
+            Log.Print($"{d.type} : {d.data}");
             if (d.type == "url")
             {
                 Browser.Address = d.data;
@@ -147,7 +164,7 @@ namespace HappyHour.Spider
                 if (d.data == 0)
                 {
                     Log.Print($"{Name}: No exact matched ID");
-                    UiServices.Invoke(() => OnScrapCompleted(false));
+                    OnScrapCompleted(false);
                     return;
                 }
                 try
@@ -178,11 +195,8 @@ namespace HappyHour.Spider
 
         public void UpdateItems(IDictionary<string, object> items)
         {
-            UiServices.Invoke(() =>
-            {
-                UpdateDb(items);
-                OnScrapCompleted(true);
-            });
+            UiServices.Invoke(() => UpdateDb(items));
+            OnScrapCompleted(true);
         }
 
         public override string ToString()

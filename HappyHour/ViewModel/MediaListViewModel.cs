@@ -479,7 +479,6 @@ namespace HappyHour.ViewModel
         private List<MediaItem> _mitemsToSearch;
         private void OnScrapCompleted(SpiderBase spider)
         {
-            Log.Print($"{_mitemsToSearch[0].Pid} Scrap completed ");
             if (_mitemsToSearch.Count > 0)
             {
                 _mitemsToSearch.RemoveAt(0);
