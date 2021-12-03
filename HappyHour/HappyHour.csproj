@@ -122,6 +122,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="..\.editorconfig" Link=".editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Resource Include="Resources\default-fallback-image.png" />
   </ItemGroup>
 

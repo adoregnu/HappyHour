@@ -192,22 +192,30 @@ namespace HappyHour.ViewModel
             {
                 case WatcherChangeTypes.Deleted:
                     {
-                        MediaItem media = MediaList.FirstOrDefault(m => m.Pid == e.Name);
+                        var media = MediaList.FirstOrDefault(m => m.Pid == e.Name);
                         if (media != null)
                         {
-                            _ = MediaList.Remove(media);
+                            MediaList.Remove(media);
                         }
                     }
                     break;
                 case WatcherChangeTypes.Renamed:
                     {
-                        RenamedEventArgs re = e as RenamedEventArgs;
-                        MediaItem media = MediaList.FirstOrDefault(m => m.Pid == re.OldName);
+                        var re = e as RenamedEventArgs;
+                        var media = MediaList.FirstOrDefault(m => m.Pid == re.OldName);
                         if (media != null)
                         {
-                            _ = MediaList.Remove(media);
+                            MediaList.Remove(media);
                         }
                     }
+                    break;
+                case WatcherChangeTypes.Created:
+                    break;
+                case WatcherChangeTypes.Changed:
+                    break;
+                case WatcherChangeTypes.All:
+                    break;
+                default:
                     break;
             }
         }
@@ -224,7 +232,7 @@ namespace HappyHour.ViewModel
         public void RemoveMedia(string path)
         {
             IsBrowsing = true;
-            List<MediaItem> medias = MediaList.Where(i => i.MediaFile.StartsWith(path,
+            var medias = MediaList.Where(i => i.MediaFile.StartsWith(path,
                     StringComparison.CurrentCultureIgnoreCase)).ToList();
             medias.ForEach(x => MediaList.Remove(x));
             IsBrowsing = false;
@@ -238,7 +246,7 @@ namespace HappyHour.ViewModel
                 MediaItem item = MediaItem.Create(path);
                 if (item != null)
                 {
-                    MediaList.InsertInPlace(item, i => i.DateTime);
+                    MediaList.AddInOrder(item, i => i.DateTime);
                 }
             }
             else
@@ -369,20 +377,20 @@ namespace HappyHour.ViewModel
         private async void SortMedia()
         {
             CancelTaskIfRunning();
-            List<MediaItem> tmp = MediaList.ToList();
+            var tmp = MediaList.ToList();
             MediaList.Clear();
 
             _tokenSource = new CancellationTokenSource();
-            CancellationToken token = _tokenSource.Token;
+            var token = _tokenSource.Token;
             _runningTask = Task.Run(() =>
             {
-                foreach (MediaItem m in tmp)
+                foreach (var m in tmp)
                 {
                     if (token.IsCancellationRequested)
                     {
                         break;
                     }
-                    MediaList.InsertInPlace(m, i => i.DateTime);
+                    MediaList.AddInOrder(m, i => i.DateTime);
                 }
             }, token);
             await _runningTask;
@@ -394,7 +402,7 @@ namespace HappyHour.ViewModel
             MediaList.Clear();
 
             _tokenSource = new CancellationTokenSource();
-            CancellationToken token = _tokenSource.Token;
+            var token = _tokenSource.Token;
             bool bSubFolder = _searchSubFolder;
             _runningTask = Task.Run(() => UpdateMediaList(msg.FullName, token, bSubFolder), token);
             await _runningTask;
@@ -407,7 +415,7 @@ namespace HappyHour.ViewModel
             IsSelected = true;
 
             _tokenSource = new CancellationTokenSource();
-            CancellationToken token = _tokenSource.Token;
+            var token = _tokenSource.Token;
 
             _runningTask = Task.Run(() =>
             {
@@ -430,13 +438,13 @@ namespace HappyHour.ViewModel
             MediaList.Clear();
 
             string currDir = _fileList.CurrDirInfo.FullName;
-            List<string> dbDirs = await App.DbContext.Items
+            var dbDirs = await App.DbContext.Items
                 .Where(i => EF.Functions.Like(i.Path, $"{currDir}%"))
                 .Select(i => i.Path)
                 .ToListAsync();
 
             _tokenSource = new CancellationTokenSource();
-            CancellationToken token = _tokenSource.Token;
+            var token = _tokenSource.Token;
 
             _runningTask = Task.Run(() =>
             {
@@ -453,14 +461,14 @@ namespace HappyHour.ViewModel
 
             MediaList.Clear();
 
-            List<string> paths = await App.DbContext.Items
+            var paths = await App.DbContext.Items
                 .Include(i => i.Actors)
                 .Where(i => i.Actors.Count == 0)
                 .Select(i => i.Path)
                 .ToListAsync();
 
             _tokenSource = new CancellationTokenSource();
-            CancellationToken token = _tokenSource.Token;
+            var token = _tokenSource.Token;
 
             _runningTask = Task.Run(() =>
             {

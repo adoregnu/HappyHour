@@ -1,84 +1,84 @@
-﻿const _PID = '{{pid}}';
+﻿(function () {
+    const _PID = '{{pid}}';
 
-function _parseSingleNode(xpath, _node = document.body, _result = null) {
-    var result = document.evaluate(xpath, _node,
-        null, XPathResult.FIRST_ORDERED_NODE_TYPE, _result);
-    var node = result.singleNodeValue;
-    if (node != null) {
-        return node.textContent.trim();
-    }
-    return null;
-}
-
-function _parseMultiNode(xpath) {
-    var result = document.evaluate(xpath, document.body,
-        null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
-
-    var array = [];
-    while (node = result.iterateNext()) {
-        array.push(node.textContent.trim());
-    }
-    if (array.length > 0) {
-        return array;
-    } 
-    return null;
-}
-
-function _parseActor(xpath) {
-    var result = document.evaluate(xpath, document.body,
-        null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
-
-    var array = [];
-    while (anode = result.iterateNext()) {
-        var actor = {};
-
-        if (!anode.src.endsWith('nowprinting.gif')) {
-            actor["thumb"] = anode.src;
+    function _parseSingleNode(xpath, _node = document.body, _result = null) {
+        var result = document.evaluate(xpath, _node,
+            null, XPathResult.FIRST_ORDERED_NODE_TYPE, _result);
+        var node = result.singleNodeValue;
+        if (node != null) {
+            return node.textContent.trim();
         }
-        var tnode = anode.parentNode.nextSibling;
-        while (tnode.nodeName != "SPAN") {
-            console.log('node name ' + tnode.nodeName);
-            tnode = tnode.nextSibling;
+        return null;
+    }
+
+    function _parseMultiNode(xpath) {
+        var result = document.evaluate(xpath, document.body,
+            null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+
+        var array = [];
+        while (node = result.iterateNext()) {
+            array.push(node.textContent.trim());
         }
-        actor["name"] = tnode.textContent.trim();
-        array.push(actor);
+        if (array.length > 0) {
+            return array;
+        } 
+        return null;
     }
 
-    if (array.length > 0) {
-        return array;
-    }
-    return null;
-}
+    function _parseActor(xpath) {
+        var result = document.evaluate(xpath, document.body,
+            null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
 
-function _convertPid() {
-    const re = new RegExp('^\d{6}(?:_|-)\d{3}$');
-    if (_PID.startsWith('HEYZO') || re.test(_PID)) {
-        return _PID.replace('_', '-');
-    }
-    return _PID;
-}
+        var array = [];
+        while (anode = result.iterateNext()) {
+            var actor = {};
 
-function _multiResult() {
-    var result = document.evaluate("//a[contains(@class,'movie-box')]",
-        document.body, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
-
-    const re = new RegExp(_convertPid(), 'i');
-    for (var i = 0; i < result.snapshotLength; i++) {
-        var anode = result.snapshotItem(i);
-        var pid = _parseSingleNode("//date[1]", anode, result);
-        console.log('PID: ' + pid);
-        if (pid != null || re.test(pid.replace('_', '-'))) {
-            CefSharp.PostMessage({ type: 'url', data: anode.href });
-            return 'redirected';
+            if (!anode.src.endsWith('nowprinting.gif')) {
+                actor["thumb"] = anode.src;
+            }
+            var tnode = anode.parentNode.nextSibling;
+            while (tnode.nodeName != "SPAN") {
+                console.log('node name ' + tnode.nodeName);
+                tnode = tnode.nextSibling;
+            }
+            actor["name"] = tnode.textContent.trim();
+            array.push(actor);
         }
-    }
-    if (result.snapshotLength > 1) {
-        return 'ambiguous';
-    }
-    return 'notfound';
-}
 
-(function () {
+        if (array.length > 0) {
+            return array;
+        }
+        return null;
+    }
+
+    function _convertPid() {
+        const re = new RegExp('^\d{6}(?:_|-)\d{3}$');
+        if (_PID.startsWith('HEYZO') || re.test(_PID)) {
+            return _PID.replace('_', '-');
+        }
+        return _PID;
+    }
+
+    function _multiResult() {
+        var result = document.evaluate("//a[contains(@class,'movie-box')]",
+            document.body, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+
+        const re = new RegExp(_convertPid(), 'i');
+        for (var i = 0; i < result.snapshotLength; i++) {
+            var anode = result.snapshotItem(i);
+            var pid = _parseSingleNode("//date[1]", anode, result);
+            console.log('PID: ' + pid);
+            if (pid != null || re.test(pid.replace('_', '-'))) {
+                CefSharp.PostMessage({ type: 'url', data: anode.href });
+                return 'redirected';
+            }
+        }
+        if (result.snapshotLength > 1) {
+            return 'ambiguous';
+        }
+        return 'notfound';
+    }
+
     if (_multiResult() != 'notfound') {
         return;
     }

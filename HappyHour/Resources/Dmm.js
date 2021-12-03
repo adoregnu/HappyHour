@@ -1,34 +1,34 @@
-﻿const _PID = '{{pid}}';
+﻿(function () {
+    const _PID = '{{pid}}';
 
-function _parseSingleNode(_xpath) {
-    var result = document.evaluate(_xpath, document.body,
-        null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
-    var node = result.singleNodeValue;
-    if (node != null) {
-        return node.textContent.trim();
-    }
-    return null;
-}
-
-function _multiResult() {
-    var result = document.evaluate("//p[@class='tmb']/a",
-        document.body, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
-
-    const re = new RegExp('cid=(h_)?(\d+)?' + _PID.split('-')[0], 'i');
-    for (var i = 0; i < result.snapshotLength; i++) {
-        var node = result.snapshotItem(i);
-        if (re.test(node.href)) {
-            CefSharp.PostMessage({ type: 'url', data: node.href});
-            return 'redirected';
+    function _parseSingleNode(_xpath) {
+        var result = document.evaluate(_xpath, document.body,
+            null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+        var node = result.singleNodeValue;
+        if (node != null) {
+            return node.textContent.trim();
         }
+        return null;
     }
-    if (result.snapshotLength > 1) {
-        return 'ambiguous';
-    }
-    return 'notfound';
-}
 
-(function () {
+    function _multiResult() {
+        var result = document.evaluate("//p[@class='tmb']/a",
+            document.body, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+
+        const re = new RegExp('cid=(h_)?(\d+)?' + _PID.split('-')[0], 'i');
+        for (var i = 0; i < result.snapshotLength; i++) {
+            var node = result.snapshotItem(i);
+            if (re.test(node.href)) {
+                CefSharp.PostMessage({ type: 'url', data: node.href});
+                return 'redirected';
+            }
+        }
+        if (result.snapshotLength > 1) {
+            return 'ambiguous';
+        }
+        return 'notfound';
+    }
+
     if (_multiResult() != 'notfound') {
         return;
     }

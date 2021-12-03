@@ -1,28 +1,28 @@
-﻿const _PID = '{{pid}}';
+﻿(function () {
+    const _PID = '{{pid}}';
 
-function _parseSingleNode(_xpath) {
-    var result = document.evaluate(_xpath, document.body,
-        null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
-    var node = result.singleNodeValue;
-    if (node != null) {
-        return node.textContent.trim();
-    }
-    return null;
-}
-
-function _parseRating(xpath) {
-    var txt = _parseSingleNode(xpath);
-    if (txt != null) {
-        var re = new RegExp('[0-9.]+');
-        var m = re.exec(txt);
-        if (m != null) {
-            return m[0];
+    function _parseSingleNode(_xpath) {
+        var result = document.evaluate(_xpath, document.body,
+            null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+        var node = result.singleNodeValue;
+        if (node != null) {
+            return node.textContent.trim();
         }
+        return null;
     }
-    return null;
-}
 
-(function () {
+    function _parseRating(xpath) {
+        var txt = _parseSingleNode(xpath);
+        if (txt != null) {
+            var re = new RegExp('[0-9.]+');
+            var m = re.exec(txt);
+            if (m != null) {
+                return m[0];
+            }
+        }
+        return null;
+    }
+
     var items = {
         //id: { xpath: "//th[contains(., '品番：')]/following-sibling::td" },
         title: { xpath: "//div[@class='common_detail_cover']/h1[@class='tag']" },

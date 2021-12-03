@@ -13,9 +13,8 @@ namespace HappyHour.Model
         public string Pid { get; set; }
         public string Path { get; set; }
         public string Poster { get; set; }
-        public MediaType Type { get; set; }
+        public string BriefInfo => $"{Pid}\n{Date}";
         public DateTime Date { get; set; }
-        public DateType DateType { get; set; }
         public List<string> ScreenShots { get; set; } = new();
 
         public List<string> Torrents { get; set; } = new();
@@ -24,28 +23,35 @@ namespace HappyHour.Model
 
         public AvTorrent(string path)
         {
-            Type = MediaType.Torrent;
             Path = path;
             Pid = path.Split('\\').Last();
         }
 
-        public List<string> GetFiles()
+        public void Reload(string[] files = null)
         {
-            return Torrents;
-        }
-        public void UpdateInfo(string file)
-        {
-            if (file.EndsWith(".downloaded", StringComparison.OrdinalIgnoreCase))
+            if (files == null)
             {
-                Downloaded = true;
+                files = Directory.GetFiles(Path);
             }
-            else if (file.EndsWith(".excluded", StringComparison.OrdinalIgnoreCase))
+            Torrents.Clear();
+            foreach (string file in files)
             {
-                Excluded = true;
-            }
-            else if (file.EndsWith("torrent", StringComparison.OrdinalIgnoreCase))
-            {
-                Torrents.Add(file);
+                if (file.Contains("_poster.") || file.Contains("_cover."))
+                {
+                    Poster = file;
+                }
+                else if (file.EndsWith(".downloaded", StringComparison.OrdinalIgnoreCase))
+                {
+                    Downloaded = true;
+                }
+                else if (file.EndsWith(".excluded", StringComparison.OrdinalIgnoreCase))
+                {
+                    Excluded = true;
+                }
+                else if (file.EndsWith("torrent", StringComparison.OrdinalIgnoreCase))
+                {
+                    Torrents.Add(file);
+                }
             }
         }
     }

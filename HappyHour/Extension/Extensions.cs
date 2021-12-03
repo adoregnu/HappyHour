@@ -20,8 +20,7 @@ namespace HappyHour.Extension
         /// based on the provided key and key comparer.
         /// Use like OrderBy(o => o.PropertyWithKey).
         /// </summary>
-        public static void InsertInPlace<TItem, TKey>(
-            this ObservableCollection<TItem> collection,
+        public static void AddInOrder<TItem, TKey>(this IList<TItem> collection,
             TItem itemToAdd, Func<TItem, TKey> keyGetter, bool isAccending = false)
         {
             int index = collection.BinarySearch(
@@ -40,12 +39,8 @@ namespace HappyHour.Extension
         /// than the equivalent recursive version. This 25% speedup is for list
         /// lengths more of than 1000 items, with less performance advantage 
         /// for smaller lists.</notes>
-        public static int BinarySearch<TItem, TKey>(
-            this IList<TItem> collection,
-            TKey keyToFind,
-            IComparer<TKey> comparer,
-            Func<TItem, TKey> keyGetter,
-            bool isAccending = false)
+        public static int BinarySearch<TItem, TKey>(this IList<TItem> collection, TKey keyToFind,
+            IComparer<TKey> comparer, Func<TItem, TKey> keyGetter, bool isAccending = false)
         {
             if (collection == null)
             {
@@ -58,14 +53,13 @@ namespace HappyHour.Extension
             while (lower <= upper)
             {
                 int middle = lower + (upper - lower) / 2;
-                int comparisonResult = comparer.Compare(keyToFind,
-                    keyGetter.Invoke(collection[middle]));
-                if (comparisonResult == 0)
+                int res = comparer.Compare(keyToFind, keyGetter.Invoke(collection[middle]));
+                if (res == 0)
                 {
                     return middle;
                 }
-                //else if (comparisonResult > 0)
-                else if (isAccending ? (comparisonResult <= 0) : (comparisonResult >= 0))
+                //else if (res > 0)
+                else if (isAccending ? (res <= 0) : (res >= 0))
                 {
                     upper = middle - 1;
                 }

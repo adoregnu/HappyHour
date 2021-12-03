@@ -79,6 +79,7 @@
 
     function _parsePage() {
         if (_parsing_done) {
+            console.log('already parsing done!!');
             return;
         }
         _parsing_done = true;
@@ -183,7 +184,6 @@
             console.log("no actresses in this movie.");
         } else {
             var rect = actor.parentElement.getBoundingClientRect();
-            //console.log(document.body.scrollHeight / 2, JSON.stringify(rect));
             window.scrollTo(0, rect.top);
             _actor_exists = true;
         }
@@ -236,6 +236,7 @@
         return;
     }
 
+    console.log("start MutationObserver");
     const config = { attributes: true, childList: true, subtree: true };
     var observer = new MutationObserver(mutationCallback);
     observer.observe(document.body, config);

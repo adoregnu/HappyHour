@@ -38,12 +38,11 @@ namespace HappyHour.Spider
             }
 
             Template template = Template.Parse(App.ReadResource(name));
-            return template.Render(new
-            {
-                Pid = Keyword,
-                Userid = userid,
-                Password = password
-            });
+            return template.Render((
+                Pid: Keyword,
+                Userid: userid,
+                Password: password
+            ));
         }
 
         private void OnBeforeDownload(object sender, DownloadItem e)

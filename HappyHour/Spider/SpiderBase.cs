@@ -38,22 +38,7 @@ namespace HappyHour.Spider
                 _selectedMedia = value;
             }
         }
-        public MediaItem SearchMedia
-        {
-            get => _searchMedia;
-            set
-            { 
-                if (value != null)
-                {
-                    Keyword = value.Pid;
-                }
-                else
-                {
-                    Keyword = null;
-                }
-                _searchMedia = value;
-            }
-        }
+        public MediaItem SearchMedia { get; set; }
 
         public string URL;
         public string Name { get; protected set; } = "Base";
@@ -88,7 +73,7 @@ namespace HappyHour.Spider
 
         protected virtual string GetScript(string name)
         {
-            Template template = Template.Parse(App.ReadResource(name));
+            var template = Template.Parse(App.ReadResource(name));
             return template.Render(new { Pid = Keyword });
         }
 
@@ -100,14 +85,14 @@ namespace HappyHour.Spider
             {
                 return;
             }
-            List<Cookie> cookies = CreateCookie();
+            var cookies = CreateCookie();
             if (cookies == null)
             {
                 return;
             }
 
-            ICookieManager cookieManager = Cef.GetGlobalCookieManager();
-            foreach (Cookie cookie in cookies)
+            var cookieManager = Cef.GetGlobalCookieManager();
+            foreach (var cookie in cookies)
             {
                 cookieManager.SetCookieAsync(URL, cookie);
             }
@@ -124,6 +109,7 @@ namespace HappyHour.Spider
             ParsingState = 0;
             if (searchMedia != null)
             {
+                Keyword = searchMedia.Pid;
                 SearchMedia = searchMedia;
             }
             Browser.SelectedSpider = this;
@@ -136,10 +122,10 @@ namespace HappyHour.Spider
 
             if (bUpdated && SearchMedia != null)
             {
-                UiServices.Invoke(() => SearchMedia.ReloadAvItem());
+                SearchMedia.ReloadAvItem();
             }
             SearchMedia = null;
-            UiServices.Invoke(() => ScrapCompleted?.Invoke(this));
+            ScrapCompleted?.Invoke(this);
         }
 
         public virtual void Scrap()
@@ -164,7 +150,7 @@ namespace HappyHour.Spider
                 if (d.data == 0)
                 {
                     Log.Print($"{Name}: No exact matched ID");
-                    OnScrapCompleted(false);
+                    UiServices.Invoke(() => OnScrapCompleted(false));
                     return;
                 }
                 try
@@ -195,8 +181,11 @@ namespace HappyHour.Spider
 
         public void UpdateItems(IDictionary<string, object> items)
         {
-            UiServices.Invoke(() => UpdateDb(items));
-            OnScrapCompleted(true);
+            UiServices.Invoke(() =>
+            {
+                UpdateDb(items);
+                OnScrapCompleted(true);
+            });
         }
 
         public override string ToString()

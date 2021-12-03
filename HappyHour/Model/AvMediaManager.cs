@@ -17,7 +17,7 @@ namespace HappyHour.Model
             try
             {
                 string dir = Path.GetDirectoryName(media.Path);
-                foreach (string file in media.GetFiles())
+                foreach (string file in (media as AvTorrent).Torrents)
                 {
                     string torrent = Path.GetFileName(file);
                     File.Copy(torrent, App.GConf["general"]["torrent_path"] + torrent);
@@ -83,18 +83,7 @@ namespace HappyHour.Model
             {
                 media = new AvMovie(path);
             }
-
-            foreach (string file in files)
-            {
-                if (file.Contains("_poster.") || file.Contains("_cover."))
-                {
-                    media.Poster = file;
-                }
-                else
-                {
-                    media.UpdateInfo(file);
-                }
-            }
+            media.Reload(files);
             return media;
         }
     }

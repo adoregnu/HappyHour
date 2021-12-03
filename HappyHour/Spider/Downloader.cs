@@ -36,7 +36,7 @@ namespace HappyHour.Spider
                 _browser.DownloadHandler.OnDownloadUpdatedFired += OnDownloadUpdated;
                 _isEnabled = true;
             }
-            else if(_isEnabled && !bEnable)
+            else if (_isEnabled && !bEnable)
             {
                 _browser.DownloadHandler.OnBeforeDownloadFired -= OnBeforeDownload;
                 _browser.DownloadHandler.OnDownloadUpdatedFired -= OnDownloadUpdated;
@@ -88,7 +88,7 @@ namespace HappyHour.Spider
 
         private static void IterateItems(IDictionary<string, object> items,
             Action<string, IDictionary<string, object>> action)
-        { 
+        {
             foreach (var item in items)
             {
                 if (item.Value == null)

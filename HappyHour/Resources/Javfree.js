@@ -60,12 +60,10 @@
     }
 */
     function _parseContent(xpath, msg) {
-        var result = document.evaluate(xpath, document.body, null,
-            XPathResult.FIRST_ORDERED_NODE_TYPE, null);
         const parser = [_date, _actor];
 
         var count = 0;
-        var p = result.singleNodeValue;
+        var p = _parseSingleNode(xpath);
         console.log('content node len:' + p.childNodes.length);
         for (var i = 0; i < p.childNodes.length; i++) {
             var node = p.childNodes[i];
@@ -83,7 +81,6 @@
         return count;
     }
 
-
     function _multiResult() {
         var result = document.evaluate(
             "//div[contains(@class,'content-loop')]//h2[@class='entry-title']/a",
@@ -92,7 +89,6 @@
         var re = new RegExp(_PID, 'i');
         for (var i = 0; i < result.snapshotLength; i++) {
             var node = result.snapshotItem(i);
-            //if (node.href.match('/' + _PID + '/i')) {
             if (re.test(node.href)) {
                 CefSharp.PostMessage({ type: 'url', data: node.href });
                 return 'redirected';

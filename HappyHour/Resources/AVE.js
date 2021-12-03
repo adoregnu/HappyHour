@@ -1,78 +1,78 @@
-﻿const _PID = '{{pid}}';
+﻿(function () {
+    const _PID = '{{pid}}';
 
-function _parseSingleNode(_xpath) {
-    //console.log(_xpath);
-    var result = document.evaluate(_xpath, document.body,
-        null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
-    var node = result.singleNodeValue;
-    if (node != null) {
-        return node.textContent.trim();
-    }
-    return null;
-}
-
-function _parseMultiNode(xpath) {
-    var result = document.evaluate(xpath, document.body,
-        null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
-
-    var array = [];
-    while (node = result.iterateNext()) {
-        array.push(node.textContent.trim());
-    }
-    if (array.length) {
-        return array;
-    }
-    return null;
-}
-function _parseActor(xpath) {
-    var array = _parseMultiNode(xpath);
-    if (array == null) {
+    function _parseSingleNode(_xpath) {
+        //console.log(_xpath);
+        var result = document.evaluate(_xpath, document.body,
+            null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+        var node = result.singleNodeValue;
+        if (node != null) {
+            return node.textContent.trim();
+        }
         return null;
     }
 
-    var actors = [];
-    array.forEach(function (a) {
-        actors.push({ name: a });
-    })
-    if (actors.length > 0) {
-        return actors;
-    }
-    return null;
-}
+    function _parseMultiNode(xpath) {
+        var result = document.evaluate(xpath, document.body,
+            null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
 
-
-function _parseDate(xpath) {
-    var txt = _parseSingleNode(xpath);
-    if (txt != null) {
-        var m = /[\d/]+/i.exec(txt);
-        if (m != null) {
-            var tmp = m[0].replace(/(\d+)/ig, function (d) {
-                if (d.length == 1) {
-                    return d.padStart(2, '0');
-                }
-                return d;
-            })
-            //console.log(m[0] + ', ' + tmp);
-            return tmp.replace(/(\d+)\/(\d+)\/(\d+)/i, '$3-$1-$2');
+        var array = [];
+        while (node = result.iterateNext()) {
+            array.push(node.textContent.trim());
         }
+        if (array.length) {
+            return array;
+        }
+        return null;
     }
-    return null;
-}
+    function _parseActor(xpath) {
+        var array = _parseMultiNode(xpath);
+        if (array == null) {
+            return null;
+        }
 
-function _multiResult() {
-    var result = document.evaluate("//div[contains(@class, 'shop-product-wrap')]//p[@class='product-title']/a",
-        document.body, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
-    if (result.snapshotLength == 1) {
-        var node = result.snapshotItem(0);
-        CefSharp.PostMessage({ type: 'url', data: node.href });
-        return 'redirected';
-    } else if (result.snapshotLength > 1) {
-        return 'ambiguous';
+        var actors = [];
+        array.forEach(function (a) {
+            actors.push({ name: a });
+        })
+        if (actors.length > 0) {
+            return actors;
+        }
+        return null;
     }
-    return 'notfound';
-}
 
-(function () {
+
+    function _parseDate(xpath) {
+        var txt = _parseSingleNode(xpath);
+        if (txt != null) {
+            var m = /[\d/]+/i.exec(txt);
+            if (m != null) {
+                var tmp = m[0].replace(/(\d+)/ig, function (d) {
+                    if (d.length == 1) {
+                        return d.padStart(2, '0');
+                    }
+                    return d;
+                })
+                //console.log(m[0] + ', ' + tmp);
+                return tmp.replace(/(\d+)\/(\d+)\/(\d+)/i, '$3-$1-$2');
+            }
+        }
+        return null;
+    }
+
+    function _multiResult() {
+        var result = document.evaluate("//div[contains(@class, 'shop-product-wrap')]//p[@class='product-title']/a",
+            document.body, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+        if (result.snapshotLength == 1) {
+            var node = result.snapshotItem(0);
+            CefSharp.PostMessage({ type: 'url', data: node.href });
+            return 'redirected';
+        } else if (result.snapshotLength > 1) {
+            return 'ambiguous';
+        }
+        return 'notfound';
+    }
+
     if (_multiResult() != 'notfound') {
         return;
     }

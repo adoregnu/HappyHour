@@ -1,40 +1,40 @@
-﻿const _PID = '{{pid}}';
+﻿(function () {
+    const _PID = '{{pid}}';
 
-function _parseSingleNode(_xpath, _getter = null) {
-    var result = document.evaluate(_xpath, document.body,
-        null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
-    var node = result.singleNodeValue;
-    if (node != null) {
-        if (_getter != null) {
-            return _getter(node);
-        } else {
-            return node.textContent.trim();
+    function _parseSingleNode(_xpath, _getter = null) {
+        var result = document.evaluate(_xpath, document.body,
+            null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+        var node = result.singleNodeValue;
+        if (node != null) {
+            if (_getter != null) {
+                return _getter(node);
+            } else {
+                return node.textContent.trim();
+            }
         }
-    }
-    return null;
-}
-
-function _parseActor(xpath) {
-    var node = _parseSingleNode(xpath, function (n) { return n; });
-    if (node == null) {
         return null;
     }
-    console.log('href : ' + node.href);
-    var array = [];
-    var actor = {};
-    var m = /av-actress\/([a-z-]+)/i.exec(node.href);
-    if (m != null) {
-        actor['name'] = m[1].replace('-', ' ');
-        actor['name'] = actor['name'].replace(/^([a-z])| ([a-z])/gi,
-            function (m) { return m.toUpperCase(); });
-    } else {
-        actor['name'] = node.textContent.trim();
-    }
-    array.push(actor);
-    return array;
-}
 
-(function () {
+    function _parseActor(xpath) {
+        var node = _parseSingleNode(xpath, function (n) { return n; });
+        if (node == null) {
+            return null;
+        }
+        console.log('href : ' + node.href);
+        var array = [];
+        var actor = {};
+        var m = /av-actress\/([a-z-]+)/i.exec(node.href);
+        if (m != null) {
+            actor['name'] = m[1].replace('-', ' ');
+            actor['name'] = actor['name'].replace(/^([a-z])| ([a-z])/gi,
+                function (m) { return m.toUpperCase(); });
+        } else {
+            actor['name'] = node.textContent.trim();
+        }
+        array.push(actor);
+        return array;
+    }
+
     var result = document.evaluate("//article[contains(@class,'archive-list')]",
         document.body, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
     console.log('snapshotLength: ' + result.snapshotLength);

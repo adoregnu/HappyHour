@@ -1,67 +1,67 @@
-﻿const _PID = '{{pid}}';
+﻿(function () {
+    const _PID = '{{pid}}';
 
-function _parseSingleNode(_xpath) {
-    var result = document.evaluate(_xpath, document.body,
-        null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
-    var node = result.singleNodeValue;
-    if (node != null) {
-        return node.textContent.trim();
+    function _parseSingleNode(_xpath) {
+        var result = document.evaluate(_xpath, document.body,
+            null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+        var node = result.singleNodeValue;
+        if (node != null) {
+            return node.textContent.trim();
+        }
+        return null;
     }
-    return null;
-}
 
-function _parseMultiNode(xpath) {
-    var result = document.evaluate(xpath, document.body,
-        null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+    function _parseMultiNode(xpath) {
+        var result = document.evaluate(xpath, document.body,
+            null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
 
-    var array = [];
-    while (node = result.iterateNext()) {
-        array.push(node.textContent.trim());
+        var array = [];
+        while (node = result.iterateNext()) {
+            array.push(node.textContent.trim());
+        }
+        if (array.length > 0) {
+            return array;
+        }
+        return null;
     }
-    if (array.length > 0) {
+
+    function _parseActor(xpath) {
+        var result = document.evaluate(xpath, document.body,
+            null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+
+        var array = [];
+        while (node = result.iterateNext()) {
+            var actor = {};
+            var m = /([\w\s]+) \((.+)\)/i.exec(node.textContent);
+            if (m == null) {
+                actor['name'] = node.textContent.trim();
+            } else {
+                actor['name'] = m[1];
+                var alias = [];
+                while ((arr = /([\w\s]+),?/ig.exec(m[2])) !== null) {
+                    alias.push(arr[1]);
+                }
+                if (alias.length > 0) {
+                    actor['alias'] = alias;
+                }
+            }
+            array.push(actor);
+        }
         return array;
     }
-    return null;
-}
 
-function _parseActor(xpath) {
-    var result = document.evaluate(xpath, document.body,
-        null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
-
-    var array = [];
-    while (node = result.iterateNext()) {
-        var actor = {};
-        var m = /([\w\s]+) \((.+)\)/i.exec(node.textContent);
-        if (m == null) {
-            actor['name'] = node.textContent.trim();
-        } else {
-            actor['name'] = m[1];
-            var alias = [];
-            while ((arr = /([\w\s]+),?/ig.exec(m[2])) !== null) {
-                alias.push(arr[1]);
-            }
-            if (alias.length > 0) {
-                actor['alias'] = alias;
-            }
+    function _multiResult() {
+        var result = document.evaluate("//div[@class='movie-thumb']/a",
+            document.body, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+        if (result.snapshotLength == 1) {
+            CefSharp.PostMessage({ type: 'url', data: result.snapshotItem(0).href });
+            return 'redirected';
+        } else if (result.snapshotLength > 1) {
+            return 'ambiguous';
         }
-        array.push(actor);
+        return 'notfound';
     }
-    return array;
-}
 
-function _multiResult() {
-    var result = document.evaluate("//div[@class='movie-thumb']/a",
-        document.body, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
-    if (result.snapshotLength == 1) {
-        CefSharp.PostMessage({ type: 'url', data: result.snapshotItem(0).href });
-        return 'redirected';
-    } else if (result.snapshotLength > 1) {
-        return 'ambiguous';
-    }
-    return 'notfound';
-}
-
-(function () {
     if (_multiResult() != 'notfound') {
         return;
     }

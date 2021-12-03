@@ -160,8 +160,7 @@
 
     <DataTemplate x:Key="ScreenshotTemplate">
         <Grid Width="200" Height="150" >
-            <Image HorizontalAlignment="Center"
-                   ToolTipService.ShowDuration="20000"
+            <Image HorizontalAlignment="Center" ToolTipService.ShowDuration="20000"
                    Source="{Binding Converter={StaticResource PathToImageConverter}}">
                 <!--View Large Image on Image Control Tooltip-->
                 <Image.ToolTip>

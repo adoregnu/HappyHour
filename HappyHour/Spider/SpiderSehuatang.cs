@@ -11,7 +11,6 @@ using Scriban;
 using CefSharp;
 
 using HappyHour.ViewModel;
-using HappyHour.CefHandler;
 using HappyHour.Model;
 
 namespace HappyHour.Spider
@@ -59,7 +58,7 @@ namespace HappyHour.Spider
 
         protected override string GetScript(string name)
         {
-            Template template = Template.Parse(App.ReadResource(name));
+            var template = Template.Parse(App.ReadResource(name));
             return template.Render(new { Pid = Keyword, Board = SelectedBoard });
         }
 
@@ -263,7 +262,7 @@ namespace HappyHour.Spider
         {
             //base.OnSelected();
             Log.Print($"{Name} selected!");
-            DownloadHandler dh = Browser.DownloadHandler;
+            var dh = Browser.DownloadHandler;
             dh.OnBeforeDownloadFired += OnBeforeDownload;
             dh.OnDownloadUpdatedFired += OnDownloadUpdated;
         }
@@ -272,7 +271,7 @@ namespace HappyHour.Spider
         {
             Log.Print($"{Name} deselected!");
             //base.OnDeselect();
-            DownloadHandler dh = Browser.DownloadHandler;
+            var dh = Browser.DownloadHandler;
             dh.OnBeforeDownloadFired -= OnBeforeDownload;
             dh.OnDownloadUpdatedFired -= OnDownloadUpdated;
         }
