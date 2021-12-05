@@ -14,37 +14,70 @@
         }
         return null;
     }
+    function _parseMultiNode(xpath, _getter = null) {
+        var result = document.evaluate(xpath, document.body,
+            null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+
+        var array = [];
+        while (node = result.iterateNext()) {
+            if (_getter != null) {
+                array.push(_getter(node));
+            } else {
+                array.push(node.textContent.trim());
+            }
+        }
+        if (array.length > 0) {
+            return array;
+        }
+        return null;
+    }
 
     function _parseActor(xpath) {
-        var node = _parseSingleNode(xpath, function (n) { return n; });
-        if (node == null) {
+        var actorArray = _parseMultiNode(xpath, function (n) { return n; });
+        if (actorArray == null) {
             return null;
         }
-        console.log('href : ' + node.href);
+
         var array = [];
-        var actor = {};
-        var m = /av-actress\/([a-z-]+)/i.exec(node.href);
-        if (m != null) {
-            actor['name'] = m[1].replace('-', ' ');
-            actor['name'] = actor['name'].replace(/^([a-z])| ([a-z])/gi,
-                function (m) { return m.toUpperCase(); });
-        } else {
-            actor['name'] = node.textContent.trim();
+        for (var i = 0; i < actorArray.length; i++) {
+            var node = actorArray[i];
+            console.log('href : ' + node.href);
+            var actor = {};
+            var m = /av-actress\/([a-z-]+)/i.exec(node.href);
+            if (m != null) {
+                actor['name'] = m[1].replace('-', ' ');
+                actor['name'] = actor['name'].replace(/^([a-z])| ([a-z])/gi,
+                    function (m) { return m.toUpperCase(); });
+            } else {
+                actor['name'] = node.textContent.trim();
+            }
+            array.push(actor);
         }
-        array.push(actor);
         return array;
     }
 
-    var result = document.evaluate("//article[contains(@class,'archive-list')]",
-        document.body, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
-    console.log('snapshotLength: ' + result.snapshotLength);
-    if (result.snapshotLength != 1) {
-        CefSharp.PostMessage({ type: 'items', data: 0 });
+    function _multiResult() {
+        var urls = _parseMultiNode("//il[@class='search-readmore']/a/@href");
+        if (urls == null) {
+            return 'notfound';
+        }
+        if (url.length == 0) {
+            CefSharp.PostMessage({ type: 'url', data: urls[0] });
+            return 'redirected';
+        } else {
+            return 'ambiguous';
+        }
+    }
+
+    if (_multiResult() != 'notfound') {
         return;
     }
 
     var items = {
-        actor: { xpath: "//p[@class='actress-name']//a", handler: _parseActor },
+        actor: {
+            xpath: "//dl[@class='dltable']/dt[contains(., 'AV女優名')]/ollowing-sibling::dd/a",
+            handler: _parseActor
+        },
     };
 
     var msg = { type : 'items' }

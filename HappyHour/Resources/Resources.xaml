@@ -310,6 +310,9 @@
             <Trigger Property="IsPressed" Value="True">
                 <Setter Property="Foreground" Value="Gray" />
             </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Foreground" Value="Gray" />
+            </Trigger>
         </Style.Triggers>
         <Setter Property="Background" Value="Transparent" />
 

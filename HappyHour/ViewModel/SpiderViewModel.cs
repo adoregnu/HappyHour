@@ -121,42 +121,33 @@ namespace HappyHour.ViewModel
             WebBrowser.MenuHandler = new MenuHandler(this);
             WebBrowser.LifeSpanHandler = new PopupHandler();
 
-            WebBrowser.LoadingStateChanged += OnStateChanged;
-            WebBrowser.JavascriptMessageReceived += OnJavascriptMessageReceived;
+            WebBrowser.LoadingStateChanged += (s, e) =>
+                UiServices.Invoke(() => OnStateChanged(s, e), true);
+            WebBrowser.JavascriptMessageReceived += (s, e) =>
+                UiServices.Invoke(() => OnJavascriptMessageReceived(s, e), true);
             //WebBrowser.FrameLoadEnd += OnFrameLoaded;
             SelectedSpider = Spiders[0];
             SelectedSpider.SetCookies();
             Address = SelectedSpider.URL;
-#if false
-            _timer = new Timer(10)
-            {
-                AutoReset = false
-            };
-            _timer.Elapsed += (s, e) => SelectedSpider.Scrap();
-#endif
             ImageDownloader = new Downloader(this);
         }
 
-        //private Timer _timer;
         private void OnStateChanged(object sender, LoadingStateChangedEventArgs e)
         {
-            if (!e.IsLoading)
+            if (e.IsLoading)
             {
-                Log.Print($"Loading Done. Number of frames:{e.Browser.GetFrameCount()}");
-                if (IsAddressChanged)
-                {
-                    IsAddressChanged = false;
-                    SelectedSpider.Scrap();
-#if false
-                    if (_timer.Enabled)
-                    {
-                        _timer.Stop();
-                    }
-                    _timer.Start();
-#endif
-                }
+                return;
+            }
+
+            Log.Print($"Loading Done. rames:{e.Browser.GetFrameCount()}, " +
+                $"url:{e.Browser.MainFrame.Url}");
+            if (IsAddressChanged && e.Browser.MainFrame.Url == Address)
+            {
+                IsAddressChanged = false;
+                SelectedSpider.Scrap();
             }
         }
+
         private void SearchText(dynamic d)
         {
             if (d.action == "google_search")
@@ -175,7 +166,7 @@ namespace HappyHour.ViewModel
             }
             else if (d.action == "pid_search_in_spider")
             {
-                SpiderBase spider = Spiders.FirstOrDefault(s => s.Name == d.spider);
+                var spider = Spiders.FirstOrDefault(s => s.Name == d.spider);
                 if (spider != null)
                 {
                     spider.Keyword = d.data;
@@ -187,13 +178,12 @@ namespace HappyHour.ViewModel
         private void OnJavascriptMessageReceived(object sender,
             JavascriptMessageReceivedEventArgs e)
         {
-            //Log.Print(e.Message.ToString());
             try
             {
                 dynamic d = e.Message;
                 if (d.type == "text")
                 {
-                    UiServices.Invoke(() => SearchText(d));
+                    SearchText(d);
                 }
                 else
                 {

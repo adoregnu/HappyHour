@@ -23,10 +23,21 @@
             <Button Style="{DynamicResource ModernButtonStyle2}"
                     Command="{Binding SelectedSpider.CmdSearch}" Margin="5,0,0,0">
                 <Path Stretch="Uniform"
-                      Data="{Binding Source={StaticResource SearchStartIcon}, Path=Data}"
+                      Data="{Binding Source={StaticResource search-web}, Path=Data}"
                       Fill="{Binding Path=Foreground, RelativeSource=
                             {RelativeSource AncestorType={x:Type Button}}}" />
             </Button>
-        </StackPanel>            
+            <Button Style="{DynamicResource ModernButtonStyle2}"
+                    IsEnabled="{Binding SelectedSpider.IsSpiderWorking}"
+                    Command="{Binding SelectedSpider.CmdStopSpider}">
+                <Path Stretch="Uniform"
+                    Data="{Binding Source={StaticResource web-cancel}, Path=Data}"
+                    Fill="{Binding Path=Foreground, RelativeSource=
+                        {RelativeSource AncestorType={x:Type Button}}}" />
+                <Button.ToolTip>
+                    <TextBlock Text="Cancel current scrapping."/>
+                </Button.ToolTip>
+            </Button>
+        </StackPanel>
     </Grid>
 </UserControl>

@@ -19,7 +19,7 @@ namespace HappyHour.Spider
             //URL = "https://av-jamack.com/";
             URL = "https://avjamak01.com/";
             ScriptName = "AvJamak.js";
-            ParsingState = 0;
+            IsSpiderWorking = true;
         }
 
         protected override string GetScript(string name)
@@ -37,7 +37,7 @@ namespace HappyHour.Spider
                 }
             }
 
-            Template template = Template.Parse(App.ReadResource(name));
+            var template = Template.Parse(App.ReadResource(name));
             return template.Render((
                 Pid: Keyword,
                 Userid: userid,

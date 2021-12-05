@@ -47,6 +47,8 @@
                       Fill="{Binding Path=Foreground, RelativeSource=
                         {RelativeSource AncestorType={x:Type ToggleButton}}}"/>
             </ToggleButton>
+            <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" />
+ 
 <!--
             <ToggleButton
                 Style="{DynamicResource ModernToggleButtonStyle3}"

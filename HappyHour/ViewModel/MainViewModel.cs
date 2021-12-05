@@ -16,19 +16,17 @@ using HappyHour.Interfaces;
 
 namespace HappyHour.ViewModel
 {
-    class MainViewModel : ViewModelBase, IMainView
+    internal class MainViewModel : ViewModelBase, IMainView
     {
-        string _status;
-        bool _nasEnabled;
-        bool _spiderEnabled;
+        private string _status;
+        private bool _nasEnabled;
+        private bool _spiderEnabled;
 
         public ICommand CmdFileToFolder { get; private set; }
         public ICommand CmdActorEdtor { get; private set; }
 
-        public ObservableCollection<Pane> Docs { get; }
-            = new ObservableCollection<Pane>();
-        public ObservableCollection<Pane> Anchors { get; }
-            = new ObservableCollection<Pane>();
+        public ObservableCollection<Pane> Docs { get; } = new();
+        public ObservableCollection<Pane> Anchors { get; } = new();
 
         public string StatusMessage
         {
@@ -61,9 +59,9 @@ namespace HappyHour.ViewModel
             }
         }
         public IDialogService DialogService { get; set; }
-        readonly FileListViewModel _fileListMv;
-        readonly MediaListViewModel _mediaListMv;
-        readonly DbViewModel _dbViewMode;
+        private readonly FileListViewModel _fileListMv;
+        private readonly MediaListViewModel _mediaListMv;
+        private readonly DbViewModel _dbViewMode;
 
         public MainViewModel(IDialogService dialogService)
         {
@@ -93,7 +91,7 @@ namespace HappyHour.ViewModel
             _fileListMv.DirChanged?.Invoke(this, _fileListMv.CurrDirInfo);
         }
 
-        void OnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        private void OnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             switch (e.Action)
             {

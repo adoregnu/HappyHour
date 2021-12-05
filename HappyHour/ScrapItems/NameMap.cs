@@ -9,67 +9,88 @@ namespace HappyHour.ScrapItems
 {
     static class NameMap
     {
-        static Dictionary<string, string> _studioMap
-            = new Dictionary<string, string>
-            {
-                //{ "Emmanuelle", "Emmanuelle"},
-                { "h.m.p", "h.m.p"},
-                //{ "Daydream", "Mousouzoku"},
-                //{ "Daydreamers", "Mousouzoku"},
-                //{ "Mousouzoku", "Mousouzoku"},
-                //{ "Mousozoku", "Mousouzoku"},
-                { "scute", "S-Cute"},
-                { "sodcreate", "SOD Create"},
-                { "Tameike Goro-", "Tameike Goro" },
-                { "Kira ★ Kira", "kira*kira"},
-                { "JUICY HONEY", "Orustak Pictures" },
-                { "Honnaka", "Hon Naka" },
-                { "K.M.Produce", "K M Produce" },
-                { "Uchu Kikaku", "K M Produce" },
-                //{ "Real Works", "K M Produce" },
-                { "Crystal Eizou", "Crystal Eizo"},
-                { "Deeps", "Deep's"},
-                { "Kyandei", "Candy"},
-                { "MAX-A", "Max A"},
-                { "Saidobi-", "Nagae Style" },
-                { "Das !", "Das"},
-                //{ "一本道", "1pondo" },
-                { "Bi", "Chijo Heaven"},
-            };
+        private readonly static Dictionary<string, string> _studioMap = new()
+        {
+            //{ "Emmanuelle", "Emmanuelle"},
+            { "h.m.p", "h.m.p" },
+            //{ "Daydream", "Mousouzoku"},
+            //{ "Daydreamers", "Mousouzoku"},
+            //{ "Mousouzoku", "Mousouzoku"},
+            //{ "Mousozoku", "Mousouzoku"},
+            { "scute", "S-Cute" },
+            { "sodcreate", "SOD Create" },
+            { "Tameike Goro-", "Tameike Goro" },
+            { "Kira ★ Kira", "kira*kira" },
+            { "JUICY HONEY", "Orustak Pictures" },
+            { "Honnaka", "Hon Naka" },
+            { "K.M.Produce", "K M Produce" },
+            { "Uchu Kikaku", "K M Produce" },
+            //{ "Real Works", "K M Produce" },
+            { "Crystal Eizou", "Crystal Eizo" },
+            { "Deeps", "Deep's" },
+            { "Kyandei", "Candy" },
+            { "MAX-A", "Max A" },
+            { "Saidobi-", "Nagae Style" },
+            { "Das !", "Das" },
+            //{ "一本道", "1pondo" },
+            { "Bi", "Chijo Heaven" },
+        };
         public static string StudioName(string name)
         {
-            if (_studioMap.Any(i => name.Contains(i.Key)))
+            if (_studioMap.Any(i => name.Contains(i.Key, StringComparison.OrdinalIgnoreCase)))
             {
-                var found = _studioMap.First(i => name.Contains(i.Key));
-                return found.Value;
+                return _studioMap.First(i => name.Contains(i.Key, StringComparison.OrdinalIgnoreCase)).Value;
             }
             else
+            {
                 return name;
+            }
         }
 
-        static Dictionary<string, string> _actorMap
-            = new Dictionary<string, string>
-            {
-                { "Oohashi Miku", "Ohashi Miku" },
-                { "Mariya Nagai", "Maria Nagai" },
-                { "Yui Ooba", "Yui Oba" },
-                { "Yuu Shinoda", "Yu Shinoda" },
-                { "Hibiki Ootsuki", "Hibiki Otsuki"},
-                { "Haruki Satou", "Haruki Sato"},
-                { "Erika Momodani", "Erika Momotani" },
-                { "Sari Kousaka", "Sari Kosaka"},
-                { "Miyuu Amano", "Miyu Amano"},
-                { "Yuuri Arakawa", "Yuri Arakawa"},
-                { "Nozomi Asou", "Nozomi Aso"},
-                { "Maasa Matsushima", "Masa Matsushima"}
-            };
+        private static readonly Dictionary<string, string> _actorMap = new()
+        {
+            { "Oohashi Miku", "Ohashi Miku" },
+            { "Mariya Nagai", "Maria Nagai" },
+            { "Yui Ooba", "Yui Oba" },
+            { "Yuu Shinoda", "Yu Shinoda" },
+            { "Hibiki Ootsuki", "Hibiki Otsuki" },
+            { "Haruki Satou", "Haruki Sato" },
+            { "Erika Momodani", "Erika Momotani" },
+            { "Sari Kousaka", "Sari Kosaka" },
+            { "Miyuu Amano", "Miyu Amano" },
+            { "Yuuri Arakawa", "Yuri Arakawa" },
+            { "Nozomi Asou", "Nozomi Aso" },
+            { "Maasa Matsushima", "Masa Matsushima" }
+        };
 
         public static string ActorName(string name)
         {
-            if (_actorMap.ContainsKey(name))
-                return _actorMap[name];
-            else
-                return name;
+            return _actorMap.ContainsKey(name) ? _actorMap[name] : name;
+        }
+
+        private readonly static List<string> _skipGenre = new()
+        {
+            "1080p",
+            "60fps",
+            "Hi-Def",
+            "AV Idol",
+            "SALE",
+            "Sample",
+            "POV",
+            "****",
+            "Blu-ray",
+            "4K",
+            "Featured",
+            "Editor",
+            "Famous"
+        };
+        public static bool SkipGenre(string name)
+        {
+            if (_skipGenre.Any(g => name.Contains(g, StringComparison.OrdinalIgnoreCase)))
+            {
+                return true;
+            }
+            return false;
         }
     }
 }

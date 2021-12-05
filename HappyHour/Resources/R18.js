@@ -47,7 +47,7 @@
                 actorInfo['name'] = m[1];
                 var arr;
                 var alias = [];
-                console.log('alias: ' + m[2]);
+                //console.log('alias: ' + m[2]);
                 var re = /([\w\s]+),?/ig;
                 while ((arr = re.exec(m[2])) !== null) {
                     alias.push(arr[1].trim());
@@ -136,31 +136,44 @@
     }
 
     function _multiResult() {
-        var pattern = '/id=(h_)?(\d+)?';
+        var pattern = 'id=(h_)?([0-9]+)?';
         if (_PID.includes('-')) {
             var tmp = _PID.split('-');
-            pattern += tmp[0] + '\d*' + tmp[1];
+            pattern += tmp[0] + '0*' + tmp[1];
         } else {
             pattern += _PID;
         }
-        pattern += '/i';
 
-        const re = new RegExp(pattern);
+        const re = new RegExp(pattern, 'i');
         var result = document.evaluate("//li[starts-with(@class,'item-list')]/a",
             document.body, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
         var num_result = 0;
         while (node = result.iterateNext()) {
             num_result += 1;
-            if (re.test(node.href) !== null) {
+            if (re.test(node.href)) {
                 CefSharp.PostMessage({ type: 'url', data: node.href });
+                console.log('redirected: ' + node.href);
                 return 'redirected';
             }
         }
-        if (num_result > 0) {
+        if (num_result == 1) {
+            CefSharp.PostMessage({ type: 'items', data: 0 });
+            return "noresult";
+        }
+        else if (num_result > 1) {
             console.log('ambiguous, num_result:' + num_result);
             return 'ambiguous';
         }
         return 'notfound';
+    }
+
+    function _checkError() {
+        var err = document.querySelector('body > h1');
+        if (err != null && err.textContent.includes('502 ERROR')) {
+            CefSharp.PostMessage({ type: 'items', data: 0 });
+            return false;
+        }
+        return true;
     }
 
     function _checkResult() {
@@ -172,21 +185,21 @@
         return true;
     }
 
-    var _div_loaded = 0;
     var _is_scrolled = false;
     var _actor_exists = false;
 
     function _scroll() {
-        _is_scrolled = true;
         var actor = _parseSingleNode("//span[contains(.,'Appearing in this movie')]", get_node);
         if (actor == null) {
-           // window.scrollTo(0, document.body.scrollHeight / 2);
             console.log("no actresses in this movie.");
+            //window.scrollTo(0, document.body.scrollHeight / 2);
+            _parsePage();
         } else {
             var rect = actor.parentElement.getBoundingClientRect();
             window.scrollTo(0, rect.top);
             _actor_exists = true;
         }
+        _is_scrolled = true;
     }
 
     function mutationCallback(mutations) {
@@ -201,7 +214,6 @@
             mutation.addedNodes.forEach(function (node) {
                 if (node.nodeName == 'DIV') {
                     //console.log(node.nodeName + ' class=' + node.className);
-                    _div_loaded += 1;
                     if (node.className == INFO_CLASS_NAME) {
                         _scroll();
                     }
@@ -216,17 +228,19 @@
                     thumb_loaded = true;
                 }
             });
-            //console.log('_div_loaded: ' + _div_loaded);
         }
 
-        if (_is_scrolled) {
-            if ((!_actor_exists && _div_loaded == 6) ||
-                (_actor_exists && thumb_loaded)) {
+        if (_is_scrolled == true) {
+            if (_actor_exists && thumb_loaded) {
                 _parsePage();
             }
         }
     }
+    console.log(window.location.href);
 
+    if (!_checkError()) {
+        return;
+    }
 
     if (_multiResult() != 'notfound') {
         return;

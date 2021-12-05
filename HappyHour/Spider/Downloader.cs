@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using CefSharp;
 
 using HappyHour.ViewModel;
-using HappyHour.Model;
 using System;
 
 namespace HappyHour.Spider
@@ -60,8 +59,8 @@ namespace HappyHour.Spider
             var dic = _urls[e.OriginalUrl];
             if (dic.ContainsKey("cover"))
             {
-                MediaItem item = _spider.SearchMedia;
-                e.SuggestedFileName =  $"{item.MediaPath}\\{item.Pid}_poster{ext}";
+                var item = _spider.SearchMedia;
+                e.SuggestedFileName = $"{item.MediaPath}\\{item.Pid}_poster{ext}";
                 dic["cover"] = e.SuggestedFileName;
             }
             else
@@ -81,41 +80,10 @@ namespace HappyHour.Spider
                     $"({_numDownloaded}/{_numDownload}){e.FullPath}");
                 if (_downloadOngoing == false && _numDownloaded == _numDownload)
                 {
-                    _spider.UpdateItems(_items);
+                    UiServices.Invoke(() => _spider.UpdateItems(_items));
                 }
             }
         }
-
-        private static void IterateItems(IDictionary<string, object> items,
-            Action<string, IDictionary<string, object>> action)
-        {
-            foreach (var item in items)
-            {
-                if (item.Value == null)
-                {
-                    continue;
-                }
-                //Log.Print($"{spider.Keyword} : {item.Key} = {item.Value?.ToString()}");
-                if (item.Key == "cover")
-                {
-                    //Download(item.Value.ToString(), items);
-                    action(item.Value.ToString(), items);
-                }
-                else if (item.Key == "actor")
-                {
-                    var actors = (List<object>)item.Value;
-                    foreach (IDictionary<string, object> actor in actors)
-                    {
-                        if (actor.ContainsKey("thumb"))
-                        {
-                            //Download(actor["thumb"].ToString(), actor);
-                            action(actor["thumb"].ToString(), actor);
-                        }
-                    }
-                }
-            }
-        }
-
         public void DownloadFiles(SpiderBase spider, IDictionary<string, object> items)
         {
             if (_numDownload != _numDownloaded || _downloadOngoing)
@@ -130,13 +98,24 @@ namespace HappyHour.Spider
 
             _spider = spider;
             _items = items;
-            IterateItems(items, (key, val) => _numDownload++);
-            IterateItems(items, (key, val) =>
-            {
-                _urls.Add(key, val);
-                _browser.Download(key);
+            SpiderBase.IterateDynamic(items, (key, obj) => {
+                if (key is "cover" or "thumb") { _numDownload++; }
+                return false;
             });
-            if (_numDownload == 0)
+            Log.Print($"{spider.Name}: _numDownload: {_numDownload}");
+            if (_numDownload > 0)
+            {
+                SpiderBase.IterateDynamic(items, (key, dict) => {
+                    if (key is "cover" or "thumb")
+                    {
+                        var url = dict[key].ToString();
+                        _urls.Add(url, dict);
+                        _browser.Download(url);
+                    }
+                    return false;
+                });
+            }
+            else
             {
                 spider.UpdateItems(items);
             }

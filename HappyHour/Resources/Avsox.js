@@ -67,7 +67,7 @@
         for (var i = 0; i < result.snapshotLength; i++) {
             var anode = result.snapshotItem(i);
             var pid = _parseSingleNode("//date[1]", anode, result);
-            console.log('PID: ' + pid);
+            //console.log('PID: ' + pid);
             if (pid != null || re.test(pid.replace('_', '-'))) {
                 CefSharp.PostMessage({ type: 'url', data: anode.href });
                 return 'redirected';

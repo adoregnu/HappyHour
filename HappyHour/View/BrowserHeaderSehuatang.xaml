@@ -30,21 +30,14 @@
             <Button Margin="5,0,0,0" Command="{Binding SelectedSpider.CmdSearch}"
                     Style="{DynamicResource ModernButtonStyle2}">
                 <Path Stretch="Uniform"
-                      Data="{Binding Source={StaticResource SearchStartIcon}, Path=Data}"
+                      Data="{Binding Source={StaticResource search-web}, Path=Data}"
                       Fill="{Binding Path=Foreground, RelativeSource=
                             {RelativeSource AncestorType={x:Type Button}}}" />
             </Button>
             <Button Style="{DynamicResource ModernButtonStyle2}"
                     Command="{Binding SelectedSpider.CmdStop}">
                 <Path Stretch="Uniform"
-                    Data="{Binding Source={StaticResource SearchStopIcon}, Path=Data}"
-                    Fill="{Binding Path=Foreground, RelativeSource=
-                        {RelativeSource AncestorType={x:Type Button}}}" />
-            </Button>
-            <Button Style="{DynamicResource ModernButtonStyle2}"
-                    Command="{Binding SelectedSpider.CmdNext}">
-                <Path Stretch="Uniform"
-                    Data="{Binding Source={StaticResource NextIcon}, Path=Data}"
+                    Data="{Binding Source={StaticResource web-cancel}, Path=Data}"
                     Fill="{Binding Path=Foreground, RelativeSource=
                         {RelativeSource AncestorType={x:Type Button}}}" />
             </Button>

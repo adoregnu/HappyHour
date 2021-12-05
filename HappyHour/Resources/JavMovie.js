@@ -47,7 +47,10 @@
             }
             array.push(actor);
         }
-        return array;
+        if (array.length > 0) {
+            return array;
+        }
+        return null;
     }
 
     function _multiResult() {

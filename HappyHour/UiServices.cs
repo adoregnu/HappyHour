@@ -80,7 +80,7 @@ namespace HappyHour
             }
         }
 
-        public static void Invoke(Action action, bool async = false)
+        public static async void Invoke(Action action, bool async = false)
         {
             if (Application.Current != null)
             {
@@ -92,7 +92,7 @@ namespace HappyHour
                 else
                 {
                     if (async)
-                        dispatchObject.BeginInvoke(action);
+                        await dispatchObject.BeginInvoke(action);
                     else
                         dispatchObject.Invoke(action);
                 }

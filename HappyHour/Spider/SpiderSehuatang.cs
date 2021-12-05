@@ -37,7 +37,6 @@ namespace HappyHour.Spider
         public bool StopOnExistingId { get; set; } = true;
 
         public ICommand CmdStop { get; private set; }
-        public ICommand CmdNext { get; private set; }
         public SpiderSehuatang(SpiderViewModel browser) : base(browser)
         {
             Name = "sehuatang";
@@ -49,10 +48,8 @@ namespace HappyHour.Spider
                 "censored", "uncensored", "subtitle"
             };
             CmdStop = new RelayCommand(() => _scrapRunning = false);
-            //CmdNext = new RelayCommand(() => Next());
 
             _dataPath = GetConf("DataPath");
-
             _images = new Dictionary<string, string>();
         }
 
@@ -218,7 +215,7 @@ namespace HappyHour.Spider
 
         public override void Navigate2(MediaItem _)
         {
-            ParsingState = 0;
+            IsSpiderWorking = true;
             _pageNum = 1;
             _scrapRunning = true;
             if (Browser.Address == URL)
@@ -253,8 +250,10 @@ namespace HappyHour.Spider
             }
             if (_toDownload == _numDownloaded)
             {
-                UpdateMedia();
-                MoveNextItem();
+                UiServices.Invoke( () => {
+                    UpdateMedia();
+                    MoveNextItem();
+                });
             }
         }
 

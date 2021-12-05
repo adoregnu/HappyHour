@@ -83,6 +83,10 @@ namespace HappyHour.ScrapItems
             _genres = new List<AvGenre>();
             foreach (string genre in genres)
             {
+                if (NameMap.SkipGenre(genre))
+                {
+                    continue;
+                }
                 AvGenre entity = _context.Genres.FirstOrDefault(
                     x => x.Name.ToLower() == genre.ToLower());
                 if (entity == null)
@@ -124,14 +128,13 @@ namespace HappyHour.ScrapItems
         {
             foreach (var item in dict)
             {
-                if (item.Key == "thumb" || item.Value == null)
+                if (item.Value == null)
                 {
                     continue;
                 }
-                if (item.Key == "alias")
+                if (item.Key == "alias" && item.Value is List<object> alias)
                 {
                     bool exitLoop = false;
-                    var alias = (List<object>)item.Value;
                     foreach (string a in alias)
                     {
                         if (action(a.ToString()))
@@ -145,7 +148,7 @@ namespace HappyHour.ScrapItems
                         break;
                     }
                 }
-                else
+                else if (item.Key == "name")
                 {
                     if (action(item.Value.ToString()))
                     {
@@ -163,7 +166,7 @@ namespace HappyHour.ScrapItems
                 ForEachActor(actor, val =>
                 {
                     dbName = _context.ActorNames
-                        .Include(n => n.Actor)
+                        .Include(n => n.Actor).ThenInclude(a => a.Names)
                         .Where(n => n.Name.ToLower() == val.ToLower())
                         .Where(n => n.Actor != null)
                         .FirstOrDefault();

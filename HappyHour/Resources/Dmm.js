@@ -15,7 +15,7 @@
         var result = document.evaluate("//p[@class='tmb']/a",
             document.body, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
 
-        const re = new RegExp('cid=(h_)?(\d+)?' + _PID.split('-')[0], 'i');
+        const re = new RegExp(_PID.replace('-', ''), 'i');
         for (var i = 0; i < result.snapshotLength; i++) {
             var node = result.snapshotItem(i);
             if (re.test(node.href)) {

@@ -18,11 +18,17 @@ namespace HappyHour.Spider
     internal class SpiderBase : NotifyPropertyChanged
     {
         private static string _keyword;
-        private bool _isCookieSet;
         private MediaItem _selectedMedia;
-        private MediaItem _searchMedia;
+        private bool _saveDb;
+        private bool _isCookieSet;
+        private bool _isSpiderWorking;
+        private readonly Queue<IDictionary<string, object>> _itemQueue = new();
 
-        public int ParsingState = -1;
+        public bool IsSpiderWorking
+        {
+            get => _isSpiderWorking;
+            set => Set(ref _isSpiderWorking, value);
+        }
 
         public SpiderViewModel Browser { get; private set; }
         public ScrapCompletedHandler ScrapCompleted { get; set; }
@@ -52,11 +58,13 @@ namespace HappyHour.Spider
         }
 
         public ICommand CmdSearch { get; private set; }
+        public ICommand CmdStopSpider { get; set; }
 
         public SpiderBase(SpiderViewModel br)
         {
             Browser = br;
             CmdSearch = new RelayCommand(() => { Navigate2(); });
+            CmdStopSpider = new RelayCommand(() => OnScrapCompleted(false));
         }
 
         public virtual void OnSelected()
@@ -106,18 +114,114 @@ namespace HappyHour.Spider
                 Log.Print($"{Name}: Empty keyword!");
                 return;
             }
-            ParsingState = 0;
+            IsSpiderWorking = true;
+            _saveDb = false;
             if (searchMedia != null)
             {
                 Keyword = searchMedia.Pid;
                 SearchMedia = searchMedia;
+                _saveDb = true;
+            }
+            else if (SelectedMedia != null && SelectedMedia.Pid == Keyword)
+            {
+                SearchMedia = SelectedMedia;
             }
             Browser.SelectedSpider = this;
         }
 
+        public static bool IterateDynamic(IDictionary<string, object> dict,
+           Func<string, IDictionary<string, object>, bool> action)
+        {
+            bool IterateList(string key, List<object> list)
+            {
+                foreach (var obj in list)
+                {
+                    if (obj is IDictionary<string, object> dict2)
+                    {
+                        if (!IterateDynamic(dict2, action))
+                        {
+                            return false;
+                        }
+                    }
+                    else if (obj is List<object> list2)
+                    {
+                        if (!IterateList(key, list2))
+                        {
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        //action(key, obj);
+                    }
+                }
+                return true;
+            }
+
+            foreach (var item in dict)
+            {
+                if (item.Value == null)
+                {
+                    continue;
+                }
+                if (item.Value is IDictionary<string, object> dictionary)
+                {
+                    if (!IterateDynamic(dictionary, action))
+                    {
+                        return false;
+                    }
+                }
+                else if (item.Value is List<object> list)
+                {
+                    if (!IterateList(item.Key, list))
+                    {
+                        return false;
+                    }
+                }
+                else if (action(item.Key, dict))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private bool FollowLink()
+        {
+            if (_itemQueue.Count == 0)
+            {
+                return false;
+            }
+            string link = null;
+            IterateDynamic(_itemQueue.Peek(), (key, dict) => {
+                if (key == "link")
+                {
+                    link = dict[key].ToString();
+                    dict.Remove(key);
+                    return true;
+                }
+                return false;
+            });
+
+            if (!string.IsNullOrEmpty(link))
+            {
+                Browser.Address = link;
+                return true;
+            }
+
+            _itemQueue.Dequeue();
+            return FollowLink();
+        }
+
         protected virtual void OnScrapCompleted(bool bUpdated)
         {
-            ParsingState = -1;
+            if (bUpdated && FollowLink())
+            {
+                return;
+            }
+
+            _itemQueue.Clear();
+            IsSpiderWorking = false;
             Log.Print($"{Name}: {Keyword} ScrapCompleted");
 
             if (bUpdated && SearchMedia != null)
@@ -130,7 +234,7 @@ namespace HappyHour.Spider
 
         public virtual void Scrap()
         {
-            if (ParsingState >= 0 && !string.IsNullOrEmpty(ScriptName))
+            if (IsSpiderWorking && !string.IsNullOrEmpty(ScriptName))
             {
                 Browser.ExecJavaScript(GetScript(ScriptName));
                 return;
@@ -150,9 +254,10 @@ namespace HappyHour.Spider
                 if (d.data == 0)
                 {
                     Log.Print($"{Name}: No exact matched ID");
-                    UiServices.Invoke(() => OnScrapCompleted(false));
+                    OnScrapCompleted(false);
                     return;
                 }
+                _itemQueue.Enqueue(d);
                 try
                 {
                     if (SearchMedia != null)
@@ -181,11 +286,11 @@ namespace HappyHour.Spider
 
         public void UpdateItems(IDictionary<string, object> items)
         {
-            UiServices.Invoke(() =>
+            if (_saveDb)
             {
                 UpdateDb(items);
-                OnScrapCompleted(true);
-            });
+            }
+            OnScrapCompleted(true);
         }
 
         public override string ToString()

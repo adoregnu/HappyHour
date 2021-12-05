@@ -1,12 +1,16 @@
 ﻿(function () {
     const _PID = '{{pid}}';
 
-    function _parseSingleNode(_xpath) {
+    function _parseSingleNode(_xpath, getter = null) {
         var result = document.evaluate(_xpath, document.body,
             null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
         var node = result.singleNodeValue;
         if (node != null) {
-            return node.textContent.trim();
+            if (getter != null) {
+                return getter(node);
+            } else {
+                return node.textContent.trim();
+            }
         }
         return null;
     }
@@ -63,7 +67,10 @@
         const parser = [_date, _actor];
 
         var count = 0;
-        var p = _parseSingleNode(xpath);
+        var p = _parseSingleNode(xpath, function (node) { return node; });
+        if (p == null || p.childNodes == null) {
+            return count;
+        }
         console.log('content node len:' + p.childNodes.length);
         for (var i = 0; i < p.childNodes.length; i++) {
             var node = p.childNodes[i];
