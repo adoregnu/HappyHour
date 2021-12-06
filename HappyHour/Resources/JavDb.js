@@ -99,28 +99,27 @@
     }
 
     function _parseActorPage() {
-        var xpath = "//div[@class='column section-title']/h2/span[@class='actor-section-name']";
-        var txt = _parseSingleNode(xpath);
-
+        if (!document.location.href.includes('/actors/')) {
+            return false;
+        }
+        var txt = _parseSingleNode("//span[@class='actor-section-name']");
+        if (txt == null) {
+            return false;
+        }
         var actors = [];
-        if (txt != null) {
-            var tmp = txt.split(',');
-            var actor = { name: tmp.length > 1 ? tmp[1].trim() : tmp[0].trim() };
+        var tmp = txt.split(',');
+        var actor = { name: tmp.length > 1 ? tmp[1].trim() : tmp[0].trim() };
 
-            xpath = "//div[contains(@class, 'actor-avatar')]//span[@class='avatar']/@style";
-            txt = _parseSingleNode(xpath);
-            if (txt != null && (m = /url\((.+)\)/i.exec(txt)) != null) {
-                actor["thumb"] = m[1];
-            }
-            actors.push(actor);
+        xpath = "//div[contains(@class, 'actor-avatar')]//span[@class='avatar']/@style";
+        txt = _parseSingleNode(xpath);
+        if (txt != null && (m = /url\((.+)\)/i.exec(txt)) != null) {
+            actor["thumb"] = m[1];
         }
-        if (actors.length > 0) {
-            var msg = { type: 'items', data: 1, actor: actors };
-            console.log(JSON.stringify(msg));
-            CefSharp.PostMessage(msg);
-            return true;
-        }
-        return false;
+        actors.push(actor);
+
+        var msg = { type: 'items', data: 1, actor: actors };
+        console.log(JSON.stringify(msg));
+        CefSharp.PostMessage(msg);
     }
 
     if (_parseActorPage()) {

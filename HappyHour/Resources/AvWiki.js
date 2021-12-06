@@ -1,9 +1,9 @@
 ﻿(function () {
     const _PID = '{{pid}}';
 
-    function _parseSingleNode(_xpath, _getter = null) {
-        var result = document.evaluate(_xpath, document.body,
-            null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+    function _parseSingleNode(_xpath, _getter = null, _node = document.body, _result = null, ) {
+        var result = document.evaluate(_xpath, _node, null,
+            XPathResult.FIRST_ORDERED_NODE_TYPE, _result);
         var node = result.singleNodeValue;
         if (node != null) {
             if (_getter != null) {
@@ -31,9 +31,10 @@
         }
         return null;
     }
+    function get_node(n) { return n; }
 
     function _parseActor(xpath) {
-        var actorArray = _parseMultiNode(xpath, function (n) { return n; });
+        var actorArray = _parseMultiNode(xpath, get_node);
         if (actorArray == null) {
             return null;
         }
@@ -41,27 +42,73 @@
         var array = [];
         for (var i = 0; i < actorArray.length; i++) {
             var node = actorArray[i];
-            console.log('href : ' + node.href);
+            //console.log('href : ' + node.href);
             var actor = {};
             var m = /av-actress\/([a-z-]+)/i.exec(node.href);
             if (m != null) {
-                actor['name'] = m[1].replace('-', ' ');
-                actor['name'] = actor['name'].replace(/^([a-z])| ([a-z])/gi,
+                if (m[1] == 'unknown') {
+                    console.log('unknown actor!');
+                    continue;
+                }
+                var tmp = m[1].replace('-', ' ');
+                tmp = tmp.replace(/^([a-z])| ([a-z])/gi,
                     function (m) { return m.toUpperCase(); });
+                actor['name'] = tmp.split(' ').reverse().join(' ');
+                actor['alias'] = [node.textContent.trim()];
             } else {
                 actor['name'] = node.textContent.trim();
             }
+            actor['link'] = node.href;
             array.push(actor);
         }
-        return array;
+        if (array.length > 0) {
+            return array;
+        }
+        return null;
+    }
+
+    function _parseActorPage() {
+        if (!document.location.href.includes('/av-actress/')) {
+            return false;
+        }
+        var node = _parseSingleNode("//div[contains(@class, 'actress-col')]", get_node);
+        if (node == null) {
+            console.log('no actress col');
+            CefSharp.PostMessage({ type: 'items', data:0 });
+            return true;
+        }
+        actor = {};
+        var name = _parseSingleNode("//dt[contains(.,'AV女優名')]/following-sibling::dd", null ,node);
+        if (name != null && (m = /(.+)（(.+)）/.exec(name)) != null) {
+            //console.log(m[0]);
+            actor['name'] = m[1];
+        }
+        var img = _parseSingleNode("//div[@class='actress-image']/img/@src", null, node);
+        if (img != null) {
+            //console.log('thumb: ' + img);
+            actor['thumb'] = img;
+        }
+        var alias = _parseSingleNode("//dt[contains(.,'別名義')]/following-sibling::dd", null, node);
+        if (alias != null && alias.trim() != '' && alias.trim() != '– – –') {
+            var alias_array = [];
+            var array = alias.split(/、|・/);
+            //console.log('alias:' + alias + ', count:' + array.length);
+            for (var i = 0; i < array.length; i++) {
+                alias_array.push(array[i].split('（')[0]);
+            }
+            actor['alias'] = alias_array;
+        }
+        console.log(JSON.stringify(actor));
+        CefSharp.PostMessage({type: 'items', data:1, actor:[actor]});
+        return true;
     }
 
     function _multiResult() {
-        var urls = _parseMultiNode("//il[@class='search-readmore']/a/@href");
+        var urls = _parseMultiNode("//li[@class='search-readmore']/a/@href");
         if (urls == null) {
             return 'notfound';
         }
-        if (url.length == 0) {
+        if (urls.length == 1) {
             CefSharp.PostMessage({ type: 'url', data: urls[0] });
             return 'redirected';
         } else {
@@ -69,13 +116,21 @@
         }
     }
 
+    if (_parseActorPage()) {
+        return;
+    }
+
     if (_multiResult() != 'notfound') {
         return;
     }
 
     var items = {
+        title: { xpath : "//div[@class='article-header']/h1/text()"}, 
+        cover: { xpath: "//div[contains(@class,'article-thumbnail')]/a/img/@src" },
+        studio: { xpath: "//dl[@class='dltable']/dt[contains(., 'レーベル')]/following-sibling::dd" },
+        date: { xpath: "//dl[@class='dltable']/dt[contains(., '配信開始日')]/following-sibling::dd" },
         actor: {
-            xpath: "//dl[@class='dltable']/dt[contains(., 'AV女優名')]/ollowing-sibling::dd/a",
+            xpath: "//dl[@class='dltable']/dt[contains(., 'AV女優名')]/following-sibling::dd/a",
             handler: _parseActor
         },
     };

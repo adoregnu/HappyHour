@@ -56,7 +56,9 @@
                     actorInfo['alias'] = alias;
                 }
             }
-            actorInfo['thumb'] = node.src;
+            if (!node.src.endsWith('printing')) {
+                actorInfo['thumb'] = node.src;
+            }
             array.push(actorInfo);
         }
         if (array.length > 0)
@@ -236,7 +238,7 @@
             }
         }
     }
-    console.log(window.location.href);
+    //console.log(window.location.href);
 
     if (!_checkError()) {
         return;

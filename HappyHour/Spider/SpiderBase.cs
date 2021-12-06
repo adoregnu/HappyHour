@@ -215,7 +215,7 @@ namespace HappyHour.Spider
 
         protected virtual void OnScrapCompleted(bool bUpdated)
         {
-            if (bUpdated && FollowLink())
+            if (/*bUpdated && */FollowLink())
             {
                 return;
             }

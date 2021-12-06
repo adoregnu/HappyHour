@@ -1,10 +1,10 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Collections.Generic;
 
 using CefSharp;
 
 using HappyHour.ViewModel;
-using System;
 
 namespace HappyHour.Spider
 {
@@ -12,7 +12,6 @@ namespace HappyHour.Spider
     {
         private int _numDownload;
         private int _numDownloaded;
-        private bool _downloadOngoing;
         private bool _isEnabled;
         private readonly string _actorPicturePath;
         private readonly SpiderViewModel _browser;
@@ -78,22 +77,22 @@ namespace HappyHour.Spider
                 _numDownloaded++;
                 Log.Print($"{_spider.SearchMedia.Pid} : Download Completed: " +
                     $"({_numDownloaded}/{_numDownload}){e.FullPath}");
-                if (_downloadOngoing == false && _numDownloaded == _numDownload)
+                if (_numDownloaded == _numDownload)
                 {
                     UiServices.Invoke(() => _spider.UpdateItems(_items));
                 }
             }
         }
+
         public void DownloadFiles(SpiderBase spider, IDictionary<string, object> items)
         {
-            if (_numDownload != _numDownloaded || _downloadOngoing)
+            if (_numDownload != _numDownloaded)
             {
                 Log.Print("download is ongoing...");
                 return;
             }
             _numDownload = 0;
             _numDownloaded = 0;
-            _downloadOngoing = true;
             _urls.Clear();
 
             _spider = spider;
@@ -119,7 +118,6 @@ namespace HappyHour.Spider
             {
                 spider.UpdateItems(items);
             }
-            _downloadOngoing = false;
         }
     }
 }
