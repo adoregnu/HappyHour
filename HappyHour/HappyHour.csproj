@@ -62,6 +62,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Model\MediaItem.cs" />
     <Compile Remove="ScrapItems\AvItemBase.cs" />
     <Compile Remove="ScrapItems\IScrapItem.cs" />
     <Compile Remove="ScrapItems\ItemAVE.cs" />

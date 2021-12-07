@@ -64,17 +64,60 @@ namespace HappyHour.Model
             }
         }
 
+        public void Move(string target, Action<AvMovie> OnCompleted)
+        {
+            try
+            {
+                if (char.ToUpper(Path[0], App.enUS) == char.ToUpper(target[0], App.enUS))
+                {
+                    target += "\\" + Pid;
+                    Directory.Move(Path, target);
+                    Path = target;
+                    if (MovieInfo != null)
+                    {
+                        MovieInfo.Path = target;
+                        App.DbContext.SaveChanges();
+                    }
+                    OnCompleted(this);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Print("Mvoe:", ex);
+            }
+        }
+
+        public bool Delete()
+        {
+            try
+            {
+                if (MovieInfo != null)
+                {
+                    App.DbContext.Items.Remove(MovieInfo);
+                    App.DbContext.SaveChanges();
+                }
+                Directory.Delete(Path, true);
+            }
+            catch (Exception ex)
+            {
+                Log.Print("Delete:", ex);
+                return false;
+            }
+            return true;
+        }
+
         private void UpdateProperties()
         {
             string tmp = Pid;
             if (Subtitles.Count > 0)
             {
-                tmp += "(sub)\n";
+                tmp += "(sub)";
             }
+            tmp += "\n";
             if (MovieInfo == null)
             {
                 tmp += Date.ToString("u");
-                Actresses = "";
+                Actresses = "Not Scrapped";
             }
             else
             {

@@ -34,15 +34,14 @@ namespace HappyHour.Converter
             return image;
         }
 
-        public object Convert(object value_, Type targetType_,
-            object parameter_, CultureInfo culture_)
+        public object Convert(object value, Type targetType,
+            object parameter, CultureInfo culture)
         {
             try
             {
-                if (value_ is string path)
+                if (value is string path)
                 {
-                    var width = parameter_ != null ?
-                        int.Parse(parameter_.ToString()) : 0;
+                    int width = parameter != null ? int.Parse(parameter.ToString()) : 0;
                     if (width is not 0 and < 150)
                     {
                         path = $"{App.LocalAppData}\\db\\" + path;
@@ -55,8 +54,10 @@ namespace HappyHour.Converter
             catch (Exception ex)
             {
                 //Log.Print(ex.Message);
-                if (value_ is string path)
-                    Log.Print($"{ex.Message}: {path}, {parameter_}");
+                if (value is string path)
+                {
+                    Log.Print($"{ex.Message}: {path}, {parameter}");
+                }
             }
             return new BitmapImage(new Uri(@"pack://application:,,,/" +
                             "Resources/default-fallback-image.png"));

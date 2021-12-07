@@ -93,7 +93,7 @@
             //director: { xpath: "//h3[contains(.,'Director')]/following-sibling::div/text()" },
             series: { xpath: "//h3[contains(.,'Series')]/following-sibling::div//a/text()" },
             studio: { xpath: "//h3[contains(.,'Studio')]/following-sibling::div/a/text()" },
-            label: { xpath: "//h3[contains(.,'Label')]/following-sibling::div//a/text()" },
+            //label: { xpath: "//h3[contains(.,'Label')]/following-sibling::div//a/text()" },
             genre: {
                 xpath: "//h3[contains(.,'Categories')]/following-sibling::div/span//text()",
                 handler: _parseMultiNode
@@ -135,7 +135,7 @@
     }
 
     function parseSearchResult() {
-        var result = _parseSingleNode('//*[@id="contents"]/div[2]/section/ul/li[1]/div/div');
+        var result = _parseSingleNode("//div[@class='col02']/div");
         if (result == '0 titles found') {
             CefSharp.PostMessage({ type: 'items', data: 0 });
             return;
@@ -152,11 +152,11 @@
 
         var url;
         var num_matched = 0;
-        var nodes = _parseMultiNode("//li[starts-with(@class,'item-list')]/a");
-        for (i = 0, node = nodes[i]; i < nodes.length; i++) {
-            if (re.test(node.href)) {
+        var urls = _parseMultiNode("//li[starts-with(@class,'item-list')]/a/@href");
+        for (var i = 0; i < urls.length; i++) {
+            if (re.test(urls[i])) {
+                url = urls[i];
                 num_matched++;
-                url = node.href;
             }
         }
         if (num_matched == 1) {

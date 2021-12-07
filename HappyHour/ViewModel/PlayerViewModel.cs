@@ -1,13 +1,10 @@
 ﻿using System;
 using System.IO;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Input;
-using System.Windows.Threading;
 
 using Unosquare.FFME;
 using Unosquare.FFME.Common;
@@ -21,12 +18,15 @@ using HappyHour.Interfaces;
 
 namespace HappyHour.ViewModel
 {
-    class PlayerViewModel : Pane, IDisposable
+    internal class PlayerViewModel : Pane, IDisposable
     {
-        bool _isPropertiesPanelOpen = App.IsInDesignMode;
-        bool _isPlayerLoaded = App.IsInDesignMode;
-        bool _isPlaying = false;
-        AvMovie _avMovie;
+        private bool _isPropertiesPanelOpen = App.IsInDesignMode;
+        private bool _isPlayerLoaded = App.IsInDesignMode;
+        private bool _isPlaying;
+        private int _fileIndex;
+
+        private AvMovie _avMovie;
+        private IMediaList _mediaList;
 
         public AvMovie Movie
         {
@@ -62,16 +62,8 @@ namespace HappyHour.ViewModel
             set => Set(ref _isPlaying, value);
         }
 
-        public string BackgroundImage
-        {
-            get
-            {
-                if (MediaPlayer.IsOpen && Movie != null)
-                    return Movie.Poster;
-                else
-                    return null;
-            }
-        }
+        public string BackgroundImage =>
+            MediaPlayer.IsOpen && Movie != null ? Movie.Poster : null;
 
         //public ICommand MouseEnterCommand { get; private set; }
         //public ICommand MouseLeaveCommand { get; private set; }
@@ -84,7 +76,6 @@ namespace HappyHour.ViewModel
         public ICommand BackCommand { get; private set; }
         public ICommand NextCommand { get; private set; }
 
-        IMediaList _mediaList;
         public IMediaList MediaList
         {
             get => _mediaList;
@@ -126,14 +117,13 @@ namespace HappyHour.ViewModel
             IsPlayerLoaded = true;
         }
 
-        int _fileIndex = 0;
-        void InitMediaEventHandler()
+        private void InitMediaEventHandler()
         {
             //MediaPlayer.MediaReady += OnMediaReady;
             //MediaPlayer.MediaInitializing += OnMediaInitializing;
             MediaPlayer.MediaEnded += OnMediaEnded;
             MediaPlayer.MediaOpening += OnMediaOpening;
-            MediaPlayer.WhenChanged(() =>  
+            MediaPlayer.WhenChanged(() =>
                 IsPlaying = MediaPlayer.IsPlaying ||
                     MediaPlayer.IsSeeking ||
                     MediaPlayer.MediaState == MediaPlaybackState.Pause,
@@ -144,7 +134,7 @@ namespace HappyHour.ViewModel
 
             this.WhenChanged(() =>
             {
-                var numFiles = Movie != null ? Movie.Files.Count : 0;
+                int numFiles = Movie != null ? Movie.Files.Count : 0;
                 Controller.BackButtonVisibility = (numFiles > 0 && _fileIndex > 0) ?
                     Visibility.Visible : Visibility.Collapsed;
                 Controller.NextButtonVisibility = (numFiles > 0 && _fileIndex >= 0 && _fileIndex < numFiles - 1) ?
@@ -154,7 +144,7 @@ namespace HappyHour.ViewModel
 
         public void SetMediaItem(IAvMedia media)
         {
-            if (media == null) return;
+            if (media is null or not AvMovie) { return; }
 
             Movie = (AvMovie)media;
             IsSelected = true;
@@ -162,45 +152,47 @@ namespace HappyHour.ViewModel
             Open();
         }
 
-        async void Open()
-        { 
+        private async void Open()
+        {
             if (MediaPlayer.IsOpen)
             {
-                await MediaPlayer.Close();
+                _ = await MediaPlayer.Close();
             }
 
-            var file = Path.GetFileName(Movie.Files[_fileIndex]);
+            string file = Path.GetFileName(Movie.Files[_fileIndex]);
             Title = $"{file} ({_fileIndex + 1}/{Movie.Files.Count})";
-            await MediaPlayer.Open(new Uri(Movie.Files[_fileIndex]));
+            _ = await MediaPlayer.Open(new Uri(Movie.Files[_fileIndex]));
             RaisePropertyChanged(nameof(Movie));
         }
 
-        async void Close()
+        private async void Close()
         {
             Title = "Player";
             if (MediaPlayer.IsOpen)
-                await MediaPlayer.Close();
+            {
+                _ = await MediaPlayer.Close();
+            }
             Movie = null;
         }
 
-        void Back()
+        private void Back()
         {
             _fileIndex = (_fileIndex - 1) % Movie.Files.Count;
             Open();
         }
 
-        void Next()
+        private void Next()
         {
             _fileIndex = (_fileIndex + 1) % Movie.Files.Count;
             Open();
         }
 
-        static void ConvertEncodingIfNeeded(string subPath)
+        private static void ConvertEncodingIfNeeded(string subPath)
         {
             ICharsetDetector cdet = new CharsetDetector();
             try
             {
-                using FileStream fs = new (subPath, FileMode.Open);
+                using FileStream fs = new(subPath, FileMode.Open);
                 cdet.Feed(fs);
                 cdet.DataEnd();
                 if (cdet.Charset == "UTF-8")
@@ -212,8 +204,8 @@ namespace HappyHour.ViewModel
                 Log.Print("Charset: {0}, confidence: {1}", cdet.Charset, cdet.Confidence);
 
                 fs.Position = 0;
-                StreamReader sr = new (fs, Encoding.GetEncoding("euc-kr"), true);
-                var text = sr.ReadToEnd();
+                StreamReader sr = new(fs, Encoding.GetEncoding("euc-kr"), true);
+                string text = sr.ReadToEnd();
                 sr.Close();
 
                 var attr = File.GetAttributes(subPath);
@@ -229,19 +221,19 @@ namespace HappyHour.ViewModel
             }
             catch (Exception ex)
             {
-                Log.Print(ex.Message);
+                Log.Print(ex.Message, ex);
             }
         }
 
 
-        void OnMediaOpening(object sender, MediaOpeningEventArgs e)
+        private void OnMediaOpening(object sender, MediaOpeningEventArgs e)
         {
             CurrentMediaOptions = e.Options;
             var subs = Movie.Subtitles;
             if (subs != null)
             {
-                var currFile = Path.GetFileNameWithoutExtension(Movie.Files[_fileIndex]);
-                var sub = subs.FirstOrDefault(s =>
+                string currFile = Path.GetFileNameWithoutExtension(Movie.Files[_fileIndex]);
+                string sub = subs.FirstOrDefault(s =>
                     Path.GetFileNameWithoutExtension(s).StartsWith(currFile, StringComparison.OrdinalIgnoreCase));
 
                 string[] exts = { ".smi", ".srt" };
@@ -253,9 +245,9 @@ namespace HappyHour.ViewModel
             }
         }
 
-        void OnMediaEnded(object sendoer, EventArgs e)
+        private void OnMediaEnded(object sendoer, EventArgs e)
         {
-            var numFiles = Movie.Files.Count;
+            int numFiles = Movie.Files.Count;
             if (numFiles > 0 && _fileIndex >= 0 && _fileIndex < numFiles - 1)
             {
                 Next();
@@ -277,10 +269,9 @@ namespace HappyHour.ViewModel
             Key.Play, Key.MediaPlayPause, Key.Space
         };
 
-        async public void OnPKeyDown(KeyEventArgs e)
+        public async void OnPKeyDown(KeyEventArgs e)
         {
-            if (e.OriginalSource is System.Windows.Controls.TextBox)
-                return;
+            if (e.OriginalSource is System.Windows.Controls.TextBox) { return; }
 
             // Pause
             if (TogglePlayPauseKeys.Contains(e.Key) && MediaPlayer.IsPlaying)

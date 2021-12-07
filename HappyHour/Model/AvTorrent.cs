@@ -10,13 +10,44 @@ namespace HappyHour.Model
     {
         public List<string> Screenshots { get; set; } = new();
         public List<string> Torrents { get; set; } = new();
-        public bool Downloaded { get; set; }
-        public bool Excluded { get; set; }
 
         public AvTorrent(string path)
         {
             Path = path;
             Pid = path.Split('\\').Last();
+        }
+
+        public void Download()
+        {
+            try
+            {
+                string dir = System.IO.Path.GetDirectoryName(Path);
+                foreach (string file in Torrents)
+                {
+                    string torrent = System.IO.Path.GetFileName(file);
+                    File.Copy(torrent, App.GConf["general"]["torrent_path"] + torrent);
+                }
+                File.Create($"{dir}\\.downloaded").Dispose();
+                Log.Print($"Mark downloaded {Path}");
+            }
+            catch (Exception ex)
+            {
+                Log.Print(ex.Message);
+            }
+        }
+
+        public void Exclude()
+        {
+            try
+            {
+                string dir = System.IO.Path.GetDirectoryName(Path);
+                File.Create($"{dir}\\.excluded").Dispose();
+                Log.Print($"Mark excluded {Path}");
+            }
+            catch (Exception ex)
+            {
+                Log.Print("Exclude: ", ex.Message);
+            }
         }
 
         public override void Reload(string[] files = null)
@@ -37,20 +68,13 @@ namespace HappyHour.Model
                 {
                     Screenshots.Add(file);
                 }
-                else if (file.EndsWith(".downloaded", StringComparison.OrdinalIgnoreCase))
-                {
-                    Downloaded = true;
-                }
-                else if (file.EndsWith(".excluded", StringComparison.OrdinalIgnoreCase))
-                {
-                    Excluded = true;
-                }
                 else if (file.EndsWith("torrent", StringComparison.OrdinalIgnoreCase))
                 {
                     Torrents.Add(file);
                     Date = File.GetCreationTime(file);
                 }
             }
+            BriefInfo = $"{Pid}\n{Date}";
         }
     }
 }
