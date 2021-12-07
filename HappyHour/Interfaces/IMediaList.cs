@@ -8,12 +8,11 @@ using HappyHour.Spider;
 
 namespace HappyHour.Interfaces
 {
-    internal delegate void MediaListItemSelected(object sender, MediaItem item);
+    internal delegate void MediaListItemSelected(object sender, IAvMedia item);
 
     internal interface IMediaList
     {
         void AddMedia(string path);
-        void RemoveMedia(string path);
         void Replace(IEnumerable<string> paths);
 
         IEnumerable<SpiderBase> SpiderList { get; set; }

@@ -26,12 +26,12 @@ namespace HappyHour.ViewModel
         bool _isPropertiesPanelOpen = App.IsInDesignMode;
         bool _isPlayerLoaded = App.IsInDesignMode;
         bool _isPlaying = false;
-        MediaItem _mediaItem;
+        AvMovie _avMovie;
 
-        public MediaItem MediaItem
+        public AvMovie Movie
         {
-            get => _mediaItem;
-            set => Set(ref _mediaItem, value);
+            get => _avMovie;
+            set => Set(ref _avMovie, value);
         }
         public MediaElement MediaPlayer { get; private set; }
         public MediaOptions CurrentMediaOptions { get; set; }
@@ -66,8 +66,8 @@ namespace HappyHour.ViewModel
         {
             get
             {
-                if (MediaPlayer.IsOpen && MediaItem != null)
-                    return MediaItem.Poster;
+                if (MediaPlayer.IsOpen && Movie != null)
+                    return Movie.Poster;
                 else
                     return null;
             }
@@ -144,22 +144,19 @@ namespace HappyHour.ViewModel
 
             this.WhenChanged(() =>
             {
-                var numFiles = MediaItem != null
-                    ? MediaItem.MediaFiles.Count : 0;
-                Controller.BackButtonVisibility =
-                    (numFiles > 0 && _fileIndex > 0)
-                        ? Visibility.Visible : Visibility.Collapsed;
-                Controller.NextButtonVisibility =
-                    (numFiles > 0 && _fileIndex >= 0 && _fileIndex < numFiles - 1)
-                        ? Visibility.Visible : Visibility.Collapsed;
-            }, nameof(MediaItem));
+                var numFiles = Movie != null ? Movie.Files.Count : 0;
+                Controller.BackButtonVisibility = (numFiles > 0 && _fileIndex > 0) ?
+                    Visibility.Visible : Visibility.Collapsed;
+                Controller.NextButtonVisibility = (numFiles > 0 && _fileIndex >= 0 && _fileIndex < numFiles - 1) ?
+                    Visibility.Visible : Visibility.Collapsed;
+            }, nameof(Movie));
         }
 
-        public void SetMediaItem(MediaItem media)
+        public void SetMediaItem(IAvMedia media)
         {
             if (media == null) return;
 
-            MediaItem = media;
+            Movie = (AvMovie)media;
             IsSelected = true;
             _fileIndex = 0;
             Open();
@@ -172,11 +169,10 @@ namespace HappyHour.ViewModel
                 await MediaPlayer.Close();
             }
 
-            var files = MediaItem.MediaFiles;
-            var file = Path.GetFileName(files[_fileIndex]);
-            Title = $"{file} ({_fileIndex + 1}/{files.Count})";
-            await MediaPlayer.Open(new Uri(files[_fileIndex]));
-            RaisePropertyChanged(nameof(MediaItem));
+            var file = Path.GetFileName(Movie.Files[_fileIndex]);
+            Title = $"{file} ({_fileIndex + 1}/{Movie.Files.Count})";
+            await MediaPlayer.Open(new Uri(Movie.Files[_fileIndex]));
+            RaisePropertyChanged(nameof(Movie));
         }
 
         async void Close()
@@ -184,18 +180,18 @@ namespace HappyHour.ViewModel
             Title = "Player";
             if (MediaPlayer.IsOpen)
                 await MediaPlayer.Close();
-            MediaItem = null;
+            Movie = null;
         }
 
         void Back()
         {
-            _fileIndex = (_fileIndex - 1) % MediaItem.MediaFiles.Count;
+            _fileIndex = (_fileIndex - 1) % Movie.Files.Count;
             Open();
         }
 
         void Next()
         {
-            _fileIndex = (_fileIndex + 1) % MediaItem.MediaFiles.Count;
+            _fileIndex = (_fileIndex + 1) % Movie.Files.Count;
             Open();
         }
 
@@ -241,18 +237,15 @@ namespace HappyHour.ViewModel
         void OnMediaOpening(object sender, MediaOpeningEventArgs e)
         {
             CurrentMediaOptions = e.Options;
-            var subs = MediaItem.Subtitles;
+            var subs = Movie.Subtitles;
             if (subs != null)
             {
-                var currFile = Path.GetFileNameWithoutExtension(
-                    MediaItem.MediaFiles[_fileIndex]);
+                var currFile = Path.GetFileNameWithoutExtension(Movie.Files[_fileIndex]);
                 var sub = subs.FirstOrDefault(s =>
-                    Path.GetFileNameWithoutExtension(s)
-                        .StartsWith(currFile, StringComparison.OrdinalIgnoreCase));
+                    Path.GetFileNameWithoutExtension(s).StartsWith(currFile, StringComparison.OrdinalIgnoreCase));
 
                 string[] exts = { ".smi", ".srt" };
-                if (sub != null && exts.Any(e => e.Contains(Path.GetExtension(sub),
-                    StringComparison.OrdinalIgnoreCase)))
+                if (sub != null && exts.Any(e => e.Contains(Path.GetExtension(sub), StringComparison.OrdinalIgnoreCase)))
                 {
                     ConvertEncodingIfNeeded(sub);
                     CurrentMediaOptions.SubtitlesSource = sub;
@@ -262,7 +255,7 @@ namespace HappyHour.ViewModel
 
         void OnMediaEnded(object sendoer, EventArgs e)
         {
-            var numFiles = MediaItem.MediaFiles.Count;
+            var numFiles = Movie.Files.Count;
             if (numFiles > 0 && _fileIndex >= 0 && _fileIndex < numFiles - 1)
             {
                 Next();

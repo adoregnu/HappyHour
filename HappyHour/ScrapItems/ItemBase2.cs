@@ -6,13 +6,14 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 
 using HappyHour.Model;
+using HappyHour.Interfaces;
 
 namespace HappyHour.ScrapItems
 {
     internal class ItemBase2
     {
         private readonly AvDbContext _context;
-        private readonly MediaItem _mediaItem;
+        private readonly IAvMedia _mediaItem;
 
         protected AvItem _avItem;
         private AvStudio _studio;
@@ -20,14 +21,14 @@ namespace HappyHour.ScrapItems
         private List<AvActor> _actors = new();
         private List<AvGenre> _genres;
 
-        public ItemBase2(MediaItem mediaItem)
+        public ItemBase2(IAvMedia mediaItem)
         {
             _mediaItem = mediaItem;
             _context = App.DbContext;
             _avItem = new AvItem
             {
                 Pid = _mediaItem.Pid,
-                Path = _mediaItem.MediaPath,
+                Path = _mediaItem.Path,
                 IsCensored = true,
             };
         }

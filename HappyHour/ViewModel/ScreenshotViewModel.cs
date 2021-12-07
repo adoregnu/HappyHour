@@ -11,16 +11,17 @@ using HappyHour.Model;
 
 namespace HappyHour.ViewModel
 {
-    class ScreenshotViewModel : Pane
+    internal class ScreenshotViewModel : Pane
     {
-        List<string> _screenshots;
+        private List<string> _screenshots;
+        private IMediaList _mediaList;
+
         public List<string> ScreenshotList
         {
             get => _screenshots;
             set => Set(ref _screenshots, value);
         }
 
-        IMediaList _mediaList;
         public IMediaList MediaList
         {
             get => _mediaList;
@@ -36,12 +37,9 @@ namespace HappyHour.ViewModel
             Title = "Screenshot";
         }
 
-        void OnMediaItemSelected(object sender, MediaItem item)
+        private void OnMediaItemSelected(object sender, IAvMedia item)
         {
-            if (item != null)
-                ScreenshotList = item.Screenshots;
-            else
-                ScreenshotList = null;
+            ScreenshotList = item is AvTorrent avt ? avt.Screenshots : null;
         }
     }
 }

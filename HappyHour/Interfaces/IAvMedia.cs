@@ -2,7 +2,7 @@
 
 namespace HappyHour.Interfaces
 {
-    internal interface IAvMedia
+    internal interface IAvMedia : IComparable<IAvMedia>
     {
         string Pid { get; set; }
         string Path { get; set; }

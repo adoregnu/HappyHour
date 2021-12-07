@@ -11,7 +11,7 @@ using Scriban;
 using CefSharp;
 
 using HappyHour.ViewModel;
-using HappyHour.Model;
+using HappyHour.Interfaces;
 
 namespace HappyHour.Spider
 {
@@ -213,7 +213,7 @@ namespace HappyHour.Spider
             return null;
         }
 
-        public override void Navigate2(MediaItem _)
+        public override void Navigate2(IAvMedia _)
         {
             IsSpiderWorking = true;
             _pageNum = 1;

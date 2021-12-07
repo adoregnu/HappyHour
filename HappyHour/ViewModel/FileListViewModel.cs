@@ -273,9 +273,9 @@ namespace HappyHour.ViewModel
             }
         }
 
-        private void OnMediaSelected(object _, MediaItem avMedia)
+        private void OnMediaSelected(object _, IAvMedia avMedia)
         {
-            FileSystemInfo fi = FileList.FirstOrDefault(f => f.FullName == avMedia.MediaPath);
+            FileSystemInfo fi = FileList.FirstOrDefault(f => f.FullName == avMedia.Path);
             if (fi != null)
             {
                 _selecFromMediaList = true;

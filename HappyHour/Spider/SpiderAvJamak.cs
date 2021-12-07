@@ -49,7 +49,7 @@ namespace HappyHour.Spider
         {
             string ext = Path.GetExtension(e.SuggestedFileName);
             string savePath = SelectedMedia != null ?
-                SelectedMedia.MediaPath : App.GConf["general"]["data_path"];
+                SelectedMedia.Path : App.GConf["general"]["data_path"];
             if (!Directory.Exists(savePath))
             {
                 Log.Print($"{savePath} does not exist.");
@@ -64,7 +64,7 @@ namespace HappyHour.Spider
                 Log.Print($"{Name}: {e.SuggestedFileName} download completed!");
                 if (SelectedMedia != null)
                 {
-                    SelectedMedia.ReloadAvItem();
+                    SelectedMedia.Reload();
                 }
             }
         }

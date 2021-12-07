@@ -4,9 +4,7 @@ using System.Linq;
 using System.Text;
 
 using CefSharp;
-using HtmlAgilityPack;
 
-using HappyHour.ScrapItems;
 using HappyHour.ViewModel;
 
 namespace HappyHour.Spider

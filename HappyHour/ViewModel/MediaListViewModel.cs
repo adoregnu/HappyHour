@@ -28,16 +28,18 @@ namespace HappyHour.ViewModel
     {
         private readonly object _lock = new();
 
-        private MediaItem _selectedMedia;
         private bool _isBrowsing;
         private bool _sortByDateReleased = true;
         private bool _sortByDateAdded;
         private bool _searchSubFolder;
         private bool _forceStopScrapping;
-        private IFileList _fileList;
-        private IEnumerable<SpiderBase> _spiderList;
 
-        public MediaItem SelectedMedia
+        private IFileList _fileList;
+        private IAvMedia _selectedMedia;
+        private IEnumerable<SpiderBase> _spiderList;
+        private List<IAvMedia> _mitemsToSearch;
+
+        public IAvMedia SelectedMedia
         {
             get => _selectedMedia;
             set
@@ -65,8 +67,8 @@ namespace HappyHour.ViewModel
                 Set(ref _spiderList, list);
             }
         }
-        public ObservableCollection<MediaItem> MediaList { get; private set; }
-        public ObservableCollection<MediaItem> SelectedMedias { get; private set; }
+        public ObservableCollection<IAvMedia> MediaList { get; private set; }
+        public ObservableCollection<IAvMedia> SelectedMedias { get; private set; }
         public bool SearchSubFolder
         {
             get => _searchSubFolder;
@@ -84,7 +86,7 @@ namespace HappyHour.ViewModel
                 Set(ref _sortByDateReleased, value);
                 if (value)
                 {
-                    MediaItem.OrderType = OrderType.ByDateReleased;
+                    AvMovie.DateType = DateType.Released;
                     SorByDateAdded = !value;
                     SortMedia();
                 }
@@ -98,7 +100,7 @@ namespace HappyHour.ViewModel
                 Set(ref _sortByDateAdded, value);
                 if (value)
                 {
-                    MediaItem.OrderType = OrderType.ByDateAdded;
+                    AvMovie.DateType = DateType.Added;
                     SorByDateReleased = !value;
                     SortMedia();
                 }
@@ -139,8 +141,8 @@ namespace HappyHour.ViewModel
         public MediaListViewModel()
         {
             Title = "AVList";
-            MediaList = new ObservableCollection<MediaItem>();
-            SelectedMedias = new ObservableCollection<MediaItem>();
+            MediaList = new ObservableCollection<IAvMedia>();
+            SelectedMedias = new ObservableCollection<IAvMedia>();
 
             BindingOperations.EnableCollectionSynchronization(MediaList, _lock);
 
@@ -148,7 +150,7 @@ namespace HappyHour.ViewModel
             {
                 if (p != null)
                 {
-                    new Process
+                    _ = new Process
                     {
                         StartInfo = new ProcessStartInfo(p.MediaFile)
                         {
@@ -157,18 +159,14 @@ namespace HappyHour.ViewModel
                     }.Start();
                 }
             });
-            CmdCopyPath = new RelayCommand<MediaItem>(
-                p => Clipboard.SetText(p.MediaPath));
-
-            CmdExclude = new RelayCommand<MediaItem>(
-                p => { if (p != null) { p.Exclude(); MediaList.Remove(p); } });
-            CmdDownload = new RelayCommand<MediaItem>(
-                p => { if (p != null) { p.Download(); MediaList.Remove(p); } });
-            CmdMoveItemTo = new RelayCommand<object>(p => OnMoveItemTo(p.ToList<MediaItem>()));
-            CmdDeleteItem = new RelayCommand<object>(p => OnDeleteItem(p.ToList<MediaItem>()));
-            CmdClearDb = new RelayCommand<object>(p => p.ToList<MediaItem>().ForEach(m => m.ClearDb()));
-            CmdEditItem = new RelayCommand<object>(p => OnEditItem(p));
-            CmdSearchOrphanageMedia = new RelayCommand(() => OnSearchOrphanageMedia());
+            CmdExclude = new RelayCommand<IAvMedia>(p => ExcludeFromList(p));
+            CmdDownload = new RelayCommand<IAvMedia>(p => DownloadMedia(p));
+            CmdCopyPath = new RelayCommand<IAvMedia>(p => Clipboard.SetText(p.Path));
+            CmdMoveItemTo = new RelayCommand<object>(p => MoveTo(p.ToList<IAvMedia>()));
+            CmdDeleteItem = new RelayCommand<object>(p => Delete(p.ToList<IAvMedia>()));
+            CmdClearDb = new RelayCommand<object>(p => ClearDb(p.ToList<AvMovie>()));
+            CmdEditItem = new RelayCommand<object>(p => EditMovieInfo(p));
+            CmdSearchOrphanageMedia = new RelayCommand(() => SearchOrphanage());
             CmdSearchEmptyActor = new RelayCommand( () => OnSearchEmptyActor());
             CmdDoubleClick = new RelayCommand(() => ItemDoubleClickedHandler?.Invoke(this, SelectedMedia));
             CmdScrap = new RelayCommand<object>(
@@ -177,6 +175,32 @@ namespace HappyHour.ViewModel
             CmdStopBatchingScrap = new RelayCommand(
                 () => _forceStopScrapping = true,
                 () => _mitemsToSearch != null);
+        }
+
+        private void ExcludeFromList(IAvMedia media)
+        {
+            if (media != null)
+            {
+                AvMediaManager.Exclude(media);
+                MediaList.Remove(media);
+            }
+        }
+
+        private void DownloadMedia(IAvMedia media)
+        {
+            if (media != null)
+            {
+                AvMediaManager.Download(media);
+                MediaList.Remove(media);
+            }
+        }
+
+        private static void ClearDb(List<AvMovie> list)
+        {
+            if (list != null)
+            {
+                list.ForEach(m => m.ClearDb());
+            }
         }
 
         private void OnDirChanged(object sender, DirectoryInfo msg)
@@ -222,45 +246,36 @@ namespace HappyHour.ViewModel
 
         private void OnFileSelected(object sender, FileSystemInfo e)
         {
-            MediaItem media = MediaList.FirstOrDefault(m => m.MediaPath == e.FullName);
+            var media = MediaList.FirstOrDefault(m => m.Path == e.FullName);
             if (media != null)
             {
                 SelectedMedia = media;
             }
         }
 
-        public void RemoveMedia(string path)
-        {
-            IsBrowsing = true;
-            var medias = MediaList.Where(i => i.MediaFile.StartsWith(path,
-                    StringComparison.CurrentCultureIgnoreCase)).ToList();
-            medias.ForEach(x => MediaList.Remove(x));
-            IsBrowsing = false;
-        }
-
         public void AddMedia(string path)
         {
-            MediaItem media = MediaList.FirstOrDefault(m => m.MediaPath == path);
+            var media = MediaList.FirstOrDefault(m => m.Path == path);
             if (media == null)
             {
-                MediaItem item = MediaItem.Create(path);
+                var item = AvMediaManager.Create(path);
                 if (item != null)
                 {
-                    MediaList.AddInOrder(item, i => i.DateTime);
+                    MediaList.AddInOrder(item, i => i.Date);
                 }
             }
             else
             {
-                media.ReloadAvItem();
+                media.Reload();
             }
         }
 
-        private void OnMoveItemTo(List<MediaItem> mitems)
+        private void MoveTo(List<IAvMedia> mitems)
         {
             FolderBrowserDialogSettings settings = new()
             {
                 Description = "Select Target folder",
-                SelectedPath = mitems[0].MediaPath
+                SelectedPath = mitems[0].Path
             };
             bool? success = MainView.DialogService.ShowFolderBrowserDialog(this, settings);
             if (success is null or false)
@@ -269,32 +284,30 @@ namespace HappyHour.ViewModel
                 return;
             }
             Log.Print(settings.SelectedPath);
-            foreach (MediaItem item in mitems)
+            foreach (var item in mitems)
             {
-                item.MoveItem(settings.SelectedPath, mitem =>
-                {
-                    if (mitem != null)
+                AvMediaManager.Move(item, settings.SelectedPath, m => {
+                    if (m != null)
                     {
-                        MediaList.Remove(mitem);
+                        MediaList.Remove(m);
                     }
                 });
             }
         }
 
-        private void OnDeleteItem(List<MediaItem> mitems)
+        private void Delete(List<IAvMedia> mitems)
         {
-            foreach (MediaItem item in mitems)
+            foreach (var item in mitems)
             {
-                if (item.DeleteItem())
-                {
-                    MediaList.Remove(item);
-                }
+                //if (item.DeleteItem())
+                AvMediaManager.Delete(item);
+                MediaList.Remove(item);
             }
         }
 
-        private void OnEditItem(object param)
+        private void EditMovieInfo(object param)
         {
-            if (param is not MediaItem item)
+            if (param is not AvMovie item)
             {
                 return;
             }
@@ -390,7 +403,7 @@ namespace HappyHour.ViewModel
                     {
                         break;
                     }
-                    MediaList.AddInOrder(m, i => i.DateTime);
+                    MediaList.AddInOrder(m, i => i);
                 }
             }, token);
             await _runningTask;
@@ -431,7 +444,7 @@ namespace HappyHour.ViewModel
             await _runningTask;
         }
 
-        private async void OnSearchOrphanageMedia()
+        private async void SearchOrphanage()
         {
             CancelTaskIfRunning();
 
@@ -484,7 +497,6 @@ namespace HappyHour.ViewModel
             await _runningTask;
         }
 
-        private List<MediaItem> _mitemsToSearch;
         private void OnScrapCompleted(SpiderBase spider)
         {
             if (_mitemsToSearch.Count > 0)

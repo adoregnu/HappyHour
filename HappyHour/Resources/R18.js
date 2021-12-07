@@ -26,10 +26,7 @@
         while (node = result.iterateNext()) {
             array.push(node.textContent.trim());
         }
-        if (array.length > 0) {
-            return array;
-        }
-        return null;
+        return array;
     }
 
     function _parseActorThumb(xpath) {
@@ -137,7 +134,13 @@
         CefSharp.PostMessage(msg);
     }
 
-    function _multiResult() {
+    function parseSearchResult() {
+        var result = _parseSingleNode('//*[@id="contents"]/div[2]/section/ul/li[1]/div/div');
+        if (result == '0 titles found') {
+            CefSharp.PostMessage({ type: 'items', data: 0 });
+            return;
+        }
+
         var pattern = 'id=(h_)?([0-9]+)?';
         if (_PID.includes('-')) {
             var tmp = _PID.split('-');
@@ -145,42 +148,32 @@
         } else {
             pattern += _PID;
         }
-
         const re = new RegExp(pattern, 'i');
-        var result = document.evaluate("//li[starts-with(@class,'item-list')]/a",
-            document.body, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
-        var num_result = 0;
-        while (node = result.iterateNext()) {
-            num_result += 1;
+
+        var url;
+        var num_matched = 0;
+        var nodes = _parseMultiNode("//li[starts-with(@class,'item-list')]/a");
+        for (i = 0, node = nodes[i]; i < nodes.length; i++) {
             if (re.test(node.href)) {
-                CefSharp.PostMessage({ type: 'url', data: node.href });
-                console.log('redirected: ' + node.href);
-                return 'redirected';
+                num_matched++;
+                url = node.href;
             }
         }
-        if (num_result == 1) {
+        if (num_matched == 1) {
+            console.log('redirect: ' + url);
+            CefSharp.PostMessage({ type: 'url', data: url });
+        }
+        else if (num_matched > 1) {
+            console.log('ambiguous, num_matched:' + num_matched);
+        } else {
+            console.log('no exact matching pid:');
             CefSharp.PostMessage({ type: 'items', data: 0 });
-            return "noresult";
         }
-        else if (num_result > 1) {
-            console.log('ambiguous, num_result:' + num_result);
-            return 'ambiguous';
-        }
-        return 'notfound';
     }
 
-    function _checkError() {
+    function _checkServerError() {
         var err = document.querySelector('body > h1');
         if (err != null && err.textContent.includes('502 ERROR')) {
-            CefSharp.PostMessage({ type: 'items', data: 0 });
-            return false;
-        }
-        return true;
-    }
-
-    function _checkResult() {
-        var result = _parseSingleNode('//*[@id="contents"]/div[2]/section/ul/li[1]/div/div');
-        if (result == '0 titles found') {
             CefSharp.PostMessage({ type: 'items', data: 0 });
             return false;
         }
@@ -240,15 +233,12 @@
     }
     //console.log(window.location.href);
 
-    if (!_checkError()) {
+    if (!_checkServerError()) {
         return;
     }
 
-    if (_multiResult() != 'notfound') {
-        return;
-    }
-
-    if (!_checkResult()) {
+    if (document.location.href.includes('/common/search/')) {
+        parseSearchResult();
         return;
     }
 

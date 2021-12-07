@@ -57,9 +57,9 @@ namespace HappyHour.Model
             }
         }
 
-        public static bool Move(IAvMedia media, string target, Action<IAvMedia> OnCompleted)
+        public static void Move(IAvMedia media, string target, Action<IAvMedia> OnCompleted)
         {
-            return true;
+            //return true;
         }
 
         public static IAvMedia Create(string path)

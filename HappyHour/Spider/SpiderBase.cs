@@ -9,7 +9,7 @@ using GalaSoft.MvvmLight.Command;
 
 using HappyHour.ViewModel;
 using HappyHour.ScrapItems;
-using HappyHour.Model;
+using HappyHour.Interfaces;
 
 namespace HappyHour.Spider
 {
@@ -18,7 +18,7 @@ namespace HappyHour.Spider
     internal class SpiderBase : NotifyPropertyChanged
     {
         private static string _keyword;
-        private MediaItem _selectedMedia;
+        private IAvMedia _selectedMedia;
         private bool _saveDb;
         private bool _isCookieSet;
         private bool _isSpiderWorking;
@@ -32,7 +32,7 @@ namespace HappyHour.Spider
 
         public SpiderViewModel Browser { get; private set; }
         public ScrapCompletedHandler ScrapCompleted { get; set; }
-        public MediaItem SelectedMedia
+        public IAvMedia SelectedMedia
         {
             get => _selectedMedia;
             set
@@ -44,7 +44,7 @@ namespace HappyHour.Spider
                 _selectedMedia = value;
             }
         }
-        public MediaItem SearchMedia { get; set; }
+        public IAvMedia SearchMedia { get; set; }
 
         public string URL;
         public string Name { get; protected set; } = "Base";
@@ -107,7 +107,7 @@ namespace HappyHour.Spider
             _isCookieSet = true;
         }
 
-        public virtual void Navigate2(MediaItem searchMedia = null)
+        public virtual void Navigate2(IAvMedia searchMedia = null)
         {
             if (string.IsNullOrEmpty(Keyword) && searchMedia == null)
             {
@@ -193,11 +193,12 @@ namespace HappyHour.Spider
                 return false;
             }
             string link = null;
-            IterateDynamic(_itemQueue.Peek(), (key, dict) => {
+            _ = IterateDynamic(_itemQueue.Peek(), (key, dict) =>
+            {
                 if (key == "link")
                 {
                     link = dict[key].ToString();
-                    dict.Remove(key);
+                    _ = dict.Remove(key);
                     return true;
                 }
                 return false;
@@ -209,7 +210,7 @@ namespace HappyHour.Spider
                 return true;
             }
 
-            _itemQueue.Dequeue();
+            _ = _itemQueue.Dequeue();
             return FollowLink();
         }
 
@@ -226,7 +227,7 @@ namespace HappyHour.Spider
 
             if (bUpdated && SearchMedia != null)
             {
-                SearchMedia.ReloadAvItem();
+                SearchMedia.Reload();
             }
             SearchMedia = null;
             ScrapCompleted?.Invoke(this);

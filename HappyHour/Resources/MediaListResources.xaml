@@ -23,19 +23,19 @@
             </Grid.ContextMenu>
             <!--Bind Image Path in Image Control-->
             <Image HorizontalAlignment="Center" ToolTipService.ShowDuration="20000"
-                   Source="{Binding MediaFile, Converter=
+                   Source="{Binding Poster, Converter=
                       {StaticResource PathToImageConverter}, ConverterParameter=200}">
                 <!--View Large Image on Image Control Tooltip-->
                 <Image.ToolTip>
                     <ToolTip>
-                        <Image Source="{Binding MediaFile, Converter=
+                        <Image Source="{Binding Poster, Converter=
                             {StaticResource PathToImageConverter}}"/>
                     </ToolTip>
                 </Image.ToolTip>
             </Image>
             <StackPanel VerticalAlignment="Bottom" Background="Black"
                         Opacity="0.60">
-                <TextBlock Text="{Binding Info}" Foreground="White"
+                <TextBlock Text="{Binding BriefInfo}" Foreground="White"
                            Height="60" Margin="15,0,15,0" TextAlignment="Center"
                            FontWeight="SemiBold"/>
             </StackPanel>
@@ -114,27 +114,23 @@
             </Grid.Style>
             <Grid.ToolTip>
                 <ToolTip>
-                    <TextBlock Text="{Binding Actors}"/>
+                    <TextBlock Text="{Binding Actresses}"/>
                 </ToolTip>
             </Grid.ToolTip>
             <Grid.InputBindings>
-                <MouseBinding Gesture="LeftDoubleClick"
-                              Command="{Binding Data.CmdDoubleClick,
-                                    Source={StaticResource VmContext}}"/>
+                <MouseBinding Gesture="LeftDoubleClick" Command="{Binding Data.CmdDoubleClick, Source={StaticResource VmContext}}"/>
             </Grid.InputBindings>
             <Image HorizontalAlignment="Center" ToolTipService.ShowDuration="20000"
-                   Source="{Binding Poster, Converter=
-                      {StaticResource PathToImageConverter}, ConverterParameter=200}">
+                   Source="{Binding Poster, Converter= {StaticResource PathToImageConverter}, ConverterParameter=200}">
                 <!--View Large Image on Image Control Tooltip-->
                 <Image.ToolTip>
                     <ToolTip>
-                        <Image Source="{Binding Poster, Converter=
-                            {StaticResource PathToImageConverter}}"/>
+                        <Image Source="{Binding Poster, Converter= {StaticResource PathToImageConverter}}"/>
                     </ToolTip>
                 </Image.ToolTip>
             </Image>
             <TextBlock
-                Text="{Binding Info}" Grid.Row="1" Opacity="0.5"
+                Text="{Binding BriefInfo}" Grid.Row="1" Opacity="0.5"
                 HorizontalAlignment="Center" VerticalAlignment="Center"
                 Foreground="White" TextAlignment="Center"/>
         </Grid>
@@ -146,10 +142,10 @@
                 <Style TargetType="ContentControl">
                     <!--<Setter Property="Template" Value="{StaticResource ImageItem}"/>-->
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding IsImage}" Value="True">
+                        <DataTrigger Binding="{Binding ., Converter={StaticResource MediaTypeConverter}}" Value="image">
                             <Setter Property="Template" Value="{StaticResource ImageItem}"/>
                         </DataTrigger>
-                        <DataTrigger Binding="{Binding IsImage}" Value="False">
+                        <DataTrigger Binding="{Binding ., Converter={StaticResource MediaTypeConverter}}" Value="movie">
                             <Setter Property="Template" Value="{StaticResource VideoItem}"/>
                         </DataTrigger>
                     </Style.Triggers>

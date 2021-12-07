@@ -2,9 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.ComponentModel;
 using System.Windows.Input;
 
 using GalaSoft.MvvmLight;
@@ -17,16 +14,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HappyHour.ViewModel
 {
-    class AvEditorViewModel : ViewModelBase, IModalDialogViewModel
+    internal class AvEditorViewModel : ViewModelBase, IModalDialogViewModel
     {
-        readonly MediaItem _mediaItem;
-        readonly IEnumerable<AvActor> _allActors;
-        string _searchActorName;
+        private readonly AvMovie _amovie;
+        private readonly IEnumerable<AvActor> _allActors;
+        private string _searchActorName;
 
-        AvStudio _studio;
-        AvSeries _series;
+        private AvStudio _studio;
+        private AvSeries _series;
 
-        bool? _dialogResult;
+        private bool? _dialogResult;
+        private bool _actorChanged;
+        private bool _genreChanges;
 
         public AvItem Av { get; private set; }
         public AvStudio Studio
@@ -62,11 +61,12 @@ namespace HappyHour.ViewModel
         public IEnumerable<AvActor> AllActors
         {
             get
-            { 
+            {
                 if (string.IsNullOrEmpty(SearchActorName))
+                {
                     return _allActors;
-                return _allActors.Where(
-                    a => a.ToString().IndexOf(SearchActorName,
+                }
+                return _allActors.Where(a => a.ToString().IndexOf(SearchActorName,
                         StringComparison.OrdinalIgnoreCase) >= 0);
             }
         }
@@ -104,14 +104,14 @@ namespace HappyHour.ViewModel
         public ICommand CmdRemoveGenre { get; private set; }
         public ICommand CmdSave { get; private set; }
 
-        public AvEditorViewModel(MediaItem mediaItem)
+        public AvEditorViewModel(AvMovie movie)
         {
-            _mediaItem = mediaItem;
-            Title = mediaItem.Pid;
+            _amovie = movie;
+            Title = movie.Pid;
 
-            if (mediaItem.AvItem != null)
+            if (movie.MovieInfo != null)
             {
-                Av = mediaItem.AvItem;
+                Av = movie.MovieInfo;
                 Actors = new ObservableCollection<AvActor>(Av.Actors);
                 Genres = new ObservableCollection<AvGenre>(Av.Genres);
                 Studio = Av.Studio;
@@ -121,8 +121,8 @@ namespace HappyHour.ViewModel
             {
                 Av = new AvItem
                 {
-                    Path = mediaItem.MediaPath,
-                    Pid = mediaItem.Pid,
+                    Path = movie.Path,
+                    Pid = movie.Pid,
                 };
                 Actors = new ObservableCollection<AvActor>();
                 Genres = new ObservableCollection<AvGenre>();
@@ -149,8 +149,7 @@ namespace HappyHour.ViewModel
             AllStudios = App.DbContext.Studios.ToList();
         }
 
-        bool _actorChanged = false;
-        void OnAddActor()
+        private void OnAddActor()
         {
             if (SelectedActor == null) return;
 
@@ -161,7 +160,7 @@ namespace HappyHour.ViewModel
             }
         }
 
-        void OnRemoveActor()
+        private void OnRemoveActor()
         {
             if (SelectedAvActor != null)
             {
@@ -170,8 +169,7 @@ namespace HappyHour.ViewModel
             }
         }
 
-        bool _genreChanges = false;
-        void OnAddGnere()
+        private void OnAddGnere()
         {
             if (SelectedGenre == null) return;
 
@@ -182,22 +180,23 @@ namespace HappyHour.ViewModel
             }
         }
 
-        void OnSave()
+        private void OnSave()
         {
             if (_actorChanged)
+            {
                 Av.Actors = Actors;
+            }
             if (_genreChanges)
+            {
                 Av.Genres = Genres;
-            if (_mediaItem.AvItem == null)
+            }
+
+            if (_amovie.MovieInfo == null)
             {
                 Av.DateAdded = DateTime.Now;
                 Av.DateModifed = DateTime.Now;
-                _mediaItem.AvItem = Av;
             }
-            else
-            {
-                _mediaItem.RefreshAvInfo();
-            }
+            _amovie.MovieInfo = Av;
             App.DbContext.SaveChanges();
         }
     }

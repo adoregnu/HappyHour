@@ -77,7 +77,7 @@
         return _PID;
     }
 
-    function _multiResult() {
+    function parseSearchResult() {
         var result = document.evaluate("//a[@class='box']",
             document.body, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
         var num_result = 0;
@@ -86,25 +86,20 @@
             var pid = _parseSingleNode("//div[@class='uid']", node, result);
             if (pid != null && re.test(pid)) {
                 CefSharp.PostMessage({ type: 'url', data: node.href });
-                return 'redirected';
+                return;
             }
             num_result += 1;
         }
         if (num_result > 0) {
+            console.log('ambiguous result!');
             CefSharp.PostMessage({ type: 'items', data: 0 });
-            return 'ambiguous';
         }
-
-        return 'notfound';
     }
 
     function _parseActorPage() {
-        if (!document.location.href.includes('/actors/')) {
-            return false;
-        }
         var txt = _parseSingleNode("//span[@class='actor-section-name']");
         if (txt == null) {
-            return false;
+            return;
         }
         var actors = [];
         var tmp = txt.split(',');
@@ -122,11 +117,13 @@
         CefSharp.PostMessage(msg);
     }
 
-    if (_parseActorPage()) {
+    if (document.location.href.includes('/actors/')) {
+        _parseActorPage();
         return;
     }
 
-    if (_multiResult() != 'notfound') {
+    if (document.location.href.includes('/search?q=')) {
+        parseSearchResult();
         return;
     }
 

@@ -1,14 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.IO;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 
 using CefSharp;
-using HtmlAgilityPack;
 
-using HappyHour.ScrapItems;
 using HappyHour.ViewModel;
 
 namespace HappyHour.Spider

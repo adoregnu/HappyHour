@@ -7,7 +7,6 @@ using HappyHour.Spider;
 using HappyHour.CefHandler;
 using HappyHour.Interfaces;
 using System;
-using System.Timers;
 
 namespace HappyHour.ViewModel
 {

@@ -1,17 +1,16 @@
 ﻿#pragma warning disable SA1649 // File name must match first type name
 #pragma warning disable CA1812 // Remove classes that are apparently never instantiated
 
+using System;
+using System.Globalization;
+using System.Windows;
+using System.Windows.Data;
+using HappyHour.Model;
+
 using Unosquare.FFME.ClosedCaptions;
 
 namespace HappyHour.Converter
 {
-    using System;
-    using System.Globalization;
-    using System.IO;
-    using System.Windows;
-    using System.Windows.Data;
-    using System.Windows.Media;
-
     /// <inheritdoc />
     class TimeSpanToSecondsConverter : IValueConverter
     {
@@ -40,6 +39,17 @@ namespace HappyHour.Converter
             return targetType == typeof(Duration) ?
                 new Duration(result) : Activator.CreateInstance(targetType);
         }
+    }
+
+    internal class AvMediaTypeConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return value is AvMovie ? "movie" : "image";
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) =>
+            throw new NotImplementedException();
     }
 
     /// <inheritdoc />

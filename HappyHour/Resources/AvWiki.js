@@ -68,21 +68,18 @@
     }
 
     function _parseActorPage() {
-        if (!document.location.href.includes('/av-actress/')) {
-            return false;
-        }
         var node = _parseSingleNode("//div[contains(@class, 'actress-col')]", get_node);
         if (node == null) {
             console.log('no actress col');
             CefSharp.PostMessage({ type: 'items', data:0 });
-            return true;
+            return;
         }
         actor = {};
         var name = _parseSingleNode("//dt[contains(.,'AV女優名')]/following-sibling::dd", null ,node);
-        if (name != null && (m = /(.+)（(.+)）/.exec(name)) != null) {
-            //console.log(m[0]);
-            actor['name'] = m[1];
-        }
+        var m = /(.+)（.+）/.exec(name);
+        //console.log(m[0]);
+        actor['name'] = m[1];
+
         var img = _parseSingleNode("//div[@class='actress-image']/img/@src", null, node);
         if (img != null) {
             //console.log('thumb: ' + img);
@@ -93,34 +90,33 @@
             var alias_array = [];
             var array = alias.split(/、|・/);
             //console.log('alias:' + alias + ', count:' + array.length);
-            for (var i = 0; i < array.length; i++) {
-                alias_array.push(array[i].split('（')[0]);
-            }
+            array.forEach(function (item) {
+                alias_array.push(item.split('（')[0]);
+            });
             actor['alias'] = alias_array;
         }
         console.log(JSON.stringify(actor));
         CefSharp.PostMessage({type: 'items', data:1, actor:[actor]});
-        return true;
     }
 
     function _multiResult() {
         var urls = _parseMultiNode("//li[@class='search-readmore']/a/@href");
         if (urls == null) {
-            return 'notfound';
-        }
-        if (urls.length == 1) {
+            CefSharp.PostMessage({ type: 'items', data: 0 });
+        } else if (urls.length == 1) {
             CefSharp.PostMessage({ type: 'url', data: urls[0] });
-            return 'redirected';
         } else {
-            return 'ambiguous';
+            console.log('ambiguous result!');
         }
     }
 
-    if (_parseActorPage()) {
+    if (document.location.href.includes('/av-actress/')) {
+        _parseActorPage();
         return;
     }
 
-    if (_multiResult() != 'notfound') {
+    if (document.location.href.includes('/?s=' + _PID)) {
+        _multiResult();
         return;
     }
 

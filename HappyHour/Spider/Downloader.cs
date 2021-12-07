@@ -59,7 +59,7 @@ namespace HappyHour.Spider
             if (dic.ContainsKey("cover"))
             {
                 var item = _spider.SearchMedia;
-                e.SuggestedFileName = $"{item.MediaPath}\\{item.Pid}_poster{ext}";
+                e.SuggestedFileName = $"{item.Path}\\{item.Pid}_poster{ext}";
                 dic["cover"] = e.SuggestedFileName;
             }
             else
