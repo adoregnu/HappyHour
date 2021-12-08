@@ -1,8 +1,10 @@
-﻿using HappyHour.ViewModel;
+﻿using System.Text.RegularExpressions;
+
+using HappyHour.ViewModel;
 
 namespace HappyHour.Spider
 {
-    class SpiderAvwiki : SpiderBase
+    internal class SpiderAvwiki : SpiderBase
     {
         public override string SearchURL => $"{URL}?s={Keyword}";
 
@@ -11,6 +13,10 @@ namespace HappyHour.Spider
             Name = "AvWiki";
             URL = "https://av-wiki.net/";
             ScriptName = "AvWiki.js";
+        }
+        protected override void AdjustKeyword()
+        {
+            Keyword = Regex.Replace(Keyword, @"^\d+", "");
         }
     }
 }

@@ -90,24 +90,27 @@ namespace HappyHour.Spider
                 Log.Print($"{Name}: Previous downloading is not completed!");
                 return;
             }
-            List<object> images = article.images;
-            List<object> files = article.files;
 
             int i = 0;
             _images.Clear();
             _numDownloaded = 0;
-            _toDownload = images.Count + files.Count;
-            Log.Print($"{Name}: toDownload : {_toDownload }");
 
-            files.ForEach(f => ((IJavascriptCallback)f).ExecuteAsync());
-            foreach (string file in images)
+            if (article.images is List<object> images &&
+                article.files is List<object> files)
             {
-                string postfix = (i == 0) ? "cover" : $"screenshot{i}";
-                string target = _outPath + $"\\{_pid}_{postfix}{Path.GetExtension(file)}";
+                _toDownload = images.Count + files.Count;
+                Log.Print($"{Name}: toDownload : {_toDownload }");
 
-                _images.Add(file, target);
-                Browser.Download(file);
-                i++;
+                files.ForEach(f => ((IJavascriptCallback)f).ExecuteAsync());
+                foreach (string file in images)
+                {
+                    string postfix = (i == 0) ? "cover" : $"screenshot{i}";
+                    string target = _outPath + $"\\{_pid}_{postfix}{Path.GetExtension(file)}";
+
+                    _images.Add(file, target);
+                    Browser.Download(file);
+                    i++;
+                }
             }
         }
 

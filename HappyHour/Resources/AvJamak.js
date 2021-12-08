@@ -25,6 +25,7 @@
             document.querySelector("div.sidebar-login input[name='mb_id']").value = _USERID;
             document.querySelector("div.sidebar-login input[name='mb_password']").value = _PASSWORD;
             document.querySelector("div.sidebar-login button").click();
+            CefSharp.PostMessage({ type: 'items', data: 0});
             return false;
         }
         return true;

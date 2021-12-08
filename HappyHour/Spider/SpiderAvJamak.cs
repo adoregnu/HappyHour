@@ -17,7 +17,7 @@ namespace HappyHour.Spider
             Name = "AvJamak";
             //URL = "https://av-jamak.com/";
             //URL = "https://av-jamack.com/";
-            URL = "https://avjamak01.com/";
+            URL = "https://avjamack.com/";
             ScriptName = "AvJamak.js";
             IsSpiderWorking = true;
         }
@@ -38,11 +38,12 @@ namespace HappyHour.Spider
             }
 
             var template = Template.Parse(App.ReadResource(name));
-            return template.Render((
-                Pid: Keyword,
-                Userid: userid,
-                Password: password
-            ));
+            return template.Render(new
+            {
+                Pid = Keyword,
+                Userid = userid,
+                Password = password
+            });
         }
 
         private void OnBeforeDownload(object sender, DownloadItem e)

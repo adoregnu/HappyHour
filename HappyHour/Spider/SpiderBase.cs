@@ -63,7 +63,7 @@ namespace HappyHour.Spider
         public SpiderBase(SpiderViewModel br)
         {
             Browser = br;
-            CmdSearch = new RelayCommand(() => { Navigate2(); });
+            CmdSearch = new RelayCommand(() => { Navigate2(); }, () => !IsSpiderWorking);
             CmdStopSpider = new RelayCommand(() => OnScrapCompleted(false));
         }
 
@@ -86,6 +86,7 @@ namespace HappyHour.Spider
         }
 
         protected virtual List<Cookie> CreateCookie() { return null; }
+        protected virtual void AdjustKeyword() { }
 
         public void SetCookies()
         {
@@ -126,6 +127,7 @@ namespace HappyHour.Spider
             {
                 SearchMedia = SelectedMedia;
             }
+            AdjustKeyword();
             Browser.SelectedSpider = this;
         }
 
@@ -264,6 +266,10 @@ namespace HappyHour.Spider
                     if (SearchMedia != null)
                     {
                         Browser.ImageDownloader.DownloadFiles(this, d);
+                    }
+                    else
+                    {
+                        OnScrapCompleted(false);
                     }
                 }
                 catch (Exception ex)
