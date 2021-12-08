@@ -17,10 +17,10 @@
         return null;
     }
 
+    function get_node(n) { return n; }
+
     function _checkLogin() {
-        var node = _parseSingleNode("//form[@id='sidebar_login_form']", function (n) {
-            return n;
-        });
+        var node = _parseSingleNode("//form[@id='sidebar_login_form']", get_node);
         if (node != null && _USERID.length > 0 && _PASSWORD.length > 0) {
             document.querySelector("div.sidebar-login input[name='mb_id']").value = _USERID;
             document.querySelector("div.sidebar-login input[name='mb_password']").value = _PASSWORD;
@@ -30,23 +30,22 @@
         return true;
     }
 
-    function _checkSearchResult() {
+    function parseSearchResult() {
         const xpath = "//div[@class='media-body']/a[" +
             "contains(@href, 'table=jamak') or " +
             "contains(@href,'table=bigsub')]";
-        var url = _parseSingleNode(xpath, function (n) { return n; });
+        var url = _parseSingleNode(xpath, get_node);
         if (url != null) {
             CefSharp.PostMessage({ type: 'url', data: url.href});
-            return true;
         }
-        return false;
     }
 
     if (!_checkLogin()) {
         return;
     }
 
-    if (_checkSearchResult()) {
+    if (document.location.href.includes('/bbs/search.php')) {
+        parseSearchResult();
         return;
     }
 

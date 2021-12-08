@@ -56,12 +56,11 @@ namespace HappyHour.Spider
         protected override string GetScript(string name)
         {
             var template = Template.Parse(App.ReadResource(name));
-            return template.Render(new { Pid = Keyword, Board = SelectedBoard });
+            return template.Render(new { Board = SelectedBoard, PageCount = NumPage });
         }
 
         private void UpdateMedia()
         {
-            //DataPath = _outPath; // 
             Browser.MediaList.AddMedia(_outPath);
         }
 

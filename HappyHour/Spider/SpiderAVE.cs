@@ -1,20 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 using CefSharp;
 
-using HtmlAgilityPack;
-
-using HappyHour.ScrapItems;
 using HappyHour.ViewModel;
 
 namespace HappyHour.Spider
 {
-    class SpiderAVE : SpiderBase
+    internal class SpiderAVE : SpiderBase
     {
         public override string SearchURL =>
             $"{URL}search_Products.aspx?languageID=1" +
@@ -29,10 +21,10 @@ namespace HappyHour.Spider
 
         protected override List<Cookie> CreateCookie()
         {
-            return new List<Cookie> 
+            return new List<Cookie>
             {
                 new Cookie
-                { 
+                {
                     Name = "__utmt",
                     Value = "1",
                     Domain = ".aventertainments.com",

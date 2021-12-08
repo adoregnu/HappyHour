@@ -15,11 +15,10 @@
 
   <ItemGroup>
     <PackageReference Include="AvalonEdit" Version="6.1.2.30" />
-    <PackageReference Include="CefSharp.Wpf.NETCore" Version="95.7.141" />
+    <PackageReference Include="CefSharp.Wpf.NETCore" Version="96.0.142" />
     <PackageReference Include="Dirkster.AvalonDock" Version="4.60.0" />
     <PackageReference Include="Dirkster.AvalonDock.Themes.VS2013" Version="4.60.0" />
     <PackageReference Include="FFME.Windows" Version="4.4.350" />
-    <PackageReference Include="HtmlAgilityPack" Version="1.11.38" />
     <PackageReference Include="ini-parser-netstandard" Version="2.5.2" />
     <PackageReference Include="log4net" Version="2.0.13" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.11" />
@@ -78,6 +77,7 @@
     <Compile Remove="ScrapItems\ItemSehuatang.cs" />
     <Compile Remove="Spider\SpiderPornav.cs" />
     <Compile Remove="ViewModel\GoogleEarthViewModel.cs" />
+    <Compile Remove="View\BrowserHeaderGoogleEarth.xaml.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -97,6 +97,10 @@
     <None Remove="Resources\R18.js" />
     <None Remove="Resources\SearchText.js" />
     <None Remove="Resources\Sehuatang.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Remove="View\BrowserHeaderGoogleEarth.xaml" />
   </ItemGroup>
 
   <ItemGroup>

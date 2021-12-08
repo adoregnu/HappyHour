@@ -59,7 +59,7 @@
         return _PID;
     }
 
-    function _multiResult() {
+    function parseSearchResult() {
         var result = document.evaluate("//a[contains(@class,'movie-box')]",
             document.body, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
 
@@ -70,16 +70,18 @@
             //console.log('PID: ' + pid);
             if (pid != null || re.test(pid.replace('_', '-'))) {
                 CefSharp.PostMessage({ type: 'url', data: anode.href });
-                return 'redirected';
+                return;
             }
         }
         if (result.snapshotLength > 1) {
-            return 'ambiguous';
+            console.log('ambiguous');
+        } else {
+            CefSharp.PostMessage({ type: 'itmes', data: 0 });
         }
-        return 'notfound';
     }
 
-    if (_multiResult() != 'notfound') {
+    if (document.location.href.includes('/search/')) {
+        parseSearchResult();
         return;
     }
     if (elm = document.querySelector('body > div.container-fluid > div.alert.alert-danger > h4')) {

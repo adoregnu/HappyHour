@@ -12,9 +12,6 @@
         <ControlTemplate x:Key="BrowserHeaderBase">
             <local:BrowserHeaderBase/>
         </ControlTemplate>
-        <ControlTemplate x:Key="BrowserHeaderGoogleEarth">
-            <local:BrowserHeaderGoogleEarth/>
-        </ControlTemplate>
         <ControlTemplate x:Key="BrowserHeaderSpider">
             <local:BrowserHeaderSpider/>
         </ControlTemplate>

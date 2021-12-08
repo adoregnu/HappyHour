@@ -1,6 +1,6 @@
 ﻿(function () {
-    const _PID = '{{pid}}';
     const _BOARD = '{{board}}';
+    const _PAGE_COUNT = '{{pageCount}}';
 
     function _parseSingleNode(_xpath, _getter = null) {
         var result = document.evaluate(_xpath, document.body,
@@ -108,10 +108,7 @@
     }
 
     var items = {
-        pid: {
-            xpath: "//span[@id='thread_subject']/text()",
-            handler: _getPid
-        },
+        pid: { xpath: "//span[@id='thread_subject']/text()", handler: _getPid },
         date: { xpath: "(//em[contains(@id, 'authorposton')]/span/@title)[1]" },
         files: { xpath: "//a[contains(., '.torrent')]", handler: _parseFiles },
         images: {

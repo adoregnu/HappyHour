@@ -11,7 +11,7 @@
         return null;
     }
 
-    function _multiResult() {
+    function parseSearchResult() {
         var result = document.evaluate("//p[@class='tmb']/a",
             document.body, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
 
@@ -24,12 +24,14 @@
             }
         }
         if (result.snapshotLength > 1) {
-            return 'ambiguous';
+            console.log('ambiguous result');
+        } else {
+            CefSharp.PostMessage({ type: 'items', data: 0 });
         }
-        return 'notfound';
     }
 
-    if (_multiResult() != 'notfound') {
+    if (document.location.href.includes('/search/=')) {
+        parseSearchResult();
         return;
     }
 

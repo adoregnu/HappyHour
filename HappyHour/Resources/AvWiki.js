@@ -99,7 +99,7 @@
         CefSharp.PostMessage({type: 'items', data:1, actor:[actor]});
     }
 
-    function _multiResult() {
+    function parseSearchResult() {
         var urls = _parseMultiNode("//li[@class='search-readmore']/a/@href");
         if (urls == null) {
             CefSharp.PostMessage({ type: 'items', data: 0 });
@@ -116,7 +116,7 @@
     }
 
     if (document.location.href.includes('/?s=' + _PID)) {
-        _multiResult();
+        parseSearchResult();
         return;
     }
 

@@ -97,17 +97,19 @@ namespace HappyHour.Spider
 
             _spider = spider;
             _items = items;
-            SpiderBase.IterateDynamic(items, (key, obj) => {
+            _ = SpiderBase.IterateDynamic(items, (key, obj) =>
+            {
                 if (key is "cover" or "thumb") { _numDownload++; }
                 return false;
             });
             Log.Print($"{spider.Name}: _numDownload: {_numDownload}");
             if (_numDownload > 0)
             {
-                SpiderBase.IterateDynamic(items, (key, dict) => {
+                _ = SpiderBase.IterateDynamic(items, (key, dict) =>
+                {
                     if (key is "cover" or "thumb")
                     {
-                        var url = dict[key].ToString();
+                        string url = dict[key].ToString();
                         _urls.Add(url, dict);
                         _browser.Download(url);
                     }

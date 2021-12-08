@@ -11,20 +11,37 @@
         return null;
     }
 
-    function _multiResult() {
-        var result = document.evaluate("//a[@class='movie-box']",
-            document.body, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
-        if (result.snapshotLength == 1) {
-            var node = result.snapshotItem(0);
-            CefSharp.PostMessage({ type: 'url', data: node.href });
-            return 'redirected';
-        } else if (result.snapshotLength > 1) {
-            return 'ambiguous';
+    function _parseMultiNode(xpath, _getter = null) {
+        var result = document.evaluate(xpath, document.body,
+            null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+
+        var array = [];
+        while (node = result.iterateNext()) {
+            if (_getter != null) {
+                array.push(_getter(node));
+            } else {
+                array.push(node.textContent.trim());
+            }
         }
-        return 'notfound';
+        if (array.length > 0) {
+            return array;
+        }
+        return null;
     }
 
-    if (_multiResult() != 'notfound') {
+    function parseSearchResult() {
+        var urls = _parseMultiNode("//a[@class='movie-box']/@href");
+        if (urls == null) {
+            CefSharp.PostMessage({ type: 'items', data: 0 });
+        } else if (urls.length == 1) {
+            CefSharp.PostMessage({ type: 'url', data: urls[0] });
+        } else {
+            console.log('ambiguous result!');
+        }
+    }
+
+    if (document.location.href.includes('/search/')) {
+        parseSearchResult();
         return;
     }
 

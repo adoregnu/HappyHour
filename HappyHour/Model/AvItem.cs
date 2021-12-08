@@ -18,7 +18,7 @@ namespace HappyHour.Model
     }
 
     public class AvActorName
-    { 
+    {
         [Key]
         public int Id { get; set; }
 
@@ -32,11 +32,12 @@ namespace HappyHour.Model
 
     public class AvActor : NotifyPropertyChanged
     {
-        string picturePath;
+        private string picturePath;
         [Key]
         public int Id { get; set; }
 
-        public string PicturePath {
+        public string PicturePath
+        {
             get => picturePath;
             set => Set(ref picturePath, value);
         }
@@ -47,26 +48,25 @@ namespace HappyHour.Model
         {
             int idx = 0;
             if (Names.Count == 0)
+            {
                 return "Actor-Name relation has broken!";
+            }
 
             string ret = "";
             foreach (var name in Names)
             {
-                if (idx == 0)
-                    ret = name.Name;
-                else if (idx == 1)
-                    ret += "(" + name.Name;
-                else if (idx > 1)
-                    ret += ", " + name.Name;
+                if (idx == 0) { ret = name.Name; }
+                else if (idx == 1) { ret += "(" + name.Name; }
+                else if (idx > 1) { ret += ", " + name.Name; }
                 idx++;
             }
-            if (idx > 1) ret += ")";
+            if (idx > 1) { ret += ")"; }
             return ret;
         }
     }
 
     public class AvStudio
-    { 
+    {
         [Key]
         public int Id { get; set; }
         public string Name { get; set; }
@@ -77,7 +77,7 @@ namespace HappyHour.Model
     }
 
     public class AvSeries
-    { 
+    {
         [Key]
         public int Id { get; set; }
         [MaxLength(512)]
@@ -119,13 +119,13 @@ namespace HappyHour.Model
         public virtual ICollection<AvActor> Actors { get; set; }
         public string ActorsName()
         {
-            if (Actors.Count == 0) return "No Actor Info";
+            if (Actors.Count == 0) { return "No Actor Info"; }
 
             int aidx = 0;
             string ret = "";
             foreach (var actor in Actors)
             {
-                if (aidx > 0) ret += "\n";
+                if (aidx > 0) { ret += "\n"; }
                 ret += actor.ToString();
                 aidx++;
             }

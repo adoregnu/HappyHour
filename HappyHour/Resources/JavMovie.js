@@ -53,19 +53,19 @@
         return null;
     }
 
-    function _multiResult() {
-        var result = document.evaluate("//div[@class='movie-thumb']/a",
-            document.body, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
-        if (result.snapshotLength == 1) {
-            CefSharp.PostMessage({ type: 'url', data: result.snapshotItem(0).href });
-            return 'redirected';
-        } else if (result.snapshotLength > 1) {
-            return 'ambiguous';
+    function parseSearchResult() {
+        var urls = _parseMultiNode("//div[@class='movie-thumb']/a/@href");
+        if (urls == null) {
+            CefSharp.PostMessage({ type: 'items', data: 0 });
+        } else if (urls.length == 1) {
+            CefSharp.PostMessage({ type: 'url', data: urls[0] });
+        } else {
+            console.log('ambiguous result');
         }
-        return 'notfound';
     }
 
-    if (_multiResult() != 'notfound') {
+    if (document.location.href.includes('/search.html?k=' + _PID)) {
+        parseSearchResult();
         return;
     }
 
