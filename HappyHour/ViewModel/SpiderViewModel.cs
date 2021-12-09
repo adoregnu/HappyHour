@@ -53,6 +53,7 @@ namespace HappyHour.ViewModel
             Spiders = new List<SpiderBase>
             {
                 new SpiderSehuatang(this),
+                //new SpiderSehuatang2(this),
                 new SpiderR18(this),
                 new SpiderJavlibrary(this),
                 new SpiderJavmoive(this),

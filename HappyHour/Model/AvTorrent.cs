@@ -21,13 +21,12 @@ namespace HappyHour.Model
         {
             try
             {
-                string dir = System.IO.Path.GetDirectoryName(Path);
                 foreach (string file in Torrents)
                 {
                     string torrent = System.IO.Path.GetFileName(file);
-                    File.Copy(torrent, App.GConf["general"]["torrent_path"] + torrent);
+                    File.Copy(file, App.GConf["general"]["torrent_path"] + torrent);
                 }
-                File.Create($"{dir}\\.downloaded").Dispose();
+                File.Create($"{Path}\\.downloaded").Dispose();
                 Log.Print($"Mark downloaded {Path}");
             }
             catch (Exception ex)
@@ -40,8 +39,7 @@ namespace HappyHour.Model
         {
             try
             {
-                string dir = System.IO.Path.GetDirectoryName(Path);
-                File.Create($"{dir}\\.excluded").Dispose();
+                File.Create($"{Path}\\.excluded").Dispose();
                 Log.Print($"Mark excluded {Path}");
             }
             catch (Exception ex)

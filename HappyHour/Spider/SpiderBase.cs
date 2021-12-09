@@ -24,8 +24,8 @@ namespace HappyHour.Spider
         private bool _isCookieSet;
         private bool _isSpiderWorking;
         private IAvMedia _selectedMedia;
-        private readonly Queue<IDictionary<string, object>> _itemQueue = new();
-
+        
+        protected readonly Queue<IDictionary<string, object>> _itemQueue = new();
         protected virtual IDownloader Downloader => _downloader;
 
         public bool IsSpiderWorking
@@ -71,7 +71,7 @@ namespace HappyHour.Spider
             {
                _downloader = new DefaultDownloader(br);
             }
-            CmdSearch = new RelayCommand(() => { Navigate2(); }, () => !IsSpiderWorking);
+            CmdSearch = new RelayCommand(() => { Navigate2(); });
             CmdStopSpider = new RelayCommand(() => OnScrapCompleted(false));
         }
 

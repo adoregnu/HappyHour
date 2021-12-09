@@ -86,7 +86,7 @@
             actor['thumb'] = img;
         }
         var alias = _parseSingleNode("//dt[contains(.,'別名義')]/following-sibling::dd", null, node);
-        if (alias != null && alias.trim() != '' && !alias.startsWith('–')) {
+        if (alias != null && alias != '' && !alias.includes('—')) {
             var alias_array = [];
             var array = alias.split(/、|・/);
             //console.log('alias:' + alias + ', count:' + array.length);

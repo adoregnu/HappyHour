@@ -16,15 +16,6 @@ namespace HappyHour.Spider
 {
     internal class SpiderSehuatang2 : SpiderBase
     {
-        private int _index;
-        private bool _scrapRunning;
-        private bool _skipDownload;
-
-        private string _pid;
-        private string _outPath;
-        private DateTime _updateTime;
-        private dynamic _currPage;
-        private readonly string _dataPath;
         private readonly ShtDownloader _downloader;
 
         protected override IDownloader Downloader => _downloader;
@@ -38,16 +29,16 @@ namespace HappyHour.Spider
         public ICommand CmdStop { get; private set; }
         public SpiderSehuatang2(SpiderViewModel browser) : base(browser)
         {
-            Name = "sehuatang";
+            Name = "sehuatang2";
             URL = "https://www.sehuatang.org/";
-            ScriptName = "Sehuatang.js";
+            ScriptName = "Sehuatang2.js";
             _downloader = new ShtDownloader(Browser);
 
             Boards = new List<string>
             {
                 "censored", "uncensored", "subtitle"
             };
-            CmdStop = new RelayCommand(() => _scrapRunning = false);
+            CmdStop = new RelayCommand(() => _itemQueue.Clear());
 
             SearchMedia = new AvTorrent(GetConf("DataPath")); 
         }
@@ -56,28 +47,6 @@ namespace HappyHour.Spider
         {
             var template = Template.Parse(App.ReadResource(name));
             return template.Render(new { Board = SelectedBoard, PageCount = NumPage });
-        }
-
-        private void UpdateMedia()
-        {
-            Browser.MediaList.AddMedia(_outPath);
-        }
-
-        private void CreateDir()
-        {
-            _skipDownload = false;
-            DirectoryInfo di = new(_outPath);
-            if (!di.Exists)
-            {
-                Directory.CreateDirectory(_outPath);
-                return;
-            }
-            _skipDownload = true;
-            Log.Print($"{Name}: Already downloaded! {_outPath}");
-            if (StopOnExistingId)
-            {
-                _scrapRunning = false;
-            }
         }
 
         private string GetConf(string key)
@@ -90,8 +59,11 @@ namespace HappyHour.Spider
                 }
 
                 var general = App.GConf["general"];
-                return !general.ContainsKey("data_path") ?
-                    null : $"{general["data_path"]}sehuatang\\{SelectedBoard}\\";
+                var path = !general.ContainsKey("data_path") ?
+                    @"c:\tmp\sht" : @$"{general["data_path"]}sehuatang";
+                path += $@"\{SelectedBoard}";
+                ShtDownloader.CreateDir(path);
+                return path;
             }
             return null;
         }
@@ -99,7 +71,6 @@ namespace HappyHour.Spider
         public override void Navigate2(IAvMedia _)
         {
             IsSpiderWorking = true;
-            _scrapRunning = true;
             if (Browser.Address == URL)
             {
                 Browser.Address = "";
@@ -108,7 +79,9 @@ namespace HappyHour.Spider
         }
 
         protected override void UpdateDb(IDictionary<string, object> items)
-        { 
+        {
+            var path = @$"{SearchMedia.Path}\{items["pid"]}";
+            Browser.MediaList.AddMedia(path);
         }
     }
 }
