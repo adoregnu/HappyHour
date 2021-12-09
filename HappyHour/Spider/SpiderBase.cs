@@ -18,11 +18,15 @@ namespace HappyHour.Spider
     internal class SpiderBase : NotifyPropertyChanged
     {
         private static string _keyword;
-        private IAvMedia _selectedMedia;
+        private static DefaultDownloader _downloader;
+
         private bool _saveDb;
         private bool _isCookieSet;
         private bool _isSpiderWorking;
+        private IAvMedia _selectedMedia;
         private readonly Queue<IDictionary<string, object>> _itemQueue = new();
+
+        protected virtual IDownloader Downloader => _downloader;
 
         public bool IsSpiderWorking
         {
@@ -63,6 +67,10 @@ namespace HappyHour.Spider
         public SpiderBase(SpiderViewModel br)
         {
             Browser = br;
+            if (_downloader == null)
+            {
+               _downloader = new DefaultDownloader(br);
+            }
             CmdSearch = new RelayCommand(() => { Navigate2(); }, () => !IsSpiderWorking);
             CmdStopSpider = new RelayCommand(() => OnScrapCompleted(false));
         }
@@ -70,13 +78,13 @@ namespace HappyHour.Spider
         public virtual void OnSelected()
         {
             Log.Print($"{Name} selected!");
-            Browser.ImageDownloader.Enable(true);
+            Downloader.Enable(true);
         }
 
         public virtual void OnDeselect()
         {
             Log.Print($"{Name} deselected!");
-            Browser.ImageDownloader.Enable(false);
+            Downloader.Enable(false);
         }
 
         protected virtual string GetScript(string name)
@@ -179,6 +187,7 @@ namespace HappyHour.Spider
                     {
                         return false;
                     }
+                    action(item.Key, dict);
                 }
                 else if (action(item.Key, dict))
                 {
@@ -265,7 +274,7 @@ namespace HappyHour.Spider
                 {
                     if (SearchMedia != null)
                     {
-                        Browser.ImageDownloader.DownloadFiles(this, d);
+                        Downloader.Download(this, d);
                     }
                     else
                     {

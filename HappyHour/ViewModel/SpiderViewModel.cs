@@ -27,7 +27,7 @@ namespace HappyHour.ViewModel
         }
 
         public DownloadHandler DownloadHandler { get; private set; }
-        public Downloader ImageDownloader { get; set; }
+        //public Downloader ImageDownloader { get; set; }
 
         public IMediaList MediaList
         {
@@ -119,7 +119,7 @@ namespace HappyHour.ViewModel
             SelectedSpider = Spiders[0];
             SelectedSpider.SetCookies();
             Address = SelectedSpider.URL;
-            ImageDownloader = new Downloader(this);
+            //ImageDownloader = new Downloader(this);
         }
 
         private void OnStateChanged(object sender, LoadingStateChangedEventArgs e)

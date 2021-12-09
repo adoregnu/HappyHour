@@ -5,10 +5,11 @@ using System.Collections.Generic;
 using CefSharp;
 
 using HappyHour.ViewModel;
+using HappyHour.Interfaces;
 
 namespace HappyHour.Spider
 {
-    internal class Downloader
+    internal class DefaultDownloader : IDownloader
     {
         private int _numDownload;
         private int _numDownloaded;
@@ -20,7 +21,7 @@ namespace HappyHour.Spider
         private SpiderBase _spider;
         private IDictionary<string, object> _items;
 
-        public Downloader(SpiderViewModel spider)
+        public DefaultDownloader(SpiderViewModel spider)
         {
             _browser = spider;
             _actorPicturePath = $"{App.LocalAppData}\\db";
@@ -84,7 +85,7 @@ namespace HappyHour.Spider
             }
         }
 
-        public void DownloadFiles(SpiderBase spider, IDictionary<string, object> items)
+        public void Download(SpiderBase spider, IDictionary<string, object> items)
         {
             if (_numDownload != _numDownloaded)
             {
@@ -97,11 +98,12 @@ namespace HappyHour.Spider
 
             _spider = spider;
             _items = items;
-            _ = SpiderBase.IterateDynamic(items, (key, obj) =>
+            _ = SpiderBase.IterateDynamic(items, (key, dict) =>
             {
                 if (key is "cover" or "thumb") { _numDownload++; }
                 return false;
             });
+
             Log.Print($"{spider.Name}: _numDownload: {_numDownload}");
             if (_numDownload > 0)
             {

@@ -97,6 +97,7 @@
     <None Remove="Resources\R18.js" />
     <None Remove="Resources\SearchText.js" />
     <None Remove="Resources\Sehuatang.js" />
+    <None Remove="Resources\Sehuatang2.js" />
   </ItemGroup>
 
   <ItemGroup>
@@ -106,6 +107,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\Dmm.js" />
     <EmbeddedResource Include="Resources\AvWiki.js" />
+    <EmbeddedResource Include="Resources\Sehuatang2.js" />
     <EmbeddedResource Include="Resources\Sehuatang.js" />
     <EmbeddedResource Include="Resources\JavBus.js" />
     <EmbeddedResource Include="Resources\Avsox.js" />
