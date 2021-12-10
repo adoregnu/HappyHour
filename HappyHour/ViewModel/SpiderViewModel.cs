@@ -120,7 +120,6 @@ namespace HappyHour.ViewModel
             SelectedSpider = Spiders[0];
             SelectedSpider.SetCookies();
             Address = SelectedSpider.URL;
-            //ImageDownloader = new Downloader(this);
         }
 
         private void OnStateChanged(object sender, LoadingStateChangedEventArgs e)

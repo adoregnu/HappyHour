@@ -13,24 +13,28 @@ namespace HappyHour.ScrapItems
     internal class ItemBase2
     {
         private readonly AvDbContext _context;
-        private readonly IAvMedia _mediaItem;
-
         protected AvItem _avItem;
-        private AvStudio _studio;
-        private AvSeries _series;
-        private List<AvActor> _actors = new();
-        private List<AvGenre> _genres;
 
-        public ItemBase2(IAvMedia mediaItem)
+        public ItemBase2(IAvMedia avm)
         {
-            _mediaItem = mediaItem;
-            _context = App.DbContext;
-            _avItem = new AvItem
+            _avItem = App.DbContext.Items
+                .Include("Studio")
+                .Include("Actors")
+                .Include("Genres")
+                .Include("Series")
+                .FirstOrDefault(av => av.Pid == avm.Pid);
+
+            if (_avItem == null)
             {
-                Pid = _mediaItem.Pid,
-                Path = _mediaItem.Path,
-                IsCensored = true,
-            };
+                _avItem = new AvItem
+                {
+                    Pid = avm.Pid,
+                    Path = avm.Path,
+                    IsCensored = true,
+                };
+                _avItem.DateAdded = _avItem.DateModifed = DateTime.Now;
+                _avItem = _context.Items.Add(_avItem).Entity;
+            }
         }
 
         private void UpdateTitle(string title)
@@ -81,7 +85,6 @@ namespace HappyHour.ScrapItems
 
         private void UpdateGenre(List<object> genres)
         {
-            _genres = new List<AvGenre>();
             foreach (string genre in genres)
             {
                 if (NameMap.SkipGenre(genre))
@@ -93,29 +96,31 @@ namespace HappyHour.ScrapItems
                 if (entity == null)
                 {
                     entity = _context.Genres.Add(new AvGenre { Name = genre }).Entity;
+                    _avItem.Genres.Add(entity);
                 }
-                _genres.Add(entity);
+                //_genres.Add(entity);
             }
         }
 
         private void UpdateStudio(string studio)
         {
             studio = NameMap.StudioName(studio);
-            _studio = _context.Studios.FirstOrDefault(
-                x => x.Name.ToLower() == studio.ToLower());
-            if (_studio == null)
+            var entity = _context.Studios.FirstOrDefault(x => x.Name.ToLower() == studio.ToLower());
+            if (entity == null)
             {
-                _studio = _context.Studios.Add(new AvStudio { Name = studio }).Entity;
+                entity = _context.Studios.Add(new AvStudio { Name = studio }).Entity;
+                _avItem.Studio = entity;
             }
         }
 
         private void UpdateSeries(string series)
         {
-            _series = _context.Series.FirstOrDefault(
+            var entity = _context.Series.FirstOrDefault(
                  x => x.Name.ToLower() == series.ToLower());
-            if (_series == null)
+            if (entity == null)
             {
-                _series = _context.Series.Add(new AvSeries { Name = series }).Entity;
+                entity = _context.Series.Add(new AvSeries { Name = series }).Entity;
+                _avItem.Series = entity;
             }
         }
 
@@ -190,23 +195,23 @@ namespace HappyHour.ScrapItems
                 else
                 {
                     dbActor = new();
-                    List<AvActorName> list = new();
+                    List<AvActorName> ActorNames = new();
                     ForEachActor(actor, name =>
                     {
-                        list.Add(new AvActorName { Name = name, Actor = dbActor });
+                        ActorNames.Add(new AvActorName { Name = name, Actor = dbActor });
                         return false;
                     });
 
-                    dbActor.Names = list;
+                    dbActor.Names = ActorNames;
                     dbActor.DateAdded = DateTime.Now;
 
-                    _context.Actors.Add(dbActor);
+                    dbActor = _context.Actors.Add(dbActor).Entity;
+                    _avItem.Actors.Add(dbActor);
                 }
                 if (actor.ContainsKey("thumb"))
                 {
                     dbActor.PicturePath = actor["thumb"].ToString();
                 }
-                _actors.Add(dbActor);
             }
         }
 
@@ -225,7 +230,7 @@ namespace HappyHour.ScrapItems
 
                 //{ "cover",  (Action<string>)UpdateCover },
             };
- 
+
             foreach (var item in items)
             {
                 //Log.Print($"{item.Key} : {item.Value?.ToString()}");
@@ -235,9 +240,17 @@ namespace HappyHour.ScrapItems
                 }
             }
 
-            UpdateDb();
-        }
+            try
+            {
+                _context.SaveChanges();
+            }
+            catch (ValidationException e)
+            {
+                Log.Print(e.Message);
+            }
+        } 
 
+#if false
         private void UpdateDb()
         {
             AvItem item = _context.Items
@@ -256,7 +269,6 @@ namespace HappyHour.ScrapItems
             {
                 _avItem.DateAdded = _avItem.DateModifed = DateTime.Now;
             }
-
             if (item == null || (_series != null && item.Series == null))
             {
                 _avItem.Series = _series;
@@ -265,7 +277,7 @@ namespace HappyHour.ScrapItems
             {
                 _avItem.Studio = _studio;
             }
-            if (item == null || (_actors != null && item.Actors.Count == 0))
+            if (item == null || _actorChanged)
             {
                 _avItem.Actors = _actors;
             }
@@ -273,13 +285,12 @@ namespace HappyHour.ScrapItems
             {
                 _avItem.Genres = _genres;
             }
-
             try
             {
-                if (item == null)
-                {
-                    _context.Items.Add(_avItem);
-                }
+                //if (item == null)
+                //{
+                //    _context.Items.Add(_avItem);
+                //}
                 _context.SaveChanges();
             }
             catch (ValidationException e)
@@ -288,11 +299,12 @@ namespace HappyHour.ScrapItems
             }
             finally
             {
-                _series = null;
-                _studio = null;
-                _actors = null;
-                _genres = null;
+                //_series = null;
+                //_studio = null;
+                //_actors = null;
+                //_genres = null;
             }
         }
+#endif
     }
 }
