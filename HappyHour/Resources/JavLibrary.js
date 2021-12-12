@@ -22,19 +22,25 @@
         return null;
     }
 
-    function _parseMultiNode(xpath) {
+    function _parseMultiNode(xpath, _getter = null) {
         var result = document.evaluate(xpath, document.body,
             null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
 
         var array = [];
         while (node = result.iterateNext()) {
-            array.push(node.textContent.trim());
+            if (_getter != null) {
+                array.push(_getter(node));
+            } else {
+                array.push(node.textContent.trim());
+            }
         }
         if (array.length > 0) {
             return array;
         }
         return null;
     }
+
+    function get_node(node) { return node; }
 
     function _parseActorName(xpath) {
         var result = document.evaluate(xpath, document.body,
@@ -69,40 +75,34 @@
         return null;
     }
 
-    function _multiResult() {
-        var result = document.evaluate("//div[@class='videos']/div/a",
-            document.body, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+    function parseSearchResult() {
+        var nodes = _parseMultiNode("//div[@class='videos']/div/a", get_node);
+        if (nodes == null) {
+            CefSharp.PostMessage({ type: 'items', data: 0 });
+            return;
+        }
 
+        var msg;
+        var nmatched = 0;
         const re = new RegExp('^' + _PID, 'i');
-        var num_item = 0;
-        while (node = result.iterateNext()) {
-            num_item += 1;
-            //console.log(re + ', ' + node.title);
-            if (re.test(node.title) !== null) {
-                CefSharp.PostMessage({ type: 'url', data: node.href });
-                return 'redirected';
+        for (var i = 0; i < nodes.length; i++) {
+            var node = nodes[i];
+            //console.log('title: ' + node.title);
+            if (re.test(node.title)) {
+                //console.log(node.title);
+                nmatched += 1;
+                msg = { type: 'url', data: node.href };
             }
         }
-        if (num_item > 0) {
-            return 'ambiguous';
+        if (nmatched == 1) {
+            CefSharp.PostMessage(msg);
+        } else {
+            console.log('ambiguous');
         }
-        return 'notfound';
     }
 
-    function _checkResult() {
-        var result = _parseSingleNode('//*[@id="rightcolumn"]/p/em');
-        if (result == 'Search returned no result.') {
-            console.log(result);
-            CefSharp.PostMessage({ type: 'items', data: 0 });
-            return false;
-        }
-        return true;
-    }
-
-    if (_multiResult() != 'notfound') {
-        return;
-    }
-    if (!_checkResult()) {
+    if (document.location.href.includes('/vl_searchbyid.php')) {
+        parseSearchResult();
         return;
     }
 

@@ -39,14 +39,11 @@ namespace HappyHour.Model
             {
                 if (_movieInfo != null && value == null)
                 {
-                    App.DbContext.Items.Remove(_movieInfo);
-                    App.DbContext.SaveChanges();
-                }
-                if (_movieInfo == value)
-                {
-                    UpdateProperties();
+                    _ = App.DbContext.Items.Remove(_movieInfo);
+                    _ = App.DbContext.SaveChanges();
                 }
                 _movieInfo = value;
+                UpdateProperties();
             }
         }
 
@@ -76,7 +73,7 @@ namespace HappyHour.Model
                     if (MovieInfo != null)
                     {
                         MovieInfo.Path = target;
-                        App.DbContext.SaveChanges();
+                        _ = App.DbContext.SaveChanges();
                     }
                     OnCompleted(this);
                 }
@@ -93,8 +90,8 @@ namespace HappyHour.Model
             {
                 if (MovieInfo != null)
                 {
-                    App.DbContext.Items.Remove(MovieInfo);
-                    App.DbContext.SaveChanges();
+                    _ = App.DbContext.Items.Remove(MovieInfo);
+                    _ = App.DbContext.SaveChanges();
                 }
                 Directory.Delete(Path, true);
             }
@@ -163,6 +160,7 @@ namespace HappyHour.Model
                 .Include(av => av.Studio)
                 .Include(av => av.Actors)
                     .ThenInclude(ac => ac.Names)
+                .Include(av => av.Genres)
                 .FirstOrDefaultAsync(av => av.Pid == Pid);
 
             UpdateProperties();

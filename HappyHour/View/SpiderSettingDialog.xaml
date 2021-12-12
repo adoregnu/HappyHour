@@ -1,0 +1,29 @@
+﻿<Window x:Class="HappyHour.View.SpiderSettingDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:md="https://github.com/fantasticfiasco/mvvm-dialogs"
+        mc:Ignorable="d"
+        WindowStartupLocation="CenterOwner"
+        md:DialogServiceViews.IsRegistered="True"
+        Title="Setting for items to be scraped" Height="350" Width="450">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <ListBox Grid.Column="0" ItemsSource="{Binding Spiders}" SelectedItem="{Binding SelectedSpider}" Margin="5"/>
+        <StackPanel Grid.Column="1" Orientation="Vertical">
+            <TextBlock Text="{Binding SelectedSpider.Name}" Margin="5"/>
+            <CheckBox IsChecked="{Binding CheckAll}" Content="Check All" Margin="5,5,0,5"/>
+            <ItemsControl ItemsSource="{Binding SelectedSpider.ScrapItems}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <CheckBox IsChecked="{Binding CanUpdate}" Content="{Binding Name}" Margin="5,5,0,0"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+    </Grid>
+</Window>

@@ -53,57 +53,40 @@
                     x:Key="VmContext"
                     Data="{Binding RelativeSource={RelativeSource FindAncestor,
                         AncestorType={x:Type local:MediaListView}}, Path=DataContext}"/>
-                <local:BindingProxy
-                    x:Key="CtrlContext"
-                    Data="{Binding RelativeSource={RelativeSource FindAncestor,
-                        AncestorType={x:Type ListBox}}}"/>
+                <local:BindingProxy x:Key="CtrlContext"
+                    Data="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}}"/>
                 <ContextMenu x:Key="videoContextMenu">
-                    <MenuItem 
-                        Header="Scrap"
-                        Visibility="{Binding Data.SpiderList,
-                            Source={StaticResource VmContext},
-                            Converter={StaticResource nulltoVis}}"
-                        ItemsSource="{Binding Data.SpiderList,
-                            Source={StaticResource VmContext}}">
+                    <MenuItem Header="Scrap"
+                        Visibility="{Binding Data.SpiderList, Source={StaticResource VmContext}, Converter={StaticResource nulltoVis}}"
+                        ItemsSource="{Binding Data.SpiderList, Source={StaticResource VmContext}}">
                         <MenuItem.ItemTemplate>
                             <DataTemplate>
-                                <MenuItem
-                                    Header="{Binding Name}"
-                                    Command="{Binding Data.CmdScrap,
-                                        Source={StaticResource VmContext}}"
+                                <MenuItem Header="{Binding Name}"
+                                    Command="{Binding Data.CmdScrap, Source={StaticResource VmContext}}"
                                     CommandParameter="{Binding .}">
                                 </MenuItem>
                             </DataTemplate>
                         </MenuItem.ItemTemplate>
                     </MenuItem>
                     <MenuItem Header="External Player" 
-                        Command="{Binding Data.CmdExternalPlayer,
-                            Source={StaticResource VmContext}}"
+                        Command="{Binding Data.CmdExternalPlayer, Source={StaticResource VmContext}}"
                         CommandParameter="{Binding}"/>
                     <MenuItem Header="Copy Path" 
-                        Command="{Binding Data.CmdCopyPath,
-                            Source={StaticResource VmContext}}"
+                        Command="{Binding Data.CmdCopyPath, Source={StaticResource VmContext}}"
                         CommandParameter="{Binding}"/>
                     <MenuItem
                         Header="MoveTo"
-                        Command="{Binding Data.CmdMoveItemTo,
-                            Source={StaticResource VmContext}}"
-                        CommandParameter="{Binding Data.SelectedItems,
-                            Source={StaticResource CtrlContext}}">
+                        Command="{Binding Data.CmdMoveItemTo, Source={StaticResource VmContext}}"
+                        CommandParameter="{Binding Data.SelectedItems, Source={StaticResource CtrlContext}}">
                     </MenuItem>
                     <MenuItem Header="Delete" 
-                        Command="{Binding Data.CmdDeleteItem,
-                            Source={StaticResource VmContext}}"
-                        CommandParameter="{Binding Data.SelectedItems,
-                            Source={StaticResource CtrlContext}}"/>
+                        Command="{Binding Data.CmdDeleteItem, Source={StaticResource VmContext}}"
+                        CommandParameter="{Binding Data.SelectedItems, Source={StaticResource CtrlContext}}"/>
                     <MenuItem Header="Clear DB"
-                        Command="{Binding Data.CmdClearDb,
-                            Source={StaticResource VmContext}}"
-                        CommandParameter="{Binding Data.SelectedItems,
-                            Source={StaticResource CtrlContext}}"/>
+                        Command="{Binding Data.CmdClearDb, Source={StaticResource VmContext}}"
+                        CommandParameter="{Binding Data.SelectedItems, Source={StaticResource CtrlContext}}"/>
                     <MenuItem Header="Edit" 
-                        Command="{Binding Data.CmdEditItem,
-                            Source={StaticResource VmContext}}"
+                        Command="{Binding Data.CmdEditItem, Source={StaticResource VmContext}}"
                         CommandParameter="{Binding}"/>
                 </ContextMenu>
             </Grid.Resources>

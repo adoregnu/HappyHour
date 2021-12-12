@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Timers;
 using System.IO;
 using System.Collections.Generic;
 
@@ -17,6 +17,7 @@ namespace HappyHour.Spider
         private readonly string _actorPicturePath;
         private readonly SpiderViewModel _browser;
         private readonly Dictionary<string, IDictionary<string, object>> _urls = new();
+        private readonly Timer _timer;
 
         private SpiderBase _spider;
         private IDictionary<string, object> _items;
@@ -25,6 +26,11 @@ namespace HappyHour.Spider
         {
             _browser = spider;
             _actorPicturePath = $"{App.LocalAppData}\\db";
+            _timer = new Timer(2000)
+            {
+                AutoReset = false,
+            };
+            _timer.Elapsed += OnDownloadTimeout;
         }
 
         public void Enable(bool bEnable)
@@ -78,10 +84,39 @@ namespace HappyHour.Spider
                 _numDownloaded++;
                 Log.Print($"{_spider.SearchMedia.Pid} : Download Completed: " +
                     $"({_numDownloaded}/{_numDownload}){e.FullPath}");
-                if (_numDownloaded == _numDownload)
+                lock (_timer)
                 {
-                    UiServices.Invoke(() => _spider.UpdateItems(_items));
+                    if (_numDownloaded == _numDownload)
+                    {
+                        _timer.Enabled = false;
+                        UiServices.Invoke(() => _spider.UpdateItems(_items));
+                    }
                 }
+            }
+        }
+
+        private void OnDownloadTimeout(object sender, ElapsedEventArgs e)
+        {
+            lock (_timer)
+            {
+                if (_numDownloaded == _numDownload) { return; }
+
+                _ = SpiderBase.IterateDynamic(_items, (key, dic) =>
+                {
+                    if (key is "cover" or "thumb")
+                    {
+                        if (dic[key].ToString().StartsWith("http",
+                            System.StringComparison.OrdinalIgnoreCase))
+                        {
+                            _ = dic.Remove(key);
+                            Log.Print($"{_spider.Name}: Downloading is timed out! Removing {key}");
+                        }
+                    }
+                    return false;
+                });
+
+                _numDownloaded = _numDownload = 0;
+                UiServices.Invoke(() => _spider.UpdateItems(_items));
             }
         }
 
@@ -95,6 +130,7 @@ namespace HappyHour.Spider
             _numDownload = 0;
             _numDownloaded = 0;
             _urls.Clear();
+            _timer.Stop();
 
             _spider = spider;
             _items = items;
@@ -104,7 +140,7 @@ namespace HappyHour.Spider
                 return false;
             });
 
-            Log.Print($"{spider.Name}: _numDownload: {_numDownload}");
+            Log.Print($"{spider.Name}: Num items to download: {_numDownload}");
             if (_numDownload > 0)
             {
                 _ = SpiderBase.IterateDynamic(items, (key, dict) =>
@@ -117,6 +153,7 @@ namespace HappyHour.Spider
                     }
                     return false;
                 });
+                _timer.Enabled = true;
             }
             else
             {

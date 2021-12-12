@@ -14,6 +14,24 @@ using HappyHour.Interfaces;
 namespace HappyHour.Spider
 {
     internal delegate void ScrapCompletedHandler(SpiderBase spider);
+    internal class ScrapItem : NotifyPropertyChanged
+    {
+        private bool _canUpdate;
+        private static bool _skipDlIfExists;
+
+        public string Name { get; set; }
+        public bool SkipDlIfExists
+        {
+            get => _skipDlIfExists;
+            set => Set(ref _skipDlIfExists, value);
+        }
+
+        public bool CanUpdate
+        {
+            get => _canUpdate;
+            set => Set(ref _canUpdate, value);
+        }
+    }
 
     internal class SpiderBase : NotifyPropertyChanged
     {
@@ -24,10 +42,11 @@ namespace HappyHour.Spider
         private bool _isCookieSet;
         private bool _isSpiderWorking;
         private IAvMedia _selectedMedia;
-        
+
         protected readonly Queue<IDictionary<string, object>> _itemQueue = new();
         protected virtual IDownloader Downloader => _downloader;
 
+        public List<ScrapItem> ScrapItems { get; set; }
         public bool IsSpiderWorking
         {
             get => _isSpiderWorking;
@@ -73,6 +92,21 @@ namespace HappyHour.Spider
             }
             CmdSearch = new RelayCommand(() => { Navigate2(); });
             CmdStopSpider = new RelayCommand(() => OnScrapCompleted(false));
+
+            ScrapItems = new()
+            {
+                new ScrapItem() { CanUpdate = true, Name = "title" },
+                new ScrapItem() { CanUpdate = true, Name = "date" },
+                //new ScrapItem() { CanUpdate = true, Name = "runtime" },
+                //new ScrapItem() { CanUpdate = true, Name = "director" },
+                new ScrapItem() { CanUpdate = true, Name = "series" },
+                new ScrapItem() { CanUpdate = true, Name = "studio" },
+                new ScrapItem() { CanUpdate = true, Name = "genre" },
+                new ScrapItem() { CanUpdate = true, Name = "plot" },
+                new ScrapItem() { CanUpdate = false, Name = "cover" },
+                new ScrapItem() { CanUpdate = true, Name = "actor" },
+                new ScrapItem() { CanUpdate = true, Name = "rating" },
+            };
         }
 
         public virtual void OnSelected()
@@ -144,7 +178,7 @@ namespace HappyHour.Spider
         {
             bool IterateList(string key, List<object> list)
             {
-                foreach (var obj in list)
+                foreach (object obj in list)
                 {
                     if (obj is IDictionary<string, object> dict2)
                     {
@@ -253,6 +287,19 @@ namespace HappyHour.Spider
             }
         }
 
+        private void ApplyItemSettings(IDictionary<string, object> items)
+        {
+            //var items = d as IDictionary<string, object>;
+            ScrapItems.ForEach(i =>
+            {
+                if (items.ContainsKey(i.Name) && !i.CanUpdate)
+                {
+                    _ = items.Remove(i.Name);
+                    Log.Print($"{Name}:: {i.Name} dropped by setting!");
+                }
+            });
+        }
+
         public virtual void OnJsMessageReceived(JavascriptMessageReceivedEventArgs msg)
         {
             dynamic d = msg.Message;
@@ -265,13 +312,14 @@ namespace HappyHour.Spider
             {
                 if (d.data == 0)
                 {
-                    Log.Print($"{Name}: No exact matched ID");
+                    Log.Print($"{Name}: {Keyword}: No exact matched ID");
                     OnScrapCompleted(false);
                     return;
                 }
                 _itemQueue.Enqueue(d);
                 try
                 {
+                    ApplyItemSettings(d);
                     if (SearchMedia != null)
                     {
                         Downloader.Download(this, d);
@@ -302,9 +350,16 @@ namespace HappyHour.Spider
 
         public void UpdateItems(IDictionary<string, object> items)
         {
-            if (_saveDb)
+            try
             {
-                UpdateDb(items);
+                if (_saveDb)
+                {
+                    UpdateDb(items);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Print($"{Name}: UpdateItem", ex);
             }
             OnScrapCompleted(true);
         }

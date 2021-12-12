@@ -48,7 +48,17 @@
                         {RelativeSource AncestorType={x:Type ToggleButton}}}"/>
             </ToggleButton>
             <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" />
- 
+            <Button Style="{DynamicResource ModernButtonStyle3}"
+                    Visibility="{Binding SpiderEnabled, Converter={StaticResource boolToVis}}"
+                    Command="{Binding CmdSpiderSetting}">
+                <Path Stretch="Uniform"
+                    Data="{Binding Source={StaticResource cog-outline}, Path=Data}"
+                    Fill="{Binding Path=Foreground, RelativeSource=
+                        {RelativeSource AncestorType={x:Type Button}}}" />
+                <Button.ToolTip>
+                    <TextBlock Text="Settings for items to be scraped."/>
+                </Button.ToolTip>
+            </Button> 
 <!--
             <ToggleButton
                 Style="{DynamicResource ModernToggleButtonStyle3}"

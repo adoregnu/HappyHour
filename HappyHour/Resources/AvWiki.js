@@ -86,7 +86,7 @@
             actor['thumb'] = img;
         }
         var alias = _parseSingleNode("//dt[contains(.,'別名義')]/following-sibling::dd", null, node);
-        if (alias != null && alias != '' && !alias.includes('—')) {
+        if (alias != null && alias != '' && !alias.includes('—') && alias.length < 3) {
             var alias_array = [];
             var array = alias.split(/、|・/);
             //console.log('alias:' + alias + ', count:' + array.length);
@@ -123,6 +123,7 @@
     var items = {
         title: { xpath : "//div[@class='article-header']/h1/text()"}, 
         cover: { xpath: "//div[contains(@class,'article-thumbnail')]/a/img/@src" },
+        series: { xpath: "//dl[@class='dltable']/dt[contains(., 'シリーズ')]/following-sibling::dd" },
         studio: { xpath: "//dl[@class='dltable']/dt[contains(., 'レーベル')]/following-sibling::dd" },
         date: { xpath: "//dl[@class='dltable']/dt[contains(., '配信開始日')]/following-sibling::dd" },
         actor: {

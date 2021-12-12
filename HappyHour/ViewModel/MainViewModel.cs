@@ -19,11 +19,11 @@ namespace HappyHour.ViewModel
     internal class MainViewModel : ViewModelBase, IMainView
     {
         private string _status;
-        private bool _nasEnabled;
         private bool _spiderEnabled;
 
         public ICommand CmdFileToFolder { get; private set; }
         public ICommand CmdActorEdtor { get; private set; }
+        public ICommand CmdSpiderSetting { get; private set; }
 
         public ObservableCollection<Pane> Docs { get; } = new();
         public ObservableCollection<Pane> Anchors { get; } = new();
@@ -49,15 +49,6 @@ namespace HappyHour.ViewModel
             }
         }
 
-        public bool NasEnabled
-        {
-            get => _nasEnabled;
-            set
-            {
-                Set(ref _nasEnabled, value);
-                OnPaneEnabled<NasViewModel>(value);
-            }
-        }
         public IDialogService DialogService { get; set; }
         private readonly FileListViewModel _fileListMv;
         private readonly MediaListViewModel _mediaListMv;
@@ -86,6 +77,7 @@ namespace HappyHour.ViewModel
 
             CmdActorEdtor = new RelayCommand(() => OnActorEditor());
             CmdFileToFolder = new RelayCommand(() => OnFileToFolder());
+            CmdSpiderSetting = new RelayCommand(() => OnSpiderSetting());
 
             //for update media list
             _fileListMv.DirChanged?.Invoke(this, _fileListMv.CurrDirInfo);
@@ -124,7 +116,7 @@ namespace HappyHour.ViewModel
             });
         }
 
-        VMType OnPaneEnabled<VMType>(bool enabled) where VMType : Pane
+        private VMType OnPaneEnabled<VMType>(bool enabled) where VMType : Pane
         {
             Pane pane = null;
             if (enabled)
@@ -144,20 +136,34 @@ namespace HappyHour.ViewModel
             return (VMType)pane;
         }
 
-        void OnFileToFolder()
+        private void OnFileToFolder()
         {
             var dialog = new FileToFolderViewModel { MediaPath = _fileListMv.CurrPath };
-            DialogService.ShowDialog<FileToFolderDialog>(this, dialog);
+            _ = DialogService.ShowDialog<FileToFolderDialog>(this, dialog);
         }
 
-        void OnActorEditor()
-        { 
+        private void OnActorEditor()
+        {
             var dialog = new ActorEditorViewModel
             {
                 MediaList = _mediaListMv,
                 DialogService = DialogService
             };
             DialogService.Show<ActorEditorDialog>(this, dialog);
+        }
+
+        private void OnSpiderSetting()
+        {
+            var spiderVm = Docs.FirstOrDefault(d => d is SpiderViewModel);
+            if (spiderVm == null) { return; }
+
+            var dialog = new SpiderSettingViewModel
+            {
+                Spiders = (spiderVm as SpiderViewModel).Spiders,
+                DialogService = DialogService
+            };
+            dialog.SelectedSpider = dialog.Spiders[1];
+            DialogService.Show<SpiderSettingDialog>(this, dialog);
         }
     }
 }

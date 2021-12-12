@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,15 +16,17 @@ using Scriban;
 
 namespace HappyHour.CefHandler
 {
-    class MenuHandler : IContextMenuHandler
+    internal class MenuHandler : IContextMenuHandler
     {
-        readonly SpiderViewModel _browser;
+        private const int CefUserCommand = 26503;
+        private readonly SpiderViewModel _browser;
+        private string _imageUrl;
+
         public MenuHandler(SpiderViewModel spider = null)
         {
             _browser = spider;
         }
 
-        const int CefUserCommand = 26503;
         void IContextMenuHandler.OnBeforeContextMenu(
             IWebBrowser chromiumWebBrowser,
             IBrowser browser,
@@ -36,33 +39,37 @@ namespace HappyHour.CefHandler
 
             if (model.Count > 0)
             {
-                model.AddSeparator();
+                _ = model.AddSeparator();
             }
 
-            model.AddItem((CefMenuCommand)26501, "Show DevTools");
-            model.AddItem((CefMenuCommand)26502, "Close DevTools");
-            //To disable context mode then clear
-            // model.Clear();
+            _ = model.AddItem((CefMenuCommand)26501, "Show DevTools");
+            _ = model.AddItem((CefMenuCommand)26502, "Close DevTools");
+
             int cefCmdId = CefUserCommand;
+
+            if (parameters.MediaType == ContextMenuMediaType.Image)
+            {
+                _ = model.AddItem((CefMenuCommand)cefCmdId++, "Edit Image");
+                _imageUrl = parameters.SourceUrl;
+            }
 
             if (string.IsNullOrEmpty(parameters.SelectionText))
             {
                 return;
             }
 
-            model.AddSeparator();
-            model.AddItem((CefMenuCommand)cefCmdId++, "Google");
-            model.AddItem((CefMenuCommand)cefCmdId++, "Google Translate");
-            model.AddItem((CefMenuCommand)cefCmdId++, "Search PID");
+            _ = model.AddSeparator();
+
+            _ = model.AddItem((CefMenuCommand)cefCmdId++, "Google");
+            _ = model.AddItem((CefMenuCommand)cefCmdId++, "Google Translate");
+            _ = model.AddItem((CefMenuCommand)cefCmdId++, "Search PID");
 
             if (_browser != null)
             {
-                // Add a separator
-                model.AddSeparator();
-                // Add another example item
+                _ = model.AddSeparator();
                 foreach (var spider in _browser.Spiders)
                 {
-                    model.AddItem((CefMenuCommand)cefCmdId++, spider.Name);
+                    _ = model.AddItem((CefMenuCommand)cefCmdId++, spider.Name);
                 }
             }
         }
@@ -120,7 +127,6 @@ namespace HappyHour.CefHandler
             //IMenuModel is only valid in the context of this method,
             // so need to read the values before invoking on the UI thread
             var menuItems = GetMenuItems(model).ToList();
-            
             webBrowser.Dispatcher.Invoke(() =>
             {
                 var menu = new ContextMenu
@@ -128,9 +134,7 @@ namespace HappyHour.CefHandler
                     IsOpen = true
                 };
 
-                RoutedEventHandler handler = null;
-
-                handler = (s, e) =>
+                void handler(object s, RoutedEventArgs e)
                 {
                     menu.Closed -= handler;
 
@@ -140,7 +144,7 @@ namespace HappyHour.CefHandler
                     {
                         callback.Cancel();
                     }
-                };
+                }
 
                 menu.Closed += handler;
 
@@ -149,17 +153,16 @@ namespace HappyHour.CefHandler
                     if (item.Item2 == CefMenuCommand.NotFound &&
                         string.IsNullOrWhiteSpace(item.Item1))
                     {
-                        menu.Items.Add(new Separator());
+                        _ = menu.Items.Add(new Separator());
                         continue;
                     }
 
-                    menu.Items.Add(new MenuItem
+                    _ = menu.Items.Add(new MenuItem
                     {
                         Header = item.Item1.Replace("&", "_"),
                         IsEnabled = item.Item3,
-                        Command = new RelayCommand(() => 
-                            ProcessMenu(item, browser, parameters),
-                            keepTargetAlive: true)
+                        Command = new RelayCommand(() =>
+                            ProcessMenu(item, browser, parameters), keepTargetAlive: true)
                     });
                 }
                 webBrowser.ContextMenu = menu;
@@ -168,13 +171,13 @@ namespace HappyHour.CefHandler
             return true;
         }
 
-        static private string GetScript(string action, string spider = "")
+        private static string GetScript(string action, string spider = "")
         {
-            Template template = Template.Parse(App.ReadResource("SearchText.js"));
+            var template = Template.Parse(App.ReadResource("SearchText.js"));
             return template.Render(new { Action = action, Spider = spider });
         }
 
-        void ProcessMenu(Tuple<string, CefMenuCommand, bool> item,
+        private void ProcessMenu(Tuple<string, CefMenuCommand, bool> item,
             IBrowser browser, IContextMenuParams parameters)
         {
             //BUG: CEF currently not executing callbacks correctly 
@@ -188,6 +191,7 @@ namespace HappyHour.CefHandler
             // you can work out the rest
             switch (item.Item2)
             {
+#if false
                 case CefMenuCommand.Back:
                     browser.GoBack();
                     break;
@@ -233,6 +237,7 @@ namespace HappyHour.CefHandler
                 case CefMenuCommand.ReloadNoCache:
                     browser.Reload(ignoreCache: true);
                     break;
+#endif
                 case (CefMenuCommand)26501:
                     browser.GetHost().ShowDevTools();
                     break;
@@ -240,12 +245,15 @@ namespace HappyHour.CefHandler
                     browser.GetHost().CloseDevTools();
                     break;
                 case (CefMenuCommand)CefUserCommand:
+                    Log.Print(_imageUrl);
+                    break;
+                case (CefMenuCommand)(CefUserCommand + 1):
                     _browser.ExecJavaScript(GetScript("google_search"));
                     break;
-                case (CefMenuCommand)(CefUserCommand+1):
+                case (CefMenuCommand)(CefUserCommand + 2):
                     _browser.ExecJavaScript(GetScript("google_translate"));
                     break;
-                case (CefMenuCommand)(CefUserCommand + 2):
+                case (CefMenuCommand)(CefUserCommand + 3):
                     _browser.ExecJavaScript(GetScript("pid_search_in_db"));
                     break;
                 default:
@@ -257,11 +265,11 @@ namespace HappyHour.CefHandler
         private static IEnumerable<Tuple<string, CefMenuCommand, bool>>
             GetMenuItems(IMenuModel model)
         {
-            for (var i = 0; i < model.Count; i++)
+            for (int  i = 0; i < model.Count; i++)
             {
-                var header = model.GetLabelAt(i);
+                string header = model.GetLabelAt(i);
                 var commandId = model.GetCommandIdAt(i);
-                var isEnabled = model.IsEnabledAt(i);
+                bool isEnabled = model.IsEnabledAt(i);
                 yield return new Tuple<string, CefMenuCommand, bool>(
                     header, commandId, isEnabled);
             }

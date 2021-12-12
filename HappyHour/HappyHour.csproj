@@ -81,6 +81,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Resources\Avdbs.js" />
     <None Remove="Resources\AVE.js" />
     <None Remove="Resources\AvJamak.js" />
     <None Remove="Resources\Avsox.js" />
@@ -107,6 +108,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\Dmm.js" />
     <EmbeddedResource Include="Resources\AvWiki.js" />
+    <EmbeddedResource Include="Resources\Avdbs.js" />
     <EmbeddedResource Include="Resources\Sehuatang2.js" />
     <EmbeddedResource Include="Resources\Sehuatang.js" />
     <EmbeddedResource Include="Resources\JavBus.js" />

@@ -13,45 +13,49 @@ namespace HappyHour.ScrapItems
     internal class ItemBase2
     {
         private readonly AvDbContext _context;
-        protected AvItem _avItem;
+        protected AvItem _avInfo;
 
         public ItemBase2(IAvMedia avm)
         {
-            _avItem = App.DbContext.Items
+            _context = App.DbContext;
+            _avInfo = _context.Items
                 .Include("Studio")
                 .Include("Actors")
                 .Include("Genres")
                 .Include("Series")
                 .FirstOrDefault(av => av.Pid == avm.Pid);
 
-            if (_avItem == null)
+            if (_avInfo == null)
             {
-                _avItem = new AvItem
+                _avInfo = new AvItem
                 {
                     Pid = avm.Pid,
                     Path = avm.Path,
                     IsCensored = true,
+                    Genres = new List<AvGenre>(),
+                    Actors = new List<AvActor>(),
+                    DateAdded = DateTime.Now,
+                    DateModifed = DateTime.Now,
                 };
-                _avItem.DateAdded = _avItem.DateModifed = DateTime.Now;
-                _avItem = _context.Items.Add(_avItem).Entity;
+                _avInfo = _context.Items.Add(_avInfo).Entity;
             }
         }
 
         private void UpdateTitle(string title)
         {
-            _avItem.Title = title;
+            _avInfo.Title = title;
         }
 
         private void UpdatePlot(string plot)
         {
-            _avItem.Plot = plot;
+            _avInfo.Plot = plot;
         }
 
         private void UpdateRating(string rating)
         {
             try
             {
-                _avItem.Rating = float.Parse(rating, App.enUS);
+                _avInfo.Rating = float.Parse(rating, App.enUS);
             }
             catch (Exception ex)
             {
@@ -70,7 +74,7 @@ namespace HappyHour.ScrapItems
                 {
                     try
                     {
-                        _avItem.DateReleased = DateTime.ParseExact(
+                        _avInfo.DateReleased = DateTime.ParseExact(
                             date, pattern, App.enUS);
                         break;
                     }
@@ -91,14 +95,16 @@ namespace HappyHour.ScrapItems
                 {
                     continue;
                 }
-                AvGenre entity = _context.Genres.FirstOrDefault(
+                var entity = _context.Genres.FirstOrDefault(
                     x => x.Name.ToLower() == genre.ToLower());
                 if (entity == null)
                 {
                     entity = _context.Genres.Add(new AvGenre { Name = genre }).Entity;
-                    _avItem.Genres.Add(entity);
                 }
-                //_genres.Add(entity);
+                if (!_avInfo.Genres.Any(g => g.Name.ToLower() == entity.Name.ToLower()))
+                {
+                    _avInfo.Genres.Add(entity);
+                }
             }
         }
 
@@ -109,8 +115,8 @@ namespace HappyHour.ScrapItems
             if (entity == null)
             {
                 entity = _context.Studios.Add(new AvStudio { Name = studio }).Entity;
-                _avItem.Studio = entity;
             }
+            _avInfo.Studio = entity;
         }
 
         private void UpdateSeries(string series)
@@ -120,8 +126,8 @@ namespace HappyHour.ScrapItems
             if (entity == null)
             {
                 entity = _context.Series.Add(new AvSeries { Name = series }).Entity;
-                _avItem.Series = entity;
             }
+            _avInfo.Series = entity;
         }
 
         /// <summary>
@@ -204,9 +210,12 @@ namespace HappyHour.ScrapItems
 
                     dbActor.Names = ActorNames;
                     dbActor.DateAdded = DateTime.Now;
-
                     dbActor = _context.Actors.Add(dbActor).Entity;
-                    _avItem.Actors.Add(dbActor);
+                }
+                if (_avInfo.Actors.Count == 0 ||
+                    !_avInfo.Actors.Any(a => a.Id != 0 && a.Id == dbActor.Id))
+                {
+                    _avInfo.Actors.Add(dbActor);
                 }
                 if (actor.ContainsKey("thumb"))
                 {
@@ -240,71 +249,7 @@ namespace HappyHour.ScrapItems
                 }
             }
 
-            try
-            {
-                _context.SaveChanges();
-            }
-            catch (ValidationException e)
-            {
-                Log.Print(e.Message);
-            }
-        } 
-
-#if false
-        private void UpdateDb()
-        {
-            AvItem item = _context.Items
-                .Include("Studio")
-                .Include("Actors")
-                .Include("Genres")
-                .Include("Series")
-                .FirstOrDefault(i => i.Pid == _avItem.Pid);
-
-            if (item != null)
-            {
-                _avItem = item;
-                _avItem.DateModifed = DateTime.Now;
-            }
-            else
-            {
-                _avItem.DateAdded = _avItem.DateModifed = DateTime.Now;
-            }
-            if (item == null || (_series != null && item.Series == null))
-            {
-                _avItem.Series = _series;
-            }
-            if (item == null || (_studio != null && item.Studio == null))
-            {
-                _avItem.Studio = _studio;
-            }
-            if (item == null || _actorChanged)
-            {
-                _avItem.Actors = _actors;
-            }
-            if (item == null || (_genres != null && item.Genres.Count == 0))
-            {
-                _avItem.Genres = _genres;
-            }
-            try
-            {
-                //if (item == null)
-                //{
-                //    _context.Items.Add(_avItem);
-                //}
-                _context.SaveChanges();
-            }
-            catch (ValidationException e)
-            {
-                Log.Print(e.Message);
-            }
-            finally
-            {
-                //_series = null;
-                //_studio = null;
-                //_actors = null;
-                //_genres = null;
-            }
+            _ = _context.SaveChanges();
         }
-#endif
     }
 }
