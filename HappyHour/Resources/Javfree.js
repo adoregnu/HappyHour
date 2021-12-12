@@ -1,5 +1,6 @@
 ﻿(function () {
     const _PID = '{{pid}}';
+    var actor_parsed = false;
 
     function _parseSingleNode(_xpath, getter = null) {
         var result = document.evaluate(_xpath, document.body,
@@ -11,6 +12,24 @@
             } else {
                 return node.textContent.trim();
             }
+        }
+        return null;
+    }
+
+    function _parseMultiNode(xpath, _getter = null) {
+        var result = document.evaluate(xpath, document.body,
+            null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+
+        var array = [];
+        while (node = result.iterateNext()) {
+            if (_getter != null) {
+                array.push(_getter(node));
+            } else {
+                array.push(node.textContent.trim());
+            }
+        }
+        if (array.length > 0) {
+            return array;
         }
         return null;
     }
@@ -39,6 +58,9 @@
     }
 
     function _actor(txt, msg) {
+        if (actor_parsed) {
+            return;
+        }
         const headers = ['名前：', '出演:']
         var header = checkHeader(headers, txt);
         if (header == null) {
@@ -51,6 +73,7 @@
         actor['name'] = txt.substring(txt.indexOf(header) + header.length);
         array.push(actor);
         msg['actor'] = array;
+        actor_parsed = true;
         return true;
     }
 /*
@@ -63,11 +86,31 @@
         return false;
     }
 */
+
+    function get_node(node) { return node; }
+
+    function _parseActorTag(xpath, msg) {
+        if (actor_parsed) {
+            return 0;
+        }
+        var nodes = _parseMultiNode(xpath, get_node);
+        if (nodes == null) {
+            console.log('no tags!');
+            return 0;
+        }
+        if (nodes.length == 3) {
+            actor_parsed = true;
+            msg['actor'] = [{ name: nodes[0].textContent.trim() }]
+            return 1;
+        }
+        return 0;
+    }
+
     function _parseContent(xpath, msg) {
         const parser = [_date, _actor];
 
         var count = 0;
-        var p = _parseSingleNode(xpath, function (node) { return node; });
+        var p = _parseSingleNode(xpath, get_node);
         if (p == null || p.childNodes == null) {
             return count;
         }
@@ -111,6 +154,10 @@
         title: { xpath: "//h1[@class='entry-title']"},
         cover: { xpath: "//div[@class='entry-content']//img[1]/@src" },
         studio: { xpath: "//strong[contains(.,'Categorized in:')]/following-sibling::a[1]"},
+        actor: {
+            xpath: "//strong[contains(.,'Tags:')]/following-sibling::a",
+            handler: _parseActorTag
+        },
         content: {
             xpath: "//div[@class='entry-content']/p",
             handler: _parseContent

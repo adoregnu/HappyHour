@@ -1,12 +1,16 @@
 ﻿(function () {
     const _PID = '{{pid}}';
 
-    function _parseSingleNode(_xpath, _node = document.body, _result = null) {
+    function _parseSingleNode(_xpath, _getter = null, _node = document.body, _result = null) {
         var result = document.evaluate(_xpath, _node,
             null, XPathResult.FIRST_ORDERED_NODE_TYPE, _result);
         var node = result.singleNodeValue;
         if (node != null) {
-            return node.textContent.trim();
+            if (_getter != null) {
+                return _getter(node);
+            } else {
+                return node.textContent.trim();
+            }
         }
         return null;
     }
@@ -78,21 +82,29 @@
     }
 
     function parseSearchResult() {
-        var result = document.evaluate("//a[@class='box']",
-            document.body, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
-        var num_result = 0;
-        const re = new RegExp(_convertPid(), 'i');
-        while (node = result.iterateNext()) {
-            var pid = _parseSingleNode("//div[@class='uid']", node, result);
-            if (pid != null && re.test(pid)) {
-                CefSharp.PostMessage({ type: 'url', data: node.href });
-                return;
-            }
-            num_result += 1;
-        }
-        if (num_result > 0) {
-            console.log('ambiguous result!');
+        var nodes = _parseMultiNode("//a[@class='box']", get_node);
+        if (nodes == null) {
             CefSharp.PostMessage({ type: 'items', data: 0 });
+            return;
+        }
+
+        var url;
+        var num_match = 0;
+        const re = new RegExp(_convertPid(), 'i');
+        for (var i = 0; i < nodes.length; i++) {
+            var pid = _parseSingleNode("//div[@class='uid']", null, nodes[i]);
+            if (pid != null && re.test(pid)) {
+                num_match += 1;
+                url = nodes[i].href;
+            }
+        }
+
+        if (num_match == 0) {
+            CefSharp.PostMessage({ type: 'items', data: 0 });
+        } else if (num_match == 1) {
+            CefSharp.PostMessage({ type: 'url', data: url });
+        } else {
+            console.log('ambiguous result!');
         }
     }
 
@@ -103,7 +115,8 @@
         }
         var actors = [];
         var tmp = txt.split(',');
-        var actor = { name: tmp.length > 1 ? tmp[1].trim() : tmp[0].trim() };
+        tmp = tmp.length > 1 ? tmp[1].trim() : tmp[0].trim();
+        var actor = { name: tmp.replace(/\(uncensored\)/i, '')};
 
         xpath = "//div[contains(@class, 'actor-avatar')]//span[@class='avatar']/@style";
         txt = _parseSingleNode(xpath);

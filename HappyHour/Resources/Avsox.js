@@ -76,7 +76,7 @@
         if (result.snapshotLength > 1) {
             console.log('ambiguous');
         } else {
-            CefSharp.PostMessage({ type: 'itmes', data: 0 });
+            CefSharp.PostMessage({ type: 'items', data: 0 });
         }
     }
 

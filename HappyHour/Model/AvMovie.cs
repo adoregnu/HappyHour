@@ -142,7 +142,7 @@ namespace HappyHour.Model
             _date = File.GetCreationTime(Path);
             foreach (string file in files)
             {
-                if (file.Contains("_poster."))
+                if (file.Contains("_poster.", StringComparison.OrdinalIgnoreCase))
                 {
                     Poster = file;
                 }

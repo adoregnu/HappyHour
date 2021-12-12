@@ -144,9 +144,7 @@
                 <!--View Large Image on Image Control Tooltip-->
                 <Image.ToolTip>
                     <ToolTip>
-                        <Image Source="{Binding RelativeSource=
-                            {RelativeSource AncestorType=ToolTip},
-                            Path=PlacementTarget.Source}"/>
+                        <Image Source="{Binding RelativeSource= {RelativeSource AncestorType=ToolTip}, Path=PlacementTarget.Source}"/>
                     </ToolTip>
                 </Image.ToolTip>
             </Image>

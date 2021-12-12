@@ -289,7 +289,6 @@ namespace HappyHour.Spider
 
         private void ApplyItemSettings(IDictionary<string, object> items)
         {
-            //var items = d as IDictionary<string, object>;
             ScrapItems.ForEach(i =>
             {
                 if (items.ContainsKey(i.Name) && !i.CanUpdate)

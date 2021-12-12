@@ -53,7 +53,7 @@
                     actorInfo['alias'] = alias;
                 }
             }
-            if (!node.src.endsWith('printing')) {
+            if (/jpg$/i.test(node.src)) {
                 actorInfo['thumb'] = node.src;
             }
             array.push(actorInfo);
