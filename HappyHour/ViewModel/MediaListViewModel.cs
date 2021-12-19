@@ -343,7 +343,7 @@ namespace HappyHour.ViewModel
             }
             catch (Exception ex)
             {
-                Log.Print("UpdateMediaList: ", ex);
+                Log.Print($"UpdateMediaList: {ex.Message}");
             }
         }
 

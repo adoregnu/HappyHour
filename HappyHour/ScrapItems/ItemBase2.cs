@@ -15,6 +15,8 @@ namespace HappyHour.ScrapItems
         private readonly AvDbContext _context;
         protected AvItem _avInfo;
 
+        public bool OverwriteActorPicture { get; set; }
+
         public ItemBase2(IAvMedia avm)
         {
             _context = App.DbContext;
@@ -217,9 +219,13 @@ namespace HappyHour.ScrapItems
                 {
                     _avInfo.Actors.Add(dbActor);
                 }
+                //string update = App.GetConf("general", "always_update_actor_thumb_of_db") ?? "false";
                 if (actor.ContainsKey("thumb"))
                 {
-                    dbActor.PicturePath = actor["thumb"].ToString();
+                    if (string.IsNullOrEmpty(dbActor.PicturePath) || OverwriteActorPicture)
+                    {
+                        dbActor.PicturePath = actor["thumb"].ToString();
+                    }
                 }
             }
         }

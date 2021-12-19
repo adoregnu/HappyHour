@@ -8,6 +8,65 @@
         WindowStartupLocation="CenterOwner"
         md:DialogServiceViews.IsRegistered="True"
         Title="Setting for items to be scraped" Height="350" Width="450">
+    <Window.Resources>
+        <ControlTemplate x:Key="SpiderTypeSehuatang">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition/> 
+                    <RowDefinition/> 
+                    <RowDefinition/> 
+                    <RowDefinition/> 
+                    <RowDefinition/> 
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1.4*"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" TextAlignment="Right" Text="Overwrite Poster : " />
+                <CheckBox Grid.Row="0" Grid.Column="1" IsChecked="{Binding OverwritePoster}" Margin="0,0,5,0"/>
+                <TextBlock Grid.Row="1" Grid.Column="0" TextAlignment="Right" Text="PID to stop : " Margin="0,5,0,0"/>
+                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding PidToStop}" Margin="0,5,5,0"/>
+                <TextBlock Grid.Row="2" Grid.Column="0" TextAlignment="Right" Text="Num pages to scrap : " Margin="0,5,0,0"/>
+                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding NumPage}" Margin="0,5,5,0"/>
+                <TextBlock Grid.Row="3" Grid.Column="0" TextAlignment="Right" Text="Board type : " Margin="0,5,0,0"/>
+                <ComboBox Grid.Row="3" Grid.Column="1" ItemsSource="{Binding Boards}" SelectedItem="{Binding SelectedBoard}" Margin="0,5,5,0" />
+                <TextBlock Grid.Row="4" Grid.Column="0" TextAlignment="Right" Text="Stop on existing PID : " Margin="0,5,0,0"/>
+                <CheckBox Grid.Row="4" Grid.Column="1" IsChecked="{Binding StopOnExistingId}" Margin="0,5,5,0"/>
+            </Grid>
+        </ControlTemplate>
+        <ControlTemplate  x:Key="SpiderTypeDefault">
+            <StackPanel Grid.Column="1" Orientation="Vertical">
+                <CheckBox IsChecked="{Binding OverwritePoster}" Content="Overwrite Poster" Margin="5,0,0,5"/>
+                <CheckBox IsChecked="{Binding OverwriteActorThumb}" Content="Overwrite actor thumb file" Margin="5,0,0,5"/>
+                <CheckBox IsChecked="{Binding OverwriteActorThumbDb}" Content="Overwirte actor thumb DB" Margin="5,0,0,5"/>
+                <CheckBox IsChecked="{Binding CheckAll}" Content="Check All items below" Margin="5,5,0,5"/>
+                <ItemsControl ItemsSource="{Binding ScrapItems}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <CheckBox IsChecked="{Binding CanUpdate}" Content="{Binding Name}" Margin="5,5,0,0"/>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </ControlTemplate>
+        <DataTemplate x:Key="SpiderSettingTemplate">
+            <ContentControl>
+                <ContentControl.Style>
+                    <Style TargetType="ContentControl">
+                        <!--<Setter Property="Template" Value="{StaticResource ImageItem}"/>-->
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ., Converter={StaticResource SpiderTypeConverter}}" Value="sehuatang">
+                                <Setter Property="Template" Value="{StaticResource SpiderTypeSehuatang}"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding ., Converter={StaticResource SpiderTypeConverter}}" Value="default">
+                                <Setter Property="Template" Value="{StaticResource SpiderTypeDefault}"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ContentControl.Style>
+            </ContentControl>
+        </DataTemplate>
+    </Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
@@ -16,14 +75,7 @@
         <ListBox Grid.Column="0" ItemsSource="{Binding Spiders}" SelectedItem="{Binding SelectedSpider}" Margin="5"/>
         <StackPanel Grid.Column="1" Orientation="Vertical">
             <TextBlock Text="{Binding SelectedSpider.Name}" Margin="5"/>
-            <CheckBox IsChecked="{Binding CheckAll}" Content="Check All" Margin="5,5,0,5"/>
-            <ItemsControl ItemsSource="{Binding SelectedSpider.ScrapItems}">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <CheckBox IsChecked="{Binding CanUpdate}" Content="{Binding Name}" Margin="5,5,0,0"/>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+            <ContentPresenter Content="{Binding SelectedSpider}" ContentTemplate="{DynamicResource SpiderSettingTemplate}"/>
         </StackPanel>
     </Grid>
 </Window>

@@ -27,17 +27,14 @@
                 <DataTrigger Binding="{Binding HeaderType, Mode=TwoWay}" Value="base">
                     <Setter Property="Template" Value="{StaticResource BrowserHeaderBase}"/>
                 </DataTrigger>
-                <DataTrigger Binding="{Binding HeaderType, Mode=TwoWay}" Value="spider">
-                    <Setter Property="Template" Value="{StaticResource BrowserHeaderSpider}"/>
-                </DataTrigger>
                 <DataTrigger Binding="{Binding HeaderType, Mode=TwoWay}" Value="sehuatang">
                     <Setter Property="Template" Value="{StaticResource BrowserHeaderSehuatang}"/>
                 </DataTrigger>
+                <DataTrigger Binding="{Binding HeaderType, Mode=TwoWay}" Value="spider">
+                    <Setter Property="Template" Value="{StaticResource BrowserHeaderSpider}"/>
+                </DataTrigger>
                 <DataTrigger Binding="{Binding HeaderType, Mode=TwoWay}" Value="JavBus">
                     <Setter Property="Template" Value="{StaticResource BrowserHeaderJavBus}"/>
-                </DataTrigger>
-                <DataTrigger Binding="{Binding HeaderType, Mode=TwoWay}" Value="googleEarth">
-                    <Setter Property="Template" Value="{StaticResource BrowserHeaderGoogleEarth}"/>
                 </DataTrigger>
             </Style.Triggers> 
         </Style>

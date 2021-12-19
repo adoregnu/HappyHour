@@ -27,7 +27,6 @@ namespace HappyHour.ViewModel
         }
 
         public DownloadHandler DownloadHandler { get; private set; }
-        //public Downloader ImageDownloader { get; set; }
 
         public IMediaList MediaList
         {
@@ -66,6 +65,7 @@ namespace HappyHour.ViewModel
                 new SpiderJavfree(this),
                 //new SpiderPornav(this),
                 new SpiderAvsox(this),
+                //new Spider1pondo(this),
                 new SpiderAvdbs(this),
                 new SpiderAvJamak(this),
             };
@@ -99,7 +99,7 @@ namespace HappyHour.ViewModel
         {
             HeaderType = spiderName switch
             {
-                "sehuatang" or "JavBus" => spiderName,
+                "JavBus" or "sehuatang" => spiderName,
                 _ => "spider",
             };
         }

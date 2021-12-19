@@ -37,6 +37,7 @@ namespace HappyHour
         public static IniData GConf { get; private set; }
         public const string Name = "HappyHour";
 
+        private FileIniDataParser _iniParser;
         /// <summary>
         /// Determines if the Application is in design mode.
         /// </summary>
@@ -71,13 +72,12 @@ namespace HappyHour
         {
             // Load configuration
             var logRepository = LogManager.GetRepository(Assembly.GetEntryAssembly());
-            XmlConfigurator.Configure(logRepository, new FileInfo("log4net.config"));
+            _ = XmlConfigurator.Configure(logRepository, new FileInfo("log4net.config"));
             LocalAppData = Environment.ExpandEnvironmentVariables(@"%LOCALAPPDATA%");
             LocalAppData += $"\\{Name}";
             // Change the default location of the ffmpeg binaries 
             // (same directory as application)
-            Library.FFmpegDirectory = @"ffmpeg" +
-                (Environment.Is64BitProcess ? @"\x64" : string.Empty);
+            Library.FFmpegDirectory = @"ffmpeg" + (Environment.Is64BitProcess ? @"\x64" : string.Empty);
 
             // Multi-threaded video enables the creation of independent
             // dispatcher threads to render video frames. This is an experimental
@@ -87,27 +87,24 @@ namespace HappyHour
             // test with true and false
         }
 
-        FileIniDataParser _iniParser;
-        void InitDefaultConf()
+        private void InitDefaultConf()
         {
             _iniParser = new FileIniDataParser();
-            if (File.Exists(@$"{LocalAppData}\gconf.ini"))
-            {
-                GConf = _iniParser.ReadFile(@$"{LocalAppData}\gconf.ini");
-            }
-            else
-            {
-                GConf = new IniData();
-            }
-            if (!GConf.Sections.ContainsSection("general"))
-            {
-                GConf.Sections.AddSection("general");
-                var general = GConf["general"];
-                general.AddKey("torrent_path", @"z:\");
-                general.AddKey("data_path", @"d:\tmp\");
-                general.AddKey("last_path", @"d:\tmp\");
-                general.AddKey("nas_url", "https://bsyoo.me:5001/");
-            }
+            GConf = File.Exists(@$"{LocalAppData}\gconf.ini") ?
+                _iniParser.ReadFile(@$"{LocalAppData}\gconf.ini") : new IniData();
+
+            _ = GConf.Sections.AddSection("general");
+            var general = GConf["general"];
+            _ = general.AddKey("torrent_path", @"z:\");
+            _ = general.AddKey("data_path", @"d:\tmp\");
+            _ = general.AddKey("last_path", @"d:\tmp\");
+        }
+
+        public static string GetConf(string sectionName, string key)
+        {
+            return !GConf.Sections.ContainsSection(sectionName) ? null
+                : !GConf[sectionName].ContainsKey(key) ? null
+                : GConf[sectionName][key];
         }
 
         static void InitCefSharp()

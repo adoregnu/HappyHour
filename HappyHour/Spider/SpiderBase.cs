@@ -10,6 +10,7 @@ using GalaSoft.MvvmLight.Command;
 using HappyHour.ViewModel;
 using HappyHour.ScrapItems;
 using HappyHour.Interfaces;
+using System.IO;
 
 namespace HappyHour.Spider
 {
@@ -17,15 +18,8 @@ namespace HappyHour.Spider
     internal class ScrapItem : NotifyPropertyChanged
     {
         private bool _canUpdate;
-        private static bool _skipDlIfExists;
 
         public string Name { get; set; }
-        public bool SkipDlIfExists
-        {
-            get => _skipDlIfExists;
-            set => Set(ref _skipDlIfExists, value);
-        }
-
         public bool CanUpdate
         {
             get => _canUpdate;
@@ -41,6 +35,7 @@ namespace HappyHour.Spider
         private bool _saveDb;
         private bool _isCookieSet;
         private bool _isSpiderWorking;
+        private bool? _checkAll;
         private IAvMedia _selectedMedia;
 
         protected readonly Queue<IDictionary<string, object>> _itemQueue = new();
@@ -73,13 +68,24 @@ namespace HappyHour.Spider
         public string Name { get; protected set; } = "Base";
         public string ScriptName { get; set; }
         public virtual string SearchURL => URL;
+        public bool OverwritePoster { get; set; }
+        public bool OverwriteActorThumb { get; set; }
+        public bool OverwriteActorThumbDb { get; set; }
 
         public string Keyword
         {
             get => _keyword;
             set => Set(ref _keyword, value);
         }
-
+        public bool? CheckAll
+        {
+            get => _checkAll;
+            set
+            {
+                Set(ref _checkAll, value);
+                UpdateCheck(value);
+            }
+        }
         public ICommand CmdSearch { get; private set; }
         public ICommand CmdStopSpider { get; set; }
 
@@ -88,7 +94,7 @@ namespace HappyHour.Spider
             Browser = br;
             if (_downloader == null)
             {
-               _downloader = new DefaultDownloader(br);
+                _downloader = new DefaultDownloader(br);
             }
             CmdSearch = new RelayCommand(() => { Navigate2(); });
             CmdStopSpider = new RelayCommand(() => OnScrapCompleted(false));
@@ -103,12 +109,29 @@ namespace HappyHour.Spider
                 new ScrapItem() { CanUpdate = true, Name = "studio" },
                 new ScrapItem() { CanUpdate = true, Name = "genre" },
                 new ScrapItem() { CanUpdate = true, Name = "plot" },
-                new ScrapItem() { CanUpdate = false, Name = "cover" },
+                new ScrapItem() { CanUpdate = true, Name = "cover" },
                 new ScrapItem() { CanUpdate = true, Name = "actor" },
                 new ScrapItem() { CanUpdate = true, Name = "rating" },
             };
         }
-
+        private void UpdateCheck(bool? check)
+        {
+            if (check == null) { return; }
+            ScrapItems.ForEach(i =>
+            {
+                i.CanUpdate = check.Value;
+            });
+        }
+        public void UpdateCheckAll()
+        {
+            int checkCount = 0;
+            ScrapItems.ForEach(i =>
+            {
+                if (i.CanUpdate) { checkCount++; }
+            });
+            CheckAll = checkCount == ScrapItems.Count ? true
+                : checkCount == 0 ? false : null;
+        }
         public virtual void OnSelected()
         {
             Log.Print($"{Name} selected!");
@@ -145,7 +168,7 @@ namespace HappyHour.Spider
             var cookieManager = Cef.GetGlobalCookieManager();
             foreach (var cookie in cookies)
             {
-                cookieManager.SetCookieAsync(URL, cookie);
+                _ = cookieManager.SetCookieAsync(URL, cookie);
             }
             _isCookieSet = true;
         }
@@ -221,9 +244,9 @@ namespace HappyHour.Spider
                     {
                         return false;
                     }
-                    action(item.Key, dict);
+                    _ = action(item.Key, dict);
                 }
-                else if (action(item.Key, dict))
+                else if (dict[item.Key] != null && action(item.Key, dict))
                 {
                     return false;
                 }
@@ -294,9 +317,30 @@ namespace HappyHour.Spider
                 if (items.ContainsKey(i.Name) && !i.CanUpdate)
                 {
                     _ = items.Remove(i.Name);
-                    Log.Print($"{Name}:: {i.Name} dropped by setting!");
+                    Log.Print($"{Name}:: {i.Name} is dropped by setting!");
                 }
             });
+
+            List<(string key, IDictionary<string, object> dict)> tmpList = new();
+            _ = IterateDynamic(items, (key, dict) =>
+            {
+                string path = null;
+                if (!OverwritePoster && key is "cover")
+                {
+                    path = SearchMedia.GenPosterPath(dict[key].ToString());
+                }
+                else if (!OverwriteActorThumb && key is "thumb")
+                {
+                    path = SearchMedia.GenActorThumbPath(dict["name"].ToString(), dict[key].ToString());
+                }
+                if (path != null && File.Exists(path))
+                {
+                    tmpList.Add((key, dict));
+                    Log.Print($"{Name}:: {key} is dropped by setting!");
+                }
+                return false;
+            });
+            tmpList.ForEach(tp => tp.dict.Remove(tp.key));
         }
 
         public virtual void OnJsMessageReceived(JavascriptMessageReceivedEventArgs msg)
@@ -339,7 +383,10 @@ namespace HappyHour.Spider
         {
             try
             {
-                new ItemBase2(SearchMedia).UpdateItems(items);
+                new ItemBase2(SearchMedia)
+                {
+                    OverwriteActorPicture = OverwriteActorThumbDb
+                }.UpdateItems(items);
             }
             catch (Exception ex)
             {

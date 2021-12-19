@@ -80,18 +80,21 @@
         }
         txt = _parseSingleNode("//span[@class='inner_name_cn']", null, node);
         if (txt != null && txt.length > 1) {
-            alias.push(txt);
+            var tmp = txt.split('（');
+            alias.push(tmp[0]);
         }
+/*
         var names = _parseMultiNode("//span[contains(., '다른이름')]/*[contains(@class, 'actor_onm')]");
         if (names != null) {
             names.forEach(function (name) {
-                var tmp = name.split('(');
+                var tmp = name.split(/\(|（/);
                 alias.push(tmp[0].substring(1));
                 if (tmp.length == 2) {
                     alias.push(tmp[1].substring(0, tmp[1].length - 1));
                 }
             });
         }
+*/
         //console.log(JSON.stringify(names));
 
         if (alias.length > 0) {
@@ -157,39 +160,16 @@
         }
     }
 
-    function mutationCallback(mutations) {
-        for (var i = 0; i < mutations.length; i++) {
-            var mutation = mutations[i];
-            //console.log(mutation.type);
-            if (mutation.type != 'childList') {
-                continue;
-            }
-
-            mutation.addedNodes.forEach(function (node) {
-                console.log('node name :' + node.name + ', ' + node.className);
-                if (node.nodeName == 'DIV') {
-                    if (node.className == 'box') {
-                        console.log(node.nodeName + ' class=' + node.className);
-                    }
-                }
-            });
-        }
-    }
-
     if (document.location.href.includes('/menu/actor.php')) {
         parseActorPage();
         return;
     }
 
     if (document.location.href.includes('/menu/search.php')) {
-        parseSearchResult();
+        window.setTimeout(parseSearchResult, 100);
+        //parseSearchResult();
         return;
     }
-
-    console.log("start MutationObserver");
-    const config = { attributes: true, childList: true, subtree: true };
-    var observer = new MutationObserver(mutationCallback);
-    observer.observe(document.body, config);
 
     var info = document.getElementsByClassName('box');
     if (info.length > 0) {

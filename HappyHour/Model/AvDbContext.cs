@@ -9,8 +9,8 @@ namespace HappyHour.Model
     {
         protected override void OnConfiguring(DbContextOptionsBuilder optionbuilder)
         {
-            //optionbuilder.UseSqlite($@"Data Source={App.LocalAppData}\db\AvDb.db");
-            optionbuilder.UseSqlite($@"Data Source={App.LocalAppData}\AvDb.db");
+            optionbuilder.UseSqlite($@"Data Source={App.LocalAppData}\db\AvDb.db");
+            //optionbuilder.UseSqlite($@"Data Source={App.LocalAppData}\AvDb.db");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

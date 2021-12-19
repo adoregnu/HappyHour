@@ -12,6 +12,7 @@ using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 
 using HappyHour.View;
+using HappyHour.Spider;
 using HappyHour.Interfaces;
 
 namespace HappyHour.ViewModel

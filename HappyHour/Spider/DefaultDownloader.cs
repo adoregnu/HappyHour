@@ -14,7 +14,6 @@ namespace HappyHour.Spider
         private int _numDownload;
         private int _numDownloaded;
         private bool _isEnabled;
-        private readonly string _actorPicturePath;
         private readonly SpiderViewModel _browser;
         private readonly Dictionary<string, IDictionary<string, object>> _urls = new();
         private readonly Timer _timer;
@@ -25,7 +24,6 @@ namespace HappyHour.Spider
         public DefaultDownloader(SpiderViewModel spider)
         {
             _browser = spider;
-            _actorPicturePath = $"{App.LocalAppData}\\db";
             _timer = new Timer(2000)
             {
                 AutoReset = false,
@@ -51,7 +49,6 @@ namespace HappyHour.Spider
 
         private void OnBeforeDownload(object sender, DownloadItem e)
         {
-            string ext = Path.GetExtension(e.SuggestedFileName);
             if (!_urls.ContainsKey(e.OriginalUrl))
             {
                 Log.Print($"{e.OriginalUrl} not found in download list!");
@@ -63,16 +60,17 @@ namespace HappyHour.Spider
             }
 
             var dic = _urls[e.OriginalUrl];
+            var item = _spider.SearchMedia;
             if (dic.ContainsKey("cover"))
             {
-                var item = _spider.SearchMedia;
-                e.SuggestedFileName = $"{item.Path}\\{item.Pid}_poster{ext}";
+                e.SuggestedFileName = item.GenPosterPath(e.SuggestedFileName);
                 dic["cover"] = e.SuggestedFileName;
             }
             else
             {
-                dic["thumb"] = $"{dic["name"].ToString().Replace(' ', '_')}{ext}";
-                e.SuggestedFileName = $"{_actorPicturePath}\\{dic["thumb"]}";
+                var path = item.GenActorThumbPath(dic["name"].ToString(), e.SuggestedFileName);
+                dic["thumb"] = Path.GetFileName(path);
+                e.SuggestedFileName = path;
             }
             //Log.Print("OnBeforeDownload: " + e.SuggestedFileName);
         }
@@ -125,6 +123,11 @@ namespace HappyHour.Spider
             if (_numDownload != _numDownloaded)
             {
                 Log.Print("download is ongoing...");
+                return;
+            }
+            if (spider == null || spider.SearchMedia == null)
+            {
+                Log.Print("No Movie selected!");
                 return;
             }
             _numDownload = 0;

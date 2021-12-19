@@ -31,6 +31,19 @@ namespace HappyHour.Model
             return result == 0 ? Pid.CompareTo(media.Pid) : result;
         }
 
+        public string GenPosterPath(string fileName)
+        {
+            string ext = System.IO.Path.GetExtension(fileName);
+            return @$"{Path}\{Pid}_poster{ext}";
+        }
+
+        public string GenActorThumbPath(string actorName, string fileName)
+        {
+            string ext = System.IO.Path.GetExtension(fileName);
+            //return $@"{Path}\{Pid}\.actors\{name.Remove(' ', '_')}{ext}";
+            return $@"{App.LocalAppData}\db\{actorName.Replace(' ', '_')}{ext}";
+        }
+
         public abstract void Reload(string[] files);
 
         public static IAvMedia Create(string path)
@@ -39,8 +52,16 @@ namespace HappyHour.Model
                 ".mp4", ".avi", ".mkv", ".ts", ".wmv", ".m4v"
             };
 
-            IAvMedia media = null;
-            string[] files = Directory.GetFiles(path);
+            string[] files;
+            try
+            {
+                files = Directory.GetFiles(path);
+            }
+            catch (Exception ex)
+            {
+                Log.Print("Create AvMedia failed!", ex);
+                return null;
+            }
             if (files.Length > 20)
             {
                 Log.Print("Too many files in media folder!");
@@ -70,6 +91,7 @@ namespace HappyHour.Model
             }
             if (downloaded || excluded) { return null; }
 
+            IAvMedia media = null;
             if (torrent) { media = new AvTorrent(path); }
             else if (movie) { media = new AvMovie(path); }
 

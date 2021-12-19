@@ -10,6 +10,8 @@ namespace HappyHour.Interfaces
         string BriefInfo { get; }
         DateTime Date { get; set; }
 
+        string GenPosterPath(string ext);
+        string GenActorThumbPath(string name, string ext);
         void Reload(string[] files = null);
     }
 }

@@ -20,7 +20,7 @@ namespace HappyHour.CefHandler
     {
         private const int CefUserCommand = 26503;
         private readonly SpiderViewModel _browser;
-        private string _imageUrl;
+        //private string _imageUrl;
 
         public MenuHandler(SpiderViewModel spider = null)
         {
@@ -46,13 +46,13 @@ namespace HappyHour.CefHandler
             _ = model.AddItem((CefMenuCommand)26502, "Close DevTools");
 
             int cefCmdId = CefUserCommand;
-
+#if false
             if (parameters.MediaType == ContextMenuMediaType.Image)
             {
                 _ = model.AddItem((CefMenuCommand)cefCmdId++, "Edit Image");
                 _imageUrl = parameters.SourceUrl;
             }
-
+#endif
             if (string.IsNullOrEmpty(parameters.SelectionText))
             {
                 return;
@@ -244,16 +244,18 @@ namespace HappyHour.CefHandler
                 case (CefMenuCommand)26502:
                     browser.GetHost().CloseDevTools();
                     break;
+#if false
                 case (CefMenuCommand)CefUserCommand:
                     Log.Print(_imageUrl);
                     break;
-                case (CefMenuCommand)(CefUserCommand + 1):
+#endif
+                case (CefMenuCommand)(CefUserCommand):
                     _browser.ExecJavaScript(GetScript("google_search"));
                     break;
-                case (CefMenuCommand)(CefUserCommand + 2):
+                case (CefMenuCommand)(CefUserCommand + 1):
                     _browser.ExecJavaScript(GetScript("google_translate"));
                     break;
-                case (CefMenuCommand)(CefUserCommand + 3):
+                case (CefMenuCommand)(CefUserCommand + 2):
                     _browser.ExecJavaScript(GetScript("pid_search_in_db"));
                     break;
                 default:

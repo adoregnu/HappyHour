@@ -20,7 +20,7 @@ namespace HappyHour.Spider
         private int _index;
         private int _pageNum = 1;
         private bool _scrapRunning;
-        private bool _skipDownload;
+        private bool _dirExists;
 
         private string _pid;
         private string _outPath;
@@ -33,8 +33,8 @@ namespace HappyHour.Spider
         public int NumPage { get; set; } = 1;
         public List<string> Boards { get; set; }
         public string SelectedBoard { set; get; } = "censored";
-        public string StopPid { get; set; }
-        public bool StopOnExistingId { get; set; } = true;
+        public string PidToStop { get; set; }
+        public bool StopOnExistingId { get; set; }
 
         public ICommand CmdStop { get; private set; }
         public SpiderSehuatang(SpiderViewModel browser) : base(browser)
@@ -49,8 +49,9 @@ namespace HappyHour.Spider
             };
             CmdStop = new RelayCommand(() => _scrapRunning = false);
 
-            _dataPath = GetConf("DataPath");
+            _dataPath = App.GetConf("general", "DataPath");
             _images = new Dictionary<string, string>();
+            OverwritePoster = false;
         }
 
         protected override string GetScript(string name)
@@ -66,14 +67,14 @@ namespace HappyHour.Spider
 
         private void CreateDir()
         {
-            _skipDownload = false;
+            _dirExists = false;
             DirectoryInfo di = new(_outPath);
             if (!di.Exists)
             {
                 Directory.CreateDirectory(_outPath);
                 return;
             }
-            _skipDownload = true;
+            _dirExists = true;
             Log.Print($"{Name}: Already downloaded! {_outPath}");
             if (StopOnExistingId)
             {
@@ -140,8 +141,8 @@ namespace HappyHour.Spider
             if (list.Count > _index)
             {
                 dynamic item = list[_index++];
-                if (!string.IsNullOrEmpty(StopPid) &&
-                    _pid.Equals(StopPid, StringComparison.OrdinalIgnoreCase))
+                if (!string.IsNullOrEmpty(PidToStop) &&
+                    _pid.Equals(PidToStop, StringComparison.OrdinalIgnoreCase))
                 {
                     _scrapRunning = false;
                 }
@@ -187,7 +188,7 @@ namespace HappyHour.Spider
             {
                 Log.Print($"{Name}: article {_pid} = {d.pid}");
                 _updateTime = DateTime.Parse(d.date);
-                if (!_skipDownload)
+                if (!_dirExists || OverwritePoster)
                 {
                     DownloadFiles(d);
                 }
@@ -197,22 +198,6 @@ namespace HappyHour.Spider
                     MoveNextItem();
                 }
             }
-        }
-
-        private string GetConf(string key)
-        {
-            if (key == "DataPath")
-            {
-                if (!App.GConf.Sections.ContainsSection("general"))
-                {
-                    return null;
-                }
-
-                var general = App.GConf["general"];
-                return !general.ContainsKey("data_path") ?
-                    null : $"{general["data_path"]}sehuatang\\{SelectedBoard}\\";
-            }
-            return null;
         }
 
         public override void Navigate2(IAvMedia _)

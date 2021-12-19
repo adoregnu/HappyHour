@@ -6,7 +6,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
 using HappyHour.Model;
-
+using HappyHour.Spider;
 using Unosquare.FFME.ClosedCaptions;
 
 namespace HappyHour.Converter
@@ -46,6 +46,17 @@ namespace HappyHour.Converter
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             return value is AvMovie ? "movie" : "image";
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) =>
+            throw new NotImplementedException();
+    }
+
+    internal class SpiderTypeConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return value is SpiderSehuatang ? "sehuatang" : "default";
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) =>
