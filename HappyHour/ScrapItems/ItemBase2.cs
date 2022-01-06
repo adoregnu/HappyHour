@@ -219,7 +219,6 @@ namespace HappyHour.ScrapItems
                 {
                     _avInfo.Actors.Add(dbActor);
                 }
-                //string update = App.GetConf("general", "always_update_actor_thumb_of_db") ?? "false";
                 if (actor.ContainsKey("thumb"))
                 {
                     if (string.IsNullOrEmpty(dbActor.PicturePath) || OverwriteActorPicture)

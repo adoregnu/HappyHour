@@ -66,9 +66,7 @@ namespace HappyHour.Spider
             }
             if (_toDownload == _numDownloaded)
             {
-                UiServices.Invoke(() => {
-                    _spider.UpdateItems(_items);
-                });
+                UiServices.Invoke(() => _spider.UpdateItems(_items));
             }
         }
 

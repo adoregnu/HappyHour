@@ -34,8 +34,11 @@ namespace HappyHour.CefHandler
 
             using (callback)
             {
-                //Log.Print("Before Download: " + downloadItem.SuggestedFileName);
-                callback.Continue(downloadItem.SuggestedFileName, showDialog: ShowDialog);
+                //if (!downloadItem.IsCancelled)
+                {
+                    //Log.Print("Before Download: " + downloadItem.SuggestedFileName);
+                    callback.Continue(downloadItem.SuggestedFileName, showDialog: ShowDialog);
+                }
             }
         }
 
@@ -44,6 +47,11 @@ namespace HappyHour.CefHandler
             DownloadItem downloadItem,
             IDownloadItemCallback callback)
         {
+            if (downloadItem.IsCancelled)
+            {
+                Log.Print($"Cancel downalod {downloadItem.SuggestedFileName}");
+                callback.Cancel();
+            }
             if (downloadItem.IsComplete)
             {
                 //Log.Print("Download completed! " + downloadItem.OriginalUrl);

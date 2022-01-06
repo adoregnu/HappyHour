@@ -28,10 +28,7 @@
                 array.push(node.textContent.trim());
             }
         }
-        if (array.length > 0) {
-            return array;
-        }
-        return null;
+        return array.length > 0 ? array : null;
     }
 
     function _get_node(n) { return n; }
@@ -41,10 +38,12 @@
         var array = [];
         if (anodes != null) {
             anodes.forEach(function (n) {
+                //console.log(n.textContent);
                 array.push(function () { n.click(); });
+                //array.push(n.href);
             });
         }
-        return array;
+        return array.length > 0 ? array : null;
     }
 
     function _selectBoard() {

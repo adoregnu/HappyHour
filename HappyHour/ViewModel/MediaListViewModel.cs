@@ -44,7 +44,10 @@ namespace HappyHour.ViewModel
             get => _selectedMedia;
             set
             {
-                ItemSelectedHandler?.Invoke(this, value);
+                if (value != null)
+                {
+                    ItemSelectedHandler?.Invoke(this, value);
+                }
                 _ = Set(ref _selectedMedia, value);
             }
         }
@@ -146,19 +149,7 @@ namespace HappyHour.ViewModel
 
             BindingOperations.EnableCollectionSynchronization(MediaList, _lock);
 
-            CmdExternalPlayer = new RelayCommand<AvMovie>(p =>
-            {
-                if (p != null)
-                {
-                    _ = new Process
-                    {
-                        StartInfo = new ProcessStartInfo(p.Files[0])
-                        {
-                            UseShellExecute = true
-                        }
-                    }.Start();
-                }
-            });
+            CmdExternalPlayer = new RelayCommand<AvMovie>(p => PlayMedia(p));
             CmdExclude = new RelayCommand<AvTorrent>(p => ExcludeFromList(p));
             CmdDownload = new RelayCommand<AvTorrent>(p => DownloadMedia(p));
             CmdCopyPath = new RelayCommand<IAvMedia>(p => Clipboard.SetText(p.Path));
@@ -168,13 +159,37 @@ namespace HappyHour.ViewModel
             CmdEditItem = new RelayCommand<object>(p => EditMovieInfo(p));
             CmdSearchOrphanageMedia = new RelayCommand(() => SearchOrphanage());
             CmdSearchEmptyActor = new RelayCommand(() => OnSearchEmptyActor());
-            CmdDoubleClick = new RelayCommand(() => ItemDoubleClickedHandler?.Invoke(this, SelectedMedia));
+            CmdDoubleClick = new RelayCommand(() =>
+            {
+                if (ItemDoubleClickedHandler != null)
+                {
+                    ItemDoubleClickedHandler.Invoke(this, SelectedMedia);
+                }
+                else
+                {
+                    PlayMedia(SelectedMedia as AvMovie);
+                }
+            });
             CmdScrap = new RelayCommand<object>(
                 p => OnScrapAvInfo(p as SpiderBase),
                 p => _mitemsToSearch == null);
             CmdStopBatchingScrap = new RelayCommand(
                 () => _forceStopScrapping = true,
                 () => _mitemsToSearch != null);
+        }
+
+        private static void PlayMedia(AvMovie media)
+        {
+            if (media != null)
+            {
+                _ = new Process
+                {
+                    StartInfo = new ProcessStartInfo(media.Files[0])
+                    {
+                        UseShellExecute = true
+                    }
+                }.Start();
+            }
         }
 
         private void ExcludeFromList(AvTorrent media)
@@ -360,6 +375,13 @@ namespace HappyHour.ViewModel
                 {
                     if (dbDirs.BinarySearch(currDir) < 0)
                     {
+                        string pid = currDir.Split('\\').Last();
+                        var item = App.DbContext.Items.FirstOrDefault(it => it.Pid == pid);
+                        if (item != null)
+                        {
+                            item.Path = currDir;
+                            App.DbContext.SaveChanges();
+                        }
                         AddMedia(currDir);
                     }
                 }
@@ -476,10 +498,10 @@ namespace HappyHour.ViewModel
 
             MediaList.Clear();
 
-            var paths = await App.DbContext.Items
+            var movies = await App.DbContext.Items
                 .Include(i => i.Actors)
                 .Where(i => i.Actors.Count == 0)
-                .Select(i => i.Path)
+                //.Select(i => i.Path)
                 .ToListAsync();
 
             _tokenSource = new CancellationTokenSource();
@@ -487,13 +509,20 @@ namespace HappyHour.ViewModel
 
             _runningTask = Task.Run(() =>
             {
-                foreach (string p in paths)
+                foreach (var movie in movies)
                 {
                     if (token.IsCancellationRequested)
                     {
                         break;
                     }
-                    AddMedia(p);
+                    if (Directory.Exists(movie.Path))
+                    {
+                        AddMedia(movie.Path);
+                    }
+                    else
+                    {
+                        App.DbContext.Items.Remove(movie);
+                    }
                 }
             }, token);
             await _runningTask;

@@ -347,7 +347,14 @@ namespace HappyHour.ViewModel
             var movies = new List<string>();
             foreach (var item in SelectedActor.Items.ToList())
             {
-                movies.Add(item.Path);
+                if (Directory.Exists(item.Path))
+                {
+                    movies.Add(item.Path);
+                }
+                else
+                {
+                    App.DbContext.Items.Remove(item);
+                }
             }
             if (MediaList != null) { MediaList.Replace(movies); }
         }

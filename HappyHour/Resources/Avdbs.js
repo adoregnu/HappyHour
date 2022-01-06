@@ -65,7 +65,7 @@
     function parseActorPage() {
         var node = _parseSingleNode("//div[@class='profile_picture']", get_node);
         var actor = {};
-        var anode = _parseSingleNode("//p[@class='profile_gallery']/img", get_node, node);
+        var anode = _parseSingleNode("p[@class='profile_gallery']/img", get_node, node);
         if (anode != null) {
             actor['thumb'] = anode.src;
         }
@@ -113,13 +113,7 @@
         return null;
     }
 
-    var parsing_done = false;
     function parsePage() {
-        if (parsing_done) {
-            console.log('already parsing done!');
-            return;
-        }
-        parsing_done = true;
 
         var items = {
             title: { xpath: "//div[@class='profile_gallery_text']/span[@id='title_kr']" },

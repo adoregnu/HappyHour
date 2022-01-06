@@ -24,7 +24,7 @@ namespace HappyHour.Spider
         public DefaultDownloader(SpiderViewModel spider)
         {
             _browser = spider;
-            _timer = new Timer(2000)
+            _timer = new Timer(5000)
             {
                 AutoReset = false,
             };
@@ -56,21 +56,30 @@ namespace HappyHour.Spider
                 {
                     Log.Print($"urls : {url.Key} : {url.Value}");
                 }
+                e.IsCancelled = true;
                 return;
             }
 
-            var dic = _urls[e.OriginalUrl];
-            var item = _spider.SearchMedia;
-            if (dic.ContainsKey("cover"))
+            lock (_timer)
             {
-                e.SuggestedFileName = item.GenPosterPath(e.SuggestedFileName);
-                dic["cover"] = e.SuggestedFileName;
-            }
-            else
-            {
-                var path = item.GenActorThumbPath(dic["name"].ToString(), e.SuggestedFileName);
-                dic["thumb"] = Path.GetFileName(path);
-                e.SuggestedFileName = path;
+                var dic = _urls[e.OriginalUrl];
+                var item = _spider.SearchMedia;
+                if (dic.ContainsKey("cover"))
+                {
+                    e.SuggestedFileName = item.GenPosterPath(e.SuggestedFileName);
+                    dic["cover"] = e.SuggestedFileName;
+                }
+                else if (dic.ContainsKey("thumb"))
+                {
+                    var path = item.GenActorThumbPath(dic["name"].ToString(), e.SuggestedFileName);
+                    dic["thumb"] = Path.GetFileName(path);
+                    e.SuggestedFileName = path;
+                }
+                else
+                {
+                    Log.Print("OnBeforeDownload: Cancel " + e.SuggestedFileName);
+                    e.IsCancelled = true;
+                }
             }
             //Log.Print("OnBeforeDownload: " + e.SuggestedFileName);
         }

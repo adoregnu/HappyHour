@@ -102,8 +102,13 @@
     function parseSearchResult() {
         var urls = _parseMultiNode("//li[@class='search-readmore']/a/@href");
         if (urls == null) {
+            urls = _parseMultiNode("//div[@class='read-more']/a/@href");
+        }
+        if (urls == null) {
             CefSharp.PostMessage({ type: 'items', data: 0 });
-        } else if (urls.length == 1) {
+            return;
+        }
+        if (urls.length == 1) {
             CefSharp.PostMessage({ type: 'url', data: urls[0] });
         } else {
             console.log('ambiguous result!');

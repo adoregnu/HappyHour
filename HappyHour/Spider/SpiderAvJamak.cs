@@ -17,7 +17,7 @@ namespace HappyHour.Spider
             Name = "AvJamak";
             //URL = "https://av-jamak.com/";
             //URL = "https://av-jamack.com/";
-            URL = "https://avjamack.com/";
+            URL = "https://avjamak.net/";
             ScriptName = "AvJamak.js";
             IsSpiderWorking = true;
         }

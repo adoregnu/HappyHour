@@ -92,7 +92,7 @@
         var num_match = 0;
         const re = new RegExp(_convertPid(), 'i');
         for (var i = 0; i < nodes.length; i++) {
-            var pid = _parseSingleNode("//div[@class='uid']", null, nodes[i]);
+            var pid = _parseSingleNode("div[@class='uid']", null, nodes[i]);
             if (pid != null && re.test(pid)) {
                 num_match += 1;
                 url = nodes[i].href;

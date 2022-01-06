@@ -55,9 +55,9 @@ namespace HappyHour.View.Pane
             LayoutDocument anchorableShown)
         {
 #if true
-            if (//anchorableShown.Content is SpiderViewModel ||
+            if (anchorableShown.Content is SpiderViewModel)// ||
                 //anchorableShown.Content is BrowserViewModel ||
-                anchorableShown.Content is PlayerViewModel)
+                //anchorableShown.Content is PlayerViewModel)
             {
                 var parentDocumentGroup = anchorableShown.FindParent<LayoutDocumentPaneGroup>();
                 var parentDocumentPane = anchorableShown.Parent as LayoutDocumentPane;

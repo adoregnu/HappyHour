@@ -20,7 +20,7 @@ namespace HappyHour.ViewModel
     internal class MainViewModel : ViewModelBase, IMainView
     {
         private string _status;
-        private bool _spiderEnabled;
+        //private bool _spiderEnabled;
 
         public ICommand CmdFileToFolder { get; private set; }
         public ICommand CmdActorEdtor { get; private set; }
@@ -34,7 +34,7 @@ namespace HappyHour.ViewModel
             get => _status;
             set => Set(ref _status, value);
         }
-
+#if false
         public bool SpiderEnabled
         {
             get => _spiderEnabled;
@@ -49,7 +49,7 @@ namespace HappyHour.ViewModel
                 }
             }
         }
-
+#endif
         public IDialogService DialogService { get; set; }
         private readonly FileListViewModel _fileListMv;
         private readonly MediaListViewModel _mediaListMv;
@@ -74,7 +74,12 @@ namespace HappyHour.ViewModel
             Anchors.Add(new ScreenshotViewModel { MediaList = _mediaListMv });
 
             Docs.Add(_mediaListMv);
-            Docs.Add(new PlayerViewModel { MediaList = _mediaListMv });
+            //Docs.Add(new PlayerViewModel { MediaList = _mediaListMv });
+            Docs.Add(new SpiderViewModel
+            {
+                MediaList = _mediaListMv,
+                DbView = _dbViewMode
+            }); ;
 
             CmdActorEdtor = new RelayCommand(() => OnActorEditor());
             CmdFileToFolder = new RelayCommand(() => OnFileToFolder());
@@ -83,7 +88,6 @@ namespace HappyHour.ViewModel
             //for update media list
             _fileListMv.DirChanged?.Invoke(this, _fileListMv.CurrDirInfo);
         }
-
         private void OnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             switch (e.Action)
@@ -98,15 +102,11 @@ namespace HappyHour.ViewModel
                     foreach (Pane pane in e.OldItems)
                     {
                         pane.Cleanup();
-                        if (pane is SpiderViewModel)
-                        {
-                            SpiderEnabled = false;
-                        }
+                        //if (pane is SpiderViewModel) { SpiderEnabled = false; }
                     }
                     break;
             }
         }
-
         public void NewBrowser(string url)
         {
             Docs.Add(new BrowserBase
@@ -116,7 +116,7 @@ namespace HappyHour.ViewModel
                 IsSelected = true
             });
         }
-
+#if false
         private VMType OnPaneEnabled<VMType>(bool enabled) where VMType : Pane
         {
             Pane pane = null;
@@ -136,7 +136,7 @@ namespace HappyHour.ViewModel
             }
             return (VMType)pane;
         }
-
+#endif
         private void OnFileToFolder()
         {
             var dialog = new FileToFolderViewModel { MediaPath = _fileListMv.CurrPath };

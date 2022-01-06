@@ -26,13 +26,26 @@ namespace HappyHour.Spider
         private string _outPath;
         private DateTime _updateTime;
         private dynamic _currPage;
+        private string _selectedBoard;
+        private string _dataPath;
 
-        private readonly string _dataPath;
-        private readonly Dictionary<string, string> _images;
+        private readonly Dictionary<string, string> _images = new();
 
         public int NumPage { get; set; } = 1;
         public List<string> Boards { get; set; }
-        public string SelectedBoard { set; get; } = "censored";
+        public string SelectedBoard
+        {
+            get => _selectedBoard;
+            set
+            {
+                Set(ref _selectedBoard, value);
+                if (value != null)
+                {
+                    _dataPath = App.GetConf("general", "data_path") ?? @"d:\tmp\sehuatang";
+                    _dataPath += @$"\{value}\";
+                }
+            }
+        } 
         public string PidToStop { get; set; }
         public bool StopOnExistingId { get; set; }
 
@@ -48,10 +61,7 @@ namespace HappyHour.Spider
                 "censored", "uncensored", "subtitle"
             };
             CmdStop = new RelayCommand(() => _scrapRunning = false);
-
-            _dataPath = App.GetConf("general", "DataPath");
-            _images = new Dictionary<string, string>();
-            OverwritePoster = false;
+            SelectedBoard = "censored";
         }
 
         protected override string GetScript(string name)
@@ -102,7 +112,7 @@ namespace HappyHour.Spider
                 _toDownload = images.Count + files.Count;
                 Log.Print($"{Name}: toDownload : {_toDownload }");
 
-                files.ForEach(f => ((IJavascriptCallback)f).ExecuteAsync());
+                files.ForEach(fn => ((IJavascriptCallback)fn).ExecuteAsync());
                 foreach (string file in images)
                 {
                     string postfix = (i == 0) ? "cover" : $"screenshot{i}";
@@ -186,6 +196,11 @@ namespace HappyHour.Spider
             }
             else if (d.type == "items")
             {
+                if (d.data == 0)
+                {
+                    OnScrapCompleted(false);
+                    return;
+                }
                 Log.Print($"{Name}: article {_pid} = {d.pid}");
                 _updateTime = DateTime.Parse(d.date);
                 if (!_dirExists || OverwritePoster)

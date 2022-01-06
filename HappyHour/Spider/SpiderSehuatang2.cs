@@ -17,13 +17,29 @@ namespace HappyHour.Spider
     internal class SpiderSehuatang2 : SpiderBase
     {
         private readonly ShtDownloader _downloader;
+        private string _selectedBoard;
+        private string _dataPath;
 
         protected override IDownloader Downloader => _downloader;
 
         public int NumPage { get; set; } = 1;
         public List<string> Boards { get; set; }
         public string StopPid { get; set; }
-        public string SelectedBoard { set; get; } = "censored";
+
+        public string SelectedBoard
+        {
+            get => _selectedBoard;
+            set
+            {
+                Set(ref _selectedBoard, value);
+                if (value != null)
+                {
+                    _dataPath = App.GetConf("general", "data_path") ?? @"d:\tmp\sehuatang";
+                    _dataPath += @$"\{value}\";
+                    ShtDownloader.CreateDir(_dataPath);
+                }
+            }
+        }
         public bool StopOnExistingId { get; set; } = true;
 
         public ICommand CmdStop { get; private set; }
@@ -40,32 +56,14 @@ namespace HappyHour.Spider
             };
             CmdStop = new RelayCommand(() => _itemQueue.Clear());
 
-            SearchMedia = new AvTorrent(GetConf("DataPath")); 
+            SelectedBoard = "censored";
+            SearchMedia = new AvTorrent(_dataPath); 
         }
 
         protected override string GetScript(string name)
         {
             var template = Template.Parse(App.ReadResource(name));
             return template.Render(new { Board = SelectedBoard, PageCount = NumPage });
-        }
-
-        private string GetConf(string key)
-        {
-            if (key == "DataPath")
-            {
-                if (!App.GConf.Sections.ContainsSection("general"))
-                {
-                    return null;
-                }
-
-                var general = App.GConf["general"];
-                var path = !general.ContainsKey("data_path") ?
-                    @"c:\tmp\sht" : @$"{general["data_path"]}sehuatang";
-                path += $@"\{SelectedBoard}";
-                ShtDownloader.CreateDir(path);
-                return path;
-            }
-            return null;
         }
 
         public override void Navigate2(IAvMedia _)
