@@ -46,9 +46,12 @@ namespace HappyHour.Converter
                     {
                         path = $"{App.LocalAppData}\\db\\" + path;
                     }
- 
-                    using var bmpTemp = new Bitmap(path);
-                    return ConvertBitmap(bmpTemp, width);
+
+                    if (File.Exists(path))
+                    {
+                        using var bmpTemp = new Bitmap(path);
+                        return ConvertBitmap(bmpTemp, width);
+                    }
                 }
             }
             catch (Exception ex)

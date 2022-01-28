@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Windows.Input;
@@ -81,14 +82,18 @@ namespace HappyHour.Spider
             DirectoryInfo di = new(_outPath);
             if (!di.Exists)
             {
-                Directory.CreateDirectory(_outPath);
+                _ = Directory.CreateDirectory(_outPath);
                 return;
             }
-            _dirExists = true;
-            Log.Print($"{Name}: Already downloaded! {_outPath}");
-            if (StopOnExistingId)
+            if (Directory.GetFiles(_outPath)
+                .Any(f => f.EndsWith(".torrent", StringComparison.OrdinalIgnoreCase)))
             {
-                _scrapRunning = false;
+                _dirExists = true;
+                Log.Print($"{Name}: Already downloaded! {_outPath}");
+                if (StopOnExistingId)
+                {
+                    _scrapRunning = false;
+                }
             }
         }
 
@@ -252,7 +257,8 @@ namespace HappyHour.Spider
             }
             if (_toDownload == _numDownloaded)
             {
-                UiServices.Invoke( () => {
+                UiServices.Invoke(() =>
+                {
                     UpdateMedia();
                     MoveNextItem();
                 });

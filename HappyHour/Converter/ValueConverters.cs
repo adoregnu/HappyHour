@@ -56,7 +56,8 @@ namespace HappyHour.Converter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return value is SpiderSehuatang ? "sehuatang" : "default";
+            return value is SpiderSehuatang ? "sehuatang" :
+                value is SpiderSukebei ? "sukebei" : "default";
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) =>

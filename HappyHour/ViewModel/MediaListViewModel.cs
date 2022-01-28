@@ -65,7 +65,7 @@ namespace HappyHour.ViewModel
                 IEnumerable<SpiderBase> list = null;
                 if (value != null)
                 {
-                    list = value.Where(l => l.Name != "sehuatang");
+                    list = value.Where(l => l.Name != "sehuatang" && l.Name != "Sukebei");
                 }
                 _ = Set(ref _spiderList, list);
             }
@@ -127,7 +127,8 @@ namespace HappyHour.ViewModel
         public ICommand CmdExternalPlayer { get; set; }
         public ICommand CmdCopyPath { get; set; }
         public ICommand CmdExclude { get; set; }
-        public ICommand CmdDownload { get; set; }
+        public ICommand CmdDownloadTorrent { get; set; }
+        public ICommand CmdDownloadMagnet { get; set; }
         public ICommand CmdMoveItemTo { get; set; }
         public ICommand CmdDeleteItem { get; set; }
         public ICommand CmdClearDb { get; set; }
@@ -137,7 +138,7 @@ namespace HappyHour.ViewModel
         public ICommand CmdSearchEmptyActor { get; set; }
         public ICommand CmdScrap { get; private set; }
         public ICommand CmdStopBatchingScrap { get; set; }
-
+        public ICommand CmdNewMovie { get; set; }
         public MediaListItemSelected ItemSelectedHandler { get; set; }
         public MediaListItemSelected ItemDoubleClickedHandler { get; set; }
 
@@ -149,9 +150,11 @@ namespace HappyHour.ViewModel
 
             BindingOperations.EnableCollectionSynchronization(MediaList, _lock);
 
+            CmdNewMovie = new RelayCommand(() => LastUpdatedMovies());
             CmdExternalPlayer = new RelayCommand<AvMovie>(p => PlayMedia(p));
             CmdExclude = new RelayCommand<AvTorrent>(p => ExcludeFromList(p));
-            CmdDownload = new RelayCommand<AvTorrent>(p => DownloadMedia(p));
+            CmdDownloadTorrent = new RelayCommand<AvTorrent>(p => DownloadMedia(p, "torrent"));
+            CmdDownloadMagnet = new RelayCommand<AvTorrent>(p => DownloadMedia(p,  "magnet"));
             CmdCopyPath = new RelayCommand<IAvMedia>(p => Clipboard.SetText(p.Path));
             CmdMoveItemTo = new RelayCommand<object>(p => MoveTo(p.ToList<AvMovie>()));
             CmdDeleteItem = new RelayCommand<object>(p => Delete(p.ToList<AvMovie>()));
@@ -201,11 +204,11 @@ namespace HappyHour.ViewModel
             }
         }
 
-        private void DownloadMedia(AvTorrent media)
+        private void DownloadMedia(AvTorrent media, string site)
         {
             if (media != null)
             {
-                media.Download();
+                media.Download(site);
                 _ = MediaList.Remove(media);
             }
         }
@@ -344,7 +347,8 @@ namespace HappyHour.ViewModel
             try
             {
                 string[] dirs = Directory.GetDirectories(path);
-                if (dirs.Length == 0 || dirs[0].EndsWith(".actors", StringComparison.OrdinalIgnoreCase))
+                if (dirs.Length == 0 ||
+                    dirs.Any(dir => dir.Contains("actors") || dir.Contains("sukebei")))
                 {
                     AddMedia(path);
                 }
@@ -445,33 +449,9 @@ namespace HappyHour.ViewModel
             await _runningTask;
         }
 
-        public async void Replace(IEnumerable<string> paths)
-        {
-            CancelTaskIfRunning();
-            MediaList.Clear();
-            IsSelected = true;
-
-            _tokenSource = new CancellationTokenSource();
-            var token = _tokenSource.Token;
-
-            _runningTask = Task.Run(() =>
-            {
-                foreach (string path in paths)
-                {
-                    if (token.IsCancellationRequested)
-                    {
-                        break;
-                    }
-                    AddMedia(path);
-                }
-            }, token);
-            await _runningTask;
-        }
-
         private async void SearchOrphanage()
         {
             CancelTaskIfRunning();
-
             MediaList.Clear();
 
             string currDir = _fileList.CurrDirInfo.FullName;
@@ -492,17 +472,10 @@ namespace HappyHour.ViewModel
             await _runningTask;
         }
 
-        private async void OnSearchEmptyActor()
+        public async void LoadItems(List<AvItem> movies)
         {
             CancelTaskIfRunning();
-
             MediaList.Clear();
-
-            var movies = await App.DbContext.Items
-                .Include(i => i.Actors)
-                .Where(i => i.Actors.Count == 0)
-                //.Select(i => i.Path)
-                .ToListAsync();
 
             _tokenSource = new CancellationTokenSource();
             var token = _tokenSource.Token;
@@ -525,7 +498,28 @@ namespace HappyHour.ViewModel
                     }
                 }
             }, token);
+
             await _runningTask;
+        }
+
+        private async void OnSearchEmptyActor()
+        {
+            var movies = await App.DbContext.Items
+                .Include(i => i.Actors)
+                .Where(i => i.Actors.Count == 0)
+                //.Select(i => i.Path)
+                .ToListAsync();
+
+            LoadItems(movies);
+        }
+
+        private async void LastUpdatedMovies()
+        {
+            var movies = await App.DbContext.Items
+                .OrderByDescending(i => i.DateAdded)
+                .Take(20).ToListAsync();
+
+            LoadItems(movies);
         }
 
         private void OnScrapCompleted(SpiderBase spider)

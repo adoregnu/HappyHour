@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Windows.Input;
 
@@ -10,7 +11,7 @@ using GalaSoft.MvvmLight.Command;
 using HappyHour.ViewModel;
 using HappyHour.ScrapItems;
 using HappyHour.Interfaces;
-using System.IO;
+using HappyHour.Model;
 
 namespace HappyHour.Spider
 {
@@ -381,31 +382,24 @@ namespace HappyHour.Spider
 
         protected virtual void UpdateDb(IDictionary<string, object> items)
         {
-            try
+            new ItemBase2(SearchMedia)
             {
-                new ItemBase2(SearchMedia)
-                {
-                    OverwriteActorPicture = OverwriteActorThumbDb
-                }.UpdateItems(items);
-            }
-            catch (Exception ex)
-            {
-                Log.Print($"{Name}: UpdateDb failed.", ex);
-            }
+                OverwriteActorPicture = OverwriteActorThumbDb
+            }.UpdateItems(items);
         }
 
         public void UpdateItems(IDictionary<string, object> items)
         {
-            try
+            if (_saveDb && SearchMedia is AvMovie)
             {
-                if (_saveDb)
+                try
                 {
                     UpdateDb(items);
                 }
-            }
-            catch (Exception ex)
-            {
-                Log.Print($"{Name}: UpdateItem", ex);
+                catch (Exception ex)
+                {
+                    Log.Print($"{Name}: UpdateItem", ex);
+                }
             }
             OnScrapCompleted(true);
         }

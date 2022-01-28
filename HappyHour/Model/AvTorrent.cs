@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
+using System.Windows;
+
+using QBittorrent.Client;
 
 namespace HappyHour.Model
 {
@@ -10,6 +12,8 @@ namespace HappyHour.Model
     {
         public List<string> Screenshots { get; set; } = new();
         public List<string> Torrents { get; set; } = new();
+        public Visibility SukebeiVisibility { get; set; } = Visibility.Collapsed;
+        public Visibility SehuatangVisibility { get; set; } = Visibility.Collapsed;
 
         public AvTorrent(string path)
         {
@@ -17,17 +21,34 @@ namespace HappyHour.Model
             Pid = path.Split('\\').Last();
         }
 
-        public void Download()
+        public async void Download(string ext)
         {
             try
             {
+                bool downloaded = false;
                 foreach (string file in Torrents)
                 {
-                    string torrent = System.IO.Path.GetFileName(file);
-                    File.Copy(file, App.GConf["general"]["torrent_path"] + torrent);
+                    if (ext is "torrent" && file.EndsWith(ext, StringComparison.OrdinalIgnoreCase))
+                    {
+                        string torrent = System.IO.Path.GetFileName(file);
+                        File.Copy(file, App.GConf["general"]["torrent_path"] + torrent);
+                        downloaded = true;
+                    }
+                    else if (ext is "magnet" && file.EndsWith(ext, StringComparison.OrdinalIgnoreCase))
+                    {
+                        var client = new QBittorrentClient(new Uri("http://localhost:8080"));
+                        var magnets = new Uri(File.ReadAllText(file));
+                        var addRequest = new AddTorrentUrlsRequest(magnets) { Paused = true };
+                        await client.AddTorrentsAsync(addRequest);
+                        client.Dispose();
+                        downloaded = true;
+                    }
                 }
-                File.Create($"{Path}\\.downloaded").Dispose();
-                Log.Print($"Mark downloaded {Path}");
+                if (downloaded)
+                {
+                    File.Create($"{Path}\\.downloaded").Dispose();
+                    Log.Print($"Mark downloaded {Path}");
+                }
             }
             catch (Exception ex)
             {
@@ -52,6 +73,7 @@ namespace HappyHour.Model
         {
             if (files == null)
             {
+                //files = Directory.GetFiles(Path);
                 files = Directory.GetFiles(Path);
             }
             Torrents.Clear();
@@ -70,9 +92,20 @@ namespace HappyHour.Model
                 {
                     Torrents.Add(file);
                     Date = File.GetCreationTime(file);
+                    SehuatangVisibility = Visibility.Visible;
+                }
+                else if (file.EndsWith("magnet", StringComparison.OrdinalIgnoreCase))
+                {
+                    Torrents.Add(file);
+                    Date = File.GetCreationTime(file);
+                    SukebeiVisibility = Visibility.Visible;
                 }
             }
             BriefInfo = $"{Pid}\n{Date}";
+            if (SukebeiVisibility == Visibility.Visible)
+            {
+                BriefInfo += "\nSukebei";
+            }
         }
     }
 }

@@ -13,7 +13,7 @@ namespace HappyHour.Interfaces
     internal interface IMediaList
     {
         void AddMedia(string path);
-        void Replace(IEnumerable<string> paths);
+        void LoadItems(List<AvItem> movies);
 
         IEnumerable<SpiderBase> SpiderList { get; set; }
         MediaListItemSelected ItemSelectedHandler { get; set; }

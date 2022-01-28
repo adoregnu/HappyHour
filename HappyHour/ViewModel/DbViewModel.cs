@@ -143,9 +143,8 @@ namespace HappyHour.ViewModel
                 App.DbContext.Entry(value.Actor)
                     .Collection(a => a.Items).Load();
 
-                var paths = value.Actor.Items
-                    .Select(i => i.Path).ToList();
-                MediaList.Replace(paths);
+                var items = value.Actor.Items.ToList();
+                MediaList.LoadItems(items);
             }
         }
         AvStudio _selectedStudio;
@@ -157,11 +156,10 @@ namespace HappyHour.ViewModel
                 Set(ref _selectedStudio, value);
                 if (value == null) return;
 
-                var paths = App.DbContext.Items
+                var items = App.DbContext.Items
                     .Where(i => i.Studio == value)
-                    .Select(i => i.Path)
                     .ToList();
-                MediaList.Replace(paths);
+                MediaList.LoadItems(items);
             }
         }
 
@@ -174,11 +172,10 @@ namespace HappyHour.ViewModel
                 Set(ref _selectedSeries, value);
                 if (value == null) return;
 
-                var paths = App.DbContext.Items
+                var items = App.DbContext.Items
                     .Where(i => i.Series == value)
-                    .Select(i => i.Path)
                     .ToList();
-                MediaList.Replace(paths);
+                MediaList.LoadItems(items);
             }
         }
 

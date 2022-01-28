@@ -52,7 +52,7 @@ namespace HappyHour.ViewModel
             Spiders = new List<SpiderBase>
             {
                 new SpiderSehuatang(this),
-                //new SpiderSehuatang2(this),
+                new SpiderSukebei(this),
                 new SpiderR18(this),
                 new SpiderJavlibrary(this),
                 new SpiderJavmoive(this),
@@ -100,6 +100,7 @@ namespace HappyHour.ViewModel
             HeaderType = spiderName switch
             {
                 "JavBus" or "sehuatang" => spiderName,
+                "Sukebei" => "sehuatang",
                 _ => "spider",
             };
         }

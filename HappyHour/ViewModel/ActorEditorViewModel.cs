@@ -343,20 +343,12 @@ namespace HappyHour.ViewModel
 
             await App.DbContext.Entry(SelectedActor)
                 .Collection(a => a.Items).LoadAsync();
+            var movies = SelectedActor.Items.ToList();
 
-            var movies = new List<string>();
-            foreach (var item in SelectedActor.Items.ToList())
+            if (MediaList != null)
             {
-                if (Directory.Exists(item.Path))
-                {
-                    movies.Add(item.Path);
-                }
-                else
-                {
-                    App.DbContext.Items.Remove(item);
-                }
+                MediaList.LoadItems(movies);
             }
-            if (MediaList != null) { MediaList.Replace(movies); }
         }
 
         private void OnActorNameDoubleClicked()

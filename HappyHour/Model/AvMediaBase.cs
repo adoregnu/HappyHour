@@ -80,7 +80,8 @@ namespace HappyHour.Model
                 {
                     excluded = true;
                 }
-                else if (file.EndsWith("torrent", StringComparison.OrdinalIgnoreCase))
+                else if (file.EndsWith("torrent", StringComparison.OrdinalIgnoreCase) ||
+                    file.EndsWith("magnet", StringComparison.OrdinalIgnoreCase))
                 {
                     torrent = true;
                 }
