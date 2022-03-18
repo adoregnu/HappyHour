@@ -4,6 +4,7 @@ using CefSharp;
 using Scriban;
 
 using HappyHour.ViewModel;
+using System.Collections.Generic;
 
 namespace HappyHour.Spider
 {
@@ -46,16 +47,41 @@ namespace HappyHour.Spider
             });
         }
 
+        public override void Scrap()
+        {
+            IsSpiderWorking = true;
+            base.Scrap();
+        }
+
+        public override bool OnJsMessageReceived(JavascriptMessageReceivedEventArgs msg)
+        {
+            if (base.OnJsMessageReceived(msg))
+            {
+                return true;
+            }
+
+            dynamic d = msg.Message;
+            if (d.type == "sub")
+            {
+                var urls = d.urls as List<object>;
+                foreach (var url in urls)
+                {
+                    Log.Print($"{Name} {d.pid} : {url}");
+                }
+                Browser.DbView.SelectPid(d.pid);
+            }
+            return true;
+        }
         private void OnBeforeDownload(object sender, DownloadItem e)
         {
             string ext = Path.GetExtension(e.SuggestedFileName);
-            string savePath = SelectedMedia != null ?
-                SelectedMedia.Path : App.GConf["general"]["data_path"];
-            if (!Directory.Exists(savePath))
+            if (SelectedMedia == null)
             {
-                Log.Print($"{savePath} does not exist.");
+                Log.Print("Media is not selected! canceling download!");
+                e.IsCancelled = true;
+                return;
             }
-            e.SuggestedFileName = $"{savePath}\\{SelectedMedia.Pid}{ext}";
+            e.SuggestedFileName = $"{SelectedMedia.Path}\\{SelectedMedia.Pid}{ext}";
         }
 
         private void OnDownloadUpdated(object sender, DownloadItem e)

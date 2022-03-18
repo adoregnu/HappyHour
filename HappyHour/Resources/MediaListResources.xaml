@@ -29,13 +29,13 @@
                           Command="{Binding PlacementTarget.Tag.CmdExclude,
                                 RelativeSource={RelativeSource FindAncestor, AncestorType=ContextMenu}}" 
                           CommandParameter="{Binding}"/>
-                    <MenuItem Header="Download" 
-                          Visibility="{Binding SehuatangVisibility}"
+                    <MenuItem Header="Torrent Download" 
+                          Visibility="{Binding TorrentVisibility}"
                           Command="{Binding PlacementTarget.Tag.CmdDownloadTorrent,
                                 RelativeSource={RelativeSource FindAncestor, AncestorType=ContextMenu}}" 
                           CommandParameter="{Binding}"/>
-                    <MenuItem Header="Sukebei Download" 
-                          Visibility="{Binding SukebeiVisibility}"
+                    <MenuItem Header="Magnet Download" 
+                          Visibility="{Binding MagnetVisibility}"
                           Command="{Binding PlacementTarget.Tag.CmdDownloadMagnet,
                                 RelativeSource={RelativeSource FindAncestor, AncestorType=ContextMenu}}" 
                           CommandParameter="{Binding}"/>

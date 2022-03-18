@@ -12,8 +12,8 @@ namespace HappyHour.Model
     {
         public List<string> Screenshots { get; set; } = new();
         public List<string> Torrents { get; set; } = new();
-        public Visibility SukebeiVisibility { get; set; } = Visibility.Collapsed;
-        public Visibility SehuatangVisibility { get; set; } = Visibility.Collapsed;
+        public Visibility MagnetVisibility { get; set; } = Visibility.Collapsed;
+        public Visibility TorrentVisibility { get; set; } = Visibility.Collapsed;
 
         public AvTorrent(string path)
         {
@@ -74,7 +74,7 @@ namespace HappyHour.Model
             if (files == null)
             {
                 //files = Directory.GetFiles(Path);
-                files = Directory.GetFiles(Path);
+                files = Directory.GetFiles(Path, "*", new EnumerationOptions { RecurseSubdirectories = true });
             }
             Torrents.Clear();
             Screenshots.Clear();
@@ -92,19 +92,19 @@ namespace HappyHour.Model
                 {
                     Torrents.Add(file);
                     Date = File.GetCreationTime(file);
-                    SehuatangVisibility = Visibility.Visible;
+                    TorrentVisibility = Visibility.Visible;
                 }
                 else if (file.EndsWith("magnet", StringComparison.OrdinalIgnoreCase))
                 {
                     Torrents.Add(file);
                     Date = File.GetCreationTime(file);
-                    SukebeiVisibility = Visibility.Visible;
+                    MagnetVisibility = Visibility.Visible;
                 }
             }
             BriefInfo = $"{Pid}\n{Date}";
-            if (SukebeiVisibility == Visibility.Visible)
+            if (MagnetVisibility == Visibility.Visible)
             {
-                BriefInfo += "\nSukebei";
+                BriefInfo += "\nMagnet";
             }
         }
     }

@@ -24,7 +24,7 @@ namespace HappyHour.Spider
         public DefaultDownloader(SpiderViewModel spider)
         {
             _browser = spider;
-            _timer = new Timer(5000)
+            _timer = new Timer(10000)
             {
                 AutoReset = false,
             };
@@ -131,7 +131,7 @@ namespace HappyHour.Spider
         {
             if (_numDownload != _numDownloaded)
             {
-                Log.Print("download is ongoing...");
+                Log.Print($"download is ongoing... _numDownload:{_numDownload} != _numDownloaded:{_numDownloaded}");
                 return;
             }
             if (spider == null || spider.SearchMedia == null)

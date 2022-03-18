@@ -2,9 +2,9 @@
     const _BOARD = '{{board}}';
     const _PAGE_COUNT = '{{pageCount}}';
 
-    function _parseSingleNode(_xpath, _getter = null) {
-        var result = document.evaluate(_xpath, document.body,
-            null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+    function _parseSingleNode(_xpath, _getter = null, node = document.body) {
+        var result = document.evaluate(_xpath, node, null,
+            XPathResult.FIRST_ORDERED_NODE_TYPE, null);
         var node = result.singleNodeValue;
         if (node != null) {
             if (_getter != null) {
@@ -98,6 +98,21 @@
         return null;
     }
 
+    function parseDate(xpath) {
+        var em = _parseSingleNode(xpath, _get_node);
+        if (em == null) { return null; }
+        var date = _parseSingleNode("span/@title", null, em);
+        if (date != null) {
+            return date;
+        }
+        console.log('em: ' + em.textContent);
+        var m = /[0-9]+/.exec(em.textContent);
+        if (m != null) {
+            return em.textContent.substring(m.index);
+        }
+        return null;
+    }
+
     if (_selectBoard() != 'notfound') {
         return;
     }
@@ -108,8 +123,9 @@
 
     var items = {
         pid: { xpath: "//span[@id='thread_subject']/text()", handler: _getPid },
-        date: { xpath: "(//em[contains(@id, 'authorposton')]/span/@title)[1]" },
+        date: { xpath: "//em[contains(@id, 'authorposton')]", handler: parseDate },
         files: { xpath: "//a[contains(., '.torrent')]", handler: _parseFiles },
+        magnet: { xpath: "//div[@id='code_Aub']//li", handler: _parseMultiNode }, 
         images: {
             xpath: "(//td[contains(@id, 'postmessage_')])[1]//img[contains(@id, 'aimg_')]/@file",
             handler: _parseMultiNode

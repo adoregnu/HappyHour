@@ -17,6 +17,24 @@
         return null;
     }
 
+    function _parseMultiNode(xpath, _getter = null) {
+        var result = document.evaluate(xpath, document.body,
+            null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+
+        var array = [];
+        while (node = result.iterateNext()) {
+            if (_getter != null) {
+                array.push(_getter(node));
+            } else {
+                array.push(node.textContent.trim());
+            }
+        }
+        if (array.length > 0) {
+            return array;
+        }
+        return null;
+    }
+
     function get_node(n) { return n; }
 
     function _checkLogin() {
@@ -41,7 +59,30 @@
         }
     }
 
+    function downloadSub() {
+        var node = _parseMultiNode("//a[contains(@class, 'view_file_download')]/@href");
+        var title = _parseSingleNode("//h1[@itemprop='headline']/@content");
+        var m = /[a-z0-9\-_]+/i.exec(title);
+        if (m != null) {
+            CefSharp.PostMessage({ type: 'sub', data: 2, urls : node, pid: m[0]});
+        }
+    }
+
     if (!_checkLogin()) {
+        return;
+    }
+
+    if (document.location.href.includes('/bbs/download.php')) {
+        var elm = document.getElementById('gda_downstop');
+        if (elm != null) { elm.click(); }
+
+        return;
+    }
+
+    if (document.location.href.includes('/bbs/board.php')) {
+        if (/(bigsub|jamakbos|jamakuser)&wr_id/i.test(document.location.href)) {
+            downloadSub();
+        }
         return;
     }
 

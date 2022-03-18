@@ -1,6 +1,6 @@
 ﻿(function () {
     const _PID = '{{pid}}';
-    const INFO_CLASS_NAME = 'sc-cQDEqr jBzZAk'
+    const INFO_CLASS_NAME = 'sc-havuko iGsJDi'
 
     function get_node(node) { return node; }
 

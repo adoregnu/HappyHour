@@ -193,5 +193,21 @@ namespace HappyHour.ViewModel
             Title = "Database";
             ListType = _typeToPropertyName.Keys.ToList();
         }
+
+        public bool SelectPid(string pid)
+        {
+            var item = App.DbContext.Items
+                .Where(i => EF.Functions.Like(i.Pid, $"%{pid}%"))
+                .FirstOrDefault();
+            if (item != null)
+            {
+                MediaList.AddMedia(item.Path);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
     }
 }

@@ -127,6 +127,7 @@
                 xpath: "//span[contains(., '출연:')]/following-sibling::a",
                 handler: _parseActor
             },
+            plot: { xpath: "//p[@id='story_kr']"},
             genre: { xpath: "//li[@class='gen_list']/a/text()", handler: _parseMultiNode },
         };
 

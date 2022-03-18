@@ -344,13 +344,14 @@ namespace HappyHour.Spider
             tmpList.ForEach(tp => tp.dict.Remove(tp.key));
         }
 
-        public virtual void OnJsMessageReceived(JavascriptMessageReceivedEventArgs msg)
+        public virtual bool OnJsMessageReceived(JavascriptMessageReceivedEventArgs msg)
         {
             dynamic d = msg.Message;
             Log.Print($"{d.type} : {d.data}");
             if (d.type == "url")
             {
                 Browser.Address = d.data;
+                return true;
             }
             else if (d.type == "items")
             {
@@ -358,7 +359,7 @@ namespace HappyHour.Spider
                 {
                     Log.Print($"{Name}: {Keyword}: No exact matched ID");
                     OnScrapCompleted(false);
-                    return;
+                    return true;
                 }
                 _itemQueue.Enqueue(d);
                 try
@@ -377,7 +378,9 @@ namespace HappyHour.Spider
                 {
                     Log.Print($"{Name}:", ex);
                 }
+                return true;
             }
+            return false;
         }
 
         protected virtual void UpdateDb(IDictionary<string, object> items)

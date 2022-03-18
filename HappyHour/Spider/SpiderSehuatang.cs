@@ -111,13 +111,27 @@ namespace HappyHour.Spider
             _images.Clear();
             _numDownloaded = 0;
 
-            if (article.images is List<object> images &&
-                article.files is List<object> files)
+            var images = article.images as List<object>;
+            var files = article.files as List<object>;
+            if (images != null) { _toDownload = images.Count; }
+            if (files != null) { _toDownload += files.Count; }
+            else if (article.magnet is List<object> magnets)
             {
-                _toDownload = images.Count + files.Count;
-                Log.Print($"{Name}: toDownload : {_toDownload }");
+                int count = 1;
+                foreach (string magnet in magnets)
+                {
+                    File.WriteAllText($"{_outPath}\\{_pid}{count}.magnet", magnet);
+                    count++;
+                }
+            }
 
+            Log.Print($"{Name}: toDownload : {_toDownload }");
+            if (files != null)
+            {
                 files.ForEach(fn => ((IJavascriptCallback)fn).ExecuteAsync());
+            }
+            if (images != null)
+            {
                 foreach (string file in images)
                 {
                     string postfix = (i == 0) ? "cover" : $"screenshot{i}";
@@ -185,12 +199,13 @@ namespace HappyHour.Spider
             }
         }
 
-        public override void OnJsMessageReceived(JavascriptMessageReceivedEventArgs msg)
+        public override bool OnJsMessageReceived(JavascriptMessageReceivedEventArgs msg)
         {
             dynamic d = msg.Message;
             if (d.type == "url")
             {
                 Browser.Address = d.data;
+                return true;
             }
             else if (d.type == "url_list")
             {
@@ -198,13 +213,14 @@ namespace HappyHour.Spider
                 _index = 0;
                 _currPage = d;
                 MoveNextItem();
+                return true;
             }
             else if (d.type == "items")
             {
                 if (d.data == 0)
                 {
                     OnScrapCompleted(false);
-                    return;
+                    return true;
                 }
                 Log.Print($"{Name}: article {_pid} = {d.pid}");
                 _updateTime = DateTime.Parse(d.date);
@@ -218,6 +234,7 @@ namespace HappyHour.Spider
                     MoveNextItem();
                 }
             }
+            return false;
         }
 
         public override void Navigate2(IAvMedia _)

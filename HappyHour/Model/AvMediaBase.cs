@@ -55,7 +55,7 @@ namespace HappyHour.Model
             string[] files;
             try
             {
-                files = Directory.GetFiles(path);
+                files = Directory.GetFiles(path, "*", new EnumerationOptions { RecurseSubdirectories = true });
             }
             catch (Exception ex)
             {

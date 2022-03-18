@@ -15,7 +15,7 @@
 
   <ItemGroup>
     <PackageReference Include="AvalonEdit" Version="6.1.3.50" />
-    <PackageReference Include="CefSharp.Wpf.NETCore" Version="97.1.11" />
+    <PackageReference Include="CefSharp.Wpf.NETCore" Version="97.1.61" />
     <PackageReference Include="Dirkster.AvalonDock" Version="4.60.1" />
     <PackageReference Include="Dirkster.AvalonDock.Themes.VS2013" Version="4.60.1" />
     <PackageReference Include="FFME.Windows" Version="4.4.350" />
@@ -98,6 +98,7 @@
     <None Remove="Resources\JavLibrary.js" />
     <None Remove="Resources\Javmovie.js" />
     <None Remove="Resources\Mgstage.js" />
+    <None Remove="Resources\MMD.js" />
     <None Remove="Resources\R18.js" />
     <None Remove="Resources\SearchText.js" />
     <None Remove="Resources\Sehuatang.js" />
@@ -110,6 +111,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Resources\MMD.js" />
     <EmbeddedResource Include="Resources\Sukebei.js" />
     <EmbeddedResource Include="Resources\Dmm.js" />
     <EmbeddedResource Include="Resources\AvWiki.js" />
@@ -145,15 +147,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="chromiumembeddedframework.runtime.win-x64" Version="97.1.1" />
+    <PackageReference Update="chromiumembeddedframework.runtime.win-x64" Version="97.1.6" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="chromiumembeddedframework.runtime.win-x86" Version="97.1.1" />
+    <PackageReference Update="chromiumembeddedframework.runtime.win-x86" Version="97.1.6" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="chromiumembeddedframework.runtime.win-arm64" Version="97.1.1" />
+    <PackageReference Update="chromiumembeddedframework.runtime.win-arm64" Version="97.1.6" />
   </ItemGroup>
 
 </Project>

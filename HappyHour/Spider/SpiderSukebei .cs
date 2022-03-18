@@ -68,10 +68,12 @@ namespace HappyHour.Spider
             }
 
             string nexPageLink = items.nextPage.ToString();
-            m = Regex.Match(nexPageLink, @"p=(\d)+");
+            m = Regex.Match(nexPageLink, @"p=(\d+)");
             if (m.Success && int.TryParse(m.Groups[1].Value, out int nextPage) &&
                 nextPage <= NumPage)
             {
+                Browser.MainView.StatusMessage =
+                    $"Page:{nextPage}/{NumPage}";
                 Browser.Address = nexPageLink;
             }
             else
@@ -80,7 +82,7 @@ namespace HappyHour.Spider
             }
         }
 
-        public override void OnJsMessageReceived(JavascriptMessageReceivedEventArgs msg)
+        public override bool OnJsMessageReceived(JavascriptMessageReceivedEventArgs msg)
         {
             dynamic d = msg.Message;
             Log.Print($"{d.type} : {d.data}");
@@ -93,6 +95,7 @@ namespace HappyHour.Spider
             {
                 SaveMagenetLink(d);
             }
+            return true;
         }
     }
 }

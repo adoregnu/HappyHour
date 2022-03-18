@@ -55,6 +55,7 @@ namespace HappyHour.ViewModel
                 new SpiderSukebei(this),
                 new SpiderR18(this),
                 new SpiderJavlibrary(this),
+                new SpiderMmd(this),
                 new SpiderJavmoive(this),
                 new SpiderAvwiki(this),
                 new SpiderMgstage(this),
