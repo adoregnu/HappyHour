@@ -150,6 +150,8 @@ namespace HappyHour.ViewModel
                 MediaList = _mediaListMv,
                 DialogService = DialogService
             };
+            var spiderVm = Docs.FirstOrDefault(d => d is SpiderViewModel) as SpiderViewModel;
+            dialog.SpiderList = spiderVm.Spiders;
             DialogService.Show<ActorEditorDialog>(this, dialog);
         }
 

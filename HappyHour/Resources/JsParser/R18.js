@@ -1,6 +1,6 @@
 ﻿(function () {
     const _PID = '{{pid}}';
-    const INFO_CLASS_NAME = 'sc-havuko iGsJDi'
+    const INFO_CLASS_NAME = 'sc-gggqho bNyAZN'; ////*[@id="root"]/div/div/div[2]/section[1]/div/div/div
 
     function get_node(node) { return node; }
 
@@ -93,7 +93,7 @@
             //director: { xpath: "//h3[contains(.,'Director')]/following-sibling::div/text()" },
             series: { xpath: "//h3[contains(.,'Series')]/following-sibling::div//a/text()" },
             studio: { xpath: "//h3[contains(.,'Studio')]/following-sibling::div/a/text()" },
-            //label: { xpath: "//h3[contains(.,'Label')]/following-sibling::div//a/text()" },
+            label: { xpath: "//h3[contains(.,'Label')]/following-sibling::div//a/text()" },
             genre: {
                 xpath: "//h3[contains(.,'Categories')]/following-sibling::div/span//text()",
                 handler: _parseMultiNode

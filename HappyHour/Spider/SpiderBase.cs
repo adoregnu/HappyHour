@@ -89,6 +89,7 @@ namespace HappyHour.Spider
         }
         public ICommand CmdSearch { get; private set; }
         public ICommand CmdStopSpider { get; set; }
+        public ICommand CmdScrap { get; set; }
 
         public SpiderBase(SpiderViewModel br)
         {
@@ -97,8 +98,15 @@ namespace HappyHour.Spider
             {
                 _downloader = new DefaultDownloader(br);
             }
-            CmdSearch = new RelayCommand(() => { Navigate2(); });
+            CmdSearch = new RelayCommand(() => Navigate2());
             CmdStopSpider = new RelayCommand(() => OnScrapCompleted(false));
+            CmdScrap = new RelayCommand(() =>
+            {
+                IsSpiderWorking = true;
+                _saveDb = true;
+                SearchMedia = SelectedMedia;
+                Scrap();
+            });
 
             ScrapItems = new()
             {
@@ -267,8 +275,7 @@ namespace HappyHour.Spider
                 if (key == "link")
                 {
                     link = dict[key].ToString();
-                    _ = dict.Remove(key);
-                    return true;
+                    return dict.Remove(key);
                 }
                 return false;
             });
@@ -285,7 +292,7 @@ namespace HappyHour.Spider
 
         protected virtual void OnScrapCompleted(bool bUpdated)
         {
-            if (/*bUpdated && */FollowLink())
+            if (SearchMedia != null && SearchMedia.IsPlayable && FollowLink())
             {
                 return;
             }
@@ -361,6 +368,11 @@ namespace HappyHour.Spider
                     OnScrapCompleted(false);
                     return true;
                 }
+                if (SearchMedia == null)
+                {
+                    Log.Print("Media is not selected!");
+                    return true;
+                }
                 _itemQueue.Enqueue(d);
                 try
                 {
@@ -385,10 +397,14 @@ namespace HappyHour.Spider
 
         protected virtual void UpdateDb(IDictionary<string, object> items)
         {
+#if false
             new ItemBase2(SearchMedia)
             {
                 OverwriteActorPicture = OverwriteActorThumbDb
             }.UpdateItems(items);
+#endif
+            DbHelper.OverwriteActorPicture = OverwriteActorThumb;
+            DbHelper.UpdateItems(SearchMedia, items);
         }
 
         public void UpdateItems(IDictionary<string, object> items)

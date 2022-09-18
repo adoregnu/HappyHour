@@ -51,7 +51,6 @@
 -->
             <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" />
             <Button Style="{DynamicResource ModernButtonStyle3}"
-                    Visibility="{Binding SpiderEnabled, Converter={StaticResource boolToVis}}"
                     Command="{Binding CmdSpiderSetting}">
                 <Path Stretch="Uniform"
                     Data="{Binding Source={StaticResource cog-outline}, Path=Data}"

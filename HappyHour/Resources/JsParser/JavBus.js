@@ -1,12 +1,15 @@
 ﻿(function () {
     const _PID = '{{pid}}';
 
-    function _parseSingleNode(_xpath) {
+    function _parseSingleNode(_xpath, _getter = null) {
         var result = document.evaluate(_xpath, document.body,
             null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
         var node = result.singleNodeValue;
         if (node != null) {
-            return node.textContent.trim();
+            if (_getter != null)
+                return _getter(node);
+            else
+                return node.textContent.trim();
         }
         return null;
     }
@@ -40,12 +43,38 @@
         }
     }
 
+    function get_node(node) { return node; }
+
+    function parseCover(xpath) {
+        var img = _parseSingleNode(xpath, get_node);
+        if (img != null) {
+            return img.src;
+        }
+        return null;
+    }
+
+    function parseActor(xpath) {
+        var result = _parseMultiNode(xpath, get_node);
+        if (result == null) {
+            console.log("no actors");
+        } else {
+            console.log(result.length + " actors");
+        }
+    }
+
     if (document.location.href.includes('/search/')) {
         parseSearchResult();
         return;
     }
 
     var items = {
+        title: { xpath: "//div[@class='container']/h3/text()" },
+        cover: { xpath: "//a[@class='bigImage']/img", handler: parseCover },
+        date: { xpath: "//span[contains(.,'Release Date:')]/following-sibling::text()"},
+        studio: { xpath: "//span[contains(.,'Studio:')]/following-sibling::a/text()"},
+        series: { xpath: "//span[contains(.,'Series:')]/following-sibling::a/text()" },
+        genre: { xpath: "//p[contains(.,'Genre:')]/following-sibling::p/span//a/text()", handler: _parseMultiNode },
+        actor: { xpath: "//p[@class='star-show']/following-sibling::p//a", handler: parseActor }
     };
 
     var msg = { type : 'items' }

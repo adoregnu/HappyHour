@@ -47,7 +47,7 @@
                 </Style>
             </Grid.Style>
             <!--Bind Image Path in Image Control-->
-            <Image HorizontalAlignment="Center" ToolTipService.ShowDuration="20000"
+            <Image HorizontalAlignment="Center" ToolTipService.ShowDuration="20000" ToolTipService.InitialShowDelay="0"
                    Source="{Binding Poster, Converter={StaticResource PathToImageConverter}, ConverterParameter=200}">
                 <!--View Large Image on Image Control Tooltip-->
                 <Image.ToolTip>

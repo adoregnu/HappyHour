@@ -88,7 +88,7 @@
         for (var i = 0; i < nodes.length; i++) {
             var node = nodes[i];
             //console.log('title: ' + node.title);
-            if (re.test(node.title)) {
+            if (re.test(node.title) && !node.title.includes('Blu-ray Disc')) {
                 //console.log(node.title);
                 nmatched += 1;
                 msg = { type: 'url', data: node.href };

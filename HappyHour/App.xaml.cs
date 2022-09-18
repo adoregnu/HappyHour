@@ -129,7 +129,7 @@ namespace HappyHour
                 // DevTools doesn't seem to be working when this is enabled
                 // http://magpcss.org/ceforum/viewtopic.php?f=6&t=14095
                 settings.CefCommandLineArgs.Add("enable-begin-frame-scheduling");
-                //settings.CefCommandLineArgs.Add("disable-image-loading");
+                settings.CefCommandLineArgs.Add("disable-image-loading");
             }
             settings.CefCommandLineArgs.Add("enable-experimental-web-platform-features");
             settings.CefCommandLineArgs.Add("ignore-certificate-errors");

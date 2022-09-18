@@ -22,6 +22,11 @@ namespace HappyHour.CefHandler
             //_basePath = Directory.GetCurrentDirectory() + "\\";
         }
 
+        public bool CanDownload(IWebBrowser chromiumWebBrowser, IBrowser browser, string url, string requestMethod)
+        {
+            return true;
+        }
+
         public void OnBeforeDownload(IWebBrowser chromiumWebBrowser,
             IBrowser browser,
             DownloadItem downloadItem,

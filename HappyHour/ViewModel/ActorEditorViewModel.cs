@@ -16,6 +16,7 @@ using MvvmDialogs.FrameworkDialogs.OpenFile;
 
 using HappyHour.Model;
 using HappyHour.Interfaces;
+using HappyHour.Spider;
 
 namespace HappyHour.ViewModel
 {
@@ -52,9 +53,11 @@ namespace HappyHour.ViewModel
 
         private ObservableCollection<AvActorName> _nameListOfOneActor;
         private ObservableCollection<AvActor> _actors = new();
+        private List<ScrapItem> ScrapItems { get; set; }
 
         public List<ActorInitial> ActorInitials { get; private set; }
         public AvActorName SelectedActorName { get; set; }
+        public List<SpiderBase> SpiderList { get; set; }
 
         public bool? DialogResult
         {
@@ -138,7 +141,7 @@ namespace HappyHour.ViewModel
         public ICommand CmdClearActors { get; private set; }
         public ICommand CmdDeleteNameOfActor { get; private set; }
         public ICommand CmdClosed { get; private set; }
-
+  
         public ActorEditorViewModel()
         {
             CmdBrowsePicture = new RelayCommand(() => PicturePath = ChoosePicture());
@@ -157,7 +160,7 @@ namespace HappyHour.ViewModel
             CmdClearActors = new RelayCommand(() => OnClearActors());
             CmdDeleteNameOfActor = new RelayCommand(() => OnDeleteNameOfActor());
             CmdClosed = new RelayCommand(() => OnClose());
-
+ 
             ActorInitials = Enumerable.Range('A', 'Z' - 'A' + 1)
                 .Select(c => new ActorInitial
                 {
@@ -170,6 +173,21 @@ namespace HappyHour.ViewModel
                 Initial = "All",
             });
             //ActorInitials[1].IsChecked = true;
+
+            ScrapItems = new()
+            {
+                new ScrapItem() { CanUpdate = false, Name = "title" },
+                new ScrapItem() { CanUpdate = false, Name = "date" },
+                //new ScrapItem() { CanUpdate = true, Name = "runtime" },
+                //new ScrapItem() { CanUpdate = true, Name = "director" },
+                new ScrapItem() { CanUpdate = false, Name = "series" },
+                new ScrapItem() { CanUpdate = false, Name = "studio" },
+                new ScrapItem() { CanUpdate = false, Name = "genre" },
+                new ScrapItem() { CanUpdate = false, Name = "plot" },
+                new ScrapItem() { CanUpdate = false, Name = "cover" },
+                new ScrapItem() { CanUpdate = true, Name = "actor" },
+                new ScrapItem() { CanUpdate = false, Name = "rating" },
+            };
         }
 
         string ChoosePicture()

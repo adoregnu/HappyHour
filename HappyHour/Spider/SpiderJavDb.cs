@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-
+using System.Text.RegularExpressions;
 using CefSharp;
 
 using HappyHour.ViewModel;
@@ -34,6 +34,10 @@ namespace HappyHour.Spider
                     Path = "/"
                 },
             };
+        }
+        protected override void AdjustKeyword()
+        {
+            Keyword = Regex.Replace(Keyword, @"^\d+", "");
         }
     }
 }

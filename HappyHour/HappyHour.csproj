@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net5.0-windows</TargetFramework>
+    <TargetFramework>net6.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
     <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
@@ -15,22 +15,22 @@
 
   <ItemGroup>
     <PackageReference Include="AvalonEdit" Version="6.1.3.50" />
-    <PackageReference Include="CefSharp.Wpf.NETCore" Version="97.1.61" />
-    <PackageReference Include="Dirkster.AvalonDock" Version="4.60.1" />
-    <PackageReference Include="Dirkster.AvalonDock.Themes.VS2013" Version="4.60.1" />
+    <PackageReference Include="CefSharp.Wpf.NETCore" Version="104.4.240" />
+    <PackageReference Include="Dirkster.AvalonDock" Version="4.70.2" />
+    <PackageReference Include="Dirkster.AvalonDock.Themes.VS2013" Version="4.70.2" />
     <PackageReference Include="FFME.Windows" Version="4.4.350" />
     <PackageReference Include="ini-parser-netstandard" Version="2.5.2" />
-    <PackageReference Include="log4net" Version="2.0.14" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.11" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.11">
+    <PackageReference Include="log4net" Version="2.0.15" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.8">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.39" />
-    <PackageReference Include="MvvmDialogs" Version="8.0.0" />
+    <PackageReference Include="MvvmDialogs" Version="9.0.1" />
     <PackageReference Include="MvvmLightStd10" Version="5.4.1.2" />
-    <PackageReference Include="QBittorrent.Client" Version="1.7.20325.1" />
-    <PackageReference Include="Scriban" Version="5.0.0" />
+    <PackageReference Include="QBittorrent.Client" Version="1.8.22216.3" />
+    <PackageReference Include="Scriban" Version="5.5.0" />
     <PackageReference Include="SimMetrics.Net" Version="1.0.5" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="6.0.0" />
     <PackageReference Include="Ude.NET" Version="1.0.0" />
@@ -111,26 +111,26 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Resources\MMD.js" />
-    <EmbeddedResource Include="Resources\Sukebei.js" />
-    <EmbeddedResource Include="Resources\Dmm.js" />
-    <EmbeddedResource Include="Resources\AvWiki.js" />
-    <EmbeddedResource Include="Resources\Avdbs.js" />
-    <EmbeddedResource Include="Resources\1pondo.js" />
-    <EmbeddedResource Include="Resources\Sehuatang2.js" />
-    <EmbeddedResource Include="Resources\Sehuatang.js" />
-    <EmbeddedResource Include="Resources\JavBus.js" />
-    <EmbeddedResource Include="Resources\Avsox.js" />
-    <EmbeddedResource Include="Resources\Javfree.js" />
-    <EmbeddedResource Include="Resources\JavMovie.js" />
-    <EmbeddedResource Include="Resources\Highlight.js" />
-    <EmbeddedResource Include="Resources\JavDb.js" />
-    <EmbeddedResource Include="Resources\AVE.js" />
-    <EmbeddedResource Include="Resources\AvJamak.js" />
-    <EmbeddedResource Include="Resources\Mgstage.js" />
-    <EmbeddedResource Include="Resources\SearchText.js" />
-    <EmbeddedResource Include="Resources\R18.js" />
-    <EmbeddedResource Include="Resources\JavLibrary.js" />
+    <EmbeddedResource Include="Resources\JsParser\MMD.js" />
+    <EmbeddedResource Include="Resources\JsParser\Sukebei.js" />
+    <EmbeddedResource Include="Resources\JsParser\Dmm.js" />
+    <EmbeddedResource Include="Resources\JsParser\AvWiki.js" />
+    <EmbeddedResource Include="Resources\JsParser\Avdbs.js" />
+    <EmbeddedResource Include="Resources\JsParser\1pondo.js" />
+    <EmbeddedResource Include="Resources\JsParser\Sehuatang2.js" />
+    <EmbeddedResource Include="Resources\JsParser\Sehuatang.js" />
+    <EmbeddedResource Include="Resources\JsParser\JavBus.js" />
+    <EmbeddedResource Include="Resources\JsParser\Avsox.js" />
+    <EmbeddedResource Include="Resources\JsParser\Javfree.js" />
+    <EmbeddedResource Include="Resources\JsParser\JavMovie.js" />
+    <EmbeddedResource Include="Resources\JsParser\Highlight.js" />
+    <EmbeddedResource Include="Resources\JsParser\JavDb.js" />
+    <EmbeddedResource Include="Resources\JsParser\AVE.js" />
+    <EmbeddedResource Include="Resources\JsParser\AvJamak.js" />
+    <EmbeddedResource Include="Resources\JsParser\Mgstage.js" />
+    <EmbeddedResource Include="Resources\JsParser\SearchText.js" />
+    <EmbeddedResource Include="Resources\JsParser\R18.js" />
+    <EmbeddedResource Include="Resources\JsParser\JavLibrary.js" />
   </ItemGroup>
 
   <ItemGroup>
@@ -147,15 +147,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="chromiumembeddedframework.runtime.win-x64" Version="97.1.6" />
+    <PackageReference Update="chromiumembeddedframework.runtime.win-x64" Version="104.4.24" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="chromiumembeddedframework.runtime.win-x86" Version="97.1.6" />
+    <PackageReference Update="chromiumembeddedframework.runtime.win-x86" Version="104.4.24" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="chromiumembeddedframework.runtime.win-arm64" Version="97.1.6" />
+    <PackageReference Update="chromiumembeddedframework.runtime.win-arm64" Version="104.4.24" />
   </ItemGroup>
 
 </Project>

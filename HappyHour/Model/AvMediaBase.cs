@@ -25,6 +25,11 @@ namespace HappyHour.Model
             set => Set(ref _briefInfo, value);
         }
 
+        public bool IsPlayable
+        {
+            get => this is AvMovie;
+        }
+
         public int CompareTo(IAvMedia media)
         {
             int result = Date.CompareTo(media.Date);

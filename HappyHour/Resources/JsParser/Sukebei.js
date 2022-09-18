@@ -44,7 +44,7 @@
         var list = [];
         for (var i = 0; i < nodes.length; i++) {
             var item = {}
-            var title = _parseSingleNode("td[2]/a[starts-with(.,'+++ [HD]')]", null, nodes[i]);
+            var title = _parseSingleNode("td[2]/a[starts-with(.,'+++ [FHD]')]", null, nodes[i]);
             if (title != null) {
                 item['title'] = title
                 item['torrent'] = _parseSingleNode("td[3]/a[1]", function (node) { return node.href }, nodes[i]);

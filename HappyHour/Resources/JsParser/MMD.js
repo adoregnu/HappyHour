@@ -1,4 +1,5 @@
 ﻿(function () {
+    sessionStorage.setItem('showAlert', "false");
     const _PID = '{{pid}}';
 
     function _parseSingleNode(_xpath, _getter = null, _node = document.body) {
@@ -50,11 +51,17 @@
         if (nodes.length < 1) { return null; }
 
         for (var i = 0; i < nodes.length; i++) {
-            if (nodes[i].naturalWidth > 900 || nodes[i].naturalHeight > 900) {
-                continue;
+            var src = nodes[i].src;
+            var arr = src.split('.');
+            if (/(pl|l)$/i.test(arr[arr.length - 2])) {
+                return src;
             }
-            return nodes[i].src;
+            arr = src.split('/');
+            if (/^pb/i.test(arr[arr.length - 1])) {
+                return src;
+            }
         }
+        return null;
     }
     alert = function () { }
 

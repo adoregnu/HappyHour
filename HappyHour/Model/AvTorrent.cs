@@ -38,7 +38,7 @@ namespace HappyHour.Model
                     {
                         var client = new QBittorrentClient(new Uri("http://localhost:8080"));
                         var magnets = new Uri(File.ReadAllText(file));
-                        var addRequest = new AddTorrentUrlsRequest(magnets) { Paused = true };
+                        var addRequest = new AddTorrentUrlsRequest(magnets) { Paused = false };
                         await client.AddTorrentsAsync(addRequest);
                         client.Dispose();
                         downloaded = true;

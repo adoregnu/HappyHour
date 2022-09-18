@@ -9,6 +9,7 @@ namespace HappyHour.Interfaces
         string Poster { get; set; }
         string BriefInfo { get; }
         DateTime Date { get; set; }
+        bool IsPlayable { get; }
 
         string GenPosterPath(string ext);
         string GenActorThumbPath(string name, string ext);

@@ -62,6 +62,17 @@
         }
     }
 
+    function addAlias(alias, xpath, node) {
+        var txt = _parseSingleNode(xpath, null, node);
+        if (txt != null && txt.length > 1) {
+            var tmp = txt.split('（');
+            alias.push(tmp[0]);
+            if (tmp.length > 1) {
+                alias.push(tmp[1].slice(0, -1))
+            }
+        }
+    }
+
     function parseActorPage() {
         var node = _parseSingleNode("//div[@class='profile_picture']", get_node);
         var actor = {};
@@ -69,20 +80,17 @@
         if (anode != null) {
             actor['thumb'] = anode.src;
         }
+        var alias = [];
         var txt = _parseSingleNode("//span[@class='inner_name_kr']", null, node);
         if (txt != null && txt.length > 1) {
-            actor['name'] = txt;
-        }
-        var alias = [];
-        txt = _parseSingleNode("//span[@class='inner_name_en']", null, node);
-        if (txt != null && txt.length > 1) {
-            alias.push(txt);
-        }
-        txt = _parseSingleNode("//span[@class='inner_name_cn']", null, node);
-        if (txt != null && txt.length > 1) {
             var tmp = txt.split('（');
-            alias.push(tmp[0]);
+            actor['name'] = tmp[0];
+            if (tmp.length > 1) {
+                alias.push(tmp[1].slice(0, -1))
+            }
         }
+        addAlias(alias, "//span[@class='inner_name_en']", node);
+        addAlias(alias, "//span[@class='inner_name_cn']", node);
 /*
         var names = _parseMultiNode("//span[contains(., '다른이름')]/*[contains(@class, 'actor_onm')]");
         if (names != null) {
