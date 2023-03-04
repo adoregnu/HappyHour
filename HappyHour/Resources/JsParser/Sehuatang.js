@@ -2,6 +2,8 @@
     const _BOARD = '{{board}}';
     const _PAGE_COUNT = '{{pageCount}}';
 
+    var msg = { type : 'items' }
+
     function _parseSingleNode(_xpath, _getter = null, node = document.body) {
         var result = document.evaluate(_xpath, node, null,
             XPathResult.FIRST_ORDERED_NODE_TYPE, null);
@@ -44,6 +46,41 @@
             });
         }
         return array.length > 0 ? array : null;
+    }
+
+    function _parseImages(xpath) {
+        var nodes = _parseMultiNode(xpath);
+        var array = [];
+        if (nodes == null) {
+            return null;
+        }
+        var i = 0;
+        nodes.forEach(function (url) {
+            var ext = url.split('.').pop();
+            var name = "unknown.jpg";
+            if (i == 0) {
+                name = msg['pid'] + "_cover." + ext;
+            } else {
+                name = msg['pid'] + "_screenshot" + i + "." + ext;
+            }
+            console.log(name, url);
+            var imgInfo = {
+                url: url,
+                target: name,
+                func: function () {
+                    const link = document.createElement('a');
+                    document.body.appendChild(link);
+                    link.download = name;
+                    link.href = url;
+                    link.target = '_blank';
+                    link.click();
+                    document.body.removeChild(link);
+                }
+            };
+            array.push(imgInfo);
+            i++;
+        });
+        return array;
     }
 
     function _selectBoard() {
@@ -128,11 +165,10 @@
         magnet: { xpath: "//div[@id='code_Aub']//li", handler: _parseMultiNode }, 
         images: {
             xpath: "(//td[contains(@id, 'postmessage_')])[1]//img[contains(@id, 'aimg_')]/@file",
-            handler: _parseMultiNode
+            handler: _parseImages
         },
     };
 
-    var msg = { type : 'items' }
     var num_item = 0;
     for (var key in items) {
         var item = items[key];

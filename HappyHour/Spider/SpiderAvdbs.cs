@@ -2,6 +2,7 @@
 using System.Drawing;
 
 using HappyHour.ViewModel;
+using Scriban;
 
 namespace HappyHour.Spider
 {
@@ -23,6 +24,45 @@ namespace HappyHour.Spider
                     i.CanUpdate = false;
                 }
             });
+        }
+
+        int _numScrap = 0;
+        public override void OnSelected()
+        {
+            base.OnSelected();
+            _numScrap = 0;
+        }
+
+        private void Search()
+        {
+            var template = Template.Parse(App.ReadResource("Avdbs_search.js"));
+            string js = template.Render(new { Pid = Keyword, });
+            Browser.ExecJavaScript(js);
+        }
+
+        public override void SetAddress()
+        {
+            if (_numScrap > 0)
+            {
+                Search();
+            }
+            else
+            {
+                Browser.Address = URL;
+            }
+        }
+
+        public override void Scrap()
+        {
+            if (_numScrap > 0)
+            {
+                base.Scrap();
+            }
+            else
+            {
+                Search();
+            }
+            _numScrap++;
         }
 
         private void CropImage(string fname)

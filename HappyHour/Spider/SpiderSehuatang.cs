@@ -22,6 +22,7 @@ namespace HappyHour.Spider
         private int _pageNum = 1;
         private bool _scrapRunning;
         private bool _dirExists;
+        private int _numDuplicatedPid;
 
         private string _pid;
         private string _outPath;
@@ -55,6 +56,7 @@ namespace HappyHour.Spider
         {
             Name = "sehuatang";
             URL = "https://www.sehuatang.org/";
+            //URL = "https://tupd.xsmy54s.com/tupian/forum/202302/28/205120gxjzpj8jkk558kea.jpg";
             ScriptName = "Sehuatang.js";
 
             Boards = new List<string>
@@ -63,6 +65,8 @@ namespace HappyHour.Spider
             };
             CmdStop = new RelayCommand(() => _scrapRunning = false);
             SelectedBoard = "censored";
+
+            ResourcesToBeFiltered = new Dictionary<string, string>();
         }
 
         protected override string GetScript(string name)
@@ -90,7 +94,8 @@ namespace HappyHour.Spider
             {
                 _dirExists = true;
                 Log.Print($"{Name}: Already downloaded! {_outPath}");
-                if (StopOnExistingId)
+                _numDuplicatedPid++;
+                if (StopOnExistingId && _numDuplicatedPid > 3)
                 {
                     _scrapRunning = false;
                 }
@@ -107,7 +112,7 @@ namespace HappyHour.Spider
                 return;
             }
 
-            int i = 0;
+            //int i = 0;
             _images.Clear();
             _numDownloaded = 0;
 
@@ -126,21 +131,38 @@ namespace HappyHour.Spider
             }
 
             Log.Print($"{Name}: toDownload : {_toDownload }");
-            if (files != null)
+            if (_toDownload == 0)
             {
-                files.ForEach(fn => ((IJavascriptCallback)fn).ExecuteAsync());
+                MoveNextItem();
+                return;
             }
+
             if (images != null)
             {
+                foreach (dynamic img in images)
+                {
+                    string target = _outPath + $"\\{img.target}";
+                    ResourcesToBeFiltered.Add(img.url, target);
+                }
+                foreach (dynamic img in images)
+                {
+                    ((IJavascriptCallback)img.func).ExecuteAsync();
+                    _numDownloaded++;
+                }
+#if false
                 foreach (string file in images)
                 {
                     string postfix = (i == 0) ? "cover" : $"screenshot{i}";
                     string target = _outPath + $"\\{_pid}_{postfix}{Path.GetExtension(file)}";
-
                     _images.Add(file, target);
                     Browser.Download(file);
                     i++;
                 }
+#endif
+            }
+            if (files != null)
+            {
+                files.ForEach(fn => ((IJavascriptCallback)fn).ExecuteAsync());
             }
         }
 
@@ -240,19 +262,23 @@ namespace HappyHour.Spider
         public override void Navigate2(IAvMedia _)
         {
             IsSpiderWorking = true;
+            _numDuplicatedPid = 0;
             _pageNum = 1;
             _scrapRunning = true;
             if (Browser.Address == URL)
             {
                 Browser.Address = "";
             }
+            ResourcesToBeFiltered.Clear();
             Browser.Address = URL;
         }
 
         private void OnBeforeDownload(object sender, DownloadItem e)
         {
-            e.SuggestedFileName = !e.SuggestedFileName.EndsWith("torrent", StringComparison.OrdinalIgnoreCase) ?
-                _images[e.OriginalUrl] : $"{_outPath}\\{e.SuggestedFileName}";
+            //e.SuggestedFileName = !e.SuggestedFileName.EndsWith("torrent", StringComparison.OrdinalIgnoreCase) ?
+            //    _images[e.OriginalUrl] : $"{_outPath}\\{e.SuggestedFileName}";
+
+            e.SuggestedFileName = $"{_outPath}\\{e.SuggestedFileName}";
         }
 
         private void OnDownloadUpdated(object sender, DownloadItem e)
@@ -299,5 +325,6 @@ namespace HappyHour.Spider
             dh.OnBeforeDownloadFired -= OnBeforeDownload;
             dh.OnDownloadUpdatedFired -= OnDownloadUpdated;
         }
+
     }
 }

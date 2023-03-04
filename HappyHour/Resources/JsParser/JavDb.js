@@ -142,9 +142,9 @@
     }
 
     var items = {
-        title: { xpath: "//h2[contains(@class, 'title')]/strong/text()" },
+        title: { xpath: "//strong[@class='current-title']/text()" },
         //cover: { xpath: "//div[@class='column column-video-cover']/a/@href" },
-        cover: { xpath: "//div[@class='column column-video-cover']/a/img/@src" },
+        cover: { xpath: "//img[@class='video-cover']/@src" },
         date: { xpath: "//strong[contains(., 'Released Date')]/following-sibling::span/text()" },
         studio: {
             xpath: "//strong[contains(., 'Maker')]/following-sibling::span/a/text()",

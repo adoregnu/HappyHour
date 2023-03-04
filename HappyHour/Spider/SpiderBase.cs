@@ -72,6 +72,7 @@ namespace HappyHour.Spider
         public bool OverwritePoster { get; set; }
         public bool OverwriteActorThumb { get; set; }
         public bool OverwriteActorThumbDb { get; set; }
+        public Dictionary<string, string> ResourcesToBeFiltered;
 
         public string Keyword
         {
@@ -205,6 +206,17 @@ namespace HappyHour.Spider
             Browser.SelectedSpider = this;
         }
 
+        public virtual void SetAddress()
+        {
+            string newUrl = string.IsNullOrEmpty(Keyword) ? URL : SearchURL;
+            if (Browser.Address == newUrl)
+            {
+                Browser.Address = "";
+            }
+            Log.Print($"Set new url : {newUrl}");
+            Browser.Address = newUrl;
+        }
+
         public static bool IterateDynamic(IDictionary<string, object> dict,
            Func<string, IDictionary<string, object>, bool> action)
         {
@@ -314,7 +326,6 @@ namespace HappyHour.Spider
             if (IsSpiderWorking && !string.IsNullOrEmpty(ScriptName))
             {
                 Browser.ExecJavaScript(GetScript(ScriptName));
-                return;
             }
         }
 

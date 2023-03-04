@@ -10,7 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Media.Imaging;
-
+using Imazen.WebP;
 
 namespace HappyHour.Converter
 {
@@ -49,8 +49,18 @@ namespace HappyHour.Converter
 
                     if (File.Exists(path))
                     {
-                        using var bmpTemp = new Bitmap(path);
-                        return ConvertBitmap(bmpTemp, width);
+                        Bitmap bitmap;
+                        var ext = Path.GetExtension(path);
+                        if (ext.Equals(".webp", StringComparison.OrdinalIgnoreCase))
+                        {
+                            var buf = File.ReadAllBytes(path);
+                            bitmap = new SimpleDecoder().DecodeFromBytes(buf,  buf.Length);
+                        }
+                        else
+                        {
+                            bitmap = new Bitmap(path);
+                        }
+                        return ConvertBitmap(bitmap, width);
                     }
                 }
             }

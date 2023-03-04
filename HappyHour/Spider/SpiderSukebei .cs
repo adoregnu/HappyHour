@@ -13,6 +13,7 @@ namespace HappyHour.Spider
     internal class SpiderSukebei : SpiderBase
     {
         private readonly string _dataPath;
+        private int _numDuplicatedPid;
 
         public override string SearchURL => $"{URL}{Keyword}";
 
@@ -32,6 +33,7 @@ namespace HappyHour.Spider
         }
         public override void Navigate2(IAvMedia _)
         {
+            _numDuplicatedPid = 0;
             IsSpiderWorking = true;
             if (Browser.Address == URL)
             {
@@ -63,7 +65,17 @@ namespace HappyHour.Spider
                 {
                     _ = Directory.CreateDirectory(sukebeiPath);
                 }
-                File.WriteAllText($"{sukebeiPath}\\{pid}.magnet", item.magnet.ToString());
+                string fileName = $"{sukebeiPath}\\{pid}.magnet";
+                if (File.Exists(fileName))
+                {
+                    _numDuplicatedPid++;
+                }
+                if (_numDuplicatedPid > 3 && StopOnExistingId)
+                {
+                    OnScrapCompleted(false);
+                    return;
+                }
+                File.WriteAllText(fileName, item.magnet.ToString());
                 Browser.MediaList.AddMedia(outPath);
             }
 

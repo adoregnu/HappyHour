@@ -53,7 +53,7 @@ namespace HappyHour.ViewModel
             {
                 new SpiderSehuatang(this),
                 new SpiderSukebei(this),
-                new SpiderR18(this),
+                //new SpiderR18(this),
                 new SpiderJavlibrary(this),
                 new SpiderMmd(this),
                 new SpiderJavmoive(this),
@@ -78,22 +78,13 @@ namespace HappyHour.ViewModel
 
             if (_selectedSpider != spider)
             {
-                if (_selectedSpider != null)
-                {
-                    _selectedSpider.OnDeselect();
-                }
+                _selectedSpider?.OnDeselect();
                 spider.OnSelected();
                 spider.SetCookies();
                 UpdateBrowserHeader(spider.Name);
             }
 
-            string newUrl = string.IsNullOrEmpty(spider.Keyword) ? spider.URL : spider.SearchURL;
-            if (Address == newUrl)
-            {
-                Address = "";
-            }
-            Log.Print($"Set new url : {newUrl}");
-            Address = newUrl;
+            spider.SetAddress();
         }
 
         private void UpdateBrowserHeader(string spiderName)
@@ -106,6 +97,7 @@ namespace HappyHour.ViewModel
             };
         }
 
+
         protected override void InitBrowser()
         {
             base.InitBrowser();
@@ -113,6 +105,7 @@ namespace HappyHour.ViewModel
             WebBrowser.DownloadHandler = DownloadHandler;
             WebBrowser.MenuHandler = new MenuHandler(this);
             WebBrowser.LifeSpanHandler = new PopupHandler();
+            WebBrowser.RequestHandler = new AvRequestHandler(this);
 
             WebBrowser.LoadingStateChanged += (s, e) =>
                 UiServices.Invoke(() => OnStateChanged(s, e), true);

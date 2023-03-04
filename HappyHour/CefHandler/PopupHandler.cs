@@ -30,7 +30,7 @@ namespace HappyHour.CefHandler
             //Set newBrowser to null unless your attempting to host 
             //the popup in a new instance of ChromiumWebBrowser
             newBrowser = null;
-            windowInfo.Style = (uint)ProcessWindowStyle.Hidden;
+            windowInfo.Style = (uint)ProcessWindowStyle.Minimized;
             //Log.Print($"Popup windows has supressed. {targetUrl}");
             return false;
         }

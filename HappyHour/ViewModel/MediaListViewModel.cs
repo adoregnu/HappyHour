@@ -372,6 +372,11 @@ namespace HappyHour.ViewModel
             {
                 return;
             }
+
+            if (currDir.Contains("Western"))
+            {
+                return;
+            }
             try
             {
                 string[] dirs = Directory.GetDirectories(currDir);
