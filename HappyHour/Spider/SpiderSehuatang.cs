@@ -13,6 +13,8 @@ using CefSharp;
 
 using HappyHour.ViewModel;
 using HappyHour.Interfaces;
+using HappyHour.CefHandler;
+using CefSharp.Handler;
 
 namespace HappyHour.Spider
 {
@@ -32,6 +34,7 @@ namespace HappyHour.Spider
         private string _dataPath;
 
         private readonly Dictionary<string, string> _images = new();
+        private ILifeSpanHandler _popupHandler;
 
         public int NumPage { get; set; } = 1;
         public List<string> Boards { get; set; }
@@ -67,6 +70,9 @@ namespace HappyHour.Spider
             SelectedBoard = "censored";
 
             ResourcesToBeFiltered = new Dictionary<string, string>();
+
+            _popupHandler = new OffScreenPopupHandler(Browser);
+            ReqeustHandler = new AvRequestHandler(this);
         }
 
         protected override string GetScript(string name)
@@ -79,7 +85,6 @@ namespace HappyHour.Spider
         {
             Browser.MediaList.AddMedia(_outPath);
         }
-
         private void CreateDir()
         {
             _dirExists = false;
@@ -123,7 +128,7 @@ namespace HappyHour.Spider
             else if (article.magnet is List<object> magnets)
             {
                 int count = 1;
-                foreach (string magnet in magnets)
+                foreach (string magnet in magnets.Cast<string>())
                 {
                     File.WriteAllText($"{_outPath}\\{_pid}{count}.magnet", magnet);
                     count++;
@@ -149,21 +154,8 @@ namespace HappyHour.Spider
                     ((IJavascriptCallback)img.func).ExecuteAsync();
                     _numDownloaded++;
                 }
-#if false
-                foreach (string file in images)
-                {
-                    string postfix = (i == 0) ? "cover" : $"screenshot{i}";
-                    string target = _outPath + $"\\{_pid}_{postfix}{Path.GetExtension(file)}";
-                    _images.Add(file, target);
-                    Browser.Download(file);
-                    i++;
-                }
-#endif
             }
-            if (files != null)
-            {
-                files.ForEach(fn => ((IJavascriptCallback)fn).ExecuteAsync());
-            }
+            files?.ForEach(fn => ((IJavascriptCallback)fn).ExecuteAsync());
         }
 
         private bool MoveNextPage()
@@ -259,17 +251,28 @@ namespace HappyHour.Spider
             return false;
         }
 
+        protected override void OnScrapCompleted(bool bUpdated)
+        {
+            base.OnScrapCompleted(bUpdated);
+            (Browser.WebBrowser.LifeSpanHandler, _popupHandler) = (_popupHandler, Browser.WebBrowser.LifeSpanHandler);
+            //(Browser.WebBrowser.RequestHandler, _reqeustHandler) = (_reqeustHandler, Browser.WebBrowser.RequestHandler);
+        }
+
         public override void Navigate2(IAvMedia _)
         {
             IsSpiderWorking = true;
             _numDuplicatedPid = 0;
             _pageNum = 1;
             _scrapRunning = true;
+
+            ResourcesToBeFiltered.Clear();
+            (Browser.WebBrowser.LifeSpanHandler, _popupHandler) = (_popupHandler, Browser.WebBrowser.LifeSpanHandler);
+            //(Browser.WebBrowser.RequestHandler, _reqeustHandler) = (_reqeustHandler, Browser.WebBrowser.RequestHandler);
+
             if (Browser.Address == URL)
             {
                 Browser.Address = "";
             }
-            ResourcesToBeFiltered.Clear();
             Browser.Address = URL;
         }
 

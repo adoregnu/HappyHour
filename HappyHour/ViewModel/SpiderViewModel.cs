@@ -55,7 +55,7 @@ namespace HappyHour.ViewModel
                 new SpiderSukebei(this),
                 //new SpiderR18(this),
                 new SpiderJavlibrary(this),
-                new SpiderMmd(this),
+                //new SpiderMmd(this),
                 new SpiderJavmoive(this),
                 new SpiderAvwiki(this),
                 new SpiderMgstage(this),
@@ -65,7 +65,7 @@ namespace HappyHour.ViewModel
                 new SpiderJavBus(this),
                 new SpiderJavfree(this),
                 //new SpiderPornav(this),
-                new SpiderAvsox(this),
+                //new SpiderAvsox(this),
                 //new Spider1pondo(this),
                 new SpiderAvdbs(this),
                 new SpiderAvJamak(this),
@@ -104,8 +104,6 @@ namespace HappyHour.ViewModel
             DownloadHandler = new DownloadHandler();
             WebBrowser.DownloadHandler = DownloadHandler;
             WebBrowser.MenuHandler = new MenuHandler(this);
-            WebBrowser.LifeSpanHandler = new PopupHandler();
-            WebBrowser.RequestHandler = new AvRequestHandler(this);
 
             WebBrowser.LoadingStateChanged += (s, e) =>
                 UiServices.Invoke(() => OnStateChanged(s, e), true);

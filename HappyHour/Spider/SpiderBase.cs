@@ -51,6 +51,7 @@ namespace HappyHour.Spider
 
         public SpiderViewModel Browser { get; private set; }
         public ScrapCompletedHandler ScrapCompleted { get; set; }
+        public IRequestHandler ReqeustHandler;
         public IAvMedia SelectedMedia
         {
             get => _selectedMedia;

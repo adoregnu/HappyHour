@@ -49,18 +49,18 @@ namespace HappyHour.Converter
 
                     if (File.Exists(path))
                     {
-                        Bitmap bitmap;
                         var ext = Path.GetExtension(path);
                         if (ext.Equals(".webp", StringComparison.OrdinalIgnoreCase))
                         {
                             var buf = File.ReadAllBytes(path);
-                            bitmap = new SimpleDecoder().DecodeFromBytes(buf,  buf.Length);
+                            using Bitmap bitmap = new SimpleDecoder().DecodeFromBytes(buf,  buf.Length);
+                            return ConvertBitmap(bitmap, width);
                         }
                         else
                         {
-                            bitmap = new Bitmap(path);
+                            using Bitmap bitmap = new Bitmap(path);
+                            return ConvertBitmap(bitmap, width);
                         }
-                        return ConvertBitmap(bitmap, width);
                     }
                 }
             }

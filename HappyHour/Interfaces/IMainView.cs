@@ -15,5 +15,7 @@ namespace HappyHour.Interfaces
         IDialogService DialogService { get; } 
         ObservableCollection<Pane> Docs { get; }
         string StatusMessage { get; set; }
+
+        BrowserBase NewBrowser(string  url = null);
     }
 }

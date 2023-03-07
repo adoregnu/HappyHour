@@ -53,6 +53,7 @@ namespace HappyHour.ViewModel
             Title = "Browser";
             HeaderType = "base";
             PropertyChanged += OnPropertyChanged;
+            Address = "www.google.com";
         }
 
         protected virtual void InitBrowser()
@@ -66,6 +67,7 @@ namespace HappyHour.ViewModel
                 MessengerInstance.Send(new CefStatusMsg(e, "log"));
             };
             WebBrowser.MenuHandler = new MenuHandler();
+            WebBrowser.LifeSpanHandler = new PopupHandler(MainView);
         }
 
         protected virtual void OnAddressChanged()

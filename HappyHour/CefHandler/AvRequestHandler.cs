@@ -5,10 +5,11 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AvalonDock.Properties;
 using CefSharp;
 using CefSharp.Handler;
+using HappyHour.Extension;
 using HappyHour.Spider;
-using HappyHour.ViewModel;
 
 namespace HappyHour.CefHandler
 {
@@ -58,27 +59,11 @@ namespace HappyHour.CefHandler
 
             return FilterStatus.Done;
         }
-        static int Search(byte[] src, byte[] pattern, int bondary)
-        {
-            for (int i = 0; i < bondary; i++)
-            {
-                if (src[i] != pattern[0]) // compare only first byte
-                    continue;
-
-                // found a match on first byte, now try to match rest of the pattern
-                for (int j = pattern.Length - 1; j >= 1; j--)
-                {
-                    if (src[i + j] != pattern[j]) break;
-                    if (j == 1) return i;
-                }
-            }
-            return -1;
-        }
         public void Dispose()
         {
             byte[] bytes = memoryStream.ToArray();
             byte[] search = Encoding.ASCII.GetBytes("WEBP");
-            if (Search(bytes, search, 20) > 0)
+            if (bytes.IndexOf(search, 20) > 0)
             {
                 _targetPath = string.Concat(_targetPath.AsSpan(0, _targetPath.LastIndexOf('.')), ".webp");
                 Log.Print($"WEBP : {_targetPath}");
@@ -87,20 +72,19 @@ namespace HappyHour.CefHandler
             {
                 Log.Print($"JPEG : {_targetPath}");
             }
-            File.WriteAllBytes(_targetPath ,memoryStream.ToArray());
+            File.WriteAllBytes(_targetPath, bytes);
             memoryStream.Dispose();
             memoryStream = null;
         }
     }
     class AvResourceRequestHandler : ResourceRequestHandler
     {
-        readonly SpiderViewModel _spiderVm;
-        public AvResourceRequestHandler(SpiderViewModel spider)
+        readonly SpiderBase _spider;
+         public AvResourceRequestHandler(SpiderBase spider)
         {
-            _spiderVm = spider;
-        } 
+            _spider = spider;
+        }
 
-        bool _closeBrowser = false;
         protected override IResponseFilter GetResourceResponseFilter(
             IWebBrowser chromiumWebBrowser,
             IBrowser browser,
@@ -108,47 +92,35 @@ namespace HappyHour.CefHandler
             IRequest request,
             IResponse response)
         {
-            var res = _spiderVm.SelectedSpider.ResourcesToBeFiltered;
-            if (res == null)
+            if (_spider.ResourcesToBeFiltered.Count == 0)
             {
                 return null;
             }
-            if (res.ContainsKey(request.Url))
+            if (_spider.ResourcesToBeFiltered.TryGetValue(request.Url, out string value))
             {
-                _closeBrowser = true;
-                return new ImageFilter(res[request.Url]);
-            }
-            else
-            {
-                _closeBrowser = false;
+                return new ImageFilter(value);
             }
             return null;
         }
-
-        protected override void OnResourceLoadComplete(
+        protected override CefReturnValue OnBeforeResourceLoad(
             IWebBrowser chromiumWebBrowser,
             IBrowser browser,
             IFrame frame,
             IRequest request,
-            IResponse response,
-            UrlRequestStatus status,
-            long receivedContentLength)
+            IRequestCallback callback)
         {
-
-            if (_closeBrowser)
-            {
-                browser.CloseBrowser(true);
-            }
+            request.SetReferrer(_spider.Browser.Address, ReferrerPolicy.Default);
+            return CefReturnValue.Continue;
         }
     }
 
     class AvRequestHandler : RequestHandler
     {
 
-        readonly SpiderViewModel _spiderVm;
-        public AvRequestHandler(SpiderViewModel spider)
+        readonly SpiderBase _spider;
+        public AvRequestHandler(SpiderBase spider)
         {
-            _spiderVm = spider;
+            _spider = spider;
         }
         protected override IResourceRequestHandler GetResourceRequestHandler(
                 IWebBrowser chromiumWebBrowser,
@@ -160,19 +132,7 @@ namespace HappyHour.CefHandler
                 string requestInitiator,
                 ref bool disableDefaultHandling)
         {
-#if false
-            return base.GetResourceRequestHandler(
-                chromiumWebBrowser,
-                browser,
-                frame,
-                request,
-                isNavigation,
-                isDownload,
-                requestInitiator,
-                ref disableDefaultHandling);
-#else
-            return new AvResourceRequestHandler(_spiderVm);
-#endif
+            return new AvResourceRequestHandler(_spider);
         }
     }
 }

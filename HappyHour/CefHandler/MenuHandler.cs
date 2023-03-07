@@ -53,7 +53,7 @@ namespace HappyHour.CefHandler
                 _imageUrl = parameters.SourceUrl;
             }
 #endif
-            if (string.IsNullOrEmpty(parameters.SelectionText))
+            if (_browser == null || string.IsNullOrEmpty(parameters.SelectionText))
             {
                 return;
             }
@@ -250,16 +250,16 @@ namespace HappyHour.CefHandler
                     break;
 #endif
                 case (CefMenuCommand)(CefUserCommand):
-                    _browser.ExecJavaScript(GetScript("google_search"));
+                    _browser?.ExecJavaScript(GetScript("google_search"));
                     break;
                 case (CefMenuCommand)(CefUserCommand + 1):
-                    _browser.ExecJavaScript(GetScript("google_translate"));
+                    _browser?.ExecJavaScript(GetScript("google_translate"));
                     break;
                 case (CefMenuCommand)(CefUserCommand + 2):
-                    _browser.ExecJavaScript(GetScript("pid_search_in_db"));
+                    _browser?.ExecJavaScript(GetScript("pid_search_in_db"));
                     break;
                 default:
-                    _browser.ExecJavaScript(GetScript("pid_search_in_spider", item.Item1));
+                    _browser?.ExecJavaScript(GetScript("pid_search_in_spider", item.Item1));
                     break;
             }
         }

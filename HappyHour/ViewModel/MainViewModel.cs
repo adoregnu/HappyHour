@@ -75,11 +75,12 @@ namespace HappyHour.ViewModel
 
             Docs.Add(_mediaListMv);
             //Docs.Add(new PlayerViewModel { MediaList = _mediaListMv });
+            //Docs.Add(new BrowserBase());
             Docs.Add(new SpiderViewModel
             {
                 MediaList = _mediaListMv,
                 DbView = _dbViewMode
-            }); ;
+            });
 
             CmdActorEdtor = new RelayCommand(() => OnActorEditor());
             CmdFileToFolder = new RelayCommand(() => OnFileToFolder());
@@ -107,14 +108,33 @@ namespace HappyHour.ViewModel
                     break;
             }
         }
-        public void NewBrowser(string url)
+
+        public BrowserBase NewBrowser(string url = null)
         {
-            Docs.Add(new BrowserBase
+            foreach (var doc in Docs)
             {
-                Address = url,
+                if (doc is BrowserBase b && b.HeaderType == "base")
+                {
+                    if (url != null)
+                    {
+                        b.Address = url;
+                        b.IsSelected = true;
+                    }
+                    return b;
+                }
+            }
+
+            var browser = new BrowserBase
+            {
                 CanClose = true,
-                IsSelected = true
-            });
+                IsActive = true
+            };
+            if (url != null)
+            {
+                browser.Address = url;
+            }
+            Docs.Add(browser);
+            return browser;
         }
 #if false
         private VMType OnPaneEnabled<VMType>(bool enabled) where VMType : Pane

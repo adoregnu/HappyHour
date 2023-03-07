@@ -33,6 +33,7 @@ namespace HappyHour.ViewModel
         }
         public bool CanHide { get; set; }
         public bool CanClose { get; set; } = false;
+        public bool IsActive { get; set; } = true; 
 
         public virtual void OnKeyDown(KeyEventArgs e)
         {

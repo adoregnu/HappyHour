@@ -8,17 +8,19 @@ using System.Windows;
 using System.Windows.Interop;
 
 using CefSharp;
+using CefSharp.OffScreen;
 using HappyHour.Interfaces;
 using HappyHour.ViewModel;
 
 namespace HappyHour.CefHandler
 {
-    class PopupHandler : ILifeSpanHandler
+    class OffScreenPopupHandler : ILifeSpanHandler
     {
-        readonly IMainView _mainVm;
-        public PopupHandler(IMainView vm)
+        readonly SpiderViewModel _spiderVm;
+        readonly List<ChromiumWebBrowser> _browserCache = new();
+        public OffScreenPopupHandler(SpiderViewModel vm)
         {
-            _mainVm = vm;
+            _spiderVm = vm;
         }
         bool ILifeSpanHandler.OnBeforePopup(
             IWebBrowser browserControl,
@@ -37,12 +39,19 @@ namespace HappyHour.CefHandler
             //Set newBrowser to null unless your attempting to host 
             //the popup in a new instance of ChromiumWebBrowser
             newBrowser = null;
-            //windowInfo.Style = (uint)ProcessWindowStyle.Minimized;
-            //Log.Print($"Popup windows has supressed. {targetUrl}");
-
-            UiServices.Invoke(() =>
+            foreach (var bc in _browserCache)
             {
-                _ = _mainVm.NewBrowser(targetUrl);
+                if (!bc.IsLoading)
+                {
+                    bc.LoadUrl(targetUrl);
+                    return true;
+                }
+            }
+
+            _browserCache.Add(new ChromiumWebBrowser(targetUrl)
+            {
+                RequestHandler = _spiderVm.SelectedSpider.ReqeustHandler,
+                DownloadHandler = _spiderVm.DownloadHandler
             });
             return true;
         }
@@ -50,19 +59,19 @@ namespace HappyHour.CefHandler
         void ILifeSpanHandler.OnAfterCreated(
             IWebBrowser browserControl, IBrowser browser)
         {
-            //Log.Print("ILifeSpanHandler.OnAfterCreated");
+            Log.Print("ILifeSpanHandler.OnAfterCreated");
         }
 
         bool ILifeSpanHandler.DoClose(IWebBrowser browserControl, IBrowser browser)
         {
-            //Log.Print("ILifeSpanHandler.DoClose");
+            Log.Print("ILifeSpanHandler.DoClose");
             return false;
         }
 
         void ILifeSpanHandler.OnBeforeClose(
             IWebBrowser browserControl, IBrowser browser)
         {
-            //Log.Print("ILifeSpanHandler.OnBeforeClose");
+            Log.Print("ILifeSpanHandler.OnBeforeClose");
         }
     }
 }

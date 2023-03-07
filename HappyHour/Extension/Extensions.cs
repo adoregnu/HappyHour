@@ -73,6 +73,23 @@ namespace HappyHour.Extension
             return lower;
         }
 
+        public static int IndexOf(this byte[] src, byte[] pattern, int maxSearch)
+        {
+            for (int i = 0; i < maxSearch; i++)
+            {
+                if (src[i] != pattern[0]) // compare only first byte
+                    continue;
+
+                // found a match on first byte, now try to match rest of the pattern
+                for (int j = pattern.Length - 1; j >= 1; j--)
+                {
+                    if (src[i + j] != pattern[j]) break;
+                    if (j == 1) return i;
+                }
+            }
+            return -1;
+        }
+
         public static bool IsNullOrEmpty<TItem>(this IList<TItem> list)
         {
             if (list == null || list.Count == 0)
