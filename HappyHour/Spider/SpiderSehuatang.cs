@@ -255,7 +255,6 @@ namespace HappyHour.Spider
         {
             base.OnScrapCompleted(bUpdated);
             (Browser.WebBrowser.LifeSpanHandler, _popupHandler) = (_popupHandler, Browser.WebBrowser.LifeSpanHandler);
-            //(Browser.WebBrowser.RequestHandler, _reqeustHandler) = (_reqeustHandler, Browser.WebBrowser.RequestHandler);
         }
 
         public override void Navigate2(IAvMedia _)
@@ -267,7 +266,6 @@ namespace HappyHour.Spider
 
             ResourcesToBeFiltered.Clear();
             (Browser.WebBrowser.LifeSpanHandler, _popupHandler) = (_popupHandler, Browser.WebBrowser.LifeSpanHandler);
-            //(Browser.WebBrowser.RequestHandler, _reqeustHandler) = (_reqeustHandler, Browser.WebBrowser.RequestHandler);
 
             if (Browser.Address == URL)
             {

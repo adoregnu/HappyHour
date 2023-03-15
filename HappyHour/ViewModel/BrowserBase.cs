@@ -48,6 +48,8 @@ namespace HappyHour.ViewModel
             set { Set(ref _webBrowser, value); }
         }
 
+        public IRequestHandler RequestHandler { get; set; }
+
         public BrowserBase()
         {
             Title = "Browser";
@@ -66,6 +68,11 @@ namespace HappyHour.ViewModel
             {
                 MessengerInstance.Send(new CefStatusMsg(e, "log"));
             };
+            if (RequestHandler != null)
+            {
+                WebBrowser.RequestHandler = RequestHandler;
+            }
+            
             WebBrowser.MenuHandler = new MenuHandler();
             WebBrowser.LifeSpanHandler = new PopupHandler(MainView);
         }

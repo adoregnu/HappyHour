@@ -92,11 +92,8 @@ namespace HappyHour.CefHandler
             IRequest request,
             IResponse response)
         {
-            if (_spider.ResourcesToBeFiltered.Count == 0)
-            {
-                return null;
-            }
-            if (_spider.ResourcesToBeFiltered.TryGetValue(request.Url, out string value))
+            var res = _spider.ResourcesToBeFiltered;
+            if (res != null  && res.TryGetValue(request.Url, out string value))
             {
                 return new ImageFilter(value);
             }

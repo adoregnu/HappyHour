@@ -57,31 +57,25 @@ namespace HappyHour.ScrapItems
 
         public static void UpdateDate(AvItem _avInfo,string date)
         {
-            try
+            string[] patterns = new string[]
             {
-                string[] patterns = new string[] {
-                    "yyyy-MM-dd", "yyyy/MM/dd", "yyyy.MM.dd", "MMM d yyyy"
-                };
-                foreach (string pattern in patterns)
+                "yyyy-MM-dd", "yyyy/MM/dd", "yyyy.MM.dd", "MMM d yyyy"
+            };
+            foreach (string pattern in patterns)
+            {
+                try
                 {
-                    try
-                    {
-                        _avInfo.DateReleased = DateTime.ParseExact(
-                            date, pattern, App.enUS);
-                        break;
-                    }
-                    catch { }
+                    _avInfo.DateReleased = DateTime.ParseExact(
+                        date, pattern, App.enUS);
+                    break;
                 }
-            }
-            catch (Exception ex)
-            {
-                Log.Print($"ItemBase2::UpdateDate : {ex.Message}");
+                catch { }
             }
         }
 
         public static void UpdateGenre(AvItem _avInfo, List<object> genres)
         {
-            foreach (string genre in genres)
+            foreach (string genre in genres.Cast<string>())
             {
                 if (NameMap.SkipGenre(genre))
                 {
@@ -139,7 +133,7 @@ namespace HappyHour.ScrapItems
                 if (item.Key == "alias" && item.Value is List<object> alias)
                 {
                     bool exitLoop = false;
-                    foreach (string a in alias)
+                    foreach (string a in alias.Cast<string>())
                     {
                         if (action(a.ToString()))
                         {
@@ -164,7 +158,7 @@ namespace HappyHour.ScrapItems
 
         public static void UpdateActor(AvItem _avInfo, List<object> actors)
         {
-            foreach (IDictionary<string, object> actor in actors)
+            foreach (var actor in actors.Cast<IDictionary<string, object>>())
             {
                 AvActorName dbName = null;
                 ForEachActor(actor, val =>

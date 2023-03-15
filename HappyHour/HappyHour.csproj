@@ -17,6 +17,7 @@
     <PackageReference Include="AvalonEdit" Version="6.2.0.78" />
     <PackageReference Include="CefSharp.OffScreen.NETCore" Version="110.0.300" />
     <PackageReference Include="CefSharp.Wpf.NETCore" Version="110.0.300" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.1.0" />
     <PackageReference Include="Dirkster.AvalonDock" Version="4.71.2" />
     <PackageReference Include="Dirkster.AvalonDock.Themes.VS2013" Version="4.71.2" />
     <PackageReference Include="FFME.Windows" Version="4.4.350" />
@@ -31,7 +32,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.39" />
     <PackageReference Include="MvvmDialogs" Version="9.1.0" />
-    <PackageReference Include="MvvmLightStd10" Version="5.4.1.2" />
+    <PackageReference Include="MvvmLight" Version="5.4.1.1" />
     <PackageReference Include="QBittorrent.Client" Version="1.8.23016.2" />
     <PackageReference Include="Scriban" Version="5.7.0" />
     <PackageReference Include="SimMetrics.Net" Version="1.0.5" />

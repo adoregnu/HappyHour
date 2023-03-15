@@ -16,6 +16,7 @@ namespace HappyHour.CefHandler
     class PopupHandler : ILifeSpanHandler
     {
         readonly IMainView _mainVm;
+        readonly PopupRequestHandler popupRequestHandler = new();
         public PopupHandler(IMainView vm)
         {
             _mainVm = vm;
@@ -42,7 +43,12 @@ namespace HappyHour.CefHandler
 
             UiServices.Invoke(() =>
             {
-                _ = _mainVm.NewBrowser(targetUrl);
+                //browserControl.Address
+                popupRequestHandler.RefAddress = browserControl.Address;
+
+                var newtap = _mainVm.NewBrowser();
+                newtap.RequestHandler = popupRequestHandler;
+                newtap.Address = targetUrl;
             });
             return true;
         }

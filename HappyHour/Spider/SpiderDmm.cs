@@ -8,8 +8,8 @@ namespace HappyHour.Spider
     class SpiderDmm : SpiderBase
     {
         //public override string SearchURL => $"{URL}mono/-/search/=/searchstr={Keyword.Replace("-", "00")}/";
-        public override string SearchURL => $"{URL}digital/videoa/-/list//searchstr={Keyword.Replace("-", "00")}/";
-        
+        //public override string SearchURL => $"{URL}digital/videoa/-/list/searchstr={Keyword.Replace("-", "00")}/";
+        public override string SearchURL => $"{URL}search/=/searchstr={Keyword.Replace("-", "00")}/";
         public SpiderDmm(SpiderViewModel browser) : base(browser)
         {
             Name = "DMM";
