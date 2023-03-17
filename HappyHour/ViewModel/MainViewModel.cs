@@ -1,23 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
 using MvvmDialogs;
-using GalaSoft.MvvmLight;
-using GalaSoft.MvvmLight.Command;
 
 using HappyHour.View;
-using HappyHour.Spider;
 using HappyHour.Interfaces;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 namespace HappyHour.ViewModel
 {
-    internal class MainViewModel : ViewModelBase, IMainView
+    internal class MainViewModel : ObservableRecipient, IMainView
     {
         private string _status;
         //private bool _spiderEnabled;
@@ -32,7 +27,7 @@ namespace HappyHour.ViewModel
         public string StatusMessage
         {
             get => _status;
-            set => Set(ref _status, value);
+            set => SetProperty(ref _status, value);
         }
 #if false
         public bool SpiderEnabled

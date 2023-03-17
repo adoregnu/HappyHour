@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 
 using CefSharp;
@@ -6,7 +7,6 @@ using CefSharp;
 using HappyHour.Spider;
 using HappyHour.CefHandler;
 using HappyHour.Interfaces;
-using System;
 
 namespace HappyHour.ViewModel
 {
@@ -22,7 +22,7 @@ namespace HappyHour.ViewModel
             set
             {
                 SetSpider(value);
-                Set(ref _selectedSpider, value);
+                SetProperty(ref _selectedSpider, value);
             }
         }
 

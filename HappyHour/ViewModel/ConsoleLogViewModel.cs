@@ -1,29 +1,27 @@
 ﻿using log4net;
 using CefSharp;
-using GalaSoft.MvvmLight.Messaging;
+using CommunityToolkit.Mvvm.Messaging;
 
 namespace HappyHour.ViewModel
 {
-    class ConsoleLogViewModel : TextViewModel
+    class ConsoleLogViewModel : TextViewModel, IRecipient<ConsoleMessageEventArgs>
     {
-        static ILog logger = LogManager.GetLogger("CefConsoleLogger");
+        static readonly ILog logger = LogManager.GetLogger("CefConsoleLogger");
         public ConsoleLogViewModel()
         {
             Title = "CEF Console Log";
-            MessengerInstance.Register<NotificationMessage<ConsoleMessageEventArgs>>(
-                this, OnConsoleMessage);
+            Messenger.Register(this);
         }
 
-        void OnConsoleMessage(NotificationMessage<ConsoleMessageEventArgs> msg)
+        public void Receive(ConsoleMessageEventArgs msg)
         {
-            var e = msg.Content;
-            if (string.IsNullOrEmpty(e.Message))
+            if (string.IsNullOrEmpty(msg.Message))
                 return;
 
             UiServices.Invoke(delegate ()
             {
-                AppendText(e.Message + "\n");
-                logger.Info(e.Message);
+                AppendText(msg.Message + "\n");
+                logger.Info(msg.Message);
             }, true);
         }
     }

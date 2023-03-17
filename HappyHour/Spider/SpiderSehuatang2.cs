@@ -4,13 +4,14 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Windows.Input;
 
-using GalaSoft.MvvmLight.Command;
+//using GalaSoft.MvvmLight.Command;
 
 using Scriban;
 
 using HappyHour.ViewModel;
 using HappyHour.Interfaces;
 using HappyHour.Model;
+using CommunityToolkit.Mvvm.Input;
 
 namespace HappyHour.Spider
 {

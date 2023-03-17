@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using GalaSoft.MvvmLight.Messaging;
+//using GalaSoft.MvvmLight.Messaging;
 
 using HappyHour.Interfaces;
 using HappyHour.Model;
@@ -19,7 +19,7 @@ namespace HappyHour.ViewModel
         public List<string> ScreenshotList
         {
             get => _screenshots;
-            set => Set(ref _screenshots, value);
+            set => SetProperty(ref _screenshots, value);
         }
 
         public IMediaList MediaList

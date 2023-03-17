@@ -1,4 +1,5 @@
-﻿using GalaSoft.MvvmLight.Ioc;
+﻿using CommunityToolkit.Mvvm.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using MvvmDialogs;
 
 namespace HappyHour.ViewModel
@@ -7,10 +8,12 @@ namespace HappyHour.ViewModel
     {
         public ViewModelLocator()
         {
-            SimpleIoc.Default.Register<MainViewModel>();
-            SimpleIoc.Default.Register<IDialogService>(() => new DialogService());
+            Ioc.Default.ConfigureServices(new ServiceCollection()
+                .AddSingleton<MainViewModel>()
+                .AddSingleton<IDialogService>(new DialogService())
+                .BuildServiceProvider());
         }
 
-        public MainViewModel MainWindow => SimpleIoc.Default.GetInstance<MainViewModel>();
+        public MainViewModel MainWindow => Ioc.Default.GetService<MainViewModel>();
     }
 }

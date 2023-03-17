@@ -4,7 +4,6 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:md="https://github.com/fantasticfiasco/mvvm-dialogs"
-        xmlns:cmd="http://www.galasoft.ch/mvvmlight"
         xmlns:view="clr-namespace:HappyHour.View"
         mc:Ignorable="d"
         md:DialogServiceViews.IsRegistered="True"

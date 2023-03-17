@@ -1,5 +1,4 @@
 ﻿using ICSharpCode.AvalonEdit.Document;
-using ICSharpCode.AvalonEdit.Rendering;
 
 namespace HappyHour.ViewModel
 {

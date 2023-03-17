@@ -1,32 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CefSharp;
-using GalaSoft.MvvmLight.Messaging;
+﻿using CefSharp;
+using CommunityToolkit.Mvvm.Messaging;
 
 namespace HappyHour.ViewModel
 {
-    class StatusLogViewModel : TextViewModel
+    class StatusLogViewModel : TextViewModel, IRecipient<StatusMessageEventArgs>
     {
         public StatusLogViewModel()
         {
             Title = "CEF Status Log";
-            MessengerInstance.Register<NotificationMessage<StatusMessageEventArgs>>(
-                this, OnMessage);
+            Messenger.Register(this);
+            //Messenger.Register<StatusLogViewModel, StatusMessageEventArgs>(this, static (r, m) => r.Receive(m));
         }
-
-        void OnMessage(NotificationMessage<StatusMessageEventArgs> msg)
+#if false
+        protected override void OnActivated()
         {
-            var e = msg.Content;
-            if (string.IsNullOrEmpty(e.Value))
+            //base.OnActivated();
+            Messenger.Register(this);
+        }
+#endif
+        public void Receive(StatusMessageEventArgs msg)
+        {
+            //var e = msg.Content;
+            if (string.IsNullOrEmpty(msg.Value))
                 return;
 
             UiServices.Invoke(delegate ()
             {
-                AppendText(e.Value + "\n");
+                AppendText(msg.Value + "\n");
             }, true);
         }
+
     }
 }

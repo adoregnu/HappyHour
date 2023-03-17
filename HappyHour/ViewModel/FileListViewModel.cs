@@ -7,8 +7,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Threading;
+using CommunityToolkit.Mvvm.Input;
 
-using GalaSoft.MvvmLight.Command;
+//using GalaSoft.MvvmLight.Command;
 
 using HappyHour.Interfaces;
 using HappyHour.Model;
@@ -33,7 +34,7 @@ namespace HappyHour.ViewModel
             {
                 if (Directory.Exists(value))
                 {
-                    Set(ref _currPath, value);
+                    SetProperty(ref _currPath, value);
                     _currDirInfo = new DirectoryInfo(value);
                     ChangeDir(true);
                 }
@@ -58,7 +59,7 @@ namespace HappyHour.ViewModel
             {
                 if (_currDirInfo != value)
                 {
-                    Set(ref _currDirInfo, value);
+                    SetProperty(ref _currDirInfo, value);
                     ChangeDir();
                 }
             }
@@ -68,7 +69,7 @@ namespace HappyHour.ViewModel
             get => _currDrive;
             set
             {
-                Set(ref _currDrive, value);
+                SetProperty(ref _currDrive, value);
                 CurrDirInfo = value.RootDirectory;
             }
         }
@@ -80,7 +81,7 @@ namespace HappyHour.ViewModel
             get => _selectedFile;
             set
             {
-                Set(ref _selectedFile, value);
+                SetProperty(ref _selectedFile, value);
                 if (!_selecFromMediaList && value != null)
                 {
                     FileSelected?.Invoke(this, value);
@@ -172,7 +173,7 @@ namespace HappyHour.ViewModel
             if (!bManual)
             {
                 _currPath = CurrDirInfo.FullName;
-                RaisePropertyChanged(nameof(CurrPath));
+                OnPropertyChanged(nameof(CurrPath));
             }
 
             DeinitFsWather();

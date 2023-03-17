@@ -4,17 +4,19 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
 
-using GalaSoft.MvvmLight;
-using GalaSoft.MvvmLight.Command;
+//using GalaSoft.MvvmLight;
+//using GalaSoft.MvvmLight.Command;
 
 using MvvmDialogs;
 
 using HappyHour.Model;
 using Microsoft.EntityFrameworkCore;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 namespace HappyHour.ViewModel
 {
-    internal class AvEditorViewModel : ViewModelBase, IModalDialogViewModel
+    internal class AvEditorViewModel : ObservableObject, IModalDialogViewModel
     {
         private readonly AvMovie _amovie;
         private readonly IEnumerable<AvActor> _allActors;
@@ -35,7 +37,7 @@ namespace HappyHour.ViewModel
             {
                 if (value != null)
                 {
-                    Set(ref _studio, value);
+                    SetProperty(ref _studio, value);
                     Av.Studio = value;
                 }
             }
@@ -48,7 +50,7 @@ namespace HappyHour.ViewModel
             {
                 if (value != null)
                 {
-                    Set(ref _series, value);
+                    SetProperty(ref _series, value);
                     Av.Series = value;
                 }
             }
@@ -76,15 +78,16 @@ namespace HappyHour.ViewModel
             get => _searchActorName;
             set
             {
-                Set(ref _searchActorName, value);
-                RaisePropertyChanged(nameof(AllActors));
+                SetProperty(ref _searchActorName, value);
+                OnPropertyChanged();
             }
         }
 
         public bool? DialogResult
         {
             get => _dialogResult;
-            private set => Set(nameof(DialogResult), ref _dialogResult, value);
+            //private set => Set(nameof(DialogResult), ref _dialogResult, value);
+            private set => SetProperty(ref _dialogResult, value);
         }
 
         public string Title { get; private set; }

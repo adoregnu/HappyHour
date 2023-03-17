@@ -11,7 +11,7 @@ using System.Windows.Data;
 
 using Microsoft.EntityFrameworkCore;
 
-using GalaSoft.MvvmLight.Command;
+//using GalaSoft.MvvmLight.Command;
 
 using MvvmDialogs.FrameworkDialogs.FolderBrowser;
 
@@ -21,6 +21,7 @@ using HappyHour.Spider;
 using HappyHour.Interfaces;
 using HappyHour.View;
 using System.Diagnostics;
+using CommunityToolkit.Mvvm.Input;
 
 namespace HappyHour.ViewModel
 {
@@ -48,13 +49,13 @@ namespace HappyHour.ViewModel
                 {
                     ItemSelectedHandler?.Invoke(this, value);
                 }
-                _ = Set(ref _selectedMedia, value);
+                _ = SetProperty(ref _selectedMedia, value);
             }
         }
         public bool IsBrowsing
         {
             get => _isBrowsing;
-            set => Set(ref _isBrowsing, value);
+            set => SetProperty(ref _isBrowsing, value);
         }
 
         public IEnumerable<SpiderBase> SpiderList
@@ -67,7 +68,7 @@ namespace HappyHour.ViewModel
                 {
                     list = value.Where(l => l.Name != "sehuatang" && l.Name != "Sukebei");
                 }
-                _ = Set(ref _spiderList, list);
+                _ = SetProperty(ref _spiderList, list);
             }
         }
         public ObservableCollection<IAvMedia> MediaList { get; private set; }
@@ -77,7 +78,7 @@ namespace HappyHour.ViewModel
             get => _searchSubFolder;
             set
             {
-                _ = Set(ref _searchSubFolder, value);
+                _ = SetProperty(ref _searchSubFolder, value);
                 RefreshMediaList(_fileList.CurrDirInfo);
             }
         }
@@ -86,7 +87,7 @@ namespace HappyHour.ViewModel
             get => _sortByDateReleased;
             set
             {
-                _ = Set(ref _sortByDateReleased, value);
+                _ = SetProperty(ref _sortByDateReleased, value);
                 if (value)
                 {
                     AvMovie.DateType = DateType.Released;
@@ -100,7 +101,7 @@ namespace HappyHour.ViewModel
             get => _sortByDateAdded;
             set
             {
-                _ = Set(ref _sortByDateAdded, value);
+                _ = SetProperty(ref _sortByDateAdded, value);
                 if (value)
                 {
                     AvMovie.DateType = DateType.Added;
@@ -224,7 +225,7 @@ namespace HappyHour.ViewModel
         private void OnDirChanged(object sender, DirectoryInfo msg)
         {
             _searchSubFolder = false;
-            RaisePropertyChanged(nameof(SearchSubFolder));
+            OnPropertyChanged(nameof(SearchSubFolder));
             RefreshMediaList(msg);
         }
 

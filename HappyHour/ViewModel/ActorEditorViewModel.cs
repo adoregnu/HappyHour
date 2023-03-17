@@ -8,8 +8,8 @@ using System.Windows.Input;
 
 using Microsoft.EntityFrameworkCore;
 
-using GalaSoft.MvvmLight;
-using GalaSoft.MvvmLight.Command;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 using MvvmDialogs;
 using MvvmDialogs.FrameworkDialogs.OpenFile;
@@ -20,7 +20,7 @@ using HappyHour.Spider;
 
 namespace HappyHour.ViewModel
 {
-    internal class ActorInitial : ViewModelBase
+    internal class ActorInitial : ObservableObject
     {
         private bool _isChecked;
 
@@ -38,11 +38,11 @@ namespace HappyHour.ViewModel
         public void UnCheck()
         {
             _isChecked = false;
-            RaisePropertyChanged(nameof(IsChecked));
+            OnPropertyChanged(nameof(IsChecked));
         }
     }
 
-    internal class ActorEditorViewModel : ViewModelBase, IModalDialogViewModel
+    internal class ActorEditorViewModel : ObservableObject, IModalDialogViewModel
     {
         private AvActor _actor;
         private string _picturePath;
@@ -62,7 +62,8 @@ namespace HappyHour.ViewModel
         public bool? DialogResult
         {
             get => _dialogResult;
-            private set => Set(nameof(DialogResult), ref _dialogResult, value);
+            //private set => SetProperty(nameof(DialogResult), ref _dialogResult, value);
+            private set => SetProperty(ref _dialogResult, value);
         }
 
         public string SearchText
@@ -70,15 +71,15 @@ namespace HappyHour.ViewModel
             get => _searchText;
             set
             {
-                Set(ref _searchText, value);
-                RaisePropertyChanged(nameof(ActorNameList));
+                SetProperty(ref _searchText, value);
+                OnPropertyChanged(nameof(ActorNameList));
             }
         }
 
         public ObservableCollection<AvActor> Actors
         {
             get => _actors;
-            private set => Set(ref _actors, value);
+            private set => SetProperty(ref _actors, value);
         }
 
         public AvActorName SelectedNameOfActor { get; set; }
@@ -86,7 +87,7 @@ namespace HappyHour.ViewModel
         public ObservableCollection<AvActorName> NameListOfOneActor
         {
             get => _nameListOfOneActor;
-            set => Set(ref _nameListOfOneActor, value);
+            set => SetProperty(ref _nameListOfOneActor, value);
         }
 
         public IEnumerable<AvActorName> ActorNameList =>
@@ -100,7 +101,7 @@ namespace HappyHour.ViewModel
             get => _actor;
             set
             {
-                Set(ref _actor, value);
+                SetProperty(ref _actor, value);
                 if (value != null)
                 {
                     NameListOfOneActor = new ObservableCollection<AvActorName>(_actor.Names);
@@ -111,19 +112,19 @@ namespace HappyHour.ViewModel
         public string ActorName
         {
             get => _actorName;
-            set => Set(ref _actorName, value);
+            set => SetProperty(ref _actorName, value);
         }
 
         public string NewName
         {
             get => _newName;
-            set => Set(ref _newName, value);
+            set => SetProperty(ref _newName, value);
         }
 
         public string PicturePath
         {
             get => _picturePath;
-            set => Set(ref _picturePath, value);
+            set => SetProperty(ref _picturePath, value);
         }
 
         public IMediaList MediaList { get; set; }
@@ -290,7 +291,7 @@ namespace HappyHour.ViewModel
             try
             {
                 _ = App.DbContext.SaveChanges();
-                RaisePropertyChanged(nameof(SelectedActor));
+                OnPropertyChanged(nameof(SelectedActor));
                 NewName = "";
                 NameListOfOneActor.Clear();
                 //NameListOfOneActor.Concat(_actor.Names);

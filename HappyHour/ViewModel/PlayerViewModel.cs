@@ -9,12 +9,13 @@ using System.Windows.Input;
 using Unosquare.FFME;
 using Unosquare.FFME.Common;
 
-using GalaSoft.MvvmLight.Command;
+//using GalaSoft.MvvmLight.Command;
 using Ude;
 
 using HappyHour.Model;
 using HappyHour.Extension;
 using HappyHour.Interfaces;
+using CommunityToolkit.Mvvm.Input;
 
 namespace HappyHour.ViewModel
 {
@@ -31,7 +32,7 @@ namespace HappyHour.ViewModel
         public AvMovie Movie
         {
             get => _avMovie;
-            set => Set(ref _avMovie, value);
+            set => SetProperty(ref _avMovie, value);
         }
         public MediaElement MediaPlayer { get; private set; }
         public MediaOptions CurrentMediaOptions { get; set; }
@@ -44,7 +45,7 @@ namespace HappyHour.ViewModel
         public bool IsPropertiesPanelOpen
         {
             get => _isPropertiesPanelOpen;
-            set => Set(ref _isPropertiesPanelOpen, value);
+            set => SetProperty(ref _isPropertiesPanelOpen, value);
         }
 
         /// <summary>
@@ -53,13 +54,13 @@ namespace HappyHour.ViewModel
         public bool IsPlayerLoaded
         {
             get => _isPlayerLoaded;
-            set => Set(ref _isPlayerLoaded, value);
+            set => SetProperty(ref _isPlayerLoaded, value);
         }
 
         public bool IsPlaying
         {
             get => _isPlaying;
-            set => Set(ref _isPlaying, value);
+            set => SetProperty(ref _isPlaying, value);
         }
 
         public string BackgroundImage =>
@@ -129,7 +130,7 @@ namespace HappyHour.ViewModel
                     MediaPlayer.MediaState == MediaPlaybackState.Pause,
                 nameof(MediaPlayer.IsPlaying));
             MediaPlayer.WhenChanged(() =>
-                RaisePropertyChanged(nameof(BackgroundImage)),
+                OnPropertyChanged(nameof(BackgroundImage)),
                 nameof(MediaPlayer.IsOpen));
 
             this.WhenChanged(() =>
@@ -162,7 +163,7 @@ namespace HappyHour.ViewModel
             string file = Path.GetFileName(Movie.Files[_fileIndex]);
             Title = $"{file} ({_fileIndex + 1}/{Movie.Files.Count})";
             _ = await MediaPlayer.Open(new Uri(Movie.Files[_fileIndex]));
-            RaisePropertyChanged(nameof(Movie));
+            OnPropertyChanged(nameof(Movie));
         }
 
         private async void Close()

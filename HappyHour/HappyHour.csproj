@@ -32,7 +32,6 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.39" />
     <PackageReference Include="MvvmDialogs" Version="9.1.0" />
-    <PackageReference Include="MvvmLight" Version="5.4.1.1" />
     <PackageReference Include="QBittorrent.Client" Version="1.8.23016.2" />
     <PackageReference Include="Scriban" Version="5.7.0" />
     <PackageReference Include="SimMetrics.Net" Version="1.0.5" />

@@ -2,13 +2,12 @@
 
 using MvvmDialogs;
 
-using GalaSoft.MvvmLight;
-
 using HappyHour.Spider;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace HappyHour.ViewModel
 {
-    internal class SpiderSettingViewModel : ViewModelBase, IModalDialogViewModel
+    internal class SpiderSettingViewModel : ObservableObject, IModalDialogViewModel
     {
         private SpiderBase _selectedSpider;
 
@@ -19,8 +18,8 @@ namespace HappyHour.ViewModel
             get => _selectedSpider;
             set
             {
-                Set(ref _selectedSpider, value);
-                if (value != null) { value.UpdateCheckAll(); }
+                SetProperty(ref _selectedSpider, value);
+                value?.UpdateCheckAll();
             }
         }
 

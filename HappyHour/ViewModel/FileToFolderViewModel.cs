@@ -10,15 +10,17 @@ using System.IO;
 using System.Text.RegularExpressions;
 
 using MvvmDialogs;
-using GalaSoft.MvvmLight;
-using GalaSoft.MvvmLight.Messaging;
-using GalaSoft.MvvmLight.Command;
+//using GalaSoft.MvvmLight;
+//using GalaSoft.MvvmLight.Messaging;
+//using GalaSoft.MvvmLight.Command;
 
 using HappyHour.Interfaces;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 namespace HappyHour.ViewModel
 {
-    class FileItem : ViewModelBase
+    class FileItem : ObservableObject
     {
         public string SourceName { get; set; }
         public string TargetPath { get; set; }
@@ -31,7 +33,7 @@ namespace HappyHour.ViewModel
         public bool? DialogResult
         {
             get => _dialogResult;
-            private set => Set(nameof(DialogResult), ref _dialogResult, value);
+            private set => SetProperty(ref _dialogResult, value);
         }
 
         public ObservableCollection<FileItem> Files { get; set; }

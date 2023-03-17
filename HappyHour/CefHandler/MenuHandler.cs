@@ -8,8 +8,9 @@ using System.Windows;
 using System.Windows.Controls;
 using CefSharp;
 using CefSharp.Wpf;
+using CommunityToolkit.Mvvm.Input;
 
-using GalaSoft.MvvmLight.Command;
+//using GalaSoft.MvvmLight.Command;
 
 using HappyHour.ViewModel;
 using Scriban;
@@ -161,8 +162,8 @@ namespace HappyHour.CefHandler
                     {
                         Header = item.Item1.Replace("&", "_"),
                         IsEnabled = item.Item3,
-                        Command = new RelayCommand(() =>
-                            ProcessMenu(item, browser, parameters), keepTargetAlive: true)
+                        //Command = new RelayCommand(() => ProcessMenu(item, browser, parameters), keepTargetAlive: true)
+                        Command = new RelayCommand(() => ProcessMenu(item, browser, parameters))
                     });
                 }
                 webBrowser.ContextMenu = menu;

@@ -6,12 +6,13 @@ using System.Windows.Input;
 using Scriban;
 using CefSharp;
 
-using GalaSoft.MvvmLight.Command;
+//using GalaSoft.MvvmLight.Command;
 
 using HappyHour.ViewModel;
 using HappyHour.ScrapItems;
 using HappyHour.Interfaces;
 using HappyHour.Model;
+using CommunityToolkit.Mvvm.Input;
 
 namespace HappyHour.Spider
 {

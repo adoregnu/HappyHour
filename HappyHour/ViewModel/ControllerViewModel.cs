@@ -10,14 +10,15 @@ namespace HappyHour.ViewModel
     using System.Windows.Media;
     using Unosquare.FFME.Common;
 
-    using GalaSoft.MvvmLight;
+    //using GalaSoft.MvvmLight;
     using Unosquare.FFME;
+    using CommunityToolkit.Mvvm.ComponentModel;
 
     /// <summary>
     /// Represents a VM for the Controller Control.
     /// </summary>
     /// <seealso cref="AttachedViewModel" />
-    public sealed class ControllerViewModel : GalaSoft.MvvmLight.ViewModelBase
+    public sealed class ControllerViewModel : ObservableObject
     {
         readonly PlayerViewModel _mp;
         readonly MediaElement _me;
@@ -86,7 +87,7 @@ namespace HappyHour.ViewModel
         public Visibility IsMediaOpenVisibility
         {
             get => m_IsMediaOpenVisibility;
-            set => Set(ref m_IsMediaOpenVisibility, value);
+            set => SetProperty(ref m_IsMediaOpenVisibility, value);
         }
 
         /// <summary>
@@ -95,7 +96,7 @@ namespace HappyHour.ViewModel
         public bool IsAudioControlEnabled
         {
             get => m_IsAudioControlEnabled;
-            set => Set(ref m_IsAudioControlEnabled, value);
+            set => SetProperty(ref m_IsAudioControlEnabled, value);
         }
 
         /// <summary>
@@ -104,7 +105,7 @@ namespace HappyHour.ViewModel
         public Visibility ClosedCaptionsVisibility
         {
             get => m_ClosedCaptionsVisibility;
-            set => Set(ref m_ClosedCaptionsVisibility, value);
+            set => SetProperty(ref m_ClosedCaptionsVisibility, value);
         }
 
         /// <summary>
@@ -113,7 +114,7 @@ namespace HappyHour.ViewModel
         public bool IsSpeedRatioEnabled
         {
             get => m_IsSpeedRatioEnabled;
-            set => Set(ref m_IsSpeedRatioEnabled, value);
+            set => SetProperty(ref m_IsSpeedRatioEnabled, value);
         }
 
         /// <summary>
@@ -122,7 +123,7 @@ namespace HappyHour.ViewModel
         public Visibility AudioControlVisibility
         {
             get => m_AudioControlVisibility;
-            set => Set(ref m_AudioControlVisibility, value);
+            set => SetProperty(ref m_AudioControlVisibility, value);
         }
 
         /// <summary>
@@ -140,7 +141,7 @@ namespace HappyHour.ViewModel
                 if (_me == null) return;
                 _me.LoopingBehavior = value ?
                     MediaPlaybackState.Play : MediaPlaybackState.Pause;
-                RaisePropertyChanged(nameof(IsLoopingMediaEnabled));
+                OnPropertyChanged();
             }
         }
 
@@ -150,7 +151,7 @@ namespace HappyHour.ViewModel
         public Visibility PauseButtonVisibility
         {
             get => m_PauseButtonVisibility;
-            set => Set(ref m_PauseButtonVisibility, value);
+            set => SetProperty(ref m_PauseButtonVisibility, value);
         }
 
         /// <summary>
@@ -159,7 +160,7 @@ namespace HappyHour.ViewModel
         public Visibility PlayButtonVisibility
         {
             get => m_PlayButtonVisibility;
-            set => Set(ref m_PlayButtonVisibility, value);
+            set => SetProperty(ref m_PlayButtonVisibility, value);
         }
 
         /// <summary>
@@ -168,17 +169,17 @@ namespace HappyHour.ViewModel
         public Visibility StopButtonVisibility
         {
             get => m_StopButtonVisibility;
-            set => Set(ref m_StopButtonVisibility, value);
+            set => SetProperty(ref m_StopButtonVisibility, value);
         }
         public Visibility BackButtonVisibility
         {
             get => m_BackButtonVisibility;
-            set => Set(ref m_BackButtonVisibility, value);
+            set => SetProperty(ref m_BackButtonVisibility, value);
         }
         public Visibility NextButtonVisibility
         {
             get => m_NextButtonVisibility;
-            set => Set(ref m_NextButtonVisibility, value);
+            set => SetProperty(ref m_NextButtonVisibility, value);
         }
         /// <summary>
         /// Gets or sets the close button visibility.
@@ -186,7 +187,7 @@ namespace HappyHour.ViewModel
         public Visibility CloseButtonVisibility
         {
             get => m_CloseButtonVisibility;
-            set => Set(ref m_CloseButtonVisibility, value);
+            set => SetProperty(ref m_CloseButtonVisibility, value);
         }
 
         /// <summary>
@@ -204,7 +205,7 @@ namespace HappyHour.ViewModel
         public Visibility SeekBarVisibility
         {
             get => m_SeekBarVisibility;
-            set => Set(ref m_SeekBarVisibility, value);
+            set => SetProperty(ref m_SeekBarVisibility, value);
         }
 
         /// <summary>
@@ -213,7 +214,7 @@ namespace HappyHour.ViewModel
         public Visibility BufferingProgressVisibility
         {
             get => m_BufferingProgressVisibility;
-            set => Set(ref m_BufferingProgressVisibility, value);
+            set => SetProperty(ref m_BufferingProgressVisibility, value);
         }
 
         /// <summary>
@@ -222,7 +223,7 @@ namespace HappyHour.ViewModel
         public Visibility DownloadProgressVisibility
         {
             get => m_DownloadProgressVisibility;
-            set => Set(ref m_DownloadProgressVisibility, value);
+            set => SetProperty(ref m_DownloadProgressVisibility, value);
         }
 
         /// <summary>
@@ -260,7 +261,7 @@ namespace HappyHour.ViewModel
                     transform.ScaleY = 5;
                 }
 
-                RaisePropertyChanged();
+                OnPropertyChanged();
             }
         }
 
@@ -417,9 +418,9 @@ namespace HappyHour.ViewModel
             }
             finally
             {
-                RaisePropertyChanged(nameof(VideoContrast));
-                RaisePropertyChanged(nameof(VideoBrightness));
-                RaisePropertyChanged(nameof(VideoSaturation));
+                OnPropertyChanged(nameof(VideoContrast));
+                OnPropertyChanged(nameof(VideoBrightness));
+                OnPropertyChanged(nameof(VideoSaturation));
 
                 // Notify a change in Video Equalizer
                 //_mp.NotificationMessage = $"Contrast:   {contrast:+0.000;-0.000}\r\n" +

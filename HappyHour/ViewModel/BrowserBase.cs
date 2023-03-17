@@ -1,24 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
+﻿using System.ComponentModel;
 
-using Scriban;
 using CefSharp;
 using CefSharp.Wpf;
 
-using GalaSoft.MvvmLight.Messaging;
-
 using HappyHour.CefHandler;
+using CommunityToolkit.Mvvm.Messaging;
 
 namespace HappyHour.ViewModel
 {
-    using CefConsoleMsg = NotificationMessage<ConsoleMessageEventArgs>;
-    using CefStatusMsg = NotificationMessage<StatusMessageEventArgs>;
-
     delegate void OnJsResult(object items);
 
     class BrowserBase : Pane
@@ -33,19 +22,19 @@ namespace HappyHour.ViewModel
         public string HeaderType
         {
             get => _headerType;
-            set => Set(ref _headerType, value);
+            set => SetProperty(ref _headerType, value);
         }
 
         public string Address
         {
             get { return _address; }
-            set { Set(ref _address, value); }
+            set { SetProperty(ref _address, value); }
         }
 
         public IWpfWebBrowser WebBrowser
         {
             get { return _webBrowser; }
-            set { Set(ref _webBrowser, value); }
+            set { SetProperty(ref _webBrowser, value); }
         }
 
         public IRequestHandler RequestHandler { get; set; }
@@ -60,14 +49,8 @@ namespace HappyHour.ViewModel
 
         protected virtual void InitBrowser()
         {
-            WebBrowser.ConsoleMessage += (s, e) =>
-            {
-                MessengerInstance.Send(new CefConsoleMsg(e, "log"));
-            };
-            WebBrowser.StatusMessage += (s, e) =>
-            {
-                MessengerInstance.Send(new CefStatusMsg(e, "log"));
-            };
+            WebBrowser.ConsoleMessage += (s, e) => Messenger.Send(e);
+            WebBrowser.StatusMessage += (s, e) => Messenger.Send(e);
             if (RequestHandler != null)
             {
                 WebBrowser.RequestHandler = RequestHandler;

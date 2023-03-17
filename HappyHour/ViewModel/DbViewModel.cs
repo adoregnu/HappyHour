@@ -25,7 +25,7 @@ namespace HappyHour.ViewModel
             {
                 if (_mediaList != null) return;
 
-                Set(ref _mediaList, value);
+                SetProperty(ref _mediaList, value);
                 _mediaList.ItemSelectedHandler += (o, i) =>
                 {
                     if (i == null) return;
@@ -43,9 +43,9 @@ namespace HappyHour.ViewModel
             get => _searchText;
             set
             {
-                Set(ref _searchText, value);
+                SetProperty(ref _searchText, value);
                 if (_typeToPropertyName.ContainsKey(SelectedType))
-                    RaisePropertyChanged(_typeToPropertyName[SelectedType]);
+                    OnPropertyChanged(_typeToPropertyName[SelectedType]);
             }
         }
         public string SelectedType
@@ -54,7 +54,7 @@ namespace HappyHour.ViewModel
             set
             {
                 SearchText = "";
-                Set(ref _selectedType, value);
+                SetProperty(ref _selectedType, value);
             }
         }
         public List<string> ListType { get; set; }
@@ -122,7 +122,7 @@ namespace HappyHour.ViewModel
             get => _selectedAvItem;
             set
             {
-                Set(ref _selectedAvItem, value);
+                SetProperty(ref _selectedAvItem, value);
                 if (value == null) return;
 
                 MediaList.AddMedia(value.Path);
@@ -135,7 +135,7 @@ namespace HappyHour.ViewModel
             get => _selectedActorName;
             set
             {
-                Set(ref _selectedActorName, value);
+                SetProperty(ref _selectedActorName, value);
                 if (value == null) return;
 
                 App.DbContext.Entry(value)
@@ -153,7 +153,7 @@ namespace HappyHour.ViewModel
             get => _selectedStudio;
             set
             {
-                Set(ref _selectedStudio, value);
+                SetProperty(ref _selectedStudio, value);
                 if (value == null) return;
 
                 var items = App.DbContext.Items
@@ -169,7 +169,7 @@ namespace HappyHour.ViewModel
             get => _selectedSeries;
             set
             {
-                Set(ref _selectedSeries, value);
+                SetProperty(ref _selectedSeries, value);
                 if (value == null) return;
 
                 var items = App.DbContext.Items
