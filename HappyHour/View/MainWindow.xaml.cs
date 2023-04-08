@@ -1,4 +1,6 @@
-﻿using System;
+﻿using CommunityToolkit.Mvvm.DependencyInjection;
+using HappyHour.ViewModel;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,6 +25,7 @@ namespace HappyHour.View
         public MainWindow()
         {
             InitializeComponent();
+            DataContext = Ioc.Default.GetService<MainViewModel>();
         }
     }
 }

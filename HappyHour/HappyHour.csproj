@@ -67,19 +67,6 @@
 
   <ItemGroup>
     <Compile Remove="Model\MediaItem.cs" />
-    <Compile Remove="ScrapItems\AvItemBase.cs" />
-    <Compile Remove="ScrapItems\IScrapItem.cs" />
-    <Compile Remove="ScrapItems\ItemAVE.cs" />
-    <Compile Remove="ScrapItems\ItemAvsox.cs" />
-    <Compile Remove="ScrapItems\ItemBase.cs" />
-    <Compile Remove="ScrapItems\ItemJavDb.cs" />
-    <Compile Remove="ScrapItems\ItemJavfree.cs" />
-    <Compile Remove="ScrapItems\ItemJavlibrary.cs" />
-    <Compile Remove="ScrapItems\ItemJavmovie.cs" />
-    <Compile Remove="ScrapItems\ItemMgstage.cs" />
-    <Compile Remove="ScrapItems\ItemPornav.cs" />
-    <Compile Remove="ScrapItems\ItemR18V3.cs" />
-    <Compile Remove="ScrapItems\ItemSehuatang.cs" />
     <Compile Remove="Spider\SpiderPornav.cs" />
     <Compile Remove="ViewModel\GoogleEarthViewModel.cs" />
     <Compile Remove="View\BrowserHeaderGoogleEarth.xaml.cs" />
@@ -148,7 +135,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Resources\default-fallback-image.png" />
+    <EmbeddedResource Include="Resources\default-fallback-image.png" />
   </ItemGroup>
 
   <ItemGroup>

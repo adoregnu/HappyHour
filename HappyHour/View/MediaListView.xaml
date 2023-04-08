@@ -17,7 +17,7 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center">
-            <Button Style="{StaticResource ModernButtonStyle2}"
+              <Button Style="{StaticResource ModernButtonStyle2}"
                     Command="{Binding CmdNewMovie}">
                 <Path Stretch="Uniform"
                       Data="{Binding Source={StaticResource new-box}, Path=Data}"

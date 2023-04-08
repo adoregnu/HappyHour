@@ -7,12 +7,50 @@
              xmlns:view="clr-namespace:HappyHour.View"
              xmlns:pane="clr-namespace:HappyHour.View.Pane"
              mc:Ignorable="d" 
+             xmlns:conv="clr-namespace:HappyHour.Converter"
              d:DesignHeight="450" d:DesignWidth="800">
+
+    <UserControl.Resources>
+        <conv:PaneTypeConverter x:Key="paneTypeConverter"/>
+
+        <ControlTemplate x:Key="TitleOnly">
+            <ContentPresenter Content="{Binding Title}" Margin="3"/> 
+        </ControlTemplate>
+
+        <ControlTemplate x:Key="TitleWithAutoScroll">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <CheckBox ToolTip="Auto Scroll" IsChecked="{Binding Content.AutoScrollEnabled, Mode=TwoWay}" Grid.Column="0" VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding Title}" Margin="3"  Grid.Column="1"/>
+            </Grid>
+        </ControlTemplate>
+
+        <DataTemplate x:Key="TitleTemplate">
+            <ContentControl>
+                <ContentControl.Style>
+                    <Style TargetType="ContentControl">
+                        <Style.Triggers>
+                            <DataTrigger  Binding="{Binding Content, Converter={StaticResource paneTypeConverter}}" Value="text">
+                                <Setter Property="Template" Value="{StaticResource TitleWithAutoScroll}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Content, Converter={StaticResource paneTypeConverter}}" Value="default">
+                                <Setter Property="Template" Value="{StaticResource TitleOnly}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ContentControl.Style>
+            </ContentControl>
+        </DataTemplate>
+    </UserControl.Resources>
     <ad:DockingManager
         AllowMixedOrientation="True" x:Name="dockManager"
         DocumentsSource="{Binding Docs}"
-        AnchorablesSource="{Binding Anchors}">
-
+        AnchorablesSource="{Binding Anchors}"
+        AnchorableTitleTemplate="{StaticResource TitleTemplate}">
+        <!-- DocumentHeaderTemplate="{StaticResource TitleTemplate}" -->
         <ad:DockingManager.Theme>
             <ad:Vs2013BlueTheme/>
         </ad:DockingManager.Theme>

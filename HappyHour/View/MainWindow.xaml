@@ -7,8 +7,7 @@
         xmlns:view="clr-namespace:HappyHour.View"
         mc:Ignorable="d"
         md:DialogServiceViews.IsRegistered="True"
-        Title="Scrapper" Height="1024" Width="1950"
-        DataContext="{Binding Source={StaticResource Locator}, Path=MainWindow}">
+        Title="Scrapper" Height="1024" Width="1950" >
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"></RowDefinition>

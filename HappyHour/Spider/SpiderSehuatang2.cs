@@ -35,7 +35,7 @@ namespace HappyHour.Spider
                 Set(ref _selectedBoard, value);
                 if (value != null)
                 {
-                    _dataPath = App.GetConf("general", "data_path") ?? @"d:\tmp\sehuatang";
+                    _dataPath = App.Current.GetConf("general", "data_path") ?? @"d:\tmp\sehuatang";
                     _dataPath += @$"\{value}\";
                     ShtDownloader.CreateDir(_dataPath);
                 }

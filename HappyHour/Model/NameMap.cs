@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HappyHour.ScrapItems
+namespace HappyHour.Model
 {
     static class NameMap
     {

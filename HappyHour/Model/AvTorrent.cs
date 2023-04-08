@@ -31,7 +31,7 @@ namespace HappyHour.Model
                     if (ext is "torrent" && file.EndsWith(ext, StringComparison.OrdinalIgnoreCase))
                     {
                         string torrent = System.IO.Path.GetFileName(file);
-                        File.Copy(file, App.GConf["general"]["torrent_path"] + torrent);
+                        File.Copy(file, App.Current.GConf["general"]["torrent_path"] + torrent);
                         downloaded = true;
                     }
                     else if (ext is "magnet" && file.EndsWith(ext, StringComparison.OrdinalIgnoreCase))

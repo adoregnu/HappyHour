@@ -6,7 +6,7 @@ using System.Windows;
 
 namespace HappyHour
 {
-    public class ViewEventArgs : RoutedEventArgs
+    public class ViewEventArgs : EventArgs
     {
         public ViewEventArgs(string msg, object data)
         {

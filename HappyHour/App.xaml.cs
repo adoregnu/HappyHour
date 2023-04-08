@@ -23,6 +23,10 @@ using IniParser;
 using IniParser.Model;
 
 using HappyHour.Model;
+using Microsoft.Extensions.DependencyInjection;
+using HappyHour.ViewModel;
+using MvvmDialogs;
+using CommunityToolkit.Mvvm.DependencyInjection;
 
 namespace HappyHour
 {
@@ -31,11 +35,16 @@ namespace HappyHour
     /// </summary>
     public partial class App : Application
     {
-        public static CultureInfo enUS = new("en-US");
-        public static string LocalAppData { get; set; }
-        public static AvDbContext DbContext { get; set; }
-        public static IniData GConf { get; private set; }
+        public new static App Current => (App)Application.Current;
+
+        public CultureInfo enUS = new("en-US");
+        public string LocalAppData { get; set; }
+        public AvDbContext DbContext { get; set; }
+
+        public IniData GConf { get; private set; }
         public const string Name = "HappyHour";
+
+        public IServiceProvider Services { get; }
 
         private FileIniDataParser _iniParser;
         /// <summary>
@@ -68,16 +77,27 @@ namespace HappyHour
             return reader.ReadToEnd();
         }
 
+        void ConfigureService()
+        { 
+            Ioc.Default.ConfigureServices(new ServiceCollection()
+                 .AddSingleton<MainViewModel>()
+                 .AddSingleton<IDialogService>(new DialogService())
+                 .BuildServiceProvider());
+        }
+
         public App()
         {
+            ConfigureService();
+
             // Load configuration
             var logRepository = LogManager.GetRepository(Assembly.GetEntryAssembly());
             _ = XmlConfigurator.Configure(logRepository, new FileInfo("log4net.config"));
             LocalAppData = Environment.ExpandEnvironmentVariables(@"%LOCALAPPDATA%");
             LocalAppData += $"\\{Name}";
+
             // Change the default location of the ffmpeg binaries 
             // (same directory as application)
-            Library.FFmpegDirectory = @"ffmpeg" + (Environment.Is64BitProcess ? @"\x64" : string.Empty);
+            //Library.FFmpegDirectory = @"ffmpeg" + (Environment.Is64BitProcess ? @"\x64" : string.Empty);
 
             // Multi-threaded video enables the creation of independent
             // dispatcher threads to render video frames. This is an experimental
@@ -100,14 +120,14 @@ namespace HappyHour
             _ = general.AddKey("last_path", @"d:\tmp\");
         }
 
-        public static string GetConf(string sectionName, string key)
+        public string GetConf(string sectionName, string key)
         {
             return !GConf.Sections.ContainsSection(sectionName) ? null
                 : !GConf[sectionName].ContainsKey(key) ? null
                 : GConf[sectionName][key];
         }
 
-        static void InitCefSharp()
+         void InitCefSharp()
         {
             var settings = new CefSettings
             {
@@ -159,7 +179,7 @@ namespace HappyHour
                 throw new Exception("Unable to Initialize Cef");
             }
         }
-
+#if false
         async void PreLoadFFmpeg()
         {
             // Pre-load FFmpeg libraries in the background. This is optional.
@@ -192,12 +212,12 @@ namespace HappyHour
                 }));
             }
         }
+#endif
         protected override void OnExit(ExitEventArgs e)
         {
             _iniParser.WriteFile($@"{LocalAppData}\gconf.ini", GConf);
             base.OnExit(e);
         }
-
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
@@ -208,14 +228,14 @@ namespace HappyHour
 
             try
             {
-                DbContext = new AvDbContext();
+                DbContext = AvDbContextPool.CreateContext();// new AvDbContext();
             }
             catch (Exception ex)
             {
                 Log.Print(ex.Message);
             }
 
-            Task.Run(() => PreLoadFFmpeg());
+            //Task.Run(() => PreLoadFFmpeg());
         }
 
         private void SetupExceptionHandling()

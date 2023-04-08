@@ -5,12 +5,12 @@ namespace HappyHour.ViewModel
     class TextViewModel : Pane
     {
         protected int _lastLineCount = 1;
-        protected TextDocument _document = new TextDocument();
+        protected TextDocument _document = new();
+        public bool AutoScrollEnabled { get; set; } = true;
         public TextDocument Document
         {
             get { return _document; }
         }
-
         protected void AppendText(string line)
         {
             _document.Insert(_document.TextLength, line);

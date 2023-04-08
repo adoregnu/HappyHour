@@ -1,8 +1,16 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-
+using System.Windows.Media.Imaging;
+using HappyHour.ViewModel;
 using HappyHour.Interfaces;
+using System.Threading.Tasks;
+using System.Threading;
+using CefSharp.DevTools.CSS;
+using Imazen.WebP;
+using System.Drawing;
+using System.Reflection.Metadata;
+using System.Drawing.Imaging;
 
 namespace HappyHour.Model
 {
@@ -17,7 +25,10 @@ namespace HappyHour.Model
         public string Poster
         {
             get => _poster;
-            set => Set(ref _poster, value);
+            set 
+            {
+                Set(ref _poster, value);
+            }
         }
         public string BriefInfo
         {
@@ -46,7 +57,7 @@ namespace HappyHour.Model
         {
             string ext = System.IO.Path.GetExtension(fileName);
             //return $@"{Path}\{Pid}\.actors\{name.Remove(' ', '_')}{ext}";
-            return $@"{App.LocalAppData}\db\{actorName.Replace(' ', '_')}{ext}";
+            return $@"{App.Current.LocalAppData}\db\{actorName.Replace(' ', '_')}{ext}";
         }
 
         public abstract void Reload(string[] files);

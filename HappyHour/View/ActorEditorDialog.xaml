@@ -6,8 +6,8 @@
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:bh="clr-namespace:HappyHour.View.Behavior"
         xmlns:md="https://github.com/fantasticfiasco/mvvm-dialogs"
-        xmlns:converter="clr-namespace:HappyHour.Converter"
         xmlns:local="clr-namespace:HappyHour.View"
+        xmlns:control="clr-namespace:HappyHour.View.Controls"
         mc:Ignorable="d"
         WindowStartupLocation="CenterOwner"
         md:DialogServiceViews.IsRegistered="True"
@@ -17,10 +17,8 @@
             <Border Name="_Border" Padding="2" SnapsToDevicePixels="true"
                     Width="128" Height="128">
                 <Grid>
-                    <Image HorizontalAlignment="Center" VerticalAlignment="Top"
-                           Source="{Binding PicturePath, Converter=
-                                {StaticResource PathToImageConverter},
-                                    ConverterParameter=125}"/>
+                    <control:AsyncImage HorizontalAlignment="Center" VerticalAlignment="Top"
+                        ImagePath="{Binding PicturePath}" Width="125"/>
                     <StackPanel VerticalAlignment="Bottom"
                                 Background="Black" Opacity="0.60">
                         <TextBlock Text="{Binding .}" Foreground="White"

@@ -22,6 +22,7 @@ using HappyHour.Interfaces;
 using HappyHour.View;
 using System.Diagnostics;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 
 namespace HappyHour.ViewModel
 {
@@ -324,6 +325,8 @@ namespace HappyHour.ViewModel
                     _ = MediaList.Remove(item);
                 }
             }
+
+            Messenger.Send(new ViewEventArgs("AvDeleted", null));
         }
 
         private void EditMovieInfo(object param)
@@ -367,7 +370,7 @@ namespace HappyHour.ViewModel
             }
         }
 
-        private void IterateMedia(string currDir, List<string> dbDirs, CancellationToken token)
+        private void IterateMedia(string currDir, List<string> dbDirs, AvDbContext context, CancellationToken token)
         {
             if (token.IsCancellationRequested)
             {
@@ -386,11 +389,11 @@ namespace HappyHour.ViewModel
                     if (dbDirs.BinarySearch(currDir) < 0)
                     {
                         string pid = currDir.Split('\\').Last();
-                        var item = App.DbContext.Items.FirstOrDefault(it => it.Pid == pid);
+                        var item = context.Items.FirstOrDefault(it => it.Pid == pid);
                         if (item != null)
                         {
                             item.Path = currDir;
-                            App.DbContext.SaveChanges();
+                            context.SaveChanges();
                         }
                         AddMedia(currDir);
                     }
@@ -399,7 +402,7 @@ namespace HappyHour.ViewModel
                 {
                     foreach (string dir in dirs)
                     {
-                        IterateMedia(dir, dbDirs, token);
+                        IterateMedia(dir, dbDirs, context, token);
                     }
                 }
             }
@@ -461,7 +464,9 @@ namespace HappyHour.ViewModel
             MediaList.Clear();
 
             string currDir = _fileList.CurrDirInfo.FullName;
-            var dbDirs = await App.DbContext.Items
+
+            using var context = AvDbContextPool.CreateContext();
+            var dbDirs = await context.Items
                 .Where(i => EF.Functions.Like(i.Path, $"{currDir}%"))
                 .Select(i => i.Path)
                 .ToListAsync();
@@ -472,7 +477,7 @@ namespace HappyHour.ViewModel
             _runningTask = Task.Run(() =>
             {
                 dbDirs.Sort();
-                IterateMedia(currDir, dbDirs, token);
+                IterateMedia(currDir, dbDirs, context, token);
                 Log.Print("Search orphanage media done!");
             }, token);
             await _runningTask;
@@ -500,7 +505,9 @@ namespace HappyHour.ViewModel
                     }
                     else
                     {
-                        App.DbContext.Items.Remove(movie);
+                        using var context = AvDbContextPool.CreateContext();
+                        context.Attach(movie);
+                        context.Items.Remove(movie);
                     }
                 }
             }, token);
@@ -510,18 +517,19 @@ namespace HappyHour.ViewModel
 
         private async void OnSearchEmptyActor()
         {
-            var movies = await App.DbContext.Items
+            using var context = AvDbContextPool.CreateContext();
+            var movies = await context.Items
                 .Include(i => i.Actors)
                 .Where(i => i.Actors.Count == 0)
                 //.Select(i => i.Path)
                 .ToListAsync();
-
             LoadItems(movies);
         }
 
         private async void LastUpdatedMovies()
         {
-            var movies = await App.DbContext.Items
+            using var context = AvDbContextPool.CreateContext();
+            var movies = await context.Items
                 .OrderByDescending(i => i.DateAdded)
                 .Take(20).ToListAsync();
 

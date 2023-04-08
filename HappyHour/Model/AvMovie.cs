@@ -39,15 +39,17 @@ namespace HappyHour.Model
             {
                 if (_movieInfo != null && value == null)
                 {
-                    _ = App.DbContext.Items.Remove(_movieInfo);
-                    _ = App.DbContext.SaveChanges();
+                    using var context = AvDbContextPool.CreateContext();
+                    _ = context.Attach(value);
+                    _ = context.Items.Remove(_movieInfo);
+                    _ = context.SaveChanges();
                 }
                 _movieInfo = value;
                 UpdateProperties();
             }
         }
 
-        public AvMovie(string path)
+        public AvMovie(string path) : base()
         {
             Path = path;
             Pid = path.Split('\\').Last();
@@ -65,15 +67,17 @@ namespace HappyHour.Model
         {
             try
             {
-                if (char.ToUpper(Path[0], App.enUS) == char.ToUpper(target[0], App.enUS))
+                if (char.ToUpper(Path[0], App.Current.enUS) == char.ToUpper(target[0], App.Current.enUS))
                 {
                     target += "\\" + Pid;
                     Directory.Move(Path, target);
                     Path = target;
                     if (MovieInfo != null)
                     {
+                        using var context = AvDbContextPool.CreateContext();
+                        context.Attach(MovieInfo);
                         MovieInfo.Path = target;
-                        _ = App.DbContext.SaveChanges();
+                        _ = context.SaveChanges();
                     }
                     OnCompleted(this);
                 }
@@ -90,8 +94,10 @@ namespace HappyHour.Model
             {
                 if (MovieInfo != null)
                 {
-                    _ = App.DbContext.Items.Remove(MovieInfo);
-                    _ = App.DbContext.SaveChanges();
+                    using var context = AvDbContextPool.CreateContext();
+                    context.Items.Attach(MovieInfo);
+                    _ = context.Items.Remove(MovieInfo);
+                    _ = context.SaveChanges();
                 }
                 Directory.Delete(Path, true);
             }
@@ -133,10 +139,7 @@ namespace HappyHour.Model
 
         public override async void Reload(string[] files)
         {
-            if (files == null)
-            {
-                files = Directory.GetFiles(Path);
-            }
+            files ??= Directory.GetFiles(Path);
             Files.Clear();
             Subtitles.Clear();
             _date = File.GetCreationTime(Path);
@@ -155,8 +158,13 @@ namespace HappyHour.Model
                     Files.AddInOrder(file, f => f, true);
                 }
             }
+            if (string.IsNullOrEmpty(Poster))
+            {
+                Poster = "";
+            }
 
-            MovieInfo = await App.DbContext.Items
+            using var context = AvDbContextPool.CreateContext();
+            MovieInfo = await context.Items
                 .Include(av => av.Studio)
                 .Include(av => av.Actors)
                     .ThenInclude(ac => ac.Names)

@@ -47,7 +47,7 @@ namespace HappyHour.Spider
                 Set(ref _selectedBoard, value);
                 if (value != null)
                 {
-                    _dataPath = App.GetConf("general", "data_path") ?? @"d:\tmp\sehuatang";
+                    _dataPath = App.Current.GetConf("general", "data_path") ?? @"d:\tmp\sehuatang";
                     _dataPath += @$"\{value}\";
                 }
             }
@@ -167,7 +167,7 @@ namespace HappyHour.Spider
                 Log.Print($"{Name}: Invalid page url format! {0}", _currPage.curr_ur);
                 return false;
             }
-            _pageNum = int.Parse(m.Groups["page"].Value, App.enUS) + 1;
+            _pageNum = int.Parse(m.Groups["page"].Value, App.Current.enUS) + 1;
             if (_pageNum > NumPage)
             {
                 Log.Print($"{Name}: Parsing done!!");

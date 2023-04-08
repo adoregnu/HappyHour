@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+        xmlns:control="clr-namespace:HappyHour.View.Controls"
         mc:Ignorable="d"
         WindowStartupLocation="CenterOwner"
         Title="{Binding Title}"
@@ -11,10 +12,7 @@
     <Window.Resources>
         <DataTemplate x:Key="ActorMiniTemplate">
             <StackPanel Orientation="Horizontal">
-                <Image HorizontalAlignment="Center" Width="64" Height="64"
-                       Source="{Binding PicturePath,
-                            Converter={StaticResource PathToImageConverter},
-                            ConverterParameter=64}"/>
+                <control:AsyncImage HorizontalAlignment="Center" Width="64" ImagePath="{Binding PicturePath}"/>
                 <TextBlock Text="{Binding .}" VerticalAlignment="Center"/>
             </StackPanel>
         </DataTemplate>
@@ -145,8 +143,7 @@
                     <TextBlock DockPanel.Dock="Left" Text="Search: "/>
                     <TextBox Margin="0,0,0,2"
                          Style="{StaticResource TextboxStyle}"
-                         Text="{Binding SearchActorName,
-                            UpdateSourceTrigger=PropertyChanged}"/>
+                         Text="{Binding SearchActorName, UpdateSourceTrigger=PropertyChanged}"/>
                 </DockPanel>
                 <ListBox MaxHeight="300" ItemsSource="{Binding AllActors}"
                      ItemTemplate="{StaticResource ActorMiniTemplate}"

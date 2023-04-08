@@ -28,7 +28,7 @@ namespace HappyHour.Spider
             URL = "https://sukebei.nyaa.si/?f=2&c=2_2&q=";
             ScriptName = "Sukebei.js";
 
-            _dataPath = App.GetConf("general", "data_path") ?? @"d:\tmp\sehuatang";
+            _dataPath = App.Current.GetConf("general", "data_path") ?? @"d:\tmp\sehuatang";
             _dataPath += "\\censored";
         }
         public override void Navigate2(IAvMedia _)

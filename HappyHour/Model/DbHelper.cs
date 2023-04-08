@@ -4,11 +4,9 @@ using System.Linq;
 using System.ComponentModel.DataAnnotations;
 
 using Microsoft.EntityFrameworkCore;
-
-using HappyHour.Model;
 using HappyHour.Interfaces;
 
-namespace HappyHour.ScrapItems
+namespace HappyHour.Model
 {
     internal static class DbHelper
     {
@@ -17,9 +15,9 @@ namespace HappyHour.ScrapItems
 
         public static bool OverwriteActorPicture { get; set; }
 
-        public static AvItem GetAvItem(IAvMedia avm)
+        private static AvItem GetAvItem(AvDbContext context, IAvMedia avm)
         {
-            var _avInfo = App.DbContext.Items
+            var _avInfo = context.Items
                 .Include("Studio")
                 .Include("Actors")
                 .Include("Genres")
@@ -38,16 +36,16 @@ namespace HappyHour.ScrapItems
                     DateAdded = DateTime.Now,
                     DateModifed = DateTime.Now,
                 };
-                _avInfo = App.DbContext.Items.Add(_avInfo).Entity;
+                _avInfo = context.Items.Add(_avInfo).Entity;
             }
             return _avInfo;
         }
 
-        public static void UpdateRating(AvItem _avInfo, string rating)
+        private static void UpdateRating(AvDbContext context, AvItem _avInfo, string rating)
         {
             try
             {
-                _avInfo.Rating = float.Parse(rating, App.enUS);
+                _avInfo.Rating = float.Parse(rating, App.Current.enUS);
             }
             catch (Exception ex)
             {
@@ -55,7 +53,7 @@ namespace HappyHour.ScrapItems
             }
         }
 
-        public static void UpdateDate(AvItem _avInfo,string date)
+        private static void UpdateDate(AvDbContext context, AvItem _avInfo, string date)
         {
             string[] patterns = new string[]
             {
@@ -66,14 +64,14 @@ namespace HappyHour.ScrapItems
                 try
                 {
                     _avInfo.DateReleased = DateTime.ParseExact(
-                        date, pattern, App.enUS);
+                        date, pattern, App.Current.enUS);
                     break;
                 }
                 catch { }
             }
         }
 
-        public static void UpdateGenre(AvItem _avInfo, List<object> genres)
+        private static void UpdateGenre(AvDbContext context, AvItem _avInfo, List<object> genres)
         {
             foreach (string genre in genres.Cast<string>())
             {
@@ -81,12 +79,9 @@ namespace HappyHour.ScrapItems
                 {
                     continue;
                 }
-                var entity = App.DbContext.Genres.FirstOrDefault(
+                var entity = context.Genres.FirstOrDefault(
                     x => x.Name.ToLower() == genre.ToLower());
-                if (entity == null)
-                {
-                    entity = App.DbContext.Genres.Add(new AvGenre { Name = genre }).Entity;
-                }
+                entity ??= context.Genres.Add(new AvGenre { Name = genre }).Entity;
                 if (!_avInfo.Genres.Any(g => g.Name.ToLower() == entity.Name.ToLower()))
                 {
                     _avInfo.Genres.Add(entity);
@@ -94,25 +89,19 @@ namespace HappyHour.ScrapItems
             }
         }
 
-        public static void UpdateStudio(AvItem _avInfo, string studio)
+        private static void UpdateStudio(AvDbContext context, AvItem _avInfo, string studio)
         {
             studio = NameMap.StudioName(studio);
-            var entity = App.DbContext.Studios.FirstOrDefault(x => x.Name.ToLower() == studio.ToLower());
-            if (entity == null)
-            {
-                entity = App.DbContext.Studios.Add(new AvStudio { Name = studio }).Entity;
-            }
+            var entity = context.Studios.FirstOrDefault(x => x.Name.ToLower() == studio.ToLower());
+            entity ??= context.Studios.Add(new AvStudio { Name = studio }).Entity;
             _avInfo.Studio = entity;
         }
 
-        public static void UpdateSeries(AvItem _avInfo, string series)
+        private static void UpdateSeries(AvDbContext context, AvItem _avInfo, string series)
         {
-            var entity = App.DbContext.Series.FirstOrDefault(
+            var entity = context.Series.FirstOrDefault(
                  x => x.Name.ToLower() == series.ToLower());
-            if (entity == null)
-            {
-                entity = App.DbContext.Series.Add(new AvSeries { Name = series }).Entity;
-            }
+            entity ??= context.Series.Add(new AvSeries { Name = series }).Entity;
             _avInfo.Series = entity;
         }
 
@@ -155,15 +144,14 @@ namespace HappyHour.ScrapItems
                 }
             }
         }
-
-        public static void UpdateActor(AvItem _avInfo, List<object> actors)
+        private static void UpdateActor(AvDbContext context, AvItem _avInfo, List<object> actors)
         {
             foreach (var actor in actors.Cast<IDictionary<string, object>>())
             {
                 AvActorName dbName = null;
                 ForEachActor(actor, val =>
                 {
-                    dbName = App.DbContext.ActorNames
+                    dbName = context.ActorNames
                         .Include(n => n.Actor).ThenInclude(a => a.Names)
                         .Where(n => n.Name.ToLower() == val.ToLower())
                         .Where(n => n.Actor != null)
@@ -196,7 +184,7 @@ namespace HappyHour.ScrapItems
 
                     dbActor.Names = ActorNames;
                     dbActor.DateAdded = DateTime.Now;
-                    dbActor = App.DbContext.Actors.Add(dbActor).Entity;
+                    dbActor = context.Actors.Add(dbActor).Entity;
                 }
                 if (_avInfo.Actors.Count == 0 ||
                     !_avInfo.Actors.Any(a => a.Id != 0 && a.Id == dbActor.Id))
@@ -207,7 +195,8 @@ namespace HappyHour.ScrapItems
                 {
                     if (string.IsNullOrEmpty(dbActor.PicturePath) || OverwriteActorPicture)
                     {
-                        dbActor.PicturePath = actor["thumb"].ToString();
+                        //dbActor.PicturePath = actor["thumb"].ToString();
+                        dbActor.PicturePath = $"{App.Current.LocalAppData}\\db\\{actor["thumb"]}";
                     }
                 }
             }
@@ -215,17 +204,19 @@ namespace HappyHour.ScrapItems
 
         public static void UpdateItems(IAvMedia avm, IDictionary<string, object> items)
         {
-            AvItem avitem = GetAvItem(avm);
+            using var context = AvDbContextPool.CreateContext();
+
+            var avitem = GetAvItem(context, avm);
             Dictionary<string, Action<AvItem, object>> updater = new()
             {
                 { "title", (_item, title) => _item.Title = title as string },
-                { "genre", (_item, list) => UpdateGenre(_item, list as List<object>) }, //(Action<List<object>>)UpdateGenre },
-                { "studio", (_item, studio) => UpdateStudio(_item, studio as string) }, //(Action<string>)UpdateStudio },
-                { "series", (_item, series) => UpdateSeries(_item, series as string) }, //(Action<string>)UpdateSeries },
-                { "actor", (_item, list) => UpdateActor(_item, list as List<object>) }, //(Action<List<object>>)UpdateActor },
-                { "date", (_item, date) => UpdateDate(_item, date as string) }, //(Action<string>)UpdateDate },
+                { "genre", (_item, list) => UpdateGenre(context, _item, list as List<object>) }, //(Action<List<object>>)UpdateGenre },
+                { "studio", (_item, studio) => UpdateStudio(context, _item, studio as string) }, //(Action<string>)UpdateStudio },
+                { "series", (_item, series) => UpdateSeries(context, _item, series as string) }, //(Action<string>)UpdateSeries },
+                { "actor", (_item, list) => UpdateActor(context, _item, list as List<object>) }, //(Action<List<object>>)UpdateActor },
+                { "date", (_item, date) => UpdateDate(context, _item, date as string) }, //(Action<string>)UpdateDate },
                 { "plot", (_item, plot) => _item.Plot = plot as string}, //(Action<string>)UpdatePlot },
-                { "rating", (_item, rating) => UpdateRating(_item, rating as string) } //(Action<string>)UpdateRating },
+                { "rating", (_item, rating) => UpdateRating(context, _item, rating as string) } //(Action<string>)UpdateRating },
 
                 //{ "cover",  (Action<string>)UpdateCover },
             };
@@ -233,14 +224,13 @@ namespace HappyHour.ScrapItems
             foreach (var item in items)
             {
                 //Log.Print($"{item.Key} : {item.Value?.ToString()}");
-                if (updater.ContainsKey(item.Key) && item.Value != null)
+                if (updater.TryGetValue(item.Key, out var value) && item.Value != null)
                 {
-                    //updater[item.Key].DynamicInvoke(item.Value);
-                    updater[item.Key](avitem, item.Value);
+                    value(avitem, item.Value);
                 }
             }
 
-            _ = App.DbContext.SaveChanges();
+            _ = context.SaveChanges();
         }
     }
 }

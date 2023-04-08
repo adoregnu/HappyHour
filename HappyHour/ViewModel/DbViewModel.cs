@@ -66,7 +66,7 @@ namespace HappyHour.ViewModel
                 if (string.IsNullOrEmpty(SearchText))
                     return null;
 
-                return App.DbContext.Items
+                return App.Current.DbContext.Items
                     .Where(i => EF.Functions.Like(i.Pid, $"%{SearchText}%"))
                     .ToList();
             }
@@ -76,11 +76,11 @@ namespace HappyHour.ViewModel
             get
             { 
                 if (string.IsNullOrEmpty(SearchText))
-                    return App.DbContext.ActorNames
+                    return App.Current.DbContext.ActorNames
                         .OrderBy(a => a.Name)
                         .ToList();
 
-                return App.DbContext.ActorNames
+                return App.Current.DbContext.ActorNames
                     .Where(i => EF.Functions.Like(i.Name, $"%{SearchText}%"))
                     .OrderBy(a => a.Name)
                     .ToList();
@@ -91,11 +91,11 @@ namespace HappyHour.ViewModel
             get
             {
                 if (string.IsNullOrEmpty(SearchText))
-                    return App.DbContext.Studios
+                    return App.Current.DbContext.Studios
                         .OrderBy(s => s.Name)
                         .ToList();
 
-                return App.DbContext.Studios
+                return App.Current.DbContext.Studios
                     .Where(s => EF.Functions.Like(s.Name, $"{SearchText}%"))
                     .OrderBy(s => s.Name)
                     .ToList();
@@ -107,10 +107,10 @@ namespace HappyHour.ViewModel
             get
             {
                 if (string.IsNullOrEmpty(SearchText))
-                    return App.DbContext.Series
+                    return App.Current.DbContext.Series
                         .ToList();
 
-                return App.DbContext.Series
+                return App.Current.DbContext.Series
                     .Where(s => EF.Functions.Like(s.Name, $"%{SearchText}%"))
                     .ToList();
             }
@@ -138,9 +138,9 @@ namespace HappyHour.ViewModel
                 SetProperty(ref _selectedActorName, value);
                 if (value == null) return;
 
-                App.DbContext.Entry(value)
+                App.Current.DbContext.Entry(value)
                     .Reference(n => n.Actor).Load();
-                App.DbContext.Entry(value.Actor)
+                App.Current.DbContext.Entry(value.Actor)
                     .Collection(a => a.Items).Load();
 
                 var items = value.Actor.Items.ToList();
@@ -156,7 +156,7 @@ namespace HappyHour.ViewModel
                 SetProperty(ref _selectedStudio, value);
                 if (value == null) return;
 
-                var items = App.DbContext.Items
+                var items = App.Current.DbContext.Items
                     .Where(i => i.Studio == value)
                     .ToList();
                 MediaList.LoadItems(items);
@@ -172,7 +172,7 @@ namespace HappyHour.ViewModel
                 SetProperty(ref _selectedSeries, value);
                 if (value == null) return;
 
-                var items = App.DbContext.Items
+                var items = App.Current.DbContext.Items
                     .Where(i => i.Series == value)
                     .ToList();
                 MediaList.LoadItems(items);
@@ -196,7 +196,7 @@ namespace HappyHour.ViewModel
 
         public bool SelectPid(string pid)
         {
-            var item = App.DbContext.Items
+            var item = App.Current.DbContext.Items
                 .Where(i => EF.Functions.Like(i.Pid, $"%{pid}%"))
                 .FirstOrDefault();
             if (item != null)

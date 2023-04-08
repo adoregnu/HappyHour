@@ -10,7 +10,7 @@ namespace HappyHour.ViewModel
 
         public NasViewModel() : base()
         {
-            _nasUrl = App.GConf["general"]["nas_url"];
+            _nasUrl = App.Current.GConf["general"]["nas_url"];
         }
 
         protected override void InitBrowser()

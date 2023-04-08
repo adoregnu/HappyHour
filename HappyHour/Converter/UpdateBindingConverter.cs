@@ -34,9 +34,6 @@
 			if (values == null)
 				return Binding.DoNothing;
 
-			if (values == null)
-				return Binding.DoNothing;
-
 			if (values.Length != 3)
 				return Binding.DoNothing;
 
@@ -44,7 +41,6 @@
 			if (values[0] is bool == false)  // Updates that are not drawn should not be 
 				return Binding.DoNothing;        // hidden from view
 												 //- since init can otherwise fail for pop-ups etc
-
 			if (((bool)values[0]) == false)
 				return values[2];           // Lets update the view since it isn't loaded yet
 

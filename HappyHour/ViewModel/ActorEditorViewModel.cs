@@ -17,6 +17,7 @@ using MvvmDialogs.FrameworkDialogs.OpenFile;
 using HappyHour.Model;
 using HappyHour.Interfaces;
 using HappyHour.Spider;
+using CommunityToolkit.Mvvm.Messaging;
 
 namespace HappyHour.ViewModel
 {
@@ -33,6 +34,7 @@ namespace HappyHour.ViewModel
             {
                 _isChecked = value;
                 ActorEditor.OnActorAlphabet(Initial, value);
+                OnPropertyChanged();
             }
         }
         public void UnCheck()
@@ -42,7 +44,7 @@ namespace HappyHour.ViewModel
         }
     }
 
-    internal class ActorEditorViewModel : ObservableObject, IModalDialogViewModel
+    internal class ActorEditorViewModel : ObservableRecipient, IModalDialogViewModel, IRecipient<ViewEventArgs>
     {
         private AvActor _actor;
         private string _picturePath;
@@ -53,7 +55,6 @@ namespace HappyHour.ViewModel
 
         private ObservableCollection<AvActorName> _nameListOfOneActor;
         private ObservableCollection<AvActor> _actors = new();
-        private List<ScrapItem> ScrapItems { get; set; }
 
         public List<ActorInitial> ActorInitials { get; private set; }
         public AvActorName SelectedActorName { get; set; }
@@ -92,7 +93,7 @@ namespace HappyHour.ViewModel
 
         public IEnumerable<AvActorName> ActorNameList =>
             string.IsNullOrEmpty(SearchText) ? null
-                    : App.DbContext.ActorNames
+                    : App.Current.DbContext.ActorNames
                     .Where(n => EF.Functions.Like(n.Name, $"%{SearchText}%"))
                     .ToList();
 
@@ -146,21 +147,21 @@ namespace HappyHour.ViewModel
         public ActorEditorViewModel()
         {
             CmdBrowsePicture = new RelayCommand(() => PicturePath = ChoosePicture());
-            CmdAddNewActor = new RelayCommand(() => OnAddNewActor());
-            CmdDeleteActorFromDb = new RelayCommand(() => OnDeleteActor());
-            CmdChangePicture = new RelayCommand(() => OnChangePicture());
-            CmdAddNewName = new RelayCommand(() => OnAddNewName());
-            CmdDoubleClick = new RelayCommand(() => OnDoubleClicked());
+            CmdAddNewActor = new RelayCommand(OnAddNewActor);
+            CmdDeleteActorFromDb = new RelayCommand(OnDeleteActor);
+            CmdChangePicture = new RelayCommand(OnChangePicture);
+            CmdAddNewName = new RelayCommand(OnAddNewName);
+            CmdDoubleClick = new RelayCommand(OnDoubleClicked);
             CmdDeleteActorFromList = new RelayCommand(() => {
                 if (SelectedActor != null) Actors.Remove(SelectedActor);
             });
-            CmdActorNameDoubleClick = new RelayCommand(() => OnActorNameDoubleClicked());
+            CmdActorNameDoubleClick = new RelayCommand(OnActorNameDoubleClicked);
             CmdMergeActors = new RelayCommand<object>(
-                p => OnMergeActors(p), 
+                OnMergeActors, 
                 p => p is IList<object> list && list.Count > 1);
-            CmdClearActors = new RelayCommand(() => OnClearActors());
-            CmdDeleteNameOfActor = new RelayCommand(() => OnDeleteNameOfActor());
-            CmdClosed = new RelayCommand(() => OnClose());
+            CmdClearActors = new RelayCommand(OnClearActors);
+            CmdDeleteNameOfActor = new RelayCommand(OnDeleteNameOfActor);
+            CmdClosed = new RelayCommand(OnClose);
  
             ActorInitials = Enumerable.Range('A', 'Z' - 'A' + 1)
                 .Select(c => new ActorInitial
@@ -173,24 +174,22 @@ namespace HappyHour.ViewModel
                 ActorEditor = this,
                 Initial = "All",
             });
-            //ActorInitials[1].IsChecked = true;
-
-            ScrapItems = new()
-            {
-                new ScrapItem() { CanUpdate = false, Name = "title" },
-                new ScrapItem() { CanUpdate = false, Name = "date" },
-                //new ScrapItem() { CanUpdate = true, Name = "runtime" },
-                //new ScrapItem() { CanUpdate = true, Name = "director" },
-                new ScrapItem() { CanUpdate = false, Name = "series" },
-                new ScrapItem() { CanUpdate = false, Name = "studio" },
-                new ScrapItem() { CanUpdate = false, Name = "genre" },
-                new ScrapItem() { CanUpdate = false, Name = "plot" },
-                new ScrapItem() { CanUpdate = false, Name = "cover" },
-                new ScrapItem() { CanUpdate = true, Name = "actor" },
-                new ScrapItem() { CanUpdate = false, Name = "rating" },
-            };
+            Messenger.Register(this);
         }
 
+        public void Receive(ViewEventArgs msg)
+        {
+            if (msg.Message != "AvDeleted")
+            {
+                return;
+            }
+
+            Log.Print(msg.Message);
+            List<ActorInitial> initials = new();
+            ActorInitials.ForEach(i => { if (i.IsChecked) initials.Add(i); });
+            OnClearActors();
+            initials.ForEach(i => i.IsChecked = true);
+        }
         string ChoosePicture()
         { 
             var settings = new OpenFileDialogSettings
@@ -208,7 +207,7 @@ namespace HappyHour.ViewModel
             try
             {
                 var fileName = Path.GetFileName(settings.FileName);
-                File.Copy(settings.FileName, $"{App.LocalAppData}\\db\\{fileName}", true);
+                File.Copy(settings.FileName, $"{App.Current.LocalAppData}\\db\\{fileName}", true);
                 return settings.FileName;
             }
             catch (Exception ex)
@@ -227,7 +226,8 @@ namespace HappyHour.ViewModel
                 return;
             }
 
-            if (App.DbContext.ActorNames.Any(i => i.Name == ActorName))
+            using var context = AvDbContextPool.CreateContext();
+            if (context.ActorNames.Any(i => i.Name == ActorName))
             {
                 Log.Print($"{NewName} is already exists.");
                 return;
@@ -243,8 +243,8 @@ namespace HappyHour.ViewModel
             };
             names.ForEach(n => n.Actor = actor);
 
-            App.DbContext.Actors.Add(actor);
-            App.DbContext.SaveChanges();
+            context.Actors.Add(actor);
+            context.SaveChanges();
 
             Actors.Add(actor);
         }
@@ -253,13 +253,18 @@ namespace HappyHour.ViewModel
         {
             if (SelectedActor == null) return;
 
+            using var context = AvDbContextPool.CreateContext();
+            context.Actors.Attach(SelectedActor);
+
             var names = SelectedActor.Names.ToList();
             foreach (var name in names)
             {
-                App.DbContext.ActorNames.Remove(name);
+                //context.ActorNames.Attach(name);
+                context.ActorNames.Remove(name);
             }
-            App.DbContext.Actors.Remove(SelectedActor);
-            App.DbContext.SaveChanges();
+            //context.Actors.Attach(SelectedActor);
+            context.Actors.Remove(SelectedActor);
+            context.SaveChanges();
             Actors.Remove(SelectedActor);
 
             SelectedActor = null;
@@ -279,18 +284,20 @@ namespace HappyHour.ViewModel
         private void OnAddNewName()
         {
             if (SelectedActor == null) { return; }
-            if (App.DbContext.ActorNames.Any(i => i.Name == NewName))
+
+            using var context = AvDbContextPool.CreateContext();
+            if (context.ActorNames.Any(i => i.Name == NewName))
             {
                 Log.Print($"{NewName} is already exists.");
                 return;
             }
 
-            var name = App.DbContext.ActorNames.Add(new AvActorName { Name = NewName });
+            var name = context.ActorNames.Add(new AvActorName { Name = NewName });
             SelectedActor.Names.Add(name.Entity);
 
             try
             {
-                _ = App.DbContext.SaveChanges();
+                _ = context.SaveChanges();
                 OnPropertyChanged(nameof(SelectedActor));
                 NewName = "";
                 NameListOfOneActor.Clear();
@@ -306,6 +313,7 @@ namespace HappyHour.ViewModel
         {
             NameListOfOneActor = null;
             SelectedActor = null;
+            using var context = AvDbContextPool.CreateContext();
             if (p == "All")
             {
                 foreach (var initial in ActorInitials)
@@ -314,14 +322,13 @@ namespace HappyHour.ViewModel
                 }
                 if (isSelected)
                 {
-                    var allActors = await App.DbContext.Actors
+                    var allActors = await context.Actors
                         .Include(a => a.Names)
                         //.Include(a => a.Items)
                         .Where(a => a.Items.Count > 0)
                         .OrderByDescending(a => a.DateAdded)
                         .ToListAsync();
 
-                    //var allActors = allNames.Select(n => n.Actor).Distinct();
                     Actors = new ObservableCollection<AvActor>(allActors);
                 }
                 else
@@ -331,28 +338,35 @@ namespace HappyHour.ViewModel
                 return;
             }
 
-            var namesStartOf = await App.DbContext.ActorNames
-                .Include(name => name.Actor)
-                    .ThenInclude(a => a.Names)
-                .Where(n => EF.Functions.Like(n.Name, $"{p}%"))
-                .Where(n => n.Actor != null)
-                .OrderBy(n => n.Name)
-                .ToListAsync();
-
-            var actors = namesStartOf.Select(n => n.Actor).Distinct();
-
-            if (!actors.Any()) { return; }
-
-            foreach (var actor in actors)
+            if (isSelected)
             {
-                if (isSelected)
+                var namesStartOf = await context.ActorNames
+                    .Include(name => name.Actor)
+                        .ThenInclude(a => a.Names)
+                    .Where(n => EF.Functions.Like(n.Name, $"{p}%"))
+                    .Where(n => n.Actor != null)
+                    .OrderBy(n => n.Name)
+                    .ToListAsync();
+
+                var actors = namesStartOf.Select(n => n.Actor).Distinct();
+                if (!actors.Any()) { return; }
+                foreach (var actor in actors)
                 {
                     Actors.Add(actor);
                 }
-                else
+            }
+            else
+            {
+                List<AvActor> tmpList = new();
+                foreach (var actor in Actors)
                 {
-                    _ = Actors.Remove(actor);
+                    if (actor.Names.Any(n => n.Name.StartsWith(p)))
+                    {
+                        tmpList.Add(actor);
+                        //_ = Actors.Remove(actor);
+                    }
                 }
+                tmpList.ForEach(a => Actors.Remove(a));
             }
         }
 
@@ -360,14 +374,13 @@ namespace HappyHour.ViewModel
         {
             if (SelectedActor == null) { return; }
 
-            await App.DbContext.Entry(SelectedActor)
+            using var context = AvDbContextPool.CreateContext();
+            await context.Attach(SelectedActor)
+            //await context.Entry(SelectedActor)
                 .Collection(a => a.Items).LoadAsync();
             var movies = SelectedActor.Items.ToList();
 
-            if (MediaList != null)
-            {
-                MediaList.LoadItems(movies);
-            }
+            MediaList?.LoadItems(movies);
         }
 
         private void OnActorNameDoubleClicked()
@@ -376,7 +389,9 @@ namespace HappyHour.ViewModel
 
             if (Actors.Any(a => a.Names.Contains(SelectedActorName))) { return; }
 
-            App.DbContext.Entry(SelectedActorName)
+            //using var context = AvDbContextPool.CreateContext();
+            //context.ActorNames.Attach(SelectedActorName)
+            App.Current.DbContext.Entry(SelectedActorName)
                 .Reference(n => n.Actor).Load();
             if (SelectedActorName.Actor == null)
             {
@@ -395,9 +410,12 @@ namespace HappyHour.ViewModel
         private void OnDeleteNameOfActor()
         {
             if (SelectedNameOfActor == null) { return; }
-            App.DbContext.Entry(SelectedNameOfActor)
+
+            using var context = AvDbContextPool.CreateContext();
+            context.Attach(SelectedNameOfActor)
+            //context.Entry(SelectedNameOfActor)
                 .Reference(n => n.Actor).Load();
-            App.DbContext.Entry(SelectedNameOfActor.Actor)
+            context.Entry(SelectedNameOfActor.Actor)
                 .Collection(a => a.Names).Load();
             if (SelectedNameOfActor.Actor.Names.Count < 2) { return; }
 
@@ -408,7 +426,7 @@ namespace HappyHour.ViewModel
             {
                 //Log.Print($"Delete {SelectedNameOfActor.Name}");
                 _ = SelectedNameOfActor.Actor.Names.Remove(SelectedNameOfActor);
-                _ = App.DbContext.ActorNames.Remove(SelectedNameOfActor);
+                _ = context.ActorNames.Remove(SelectedNameOfActor);
                 _ = NameListOfOneActor.Remove(SelectedNameOfActor);
             }
 
@@ -419,23 +437,29 @@ namespace HappyHour.ViewModel
         {
             AvActor tgtActor = null;
             var selectedActors = (p as IList<object>).Select(o => o as AvActor).ToList();
+            using var context = AvDbContextPool.CreateContext();
             foreach (var actor in selectedActors)
             {
+                var entry = context.Attach(actor);
                 if (tgtActor == null)
                 {
                     tgtActor = actor;
                     continue;
                 }
 
-                App.DbContext.Entry(actor).Collection(a => a.Items).Load();
+                //context.Attach(actor)
+                //context.Entry(actor)
+                entry.Collection(a => a.Items).Load();
                 var avItems = actor.Items.ToList();
                 foreach (var item in avItems)
                 {
                     _ = item.Actors.Remove(actor);
+#if false
                     if (!item.Actors.Any(a => a.Id == tgtActor.Id))
                     {
                         item.Actors.Add(tgtActor);
                     }
+#endif
                 }
                 foreach (var name in actor.Names)
                 {
@@ -445,10 +469,10 @@ namespace HappyHour.ViewModel
                         tgtActor.Names.Add(name);
                     }
                 }
-                _ = App.DbContext.Actors.Remove(actor);
+                _ = context.Actors.Remove(actor);
                 _ = Actors.Remove(actor);
             }
-            //App.DbContext.SaveChanges();
+            context.SaveChanges();
             DialogResult = true;
         }
 
@@ -456,8 +480,9 @@ namespace HappyHour.ViewModel
         {
             if (DialogResult.Value)
             {
-                App.DbContext.SaveChanges();
+                //App.Current.DbContext.SaveChanges();
             }
+            Messenger.Unregister<ViewEventArgs>(this);
         }
     }
 }

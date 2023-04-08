@@ -39,26 +39,17 @@ namespace HappyHour.View.Behavior
             }
         }
 
-        bool _autoscroll = true;
+        //bool _autoscroll = true;
+        TextViewModel _viewModel = null;
         private void DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            if (e.NewValue is ConsoleLogViewModel)
-            {
-                //var editor = sender as TextEditor;
-                //(e.NewValue as TextViewModel).AddElementGenerator(editor.TextArea.TextView);
-                _autoscroll = false;
-            }
-            else
-            {
-                _autoscroll = true;
-            }
+            _viewModel = e.NewValue as TextViewModel;
         }
         private void AssociatedObjectOnTextChanged(object sender, EventArgs eventArgs)
         {
-            if (!_autoscroll)
-                return;
-            var textEditor = sender as TextEditor;
+            if (!_viewModel.AutoScrollEnabled) return;
 
+            var textEditor = sender as TextEditor;
             if (textEditor != null && _prevLineCount != textEditor.LineCount)
             {
                 textEditor.ScrollToLine(textEditor.LineCount);

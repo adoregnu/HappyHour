@@ -79,14 +79,13 @@ namespace HappyHour.ViewModel
             set
             {
                 SetProperty(ref _searchActorName, value);
-                OnPropertyChanged();
+                OnPropertyChanged(nameof(AllActors));
             }
         }
 
         public bool? DialogResult
         {
             get => _dialogResult;
-            //private set => Set(nameof(DialogResult), ref _dialogResult, value);
             private set => SetProperty(ref _dialogResult, value);
         }
 
@@ -112,6 +111,13 @@ namespace HappyHour.ViewModel
             _amovie = movie;
             Title = movie.Pid;
 
+            CmdSetStudio = new RelayCommand(() => Studio = SelectedStudio);
+            CmdSetSeries = new RelayCommand(() => Series = SelectedSeries);
+            CmdAddActor = new RelayCommand(OnAddActor);
+            CmdRemoveActor = new RelayCommand(OnRemoveActor);
+            CmdAddGenre = new RelayCommand(OnAddGnere);
+            CmdSave = new RelayCommand(OnSave);
+
             if (movie.MovieInfo != null)
             {
                 Av = movie.MovieInfo;
@@ -130,26 +136,22 @@ namespace HappyHour.ViewModel
                 Actors = new ObservableCollection<AvActor>();
                 Genres = new ObservableCollection<AvGenre>();
 
-                App.DbContext.Items.Attach(Av);
+                //App.Current.DbContext.Items.Attach(Av);
             }
 
-            CmdSetStudio = new RelayCommand(() => Studio = SelectedStudio);
-            CmdSetSeries = new RelayCommand(() => Series = SelectedSeries);
-            CmdAddActor = new RelayCommand(() => OnAddActor());
-            CmdRemoveActor = new RelayCommand(() => OnRemoveActor());
-            CmdAddGenre = new RelayCommand(() => OnAddGnere());
-            CmdSave = new RelayCommand(() => OnSave());
+            using var context = AvDbContextPool.CreateContext();
+            //context.Items.Attach(Av);
 
-            AllSeries = App.DbContext.Series.ToList();
-            AllGenres = App.DbContext.Genres.ToList();
+            AllSeries = context.Series.ToList();
+            AllGenres = context.Genres.ToList();
 
-            var names = App.DbContext.ActorNames
+            var names = context.ActorNames
                 .Include(n => n.Actor)
                 .Where(n => n.Actor != null)
                 .OrderBy(n => n.Name)
                 .ToList();
             _allActors = names.Select(n => n.Actor).Distinct();
-            AllStudios = App.DbContext.Studios.ToList();
+            AllStudios = context.Studios.ToList();
         }
 
         private void OnAddActor()
@@ -185,6 +187,8 @@ namespace HappyHour.ViewModel
 
         private void OnSave()
         {
+            using var context = AvDbContextPool.CreateContext();
+            _ = context.Items.Attach(Av);
             if (_actorChanged)
             {
                 Av.Actors = Actors;
@@ -200,7 +204,7 @@ namespace HappyHour.ViewModel
                 Av.DateModifed = DateTime.Now;
             }
             _amovie.MovieInfo = Av;
-            App.DbContext.SaveChanges();
+            context.SaveChanges();
         }
     }
 }

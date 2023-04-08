@@ -123,7 +123,7 @@ namespace HappyHour.ViewModel
             CmdDownToSubfolder = new RelayCommand(() => EnterSubFolder());
             CmdRename = new RelayCommand<object>(p => RenameFile(p));
 
-            var lastDir = App.GConf["general"]["last_path"];
+            var lastDir = App.Current.GConf["general"]["last_path"];
             var driveName = lastDir.Substring(0, 2);
 
             RefreshDrive();
@@ -180,7 +180,7 @@ namespace HappyHour.ViewModel
             InitFsWatcher();
             PopulateFiles();
             DirChanged?.Invoke(this, CurrDirInfo);
-            App.GConf["general"]["last_path"] = _currPath;
+            App.Current.GConf["general"]["last_path"] = _currPath;
         }
 
         void InitFsWatcher()

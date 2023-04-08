@@ -27,9 +27,9 @@ namespace HappyHour.Spider
         {
             string userid = "";
             string password = "";
-            if (App.GConf.Sections.ContainsSection("avjamak"))
+            if (App.Current.GConf.Sections.ContainsSection("avjamak"))
             {
-                var avjamak = App.GConf["avjamak"];
+                var avjamak = App.Current.GConf["avjamak"];
                 if (avjamak.ContainsKey("userid") &&
                     avjamak.ContainsKey("password"))
                 {

@@ -2,17 +2,14 @@
 using System.Linq;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace HappyHour.Model
 {
     public class AvDbContext : DbContext
     {
-        protected override void OnConfiguring(DbContextOptionsBuilder optionbuilder)
-        {
-            optionbuilder.UseSqlite($@"Data Source={App.LocalAppData}\db\AvDb.db");
-            //optionbuilder.UseSqlite($@"Data Source={App.LocalAppData}\AvDb.db");
-        }
 
+        public AvDbContext(DbContextOptions<AvDbContext> options) : base(options) { }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             AvModelConfig.Config(modelBuilder);

@@ -68,7 +68,7 @@ namespace HappyHour.Spider
         private void CropImage(string fname)
         {
             Log.Print($"{Name}: CropImage: {fname}");
-            string realPath = @$"{App.LocalAppData}\db\{fname}";
+            string realPath = @$"{App.Current.LocalAppData}\db\{fname}";
 
             var org = new Bitmap(realPath);
             if (org.Height <= org.Width) { return; }
