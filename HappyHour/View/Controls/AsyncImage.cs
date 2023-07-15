@@ -21,7 +21,7 @@ namespace HappyHour.View.Controls
         private async Task LoadImageAsync(AsyncImage ctrl, string imagePath)
         {
             int width = (int)(double)ctrl.GetValue(WidthProperty);
-            //Log.Print($"width:{width}");
+            //Log.Print($"path:{imagePath}, width:{width}");
             Source = await Task.Run(() =>
             {
                 return ImageUtils.ReadImage(imagePath, width);

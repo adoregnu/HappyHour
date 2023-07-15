@@ -17,8 +17,8 @@ namespace HappyHour.View.Pane
             ILayoutContainer destinationContainer)
         {
             LayoutAnchorablePane pane = null;
-            if (anchorableToShow.Content is TextViewModel ||
-                anchorableToShow.Content is ScreenshotViewModel)
+            if (anchorableToShow.Content is TextViewModel)
+                //anchorableToShow.Content is ScreenshotViewModel)
             {
                 pane = layout.Descendents().OfType<LayoutAnchorablePane>()
                             .FirstOrDefault(d => d.Name == "bottom");
@@ -55,8 +55,8 @@ namespace HappyHour.View.Pane
             LayoutDocument anchorableShown)
         {
 #if true
-            if (anchorableShown.Content is SpiderViewModel)// ||
-                //anchorableShown.Content is BrowserViewModel ||
+            if (anchorableShown.Content is SpiderViewModel ||
+                anchorableShown.Content is ScreenshotViewModel)
                 //anchorableShown.Content is PlayerViewModel)
             {
                 var parentDocumentGroup = anchorableShown.FindParent<LayoutDocumentPaneGroup>();

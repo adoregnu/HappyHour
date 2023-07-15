@@ -17,6 +17,7 @@ namespace HappyHour.ViewModel
         string _searchText;
 
         IMediaList _mediaList;
+        readonly AvDbContextPool _dbPoll;
 
         public IMediaList MediaList
         {
@@ -59,62 +60,10 @@ namespace HappyHour.ViewModel
         }
         public List<string> ListType { get; set; }
 
-        public IEnumerable<AvItem> AvItemList
-        { 
-            get
-            {
-                if (string.IsNullOrEmpty(SearchText))
-                    return null;
-
-                return App.Current.DbContext.Items
-                    .Where(i => EF.Functions.Like(i.Pid, $"%{SearchText}%"))
-                    .ToList();
-            }
-        }
-        public IEnumerable<AvActorName> AvActorNameList
-        {
-            get
-            { 
-                if (string.IsNullOrEmpty(SearchText))
-                    return App.Current.DbContext.ActorNames
-                        .OrderBy(a => a.Name)
-                        .ToList();
-
-                return App.Current.DbContext.ActorNames
-                    .Where(i => EF.Functions.Like(i.Name, $"%{SearchText}%"))
-                    .OrderBy(a => a.Name)
-                    .ToList();
-            }
-        }
-        public IEnumerable<AvStudio> AvStudioList
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(SearchText))
-                    return App.Current.DbContext.Studios
-                        .OrderBy(s => s.Name)
-                        .ToList();
-
-                return App.Current.DbContext.Studios
-                    .Where(s => EF.Functions.Like(s.Name, $"{SearchText}%"))
-                    .OrderBy(s => s.Name)
-                    .ToList();
-            }
-        }
-
-        public IEnumerable<AvSeries> AvSeriesList
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(SearchText))
-                    return App.Current.DbContext.Series
-                        .ToList();
-
-                return App.Current.DbContext.Series
-                    .Where(s => EF.Functions.Like(s.Name, $"%{SearchText}%"))
-                    .ToList();
-            }
-        }
+        public IEnumerable<AvItem> AvItemList => _dbPoll.GetAvMovies(SearchText);
+        public IEnumerable<AvActorName> AvActorNameList => _dbPoll.GetActorNames(SearchText);
+        public IEnumerable<AvStudio> AvStudioList => _dbPoll.GetAvStudios(SearchText);
+        public IEnumerable<AvSeries> AvSeriesList  =>  _dbPoll.GetAvSeries(SearchText);
 
         AvItem _selectedAvItem;
         public AvItem  SelectedItem
@@ -138,13 +87,8 @@ namespace HappyHour.ViewModel
                 SetProperty(ref _selectedActorName, value);
                 if (value == null) return;
 
-                App.Current.DbContext.Entry(value)
-                    .Reference(n => n.Actor).Load();
-                App.Current.DbContext.Entry(value.Actor)
-                    .Collection(a => a.Items).Load();
-
-                var items = value.Actor.Items.ToList();
-                MediaList.LoadItems(items);
+                var movies = _dbPoll.GetAvMovies(value);
+                MediaList.LoadItems(movies);
             }
         }
         AvStudio _selectedStudio;
@@ -156,10 +100,8 @@ namespace HappyHour.ViewModel
                 SetProperty(ref _selectedStudio, value);
                 if (value == null) return;
 
-                var items = App.Current.DbContext.Items
-                    .Where(i => i.Studio == value)
-                    .ToList();
-                MediaList.LoadItems(items);
+                var movies = _dbPoll.GetAvMovies(value);
+                MediaList.LoadItems(movies);
             }
         }
 
@@ -172,15 +114,12 @@ namespace HappyHour.ViewModel
                 SetProperty(ref _selectedSeries, value);
                 if (value == null) return;
 
-                var items = App.Current.DbContext.Items
-                    .Where(i => i.Series == value)
-                    .ToList();
-                MediaList.LoadItems(items);
+                var movies = _dbPoll.GetAvMovies(value);
+                MediaList.LoadItems(movies);
             }
         }
 
-        readonly Dictionary<string, string> _typeToPropertyName
-            = new Dictionary<string, string>
+        readonly Dictionary<string, string> _typeToPropertyName = new ()
             {
                 { "Pid", nameof(AvItemList) },
                 { "Actor", nameof(AvActorNameList) },
@@ -192,16 +131,15 @@ namespace HappyHour.ViewModel
         {
             Title = "Database";
             ListType = _typeToPropertyName.Keys.ToList();
+            _dbPoll = new AvDbContextPool();
         }
 
         public bool SelectPid(string pid)
         {
-            var item = App.Current.DbContext.Items
-                .Where(i => EF.Functions.Like(i.Pid, $"%{pid}%"))
-                .FirstOrDefault();
-            if (item != null)
+            var movies = _dbPoll.GetAvMovies(pid);
+            if (movies.Any())
             {
-                MediaList.AddMedia(item.Path);
+                MediaList.AddMedia(movies.First().Path);
                 return true;
             }
             else

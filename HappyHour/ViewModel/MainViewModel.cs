@@ -66,11 +66,11 @@ namespace HappyHour.ViewModel
             Anchors.Add(new DebugLogViewModel());
             Anchors.Add(new StatusLogViewModel());
             Anchors.Add(new ConsoleLogViewModel());
-            Anchors.Add(new ScreenshotViewModel { MediaList = _mediaListMv });
 
             Docs.Add(_mediaListMv);
             //Docs.Add(new PlayerViewModel { MediaList = _mediaListMv });
             //Docs.Add(new BrowserBase());
+            Docs.Add(new ScreenshotViewModel { MediaList = _mediaListMv });
             Docs.Add(new SpiderViewModel
             {
                 MediaList = _mediaListMv,

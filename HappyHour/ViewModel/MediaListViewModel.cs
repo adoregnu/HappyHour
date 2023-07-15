@@ -326,7 +326,7 @@ namespace HappyHour.ViewModel
                 }
             }
 
-            Messenger.Send(new ViewEventArgs("AvDeleted", null));
+            Messenger.Send(new ViewEventArgs("RefreshActors", null));
         }
 
         private void EditMovieInfo(object param)
@@ -393,7 +393,6 @@ namespace HappyHour.ViewModel
                         if (item != null)
                         {
                             item.Path = currDir;
-                            context.SaveChanges();
                         }
                         AddMedia(currDir);
                     }
@@ -481,6 +480,7 @@ namespace HappyHour.ViewModel
                 Log.Print("Search orphanage media done!");
             }, token);
             await _runningTask;
+            context.SaveChanges();
         }
 
         public async void LoadItems(List<AvItem> movies)
@@ -542,6 +542,7 @@ namespace HappyHour.ViewModel
             {
                 _mitemsToSearch.RemoveAt(0);
             }
+            Messenger.Send(new ViewEventArgs("RefreshActors", null));
             OnScrapAvInfo(spider);
         }
 

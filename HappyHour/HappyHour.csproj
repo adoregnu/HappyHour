@@ -14,19 +14,19 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AvalonEdit" Version="6.2.0.78" />
-    <PackageReference Include="CefSharp.OffScreen.NETCore" Version="110.0.300" />
-    <PackageReference Include="CefSharp.Wpf.NETCore" Version="110.0.300" />
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.1.0" />
-    <PackageReference Include="Dirkster.AvalonDock" Version="4.71.2" />
-    <PackageReference Include="Dirkster.AvalonDock.Themes.VS2013" Version="4.71.2" />
+    <PackageReference Include="AvalonEdit" Version="6.3.0.90" />
+    <PackageReference Include="CefSharp.OffScreen.NETCore" Version="114.2.100" />
+    <PackageReference Include="CefSharp.Wpf.NETCore" Version="114.2.100" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.0" />
+    <PackageReference Include="Dirkster.AvalonDock" Version="4.72.0" />
+    <PackageReference Include="Dirkster.AvalonDock.Themes.VS2013" Version="4.72.0" />
     <PackageReference Include="FFME.Windows" Version="4.4.350" />
     <PackageReference Include="Imazen.WebP" Version="10.0.1" />
     <PackageReference Include="ini-parser-netstandard" Version="2.5.2" />
     <PackageReference Include="libwebp.v140" Version="0.5.0.2" />
     <PackageReference Include="log4net" Version="2.0.15" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.3" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.3">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.8">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -139,15 +139,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="chromiumembeddedframework.runtime.win-x64" Version="110.0.30" />
+    <PackageReference Update="chromiumembeddedframework.runtime.win-x64" Version="114.2.10" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="chromiumembeddedframework.runtime.win-x86" Version="110.0.30" />
+    <PackageReference Update="chromiumembeddedframework.runtime.win-x86" Version="114.2.10" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="chromiumembeddedframework.runtime.win-arm64" Version="110.0.30" />
+    <PackageReference Update="chromiumembeddedframework.runtime.win-arm64" Version="114.2.10" />
   </ItemGroup>
 
 </Project>

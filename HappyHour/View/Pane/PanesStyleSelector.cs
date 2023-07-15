@@ -13,7 +13,7 @@ namespace HappyHour.View.Pane
         public override Style SelectStyle(object item, DependencyObject container)
         {
             if (item is DebugLogViewModel || item is FileListViewModel ||
-                item is ScreenshotViewModel || item is DbViewModel)
+                item is DbViewModel)
                 return AnchorStyle;
 
             if (item is ViewModel.Pane)

@@ -39,7 +39,6 @@ namespace HappyHour
 
         public CultureInfo enUS = new("en-US");
         public string LocalAppData { get; set; }
-        public AvDbContext DbContext { get; set; }
 
         public IniData GConf { get; private set; }
         public const string Name = "HappyHour";
@@ -225,16 +224,6 @@ namespace HappyHour
 
             InitDefaultConf();
             InitCefSharp();
-
-            try
-            {
-                DbContext = AvDbContextPool.CreateContext();// new AvDbContext();
-            }
-            catch (Exception ex)
-            {
-                Log.Print(ex.Message);
-            }
-
             //Task.Run(() => PreLoadFFmpeg());
         }
 

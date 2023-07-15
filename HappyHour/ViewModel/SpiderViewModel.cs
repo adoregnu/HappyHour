@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Windows;
 using System.Collections.Generic;
 
 using CefSharp;
@@ -7,6 +8,7 @@ using CefSharp;
 using HappyHour.Spider;
 using HappyHour.CefHandler;
 using HappyHour.Interfaces;
+using MvvmDialogs;
 
 namespace HappyHour.ViewModel
 {
@@ -164,6 +166,10 @@ namespace HappyHour.ViewModel
                 if (d.type == "text")
                 {
                     SearchText(d);
+                }
+                else if (d.type == "error")
+                {
+                    MainView.DialogService.ShowMessageBox(this, d.message, "Error");
                 }
                 else
                 {

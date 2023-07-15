@@ -38,7 +38,7 @@ namespace HappyHour.Model
 
         public string PicturePath
         {
-            get => picturePath;
+            get => string.IsNullOrEmpty(picturePath) ? "" : picturePath;
             set => Set(ref picturePath, value);
         }
         public DateTime DateAdded { get; set; }

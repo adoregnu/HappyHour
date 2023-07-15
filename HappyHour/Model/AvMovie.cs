@@ -39,10 +39,8 @@ namespace HappyHour.Model
             {
                 if (_movieInfo != null && value == null)
                 {
-                    using var context = AvDbContextPool.CreateContext();
-                    _ = context.Attach(value);
-                    _ = context.Items.Remove(_movieInfo);
-                    _ = context.SaveChanges();
+                    using var context = new AvDbContextPool();
+                    context.DeleteMovie(_movieInfo);
                 }
                 _movieInfo = value;
                 UpdateProperties();
@@ -74,10 +72,8 @@ namespace HappyHour.Model
                     Path = target;
                     if (MovieInfo != null)
                     {
-                        using var context = AvDbContextPool.CreateContext();
-                        context.Attach(MovieInfo);
-                        MovieInfo.Path = target;
-                        _ = context.SaveChanges();
+                        using var context = new AvDbContextPool();
+                        context.UpdateMovie(MovieInfo, movie => { movie.Path = target; });
                     }
                     OnCompleted(this);
                 }
@@ -92,13 +88,7 @@ namespace HappyHour.Model
         {
             try
             {
-                if (MovieInfo != null)
-                {
-                    using var context = AvDbContextPool.CreateContext();
-                    context.Items.Attach(MovieInfo);
-                    _ = context.Items.Remove(MovieInfo);
-                    _ = context.SaveChanges();
-                }
+                MovieInfo = null;
                 Directory.Delete(Path, true);
             }
             catch (Exception ex)
@@ -163,14 +153,8 @@ namespace HappyHour.Model
                 Poster = "";
             }
 
-            using var context = AvDbContextPool.CreateContext();
-            MovieInfo = await context.Items
-                .Include(av => av.Studio)
-                .Include(av => av.Actors)
-                    .ThenInclude(ac => ac.Names)
-                .Include(av => av.Genres)
-                .FirstOrDefaultAsync(av => av.Pid == Pid);
-
+            using var context = new AvDbContextPool();
+            MovieInfo = await context.GetMovie(Pid);
             UpdateProperties();
         }
     }

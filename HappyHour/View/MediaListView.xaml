@@ -5,11 +5,195 @@
              xmlns:md="https://github.com/fantasticfiasco/mvvm-dialogs"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:bh="clr-namespace:HappyHour.View.Behavior"
-                xmlns:viewmodel="clr-namespace:HappyHour.ViewModel"
-                d:DataContext="{d:DesignInstance Type=viewmodel:MediaListViewModel}"
+             xmlns:viewmodel="clr-namespace:HappyHour.ViewModel"
+             xmlns:control="clr-namespace:HappyHour.View.Controls"
+             xmlns:local="clr-namespace:HappyHour.View"
+             xmlns:converter="clr-namespace:HappyHour.Converter"
+             xmlns:vwp="clr-namespace:WpfToolkit.Controls;assembly=VirtualizingWrapPanel"
              mc:Ignorable="d" 
              md:DialogServiceViews.IsRegistered="True"
+             d:DataContext="{d:DesignInstance Type=viewmodel:MediaListViewModel}"
              d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <converter:PosterToVisivility x:Key="PosterToVisivility" />
+        <ControlTemplate x:Key="ImageItem">
+            <Grid Width="200" Height="180"
+               Tag="{Binding RelativeSource={RelativeSource FindAncestor,
+                        AncestorType={x:Type local:MediaListView}}, Path=DataContext}">
+                <Grid.Resources>
+                    <local:BindingProxy x:Key="VmContext"
+                    Data="{Binding RelativeSource={RelativeSource FindAncestor,
+                        AncestorType={x:Type local:MediaListView}}, Path=DataContext}"/>
+                    <ContextMenu x:Key="ImageContextMenu">
+                        <MenuItem Header="Scrap"
+                        Visibility="{Binding Data.SpiderList, Source={StaticResource VmContext},
+                            Converter={StaticResource nulltoVis}}"
+                        ItemsSource="{Binding Data.SpiderList, Source={StaticResource VmContext}}">
+                            <MenuItem.ItemTemplate>
+                                <DataTemplate>
+                                    <MenuItem Header="{Binding Name}"
+                                    Command="{Binding Data.CmdScrap, Source={StaticResource VmContext}}"
+                                    CommandParameter="{Binding .}">
+                                    </MenuItem>
+                                </DataTemplate>
+                            </MenuItem.ItemTemplate>
+                        </MenuItem>
+                        <MenuItem Header="Exclude" 
+                          Command="{Binding PlacementTarget.Tag.CmdExclude,
+                                RelativeSource={RelativeSource FindAncestor, AncestorType=ContextMenu}}" 
+                          CommandParameter="{Binding}"/>
+                        <MenuItem Header="Torrent Download" 
+                          Visibility="{Binding TorrentVisibility}"
+                          Command="{Binding PlacementTarget.Tag.CmdDownloadTorrent,
+                                RelativeSource={RelativeSource FindAncestor, AncestorType=ContextMenu}}" 
+                          CommandParameter="{Binding}"/>
+                        <MenuItem Header="Magnet Download" 
+                          Visibility="{Binding MagnetVisibility}"
+                          Command="{Binding PlacementTarget.Tag.CmdDownloadMagnet,
+                                RelativeSource={RelativeSource FindAncestor, AncestorType=ContextMenu}}" 
+                          CommandParameter="{Binding}"/>
+                    </ContextMenu>
+                </Grid.Resources>
+                <Grid.Style>
+                    <Style TargetType="{x:Type Grid}">
+                        <Setter Property="ContextMenu" Value="{StaticResource ImageContextMenu}"/>
+                    </Style>
+                </Grid.Style>
+                <!--Bind Image Path in Image Control-->
+                <control:AsyncImage HorizontalAlignment="Center" ToolTipService.ShowDuration="20000" ToolTipService.InitialShowDelay="0"
+                ImagePath="{Binding Poster}" Width="200">
+                    <!--View Large Image on Image Control Tooltip-->
+                    <Image.ToolTip>
+                        <ToolTip Visibility="{Binding Poster, Converter={StaticResource PosterToVisivility}}">
+                            <control:AsyncImage ImagePath="{Binding Poster}"/>
+                        </ToolTip>
+                    </Image.ToolTip>
+                </control:AsyncImage>
+                <StackPanel VerticalAlignment="Bottom" Background="Black"
+                        Opacity="0.60">
+                    <TextBlock Text="{Binding BriefInfo}" Foreground="White"
+                           Height="60" Margin="15,0,15,0" TextAlignment="Center"
+                           FontWeight="SemiBold"/>
+                </StackPanel>
+            </Grid>
+        </ControlTemplate>
+
+        <ControlTemplate x:Key="VideoItem">
+            <Grid Width="200" Height="180">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="auto"/>
+                </Grid.RowDefinitions>
+                <Grid.Resources>
+                    <local:BindingProxy x:Key="VmContext"
+                    Data="{Binding RelativeSource={RelativeSource FindAncestor,
+                        AncestorType={x:Type local:MediaListView}}, Path=DataContext}"/>
+                    <local:BindingProxy x:Key="CtrlContext"
+                    Data="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}}"/>
+                    <ContextMenu x:Key="videoContextMenu">
+                        <MenuItem Header="Scrap"
+                        Visibility="{Binding Data.SpiderList, Source={StaticResource VmContext}, Converter={StaticResource nulltoVis}}"
+                        ItemsSource="{Binding Data.SpiderList, Source={StaticResource VmContext}}">
+                            <MenuItem.ItemTemplate>
+                                <DataTemplate>
+                                    <MenuItem Header="{Binding Name}"
+                                    Command="{Binding Data.CmdScrap, Source={StaticResource VmContext}}"
+                                    CommandParameter="{Binding .}">
+                                    </MenuItem>
+                                </DataTemplate>
+                            </MenuItem.ItemTemplate>
+                        </MenuItem>
+                        <!--
+                    <MenuItem Header="External Player" 
+                        Command="{Binding Data.CmdExternalPlayer, Source={StaticResource VmContext}}"
+                        CommandParameter="{Binding}"/>
+
+                    <MenuItem
+                        Header="MoveTo"
+                        Command="{Binding Data.CmdMoveItemTo, Source={StaticResource VmContext}}"
+                        CommandParameter="{Binding Data.SelectedItems, Source={StaticResource CtrlContext}}">
+                    </MenuItem>
+-->
+                        <MenuItem Header="Copy Path" 
+                        Command="{Binding Data.CmdCopyPath, Source={StaticResource VmContext}}"
+                        CommandParameter="{Binding}"/>
+                        <MenuItem Header="Delete" 
+                        Command="{Binding Data.CmdDeleteItem, Source={StaticResource VmContext}}"
+                        CommandParameter="{Binding Data.SelectedItems, Source={StaticResource CtrlContext}}"/>
+                        <MenuItem Header="Clear DB"
+                        Command="{Binding Data.CmdClearDb, Source={StaticResource VmContext}}"
+                        CommandParameter="{Binding Data.SelectedItems, Source={StaticResource CtrlContext}}"/>
+                        <MenuItem Header="Edit" 
+                        Command="{Binding Data.CmdEditItem, Source={StaticResource VmContext}}"
+                        CommandParameter="{Binding}"/>
+                    </ContextMenu>
+                </Grid.Resources>
+                <Grid.Style>
+                    <Style TargetType="{x:Type Grid}">
+                        <Setter Property="ContextMenu" Value="{StaticResource videoContextMenu}"/>
+                    </Style>
+                </Grid.Style>
+                <Grid.ToolTip>
+                    <ToolTip>
+                        <TextBlock Text="{Binding Actresses}"/>
+                    </ToolTip>
+                </Grid.ToolTip>
+                <Grid.InputBindings>
+                    <MouseBinding Gesture="LeftDoubleClick" Command="{Binding Data.CmdDoubleClick, Source={StaticResource VmContext}}"/>
+                </Grid.InputBindings>
+                <control:AsyncImage HorizontalAlignment="Center" ToolTipService.ShowDuration="20000"
+                ImagePath="{Binding Poster}" Width="200">
+                    <!--View Large Image on Image Control Tooltip-->
+                    <Image.ToolTip>
+                        <ToolTip Visibility="{Binding Poster, Converter={StaticResource PosterToVisivility}}">
+                            <control:AsyncImage ImagePath="{Binding Poster}"/>
+                        </ToolTip>
+                    </Image.ToolTip>
+                </control:AsyncImage>
+                <TextBlock
+                Text="{Binding BriefInfo}" Grid.Row="1" Opacity="0.5"
+                HorizontalAlignment="Center" VerticalAlignment="Center"
+                Foreground="White" TextAlignment="Center"/>
+            </Grid>
+        </ControlTemplate>
+<!--
+        <ControlTemplate x:Key="MediaListTamplate">
+            <local:MediaListView DataContext="{Binding MediaList}"/>
+        </ControlTemplate>
+        <ControlTemplate x:Key="MediaPlayerTemplate">
+            <local:PlayerView DataContext="{Binding MediaPlayer}"/>
+        </ControlTemplate>
+
+        <Style x:Key="ListPlayerStyle" TargetType="ContentControl">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ViewType, Mode=TwoWay}" Value="1">
+                    <Setter Property="Template" Value="{StaticResource MediaListTamplate}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding ViewType, Mode=TwoWay}" Value="2">
+                    <Setter Property="Template" Value="{StaticResource MediaPlayerTemplate}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+-->
+        <DataTemplate x:Key="ImageListTemplate">
+            <ContentControl>
+                <ContentControl.Style>
+                    <Style TargetType="ContentControl">
+                        <!--<Setter Property="Template" Value="{StaticResource ImageItem}"/>-->
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ., Converter={StaticResource MediaTypeConverter}}" Value="image">
+                                <Setter Property="Template" Value="{StaticResource ImageItem}"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding ., Converter={StaticResource MediaTypeConverter}}" Value="movie">
+                                <Setter Property="Template" Value="{StaticResource VideoItem}"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ContentControl.Style>
+            </ContentControl>
+        </DataTemplate>
+
+    </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
