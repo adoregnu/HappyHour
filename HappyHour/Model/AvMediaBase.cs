@@ -7,7 +7,6 @@ using HappyHour.Interfaces;
 using System.Threading.Tasks;
 using System.Threading;
 using CefSharp.DevTools.CSS;
-using Imazen.WebP;
 using System.Drawing;
 using System.Reflection.Metadata;
 using System.Drawing.Imaging;
@@ -47,10 +46,28 @@ namespace HappyHour.Model
             return result == 0 ? Pid.CompareTo(media.Pid) : result;
         }
 
-        public string GenPosterPath(string fileName)
+        public string GenPosterPath(string fileName, bool isScreenshot = false)
         {
             string ext = System.IO.Path.GetExtension(fileName);
-            return @$"{Path}\{Pid}_poster{ext}";
+            if (isScreenshot)
+            {
+                int idx = 0;
+                string candidate;
+                do {
+                    candidate = @$"{Path}\{Pid}_screenshot_{idx}{ext}";
+                    if (!File.Exists(candidate))
+                    {
+                        break;
+                    }
+                    idx++;
+                } while (true);
+
+                return candidate; 
+            }
+            else
+            {
+                return @$"{Path}\{Pid}_poster{ext}";
+            }
         }
 
         public string GenActorThumbPath(string actorName, string fileName)

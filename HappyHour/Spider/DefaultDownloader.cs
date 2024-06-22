@@ -15,7 +15,7 @@ namespace HappyHour.Spider
         private int _numDownloaded;
         private bool _isEnabled;
         private readonly SpiderViewModel _browser;
-        private readonly Dictionary<string, IDictionary<string, object>> _urls = new();
+        private readonly Dictionary<string, (string, IDictionary<string, object>)> _urls = new();
         private readonly Timer _timer;
 
         private SpiderBase _spider;
@@ -62,17 +62,22 @@ namespace HappyHour.Spider
 
             lock (_timer)
             {
-                var dic = _urls[e.OriginalUrl];
+                var dict = _urls[e.OriginalUrl];
                 var item = _spider.SearchMedia;
-                if (dic.ContainsKey("cover"))
+                if (dict.Item1 == "cover")
                 {
                     e.SuggestedFileName = item.GenPosterPath(e.SuggestedFileName);
-                    dic["cover"] = e.SuggestedFileName;
+                    dict.Item2["cover"] = e.SuggestedFileName;
                 }
-                else if (dic.ContainsKey("thumb"))
+                else if (dict.Item1 == "screenshot")
                 {
-                    var path = item.GenActorThumbPath(dic["name"].ToString(), e.SuggestedFileName);
-                    dic["thumb"] = Path.GetFileName(path);
+                    e.SuggestedFileName = item.GenPosterPath(e.SuggestedFileName, true);
+                    dict.Item2["screenshot"] = e.SuggestedFileName;
+                }
+                else if (dict.Item1 == "thumb")
+                {
+                    var path = item.GenActorThumbPath(dict.Item2["name"].ToString(), e.SuggestedFileName);
+                    dict.Item2["thumb"] = Path.GetFileName(path);
                     e.SuggestedFileName = path;
                 }
                 else
@@ -102,6 +107,7 @@ namespace HappyHour.Spider
             }
         }
 
+        readonly List<string> _item2download = ["cover", "thumb", "screenshot"];
         private void OnDownloadTimeout(object sender, ElapsedEventArgs e)
         {
             lock (_timer)
@@ -110,7 +116,7 @@ namespace HappyHour.Spider
 
                 _ = SpiderBase.IterateDynamic(_items, (key, dic) =>
                 {
-                    if (key is "cover" or "thumb")
+                    if (_item2download.Contains(key))
                     {
                         if (dic[key].ToString().StartsWith("http",
                             System.StringComparison.OrdinalIgnoreCase))
@@ -148,7 +154,7 @@ namespace HappyHour.Spider
             _items = items;
             _ = SpiderBase.IterateDynamic(items, (key, dict) =>
             {
-                if (key is "cover" or "thumb") { _numDownload++; }
+                if (_item2download.Contains(key)) { _numDownload++; }
                 return false;
             });
 
@@ -157,10 +163,10 @@ namespace HappyHour.Spider
             {
                 _ = SpiderBase.IterateDynamic(items, (key, dict) =>
                 {
-                    if (key is "cover" or "thumb")
+                    if (_item2download.Contains(key))
                     {
                         string url = dict[key].ToString();
-                        _urls.Add(url, dict);
+                        _urls.Add(url, (key, dict));
                         _browser.Download(url);
                     }
                     return false;

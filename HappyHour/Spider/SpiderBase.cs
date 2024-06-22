@@ -6,8 +6,6 @@ using System.Windows.Input;
 using Scriban;
 using CefSharp;
 
-//using GalaSoft.MvvmLight.Command;
-
 using HappyHour.ViewModel;
 using HappyHour.Interfaces;
 using HappyHour.Model;
@@ -107,8 +105,8 @@ namespace HappyHour.Spider
                 Scrap();
             });
 
-            ScrapItems = new()
-            {
+            ScrapItems =
+            [
                 new ScrapItem() { CanUpdate = true, Name = "title" },
                 new ScrapItem() { CanUpdate = true, Name = "date" },
                 //new ScrapItem() { CanUpdate = true, Name = "runtime" },
@@ -118,9 +116,10 @@ namespace HappyHour.Spider
                 new ScrapItem() { CanUpdate = true, Name = "genre" },
                 new ScrapItem() { CanUpdate = true, Name = "plot" },
                 new ScrapItem() { CanUpdate = true, Name = "cover" },
+                new ScrapItem() { CanUpdate = true, Name = "screenshot" },
                 new ScrapItem() { CanUpdate = true, Name = "actor" },
                 new ScrapItem() { CanUpdate = true, Name = "rating" },
-            };
+            ];
         }
         private void UpdateCheck(bool? check)
         {
@@ -154,7 +153,8 @@ namespace HappyHour.Spider
 
         protected virtual string GetScript(string name)
         {
-            var template = Template.Parse(App.ReadResource(name));
+            string common = App.ReadResource("Common.js");
+            var template = Template.Parse(common + App.ReadResource(name));
             return template.Render(new { Pid = Keyword });
         }
 
@@ -350,6 +350,7 @@ namespace HappyHour.Spider
                 {
                     path = SearchMedia.GenActorThumbPath(dict["name"].ToString(), dict[key].ToString());
                 }
+
                 if (path != null && File.Exists(path))
                 {
                     tmpList.Add((key, dict));
@@ -374,7 +375,7 @@ namespace HappyHour.Spider
                 if (d.data == 0)
                 {
                     Log.Print($"{Name}: {Keyword}: No exact matched ID");
-                    OnScrapCompleted(false);
+                    OnScrapCompleted(true);
                     return true;
                 }
                 if (SearchMedia == null)
@@ -402,6 +403,11 @@ namespace HappyHour.Spider
                 return true;
             }
             return false;
+        }
+
+
+        public virtual void UpdateDownload()
+        {
         }
 
         protected virtual void UpdateDb(IDictionary<string, object> items)

@@ -147,23 +147,23 @@ namespace HappyHour.ViewModel
         public MediaListViewModel()
         {
             Title = "AVList";
-            MediaList = new ObservableCollection<IAvMedia>();
-            SelectedMedias = new ObservableCollection<IAvMedia>();
+            MediaList = [];
+            SelectedMedias = [];
 
             BindingOperations.EnableCollectionSynchronization(MediaList, _lock);
 
-            CmdNewMovie = new RelayCommand(() => LastUpdatedMovies());
-            CmdExternalPlayer = new RelayCommand<AvMovie>(p => PlayMedia(p));
-            CmdExclude = new RelayCommand<AvTorrent>(p => ExcludeFromList(p));
+            CmdNewMovie = new RelayCommand(LastUpdatedMovies);
+            CmdExternalPlayer = new RelayCommand<AvMovie>(PlayMedia);
+            CmdExclude = new RelayCommand<AvTorrent>(ExcludeFromList);
             CmdDownloadTorrent = new RelayCommand<AvTorrent>(p => DownloadMedia(p, "torrent"));
             CmdDownloadMagnet = new RelayCommand<AvTorrent>(p => DownloadMedia(p,  "magnet"));
             CmdCopyPath = new RelayCommand<IAvMedia>(p => Clipboard.SetText(p.Path));
             CmdMoveItemTo = new RelayCommand<object>(p => MoveTo(p.ToList<AvMovie>()));
             CmdDeleteItem = new RelayCommand<object>(p => Delete(p.ToList<AvMovie>()));
             CmdClearDb = new RelayCommand<object>(p => ClearDb(p.ToList<AvMovie>()));
-            CmdEditItem = new RelayCommand<object>(p => EditMovieInfo(p));
-            CmdSearchOrphanageMedia = new RelayCommand(() => SearchOrphanage());
-            CmdSearchEmptyActor = new RelayCommand(() => OnSearchEmptyActor());
+            CmdEditItem = new RelayCommand<object>(EditMovieInfo);
+            CmdSearchOrphanageMedia = new RelayCommand(SearchOrphanage);
+            CmdSearchEmptyActor = new RelayCommand(OnSearchEmptyActor);
             CmdDoubleClick = new RelayCommand(() =>
             {
                 if (ItemDoubleClickedHandler != null)
@@ -542,8 +542,8 @@ namespace HappyHour.ViewModel
             {
                 _mitemsToSearch.RemoveAt(0);
             }
-            Messenger.Send(new ViewEventArgs("RefreshActors", null));
             OnScrapAvInfo(spider);
+            Messenger.Send(new ViewEventArgs("RefreshActors", null));
         }
 
         private void OnScrapAvInfo(SpiderBase spider)

@@ -17,11 +17,12 @@ namespace HappyHour.CefHandler
     class ImageFilter : IResponseFilter
     {
         private MemoryStream memoryStream;
-
+        readonly SpiderBase _spider;
         string _targetPath;
-        public ImageFilter(string targetPath)
+        public ImageFilter(string targetPath, SpiderBase spider)
         {
             _targetPath = targetPath;
+            _spider = spider;
         }
         bool IResponseFilter.InitFilter()
         {
@@ -75,12 +76,13 @@ namespace HappyHour.CefHandler
             File.WriteAllBytes(_targetPath, bytes);
             memoryStream.Dispose();
             memoryStream = null;
+            _spider.UpdateDownload();
         }
     }
     class AvResourceRequestHandler : ResourceRequestHandler
     {
         readonly SpiderBase _spider;
-         public AvResourceRequestHandler(SpiderBase spider)
+        public AvResourceRequestHandler(SpiderBase spider)
         {
             _spider = spider;
         }
@@ -95,7 +97,7 @@ namespace HappyHour.CefHandler
             var res = _spider.ResourcesToBeFiltered;
             if (res != null  && res.TryGetValue(request.Url, out string value))
             {
-                return new ImageFilter(value);
+                return new ImageFilter(value, _spider);
             }
             return null;
         }
@@ -106,11 +108,10 @@ namespace HappyHour.CefHandler
             IRequest request,
             IRequestCallback callback)
         {
-            request.SetReferrer(_spider.Browser.Address, ReferrerPolicy.Default);
+            request.SetReferrer(chromiumWebBrowser.Address, ReferrerPolicy.Default);
             return CefReturnValue.Continue;
         }
     }
-
     class AvRequestHandler : RequestHandler
     {
 

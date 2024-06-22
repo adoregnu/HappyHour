@@ -280,7 +280,7 @@ namespace HappyHour.Model
             await _context.Actors.Attach(actor)
                 .Collection(a => a.Items)
                 .LoadAsync();
-            return actor.Items.ToList();
+            return [.. actor.Items];
         }
 
         public async ValueTask<List<AvActor>> GetActorsByInitial(string initial)
@@ -305,7 +305,7 @@ namespace HappyHour.Model
                     .ToListAsync();
 
                 var actors = names.Select(n => n.Actor).Distinct();
-                if (!actors.Any()) return new List<AvActor>();
+                if (!actors.Any()) return [];
                 return actors.ToList();
             }
         }

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
-
+using System.Windows.Forms;
 using HappyHour.ViewModel;
 using Scriban;
 
@@ -24,6 +24,7 @@ namespace HappyHour.Spider
                     i.CanUpdate = false;
                 }
             });
+            OverwriteActorThumb = true;
         }
 
         int _numScrap = 0;

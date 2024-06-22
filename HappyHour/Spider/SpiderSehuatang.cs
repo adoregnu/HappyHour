@@ -5,8 +5,6 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Windows.Input;
 
-//using GalaSoft.MvvmLight.Command;
-
 using Scriban;
 
 using CefSharp;
@@ -16,6 +14,7 @@ using HappyHour.Interfaces;
 using HappyHour.CefHandler;
 using CefSharp.Handler;
 using CommunityToolkit.Mvvm.Input;
+using System.Threading;
 
 namespace HappyHour.Spider
 {
@@ -36,6 +35,7 @@ namespace HappyHour.Spider
 
         private readonly Dictionary<string, string> _images = new();
         private ILifeSpanHandler _popupHandler;
+        private Timer _downloadTimer;
 
         public int NumPage { get; set; } = 1;
         public List<string> Boards { get; set; }
@@ -71,14 +71,17 @@ namespace HappyHour.Spider
             SelectedBoard = "censored";
 
             ResourcesToBeFiltered = new Dictionary<string, string>();
+            //browser.RequestHandler = new AvRequestHandler(this);
 
             _popupHandler = new OffScreenPopupHandler(Browser);
             ReqeustHandler = new AvRequestHandler(this);
+            _downloadTimer = new Timer(TimerCallback, null, Timeout.Infinite, Timeout.Infinite);
         }
 
         protected override string GetScript(string name)
         {
-            var template = Template.Parse(App.ReadResource(name));
+            string common = App.ReadResource("Common.js");
+            var template = Template.Parse(common + App.ReadResource(name));
             return template.Render(new { Board = SelectedBoard, PageCount = NumPage });
         }
 
@@ -96,7 +99,7 @@ namespace HappyHour.Spider
                 return;
             }
             if (Directory.GetFiles(_outPath)
-                .Any(f => f.EndsWith(".torrent", StringComparison.OrdinalIgnoreCase)))
+                .Any(f => f.EndsWith(".torrent") || f.EndsWith(".magnet")))
             {
                 _dirExists = true;
                 Log.Print($"{Name}: Already downloaded! {_outPath}");
@@ -123,15 +126,15 @@ namespace HappyHour.Spider
             _numDownloaded = 0;
 
             var images = article.images as List<object>;
-            var files = article.files as List<object>;
+            //var files = article.files as List<object>;
             if (images != null) { _toDownload = images.Count; }
-            if (files != null) { _toDownload += files.Count; }
-            else if (article.magnet is List<object> magnets)
+            //if (files != null) { _toDownload += files.Count; }
+            if (article.magnet is List<object> magnets)
             {
                 int count = 1;
                 foreach (string magnet in magnets.Cast<string>())
                 {
-                    File.WriteAllText($"{_outPath}\\{_pid}{count}.magnet", magnet);
+                    File.WriteAllText($"{_outPath}\\{_pid}_{count}.magnet", magnet);
                     count++;
                 }
             }
@@ -153,10 +156,11 @@ namespace HappyHour.Spider
                 foreach (dynamic img in images)
                 {
                     ((IJavascriptCallback)img.func).ExecuteAsync();
-                    _numDownloaded++;
+                    //_numDownloaded++;
                 }
             }
-            files?.ForEach(fn => ((IJavascriptCallback)fn).ExecuteAsync());
+            //files?.ForEach(fn => ((IJavascriptCallback)fn).ExecuteAsync());
+            _downloadTimer.Change(2 * 1000, Timeout.Infinite);
         }
 
         private bool MoveNextPage()
@@ -206,6 +210,7 @@ namespace HappyHour.Spider
             else
             {
                 _scrapRunning = MoveNextPage();
+                //Thread.Sleep(1000);
             }
 
             if (!_scrapRunning)
@@ -256,6 +261,7 @@ namespace HappyHour.Spider
         {
             base.OnScrapCompleted(bUpdated);
             (Browser.WebBrowser.LifeSpanHandler, _popupHandler) = (_popupHandler, Browser.WebBrowser.LifeSpanHandler);
+            _downloadTimer.Change(Timeout.Infinite, Timeout.Infinite);
         }
 
         public override void Navigate2(IAvMedia _)
@@ -281,6 +287,31 @@ namespace HappyHour.Spider
             //    _images[e.OriginalUrl] : $"{_outPath}\\{e.SuggestedFileName}";
 
             e.SuggestedFileName = $"{_outPath}\\{e.SuggestedFileName}";
+        }
+
+        private void TimerCallback(object state)
+        {
+            _downloadTimer.Change(Timeout.Infinite, Timeout.Infinite);
+            Log.Print("Download timed out!!");
+            UiServices.Invoke(() =>
+            {
+                _numDownloaded = _toDownload = 0;
+                UpdateMedia();
+                MoveNextItem();
+            });
+        }
+
+        public override void UpdateDownload()
+        {
+            UiServices.Invoke(() =>
+            {
+                _numDownloaded++;
+                if (_toDownload == _numDownloaded)
+                {
+                    UpdateMedia();
+                    MoveNextItem();
+                }
+            });
         }
 
         private void OnDownloadUpdated(object sender, DownloadItem e)

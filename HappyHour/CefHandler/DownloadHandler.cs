@@ -27,7 +27,7 @@ namespace HappyHour.CefHandler
             return true;
         }
 
-        public void OnBeforeDownload(IWebBrowser chromiumWebBrowser,
+        public bool OnBeforeDownload(IWebBrowser chromiumWebBrowser,
             IBrowser browser,
             DownloadItem downloadItem,
             IBeforeDownloadCallback callback)
@@ -35,7 +35,7 @@ namespace HappyHour.CefHandler
             OnBeforeDownloadFired?.Invoke(this, downloadItem);
 
             if (callback.IsDisposed)
-                return;
+                return true;
 
             using (callback)
             {
@@ -45,6 +45,7 @@ namespace HappyHour.CefHandler
                     callback.Continue(downloadItem.SuggestedFileName, showDialog: ShowDialog);
                 }
             }
+            return true;
         }
 
         public void OnDownloadUpdated(IWebBrowser chromiumWebBrowser,

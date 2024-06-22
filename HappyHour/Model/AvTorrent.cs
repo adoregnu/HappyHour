@@ -36,7 +36,7 @@ namespace HappyHour.Model
                     }
                     else if (ext is "magnet" && file.EndsWith(ext, StringComparison.OrdinalIgnoreCase))
                     {
-                        var client = new QBittorrentClient(new Uri("http://localhost:8080"));
+                        var client = new QBittorrentClient(new Uri("http://192.168.50.26:8080"));
                         var magnets = new Uri(File.ReadAllText(file));
                         var addRequest = new AddTorrentUrlsRequest(magnets) { Paused = false };
                         await client.AddTorrentsAsync(addRequest);
@@ -78,6 +78,7 @@ namespace HappyHour.Model
             }
             Torrents.Clear();
             Screenshots.Clear();
+            bool torrent_sht = false;
             foreach (string file in files)
             {
                 if (file.Contains("_poster.") || file.Contains("_cover."))
@@ -99,6 +100,18 @@ namespace HappyHour.Model
                     Torrents.Add(file);
                     Date = File.GetCreationTime(file);
                     MagnetVisibility = Visibility.Visible;
+                    if (!file.Contains("sukebei"))
+                    {
+                        torrent_sht = true;
+                    }
+                }
+            }
+            if (torrent_sht)
+            {
+                int idx = -1;
+                while ((idx = Torrents.FindIndex(p => p.Contains("sukebei"))) >= 0)
+                {
+                    Torrents.RemoveAt(idx);
                 }
             }
             BriefInfo = $"{Pid}\n{Date}";

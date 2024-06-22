@@ -1,41 +1,12 @@
 ﻿(function () {
     const _PID = '{{pid}}';
-
-    function _parseSingleNode(_xpath) {
-        var result = document.evaluate(_xpath, document.body,
-            null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
-        var node = result.singleNodeValue;
-        if (node != null) {
-            return node.textContent.trim();
-        }
-        return null;
-    }
-
     function _parseRating(xpath) {
-        var rating = _parseSingleNode(xpath);
+        var rating = _jav_parse_single_node(xpath);
         if (rating != null && rating.length > 0) {
             //console.log('JavLibrary: rating:' + rating);
             var re = new RegExp('([0-9.]+)', 'i');
             var m = re.exec(rating);
             if (m != null) return m[1];
-        }
-        return null;
-    }
-
-    function _parseMultiNode(xpath, _getter = null) {
-        var result = document.evaluate(xpath, document.body,
-            null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
-
-        var array = [];
-        while (node = result.iterateNext()) {
-            if (_getter != null) {
-                array.push(_getter(node));
-            } else {
-                array.push(node.textContent.trim());
-            }
-        }
-        if (array.length > 0) {
-            return array;
         }
         return null;
     }
@@ -76,7 +47,7 @@
     }
 
     function parseSearchResult() {
-        var nodes = _parseMultiNode("//div[@class='videos']/div/a", get_node);
+        var nodes = _jav_parse_multi_node("//div[@class='videos']/div/a", get_node);
         if (nodes == null) {
             CefSharp.PostMessage({ type: 'items', data: 0 });
             return;
@@ -117,7 +88,7 @@
         },
         genre: {
             xpath: "//*[@id='video_genres']//*[@class='genre']//text()",
-            handler: _parseMultiNode
+            handler: _jav_parse_multi_node
         },
         actor: {
             xpath: "//*[@id='video_cast']//*[@class='cast']",
@@ -130,7 +101,7 @@
     for (var key in items) {
         var item = items[key];
         if (item["handler"] == null) {
-            msg[key] = _parseSingleNode(item['xpath']);
+            msg[key] = _jav_parse_single_node(item['xpath']);
         } else {
             msg[key] = item['handler'](item['xpath']);
         }

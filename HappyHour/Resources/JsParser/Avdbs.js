@@ -1,43 +1,8 @@
 ﻿(function () {
     const _PID = '{{pid}}';
-
-    function _parseSingleNode(_xpath, _getter = null, _node = document.body) {
-        var result = document.evaluate(_xpath, _node,
-            null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
-        var node = result.singleNodeValue;
-        if (node != null) {
-            if (_getter != null) {
-                return _getter(node);
-            } else {
-                var txt = node.textContent.trim();
-                return txt.length < 2 ? null : txt;
-            }
-        }
-        return null;
-    }
-
-    function _parseMultiNode(xpath, _getter = null) {
-        var result = document.evaluate(xpath, document.body,
-            null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
-
-        var array = [];
-        while (node = result.iterateNext()) {
-            if (_getter != null) {
-                array.push(_getter(node));
-            } else {
-                array.push(node.textContent.trim());
-            }
-        }
-        if (array.length > 0) {
-            return array;
-        }
-        return null;
-    }
-
     function get_node(node) { return node; }
-
     function _parseActor(xpath) {
-        var nodes = _parseMultiNode(xpath, get_node);
+        var nodes = _jav_parse_multi_node(xpath, get_node);
         if (nodes == null) { return null; }
 
         var actors = [];
@@ -48,7 +13,7 @@
     }
 
     function parseSearchResult() {
-        var nodes = _parseMultiNode("//div[@class='photo']/a", get_node);
+        var nodes = _jav_parse_multi_node("//div[@class='photo']/a", get_node);
         if (nodes == null) {
             console.log('no result!');
             CefSharp.PostMessage({ type: 'items', data: 0});
@@ -63,7 +28,7 @@
     }
 
     function addAlias(alias, xpath, node) {
-        var txt = _parseSingleNode(xpath, null, node);
+        var txt = _jav_parse_single_node(xpath, null, node);
         if (txt != null && txt.length > 1) {
             var tmp = txt.split('（');
             alias.push(tmp[0]);
@@ -74,14 +39,14 @@
     }
 
     function parseActorPage() {
-        var node = _parseSingleNode("//div[@class='profile_picture']", get_node);
+        var node = _jav_parse_single_node("//div[@class='profile_picture']", get_node);
         var actor = {};
-        var anode = _parseSingleNode("p[@class='profile_gallery']/img", get_node, node);
+        var anode = _jav_parse_single_node("p[@class='profile_gallery']/img", get_node, node);
         if (anode != null) {
             actor['thumb'] = anode.src;
         }
         var alias = [];
-        var txt = _parseSingleNode("//span[@class='inner_name_kr']", null, node);
+        var txt = _jav_parse_single_node("//span[@class='inner_name_kr']", null, node);
         if (txt != null && txt.length > 1) {
             var tmp = txt.split('（');
             actor['name'] = tmp[0];
@@ -92,7 +57,7 @@
         addAlias(alias, "//span[@class='inner_name_en']", node);
         addAlias(alias, "//span[@class='inner_name_cn']", node);
 /*
-        var names = _parseMultiNode("//span[contains(., '다른이름')]/*[contains(@class, 'actor_onm')]");
+        var names = _jav_parse_multi_node("//span[contains(., '다른이름')]/*[contains(@class, 'actor_onm')]");
         if (names != null) {
             names.forEach(function (name) {
                 var tmp = name.split(/\(|（/);
@@ -114,7 +79,7 @@
     }
 
     function parseStudio(xpath) {
-        var txt = _parseSingleNode(xpath);
+        var txt = _jav_parse_single_node(xpath);
         if (txt != null && txt.length > 1) {
             return txt.trim().substring(1);
         }
@@ -136,7 +101,7 @@
                 handler: _parseActor
             },
             plot: { xpath: "//p[@id='story_kr']"},
-            genre: { xpath: "//li[@class='gen_list']/a/text()", handler: _parseMultiNode },
+            genre: { xpath: "//li[@class='gen_list']/a/text()", handler: _jav_parse_multi_node },
         };
 
         var msg = { type: 'items' }
@@ -145,7 +110,7 @@
             for (var key in items) {
                 var item = items[key];
                 if (item["handler"] == null) {
-                    msg[key] = _parseSingleNode(item['xpath']);
+                    msg[key] = _jav_parse_single_node(item['xpath']);
                 } else {
                     msg[key] = item['handler'](item['xpath']);
                 }

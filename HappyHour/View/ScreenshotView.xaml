@@ -7,23 +7,26 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
         <DataTemplate x:Key="ScreenshotTemplate">
-            <Grid Width="{Binding ActualWidth, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListBox}}">
-                <Image ToolTipService.ShowDuration="20000" Source="{Binding .}">
+            <!--<Grid Width="{Binding ActualWidth, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Grid}}">-->
+                <Image ToolTipService.ShowDuration="20000" Source="{Binding .}"
+                       Width="{Binding ActualWidth, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Grid}}">
                     <Image.ToolTip>
                         <ToolTip>
                             <Image Source="{Binding RelativeSource= {RelativeSource AncestorType=ToolTip}, Path=PlacementTarget.Source}"/>
                         </ToolTip>
                     </Image.ToolTip>
                 </Image>
-            </Grid>
+            <!--</Grid>-->
         </DataTemplate>
     </UserControl.Resources>
     <Grid>
-        <ListBox ItemTemplate="{DynamicResource ScreenshotTemplate}"
-                 ItemsSource="{Binding ScreenshotList}" >
-            <ListBox.Background>
-                <Brush>Black</Brush>
-            </ListBox.Background>
-        </ListBox>
+        <ScrollViewer VerticalScrollBarVisibility="Auto" >
+            <ListBox ItemTemplate="{DynamicResource ScreenshotTemplate}"
+                 ItemsSource="{Binding ScreenshotList}">
+                <ListBox.Background>
+                    <Brush>Black</Brush>
+                </ListBox.Background>
+            </ListBox>
+        </ScrollViewer>
     </Grid>
 </UserControl>

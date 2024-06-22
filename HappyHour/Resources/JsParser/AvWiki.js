@@ -1,40 +1,9 @@
 ﻿(function () {
     const _PID = '{{pid}}';
-
-    function _parseSingleNode(_xpath, _getter = null, _node = document.body, _result = null, ) {
-        var result = document.evaluate(_xpath, _node, null,
-            XPathResult.FIRST_ORDERED_NODE_TYPE, _result);
-        var node = result.singleNodeValue;
-        if (node != null) {
-            if (_getter != null) {
-                return _getter(node);
-            } else {
-                return node.textContent.trim();
-            }
-        }
-        return null;
-    }
-    function _parseMultiNode(xpath, _getter = null) {
-        var result = document.evaluate(xpath, document.body,
-            null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
-
-        var array = [];
-        while (node = result.iterateNext()) {
-            if (_getter != null) {
-                array.push(_getter(node));
-            } else {
-                array.push(node.textContent.trim());
-            }
-        }
-        if (array.length > 0) {
-            return array;
-        }
-        return null;
-    }
     function get_node(n) { return n; }
 
-    function _parseActor(xpath) {
-        var actorArray = _parseMultiNode(xpath, get_node);
+    function _parse_actor(xpath) {
+        var actorArray = _jav_parse_multi_node(xpath, get_node);
         if (actorArray == null) {
             return null;
         }
@@ -67,32 +36,52 @@
         return null;
     }
 
-    function _parseActorPage() {
-        var node = _parseSingleNode("//div[contains(@class, 'actress-col')]", get_node);
+    function _parse_actor_page() {
+        var node = _jav_parse_single_node("//div[contains(@class, 'actress-col')]", get_node);
         if (node == null) {
             console.log('no actress col');
             CefSharp.PostMessage({ type: 'items', data:0 });
             return;
         }
         actor = {};
-        var name = _parseSingleNode("//dt[contains(.,'AV女優名')]/following-sibling::dd", null ,node);
-        var m = /(.+)（.+）/.exec(name);
-        //console.log(m[0]);
-        actor['name'] = m[1];
+        alias_array = [];
+        var name = _jav_parse_single_node("div[@class='actress-data']//dt[contains(.,'女優名')]/following-sibling::dd", null ,node);
+        names = name.split('-');
+        //if (names.length > 1) { alias_array.push(names[1].trim()); }
 
-        var img = _parseSingleNode("//div[@class='actress-image']/img/@src", null, node);
+        const regex = /(.+)(（.+）)?/;
+        m = regex.exec(names[0]);
+        if (m == null) {
+            console.log('failed to parse actor name!');
+            CefSharp.PostMessage({ type: 'items', data:0 });
+            return;
+        }
+        names = m[1].split('（')
+        actor['name'] = names[0];
+        if (names.length > 1) {
+            alias_array.push(names[1].slice(0,-1));
+        }
+
+        var img = _jav_parse_single_node("div[@class='actress-image']/img/@src", null, node);
         if (img != null) {
-            //console.log('thumb: ' + img);
             actor['thumb'] = img;
         }
-        var alias = _parseSingleNode("//dt[contains(.,'別名義')]/following-sibling::dd", null, node);
-        if (alias != null && alias != '' && !alias.includes('—') && alias.length < 3) {
-            var alias_array = [];
+        var alias = _jav_parse_single_node("div[@class='actress-data']//dt[contains(.,'別名義')]/following-sibling::dd", null, node);
+        if (alias != null) {
             var array = alias.split(/、|・/);
-            //console.log('alias:' + alias + ', count:' + array.length);
             array.forEach(function (item) {
-                alias_array.push(item.split('（')[0]);
+                if (item.startsWith('– –')) { return; }
+                m = regex.exec(item);
+                if (m != null) {
+                    names = m[1].split('（')
+                    alias_array.push(names[0]);
+                    if (names.length > 1) {
+                        alias_array.push(names[1].slice(0, -1));
+                    }
+                }
             });
+        }
+        if (alias_array.length > 0) {
             actor['alias'] = alias_array;
         }
         console.log(JSON.stringify(actor));
@@ -100,9 +89,9 @@
     }
 
     function parseSearchResult() {
-        var urls = _parseMultiNode("//li[@class='search-readmore']/a/@href");
+        var urls = _jav_parse_multi_node("//li[@class='search-readmore']/a/@href");
         if (urls == null) {
-            urls = _parseMultiNode("//div[@class='read-more']/a/@href");
+            urls = _jav_parse_multi_node("//div[@class='read-more']/a/@href");
         }
         if (urls == null) {
             CefSharp.PostMessage({ type: 'items', data: 0 });
@@ -116,7 +105,7 @@
     }
 
     if (document.location.href.includes('/av-actress/')) {
-        _parseActorPage();
+        _parse_actor_page();
         return;
     }
 
@@ -129,11 +118,11 @@
         title: { xpath : "//div[@class='article-header']/h1/text()"}, 
         cover: { xpath: "//div[contains(@class,'article-thumbnail')]/a/img/@src" },
         series: { xpath: "//dl[@class='dltable']/dt[contains(., 'シリーズ')]/following-sibling::dd" },
-        studio: { xpath: "//dl[@class='dltable']/dt[contains(., 'レーベル')]/following-sibling::dd" },
+        studio: { xpath: "//dl[@class='dltable']/dt[contains(., 'メーカー')]/following-sibling::dd" },
         date: { xpath: "//dl[@class='dltable']/dt[contains(., '配信開始日')]/following-sibling::dd" },
         actor: {
-            xpath: "//dl[@class='dltable']/dt[contains(., 'AV女優名')]/following-sibling::dd/a",
-            handler: _parseActor
+            xpath: "//dl[@class='dltable']/dt[contains(., 'AV女優名')]/following-sibling::dd[1]/a",
+            handler: _parse_actor
         },
     };
 
@@ -142,7 +131,7 @@
     for (var key in items) {
         var item = items[key];
         if (item["handler"] == null) {
-            msg[key] = _parseSingleNode(item['xpath']);
+            msg[key] = _jav_parse_single_node(item['xpath']);
         } else {
             msg[key] = item['handler'](item['xpath']);
         }

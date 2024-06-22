@@ -1,18 +1,8 @@
 ﻿(function () {
     const _PID = '{{pid}}';
 
-    function _parseSingleNode(_xpath) {
-        var result = document.evaluate(_xpath, document.body,
-            null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
-        var node = result.singleNodeValue;
-        if (node != null) {
-            return node.textContent.trim();
-        }
-        return null;
-    }
-
     function _parseRating(xpath) {
-        var txt = _parseSingleNode(xpath);
+        var txt = _jav_parse_single_node(xpath);
         if (txt != null) {
             var re = new RegExp('[0-9.]+');
             var m = re.exec(txt);
@@ -40,7 +30,7 @@
     for (var key in items) {
         var item = items[key];
         if (item["handler"] == null) {
-            msg[key] = _parseSingleNode(item['xpath']);
+            msg[key] = _jav_parse_single_node(item['xpath']);
         } else {
             msg[key] = item['handler'](item['xpath']);
         }

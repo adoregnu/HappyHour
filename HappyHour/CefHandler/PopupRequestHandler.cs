@@ -23,7 +23,17 @@ namespace HappyHour.CefHandler
             IRequest request,
             IRequestCallback callback)
         {
-            request.SetReferrer(RefAddress, ReferrerPolicy.Default);
+            /*
+            if (request.Url.Contains("r3ltm.app"))
+            {
+                //Log.Print(request.Url);
+                foreach (var nv in request.Headers)
+                {
+                    Log.Print($"name={nv}, value={request.Headers[nv.ToString()]}");
+                }
+            }
+            */
+            //request.SetReferrer(RefAddress, ReferrerPolicy.Default);
             return CefReturnValue.Continue;
         }
     }

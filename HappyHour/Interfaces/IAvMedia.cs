@@ -11,7 +11,7 @@ namespace HappyHour.Interfaces
         DateTime Date { get; set; }
         bool IsPlayable { get; }
 
-        string GenPosterPath(string ext);
+        string GenPosterPath(string ext, bool isScreenshot = false);
         string GenActorThumbPath(string name, string ext);
         void Reload(string[] files = null);
     }

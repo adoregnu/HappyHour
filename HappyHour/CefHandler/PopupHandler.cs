@@ -47,7 +47,8 @@ namespace HappyHour.CefHandler
                 popupRequestHandler.RefAddress = browserControl.Address;
 
                 var newtap = _mainVm.NewBrowser();
-                newtap.RequestHandler = popupRequestHandler;
+
+                //newtap.RequestHandler = popupRequestHandler;
                 newtap.Address = targetUrl;
             });
             return true;

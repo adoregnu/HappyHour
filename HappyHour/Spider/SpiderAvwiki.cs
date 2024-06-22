@@ -14,6 +14,7 @@ namespace HappyHour.Spider
             URL = "https://av-wiki.net/";
             ScriptName = "AvWiki.js";
 
+            /*
             ScrapItems.ForEach(i =>
             {
                 if (i.Name is not "actor" and not "series")
@@ -21,6 +22,7 @@ namespace HappyHour.Spider
                     i.CanUpdate = false;
                 }
             });
+            */
         }
 
         protected override void AdjustKeyword()

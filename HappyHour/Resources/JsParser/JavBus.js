@@ -1,39 +1,7 @@
 ﻿(function () {
     const _PID = '{{pid}}';
-
-    function _parseSingleNode(_xpath, _getter = null) {
-        var result = document.evaluate(_xpath, document.body,
-            null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
-        var node = result.singleNodeValue;
-        if (node != null) {
-            if (_getter != null)
-                return _getter(node);
-            else
-                return node.textContent.trim();
-        }
-        return null;
-    }
-
-    function _parseMultiNode(xpath, _getter = null) {
-        var result = document.evaluate(xpath, document.body,
-            null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
-
-        var array = [];
-        while (node = result.iterateNext()) {
-            if (_getter != null) {
-                array.push(_getter(node));
-            } else {
-                array.push(node.textContent.trim());
-            }
-        }
-        if (array.length > 0) {
-            return array;
-        }
-        return null;
-    }
-
     function parseSearchResult() {
-        var urls = _parseMultiNode("//a[@class='movie-box']/@href");
+        var urls = _jav_parse_multi_node("//a[@class='movie-box']/@href");
         if (urls == null) {
             CefSharp.PostMessage({ type: 'items', data: 0 });
         } else if (urls.length == 1) {
@@ -46,7 +14,7 @@
     function get_node(node) { return node; }
 
     function parseCover(xpath) {
-        var img = _parseSingleNode(xpath, get_node);
+        var img = _jav_parse_single_node(xpath, get_node);
         if (img != null) {
             return img.src;
         }
@@ -54,7 +22,7 @@
     }
 
     function parseActor(xpath) {
-        var result = _parseMultiNode(xpath, get_node);
+        var result = _jav_parse_multi_node(xpath, get_node);
         if (result == null) {
             console.log("no actors");
         } else {
@@ -73,7 +41,7 @@
         date: { xpath: "//span[contains(.,'Release Date:')]/following-sibling::text()"},
         studio: { xpath: "//span[contains(.,'Studio:')]/following-sibling::a/text()"},
         series: { xpath: "//span[contains(.,'Series:')]/following-sibling::a/text()" },
-        genre: { xpath: "//p[contains(.,'Genre:')]/following-sibling::p/span//a/text()", handler: _parseMultiNode },
+        genre: { xpath: "//p[contains(.,'Genre:')]/following-sibling::p/span//a/text()", handler: _jav_parse_multi_node },
         actor: { xpath: "//p[@class='star-show']/following-sibling::p//a", handler: parseActor }
     };
 
@@ -82,7 +50,7 @@
     for (var key in items) {
         var item = items[key];
         if (item["handler"] == null) {
-            msg[key] = _parseSingleNode(item['xpath']);
+            msg[key] = _jav_parse_single_node(item['xpath']);
         } else {
             msg[key] = item['handler'](item['xpath']);
         }

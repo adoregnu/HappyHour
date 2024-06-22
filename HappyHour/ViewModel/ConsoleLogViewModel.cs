@@ -18,6 +18,9 @@ namespace HappyHour.ViewModel
             if (string.IsNullOrEmpty(msg.Message))
                 return;
 
+            if (msg.Message.StartsWith("Third-party cookie"))
+                return;
+
             UiServices.Invoke(delegate ()
             {
                 AppendText(msg.Message + "\n");

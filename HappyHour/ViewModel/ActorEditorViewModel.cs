@@ -55,7 +55,7 @@ namespace HappyHour.ViewModel
 
         private readonly AvDbContextPool _dbPool = new ();
         private ObservableCollection<AvActorName> _nameListOfOneActor;
-        private ObservableCollection<AvActor> _actors = new();
+        private ObservableCollection<AvActor> _actors = [];
 
         public List<ActorInitial> ActorInitials { get; private set; }
         public AvActorName SelectedActorName { get; set; }
@@ -182,7 +182,7 @@ namespace HappyHour.ViewModel
             }
 
             Log.Print(msg.Message);
-            List<ActorInitial> initials = new();
+            List<ActorInitial> initials = [];
             ActorInitials.ForEach(i => { if (i.IsChecked) initials.Add(i); });
             OnClearActors();
             initials.ForEach(i => i.IsChecked = true);
@@ -282,7 +282,7 @@ namespace HappyHour.ViewModel
             }
             else
             {
-                List<AvActor> tmpList = new();
+                List<AvActor> tmpList = [];
                 foreach (var actor in Actors)
                 {
                     if (actor.Names.Any(n => n.Name.StartsWith(p)))

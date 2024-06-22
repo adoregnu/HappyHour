@@ -3,44 +3,14 @@
     const _PAGE_COUNT = '{{pageCount}}';
 
     var msg = { type : 'items' }
-
-    function _parseSingleNode(_xpath, _getter = null, node = document.body) {
-        var result = document.evaluate(_xpath, node, null,
-            XPathResult.FIRST_ORDERED_NODE_TYPE, null);
-        var node = result.singleNodeValue;
-        if (node != null) {
-            if (_getter != null) {
-                return _getter(node);
-            } else {
-                return node.textContent.trim();
-            }
-        }
-        return null;
-    }
-
-    function _parseMultiNode(xpath, _getter = null) {
-        var result = document.evaluate(xpath, document.body,
-            null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
-
-        var array = [];
-        while (node = result.iterateNext()) {
-            if (_getter != null) {
-                array.push(_getter(node));
-            } else {
-                array.push(node.textContent.trim());
-            }
-        }
-        return array.length > 0 ? array : null;
-    }
-
     function _get_node(n) { return n; }
 
     function _parseFiles(xpath) {
-        var anodes = _parseMultiNode(xpath, _get_node);
+        var anodes = _jav_parse_multi_node(xpath, _get_node);
         var array = [];
         if (anodes != null) {
             anodes.forEach(function (n) {
-                //console.log(n.textContent);
+                console.log(n.textContent);
                 array.push(function () { n.click(); });
                 //array.push(n.href);
             });
@@ -49,7 +19,7 @@
     }
 
     function _parseImages(xpath) {
-        var nodes = _parseMultiNode(xpath);
+        var nodes = _jav_parse_multi_node(xpath);
         var array = [];
         if (nodes == null) {
             return null;
@@ -88,7 +58,7 @@
             censored: "//div[@id='category_1']//a[contains(., '亚洲有码原创')]",
             uncensored: "//div[@id='category_1']//a[contains(., '亚洲无码原创')]"
         };
-        var node = _parseSingleNode(boards[_BOARD], _get_node);
+        var node = _jav_parse_single_node(boards[_BOARD], _get_node);
         if (node != null) {
             CefSharp.PostMessage({ type: 'url', data: node.href });
             return "redirected";
@@ -97,7 +67,7 @@
     }
 
     function _getItemList() {
-        var alist = _parseMultiNode(
+        var alist = _jav_parse_multi_node(
             "//tbody[contains(@id, 'normalthread_')]/tr/th[1]/a[@class='s xst']", _get_node);
 
         var array = [];
@@ -125,7 +95,7 @@
     }
 
     function _getPid(xpath) {
-        var title = _parseSingleNode(xpath);
+        var title = _jav_parse_single_node(xpath);
         if (title != null) {
             var m = /[a-z0-9-_]+/i.exec(title);
             if (m != null) {
@@ -136,9 +106,9 @@
     }
 
     function parseDate(xpath) {
-        var em = _parseSingleNode(xpath, _get_node);
+        var em = _jav_parse_single_node(xpath, _get_node);
         if (em == null) { return null; }
-        var date = _parseSingleNode("span/@title", null, em);
+        var date = _jav_parse_single_node("span/@title", null, em);
         if (date != null) {
             return date;
         }
@@ -161,8 +131,8 @@
     var items = {
         pid: { xpath: "//span[@id='thread_subject']/text()", handler: _getPid },
         date: { xpath: "//em[contains(@id, 'authorposton')]", handler: parseDate },
-        files: { xpath: "//a[contains(., '.torrent')]", handler: _parseFiles },
-        magnet: { xpath: "//div[@id='code_Aub']//li", handler: _parseMultiNode }, 
+        //files: { xpath: "//a[contains(., '.torrent')]", handler: _parseFiles },
+        magnet: { xpath: "//div[@class='blockcode']/div[contains(@id, 'code_')]//li", handler: _jav_parse_multi_node }, 
         images: {
             xpath: "(//td[contains(@id, 'postmessage_')])[1]//img[contains(@id, 'aimg_')]/@file",
             handler: _parseImages
@@ -173,7 +143,7 @@
     for (var key in items) {
         var item = items[key];
         if (item["handler"] == null) {
-            msg[key] = _parseSingleNode(item['xpath']);
+            msg[key] = _jav_parse_single_node(item['xpath']);
         } else {
             msg[key] = item['handler'](item['xpath']);
         }

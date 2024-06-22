@@ -2,7 +2,7 @@
     const _PID = '{{pid}}';
     var actor_parsed = false;
 
-    function check_header(headers, txt) {
+    function checkHeader(headers, txt) {
         for (var i = 0; i < headers.length; i++) {
             if (txt.includes(headers[i])) {
                 return headers[i];
@@ -12,8 +12,8 @@
     }
 
     function _date(txt, msg) {
-        const headers = ['配信開始日', '更新日', '配信日', '発売日'];
-        var header = check_header(headers, txt);
+        const headers = ['更新日：', '配信日:']
+        var header = checkHeader(headers, txt);
         if (header == null) {
             return false;
         }
@@ -29,68 +29,70 @@
         if (actor_parsed) {
             return;
         }
-        const headers = ['名前', '出演女優', '出演者', '出演' ];
-        var header = check_header(headers, txt);
+        const headers = ['名前：', '出演:']
+        var header = checkHeader(headers, txt);
         if (header == null) {
             return false;
         }
 
         array = [];
-        names = txt.substring(txt.indexOf(header) + header.length);
-        names = names.replace(/^[：: —-]+/g, '');
-        if (names.length < 2) {
-            return false;
-        }
-        names = names.split(/[\/ ]+/)
-        names.forEach(function (name) {
-            actor = {};
-            name = name.replace(/[()\d]+/,'')
-            actor['name'] = name;
-            array.push(actor);
-        });
+        actor = {};
 
+        actor['name'] = txt.substring(txt.indexOf(header) + header.length);
+        array.push(actor);
         msg['actor'] = array;
         actor_parsed = true;
         return true;
     }
-
+/*
     function _studio(txt, msg) {
-        const headers = ['レーベル', 'メーカー'];
-        var header = check_header(headers, txt);
-
-        if (header == null) {
-            return false;
+        const kw = 'レーベル:'
+        if (txt.includes(kw)) {
+            msg['studio'] = txt.substring(txt.indexOf(kw) + kw.length);
+            return true;
         }
-
-        studio = txt.substring(txt.indexOf(header) + header.length);
-        msg['studio'] = studio.replace(/^[：: ]+/g, '');
-        return true;
+        return false;
     }
+*/
 
     function get_node(node) { return node; }
 
-    function _parse_content(xpath, msg) {
-        var parsers = [
-            { func: _date, parsed: false },
-            { func: _actor, parsed: false },
-            { func: _studio, parsed: false }
-        ];
+    function _parseActorTag(xpath, msg) {
+        if (actor_parsed) {
+            return 0;
+        }
+        var nodes = _jav_parse_multi_node(xpath, get_node);
+        if (nodes == null) {
+            console.log('no tags!');
+            return 0;
+        }
+        if (nodes.length == 3) {
+            actor_parsed = true;
+            msg['actor'] = [{ name: nodes[0].textContent.trim() }]
+            return 1;
+        }
+        return 0;
+    }
+
+    function _parseContent(xpath, msg) {
+        const parser = [_date, _actor];
 
         var count = 0;
         var p = _jav_parse_single_node(xpath, get_node);
         if (p == null || p.childNodes == null) {
             return count;
         }
+        console.log('content node len:' + p.childNodes.length);
         for (var i = 0; i < p.childNodes.length; i++) {
             var node = p.childNodes[i];
+            //console.log('nodeType : ' + node.nodeType);
             if (node.nodeType != Node.TEXT_NODE) {
                 continue;
             }
-            for (var j = 0; j < parsers.length; j++) {
-                parser = parsers[j]
-                if (!parser.parsed) {
-                    parser.parsed = parser.func(node.textContent.trim(), msg);
-                    if  (parser.parsed) count += 1;
+            for (var j = 0; j < parser.length; j++) {
+                if (parser[j](node.textContent.trim(), msg)) {
+                    count += 1;
+                    break;
                 }
             }
         }
@@ -117,17 +119,16 @@
     }
 
     var items = {
-        title: { xpath: "//h1[@class='entry-title']"},
-        cover: { xpath: "//div[@class='entry-content']//img[1]/@src" },
-        screenshot: { xpath: "//div[@class='entry-content']//img[2]/@src" },
-        //studio: { xpath: "//strong[contains(.,'Tags:')]/following-sibling::a[1]"},
-        //actor: {
-        //    xpath: "//strong[contains(.,'Tags:')]/following-sibling::a",
-        //    handler: _parseActorTag
-        //},
+        title: { xpath: "//div[@class='entry']/p"},
+        cover: { xpath: "//div[@class='entry']/figure/img/@src" },
+        studio: { xpath: "//strong[contains(.,'Categorized in:')]/following-sibling::a[1]"},
+        actor: {
+            xpath: "//strong[contains(.,'Tags:')]/following-sibling::a",
+            handler: _parseActorTag
+        },
         content: {
-            xpath: "//div[@class='entry-content']//p",
-            handler: _parse_content
+            xpath: "//div[@class='entry-content']/p",
+            handler: _parseContent
         },
     };
 

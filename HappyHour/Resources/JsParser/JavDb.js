@@ -14,29 +14,10 @@
         }
         return null;
     }
-
-    function _parseMultiNode(xpath, _getter = null) {
-        var result = document.evaluate(xpath, document.body,
-            null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
-
-        var array = [];
-        while (node = result.iterateNext()) {
-            if (_getter != null) {
-                array.push(_getter(node));
-            } else {
-                array.push(node.textContent.trim());
-            }
-        }
-        if (array.length > 0) {
-            return array;
-        }
-        return null;
-    }
-
     function get_node(node) { return node; }
 
     function _parseActor(xpath) {
-        var array = _parseMultiNode(xpath, get_node);
+        var array = _jav_parse_multi_node(xpath, get_node);
         if (array == null) {
             return null;
         }
@@ -82,7 +63,7 @@
     }
 
     function parseSearchResult() {
-        var nodes = _parseMultiNode("//a[@class='box']", get_node);
+        var nodes = _jav_parse_multi_node("//a[@class='box']", get_node);
         if (nodes == null) {
             CefSharp.PostMessage({ type: 'items', data: 0 });
             return;
@@ -161,7 +142,7 @@
         },
         genre: {
             xpath: "//strong[contains(., 'Tags')]/following-sibling::span/a/text()",
-            handler: _parseMultiNode
+            handler: _jav_parse_multi_node
         },
     };
 

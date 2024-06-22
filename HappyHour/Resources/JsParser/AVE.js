@@ -1,32 +1,7 @@
 ﻿(function () {
     const _PID = '{{pid}}';
-
-    function _parseSingleNode(_xpath) {
-        //console.log(_xpath);
-        var result = document.evaluate(_xpath, document.body,
-            null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
-        var node = result.singleNodeValue;
-        if (node != null) {
-            return node.textContent.trim();
-        }
-        return null;
-    }
-
-    function _parseMultiNode(xpath) {
-        var result = document.evaluate(xpath, document.body,
-            null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
-
-        var array = [];
-        while (node = result.iterateNext()) {
-            array.push(node.textContent.trim());
-        }
-        if (array.length) {
-            return array;
-        }
-        return null;
-    }
     function _parseActor(xpath) {
-        var array = _parseMultiNode(xpath);
+        var array = _jav_parse_multi_node(xpath);
         if (array == null) {
             return null;
         }
@@ -41,9 +16,8 @@
         return null;
     }
 
-
     function _parseDate(xpath) {
-        var txt = _parseSingleNode(xpath);
+        var txt = _jav_parse_single_node(xpath);
         if (txt != null) {
             var m = /[\d/]+/i.exec(txt);
             if (m != null) {
@@ -91,7 +65,7 @@
         },
         genre: {
             xpath: "//span[contains(., 'Category')]/following-sibling::span/a/text()",
-            handler: _parseMultiNode
+            handler: _jav_parse_multi_node
         },
         series: {
             xpath: "//span[contains(., 'Series')]/following-sibling::span//text()"
@@ -107,7 +81,7 @@
     for (var key in items) {
         var item = items[key];
         if (item["handler"] == null) {
-            msg[key] = _parseSingleNode(item['xpath']);
+            msg[key] = _jav_parse_single_node(item['xpath']);
         } else {
             msg[key] = item['handler'](item['xpath']);
         }

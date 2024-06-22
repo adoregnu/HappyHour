@@ -4,7 +4,7 @@ using System.Drawing.Imaging;
 using System.Drawing;
 using System.IO;
 using System.Windows.Media.Imaging;
-using Imazen.WebP;
+using WebPWrapper;
 using System.Reflection;
 
 namespace HappyHour.View.Controls
@@ -31,24 +31,27 @@ namespace HappyHour.View.Controls
         }
         public static BitmapImage ReadImage(string imagePath, int width)
         {
-            if (string.IsNullOrEmpty(imagePath) || !Path.Exists(imagePath))
+            try
             {
+                var ext = Path.GetExtension(imagePath);
+                if (ext.Equals(".webp", StringComparison.OrdinalIgnoreCase))
+                {
+                    WebP webp = new();
+                    using var bitmap = webp.Load(imagePath);
+                    return ConvertBitmap(bitmap, width);
+                }
+                else
+                {
+                    using var bitmap = new Bitmap(imagePath);
+                    return ConvertBitmap(bitmap, width);
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Print(e.Message);
                 using var bmp = new Bitmap(Assembly.GetEntryAssembly().GetManifestResourceStream(
                     "HappyHour.Resources.default-fallback-image.png"));
                 return ConvertBitmap(bmp, width);
-            }
-
-            var ext = Path.GetExtension(imagePath);
-            if (ext.Equals(".webp", StringComparison.OrdinalIgnoreCase))
-            {
-                var buf = File.ReadAllBytes(imagePath);
-                using var bitmap = new SimpleDecoder().DecodeFromBytes(buf, buf.Length);
-                return ConvertBitmap(bitmap, width);
-            }
-            else
-            {
-                using var bitmap = new Bitmap(imagePath);
-                return ConvertBitmap(bitmap, width);
             }
         }
     }
