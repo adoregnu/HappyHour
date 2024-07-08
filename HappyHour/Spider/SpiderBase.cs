@@ -387,14 +387,7 @@ namespace HappyHour.Spider
                 try
                 {
                     ApplyItemSettings(d);
-                    if (SearchMedia != null)
-                    {
-                        Downloader.Download(this, d);
-                    }
-                    else
-                    {
-                        OnScrapCompleted(false);
-                    }
+                    Downloader.Download(this, d);
                 }
                 catch (Exception ex)
                 {
