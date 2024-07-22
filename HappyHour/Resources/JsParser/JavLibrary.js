@@ -66,7 +66,7 @@
             }
         }
         if (nmatched == 1) {
-            CefSharp.PostMessage(msg);
+            _post_message(msg, 'en');
         } else {
             console.log('ambiguous');
         }
@@ -80,7 +80,8 @@
     var items = {
         title: { xpath: "//*[@id='video_title']/h3/a" },
         date: { xpath: "//*[@id='video_date']//td[2]" },
-        studio: { xpath: "//*[@id='video_maker']//*[@class='maker']/a" },
+        maker: { xpath: "//*[@id='video_maker']//*[@class='maker']/a" },
+        label: { xpath: "//*[@id='video_label']//*[@class='label']/a" },
         cover: { xpath: "//*[@id='video_jacket_img']/@src" },
         rating: {
             xpath: "//*[@id='video_review']//*[@class='score']",
@@ -111,6 +112,5 @@
         num_item += 1;
     }
     msg['data'] = num_item;
-    console.log(JSON.stringify(msg));
-    CefSharp.PostMessage(msg);
+    _post_message(msg, 'en');
 }) ();

@@ -7,7 +7,7 @@
         xmlns:bh="clr-namespace:HappyHour.View.Behavior"
         xmlns:md="https://github.com/fantasticfiasco/mvvm-dialogs"
         xmlns:local="clr-namespace:HappyHour.View"
-        xmlns:control="clr-namespace:HappyHour.View.Controls"
+        xmlns:ctrls="clr-namespace:HappyHour.View.Controls"
         mc:Ignorable="d"
         WindowStartupLocation="CenterOwner"
         md:DialogServiceViews.IsRegistered="True"
@@ -17,8 +17,8 @@
             <Border Name="_Border" Padding="2" SnapsToDevicePixels="true"
                     Width="128" Height="128">
                 <Grid>
-                    <control:AsyncImage HorizontalAlignment="Center" VerticalAlignment="Top"
-                        ImagePath="{Binding PicturePath}" Width="125"/>
+                    <ctrls:AsyncImage HorizontalAlignment="Center" VerticalAlignment="Top"
+                        ImageBlob="{Binding Thumb}" Width="125"/>
                     <StackPanel VerticalAlignment="Bottom"
                                 Background="Black" Opacity="0.60">
                         <TextBlock Text="{Binding .}" Foreground="White"
@@ -43,11 +43,6 @@
                     RelativeSource={RelativeSource FindAncestor,
                     AncestorType=ContextMenu}}"
                 Command="{Binding PlacementTarget.Tag.DataContext.CmdMergeActors,
-                    RelativeSource={RelativeSource FindAncestor,
-                    AncestorType=ContextMenu}}"/>
-            <MenuItem
-                Header="Delete"
-                Command="{Binding PlacementTarget.Tag.DataContext.CmdDeleteActorFromDb,
                     RelativeSource={RelativeSource FindAncestor,
                     AncestorType=ContextMenu}}"/>
             <MenuItem
@@ -78,6 +73,7 @@
         </i:EventTrigger>
     </i:Interaction.Triggers>
     <DockPanel>
+<!--
         <Grid DockPanel.Dock="Top" Margin="5">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
@@ -115,6 +111,7 @@
                 </Button.ToolTip>
             </Button>
         </Grid>
+   --> 
         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Center">
             <Button Content="Clear" Margin="0,0,5,5" Padding="2" Command="{Binding CmdClearActors}"/>
             <Button Content="Close" Margin="0,0,5,5" Padding="2" IsCancel="True" Click="Close"/>
@@ -130,7 +127,7 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <WrapPanel Grid.Row="0" Orientation="Horizontal"
-                           HorizontalAlignment="Center">
+                           HorizontalAlignment="Center" Margin="5">
                     <ItemsControl Grid.Row="1" ItemsSource="{Binding ActorInitials}">
                         <ItemsControl.ItemsPanel>
                             <!-- specify the panel that is the container for your items -->
@@ -182,6 +179,7 @@
             </Grid>
             <DockPanel Grid.Column="1" Width="200">
                 <DockPanel DockPanel.Dock="Top">
+                <!--
                     <DockPanel DockPanel.Dock="Top" Margin="5,0,5,5">
                         <Button DockPanel.Dock="Right" Margin="5,0,0,0"
                                 Style="{StaticResource ModernButtonStyle2}"
@@ -196,9 +194,10 @@
                         </Button>
                         <TextBox Text="{Binding NewName}"/>
                     </DockPanel>
-                    <ListBox  Height="100" Margin="5,0,5,0"
-                              ItemsSource="{Binding NameListOfOneActor}"
-                              SelectedItem="{Binding SelectedNameOfActor}">
+                    -->
+                    <ListBox  Height="150" Margin="5,10,5,0"
+                              ItemsSource="{Binding ActorNames}"
+                              SelectedItem="{Binding SelectedActorName}">
                         <ListBox.InputBindings>
                             <KeyBinding Command="{Binding CmdDeleteNameOfActor}" Key="Delete"/>
                         </ListBox.InputBindings>
@@ -208,10 +207,10 @@
                     </ListBox>
                 </DockPanel>
                 <DockPanel>
-                    <TextBox DockPanel.Dock="Top" Margin="5,5,5,0"
-                             Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
-                    <ListBox ItemsSource="{Binding ActorNameList}" Margin="5"
-                             SelectedItem="{Binding SelectedActorName}">
+                    <ctrls:DelayedBindingTextBox DelayTime="500" DockPanel.Dock="Top" Margin="5,5,5,0"
+                             Text="{Binding SearchText}"/>
+                    <ListBox ItemsSource="{Binding SearchNames}" Margin="5"
+                             SelectedItem="{Binding SelectedSearchName}">
 <!--
                         <ListBox.InputBindings>
                             <MouseBinding MouseAction="LeftDoubleClick"
@@ -221,7 +220,7 @@
                         <i:Interaction.Triggers>
                             <i:EventTrigger EventName="MouseDoubleClick">
                                 <i:InvokeCommandAction
-                                    Command="{Binding CmdActorNameDoubleClick}"/>
+                                    Command="{Binding CmdSearchNameDoubleClick }"/>
                             </i:EventTrigger>
                         </i:Interaction.Triggers>
                         <i:Interaction.Behaviors>

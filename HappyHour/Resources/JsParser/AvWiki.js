@@ -84,8 +84,8 @@
         if (alias_array.length > 0) {
             actor['alias'] = alias_array;
         }
-        console.log(JSON.stringify(actor));
-        CefSharp.PostMessage({type: 'items', data:1, actor:[actor]});
+        msg = {type: 'items', data:1, actor:[actor]};
+        _post_message(msg, 'jp');
     }
 
     function parseSearchResult() {
@@ -118,7 +118,8 @@
         title: { xpath : "//div[@class='article-header']/h1/text()"}, 
         cover: { xpath: "//div[contains(@class,'article-thumbnail')]/a/img/@src" },
         series: { xpath: "//dl[@class='dltable']/dt[contains(., 'シリーズ')]/following-sibling::dd" },
-        studio: { xpath: "//dl[@class='dltable']/dt[contains(., 'メーカー')]/following-sibling::dd" },
+        maker: { xpath: "//dl[@class='dltable']/dt[contains(., 'メーカー')]/following-sibling::dd" },
+        label: { xpath: "//dl[@class='dltable']/dt[contains(., 'レーベル')]/following-sibling::dd" },
         date: { xpath: "//dl[@class='dltable']/dt[contains(., '配信開始日')]/following-sibling::dd" },
         actor: {
             xpath: "//dl[@class='dltable']/dt[contains(., 'AV女優名')]/following-sibling::dd[1]/a",
@@ -142,6 +143,5 @@
         num_item += 1;
     }
     msg['data'] = num_item;
-    console.log(JSON.stringify(msg));
-    CefSharp.PostMessage(msg);
+    _post_message(msg, 'jp');
 }) ();

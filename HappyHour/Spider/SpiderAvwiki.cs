@@ -4,7 +4,7 @@ using HappyHour.ViewModel;
 
 namespace HappyHour.Spider
 {
-    internal class SpiderAvwiki : SpiderBase
+    internal partial class SpiderAvwiki : SpiderBase
     {
         public override string SearchURL => $"{URL}?s={Keyword}";
 
@@ -27,7 +27,10 @@ namespace HappyHour.Spider
 
         protected override void AdjustKeyword()
         {
-            Keyword = Regex.Replace(Keyword, @"^\d+", "");
+            Keyword = _prefixRegex().Replace(Keyword, "");
         }
+
+        [GeneratedRegex(@"^\d+")]
+        private static partial Regex _prefixRegex();
     }
 }

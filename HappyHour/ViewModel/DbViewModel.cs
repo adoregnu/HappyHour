@@ -8,16 +8,21 @@ using Microsoft.EntityFrameworkCore;
 
 using HappyHour.Model;
 using HappyHour.Interfaces;
+using System.Collections.ObjectModel;
+using HappyHour.Extension;
+using CommunityToolkit.Mvvm.Input;
+using System.Reflection;
 
 namespace HappyHour.ViewModel
 {
-    class DbViewModel : Pane, IDbView
+
+    partial class DbViewModel : Pane, IDbView
     {
-        string _selectedType = "Pid";
+        string _selectedType = "Movies";
         string _searchText;
 
         IMediaList _mediaList;
-        readonly AvDbContextPool _dbPoll;
+        private readonly MovieDbContext _db =  App.Current.DbContext;
 
         public IMediaList MediaList
         {
@@ -30,9 +35,9 @@ namespace HappyHour.ViewModel
                 _mediaList.ItemSelectedHandler += (o, i) =>
                 {
                     if (i == null) return;
-                    if (SelectedType != "Pid")
+                    if (SelectedType != "Movies")
                     {
-                        SelectedType = "Pid";
+                        SelectedType = "Movies";
                     }
                     SearchText = i.Pid;
                 };
@@ -45,8 +50,10 @@ namespace HappyHour.ViewModel
             set
             {
                 SetProperty(ref _searchText, value);
-                if (_typeToPropertyName.ContainsKey(SelectedType))
-                    OnPropertyChanged(_typeToPropertyName[SelectedType]);
+                if (_typeToPropertyName.TryGetValue(SelectedType, out string type))
+                {
+                    OnPropertyChanged(type);
+                }
             }
         }
         public string SelectedType
@@ -56,93 +63,98 @@ namespace HappyHour.ViewModel
             {
                 SearchText = "";
                 SetProperty(ref _selectedType, value);
+                OnTypeChanged();
             }
         }
         public List<string> ListType { get; set; }
 
-        public IEnumerable<AvItem> AvItemList => _dbPoll.GetAvMovies(SearchText);
-        public IEnumerable<AvActorName> AvActorNameList => _dbPoll.GetActorNames(SearchText);
-        public IEnumerable<AvStudio> AvStudioList => _dbPoll.GetAvStudios(SearchText);
-        public IEnumerable<AvSeries> AvSeriesList  =>  _dbPoll.GetAvSeries(SearchText);
+        public ObservableCollection<Maker> Makers;// => _dbPoll.GetAvStudios(SearchText);
+        public ObservableCollection<Label> Labels;// => _dbPoll.GetAvStudios(SearchText);
 
-        AvItem _selectedAvItem;
-        public AvItem  SelectedItem
+        public ObservableCollection<Actor> Actors { get; set; } = [];
+        public ObservableCollection<Movie> Movies { get; set; } = [];
+
+        Movie _selectedMovie;
+        public Movie SelectedMovie
         {
-            get => _selectedAvItem;
+            get => _selectedMovie;
             set
             {
-                SetProperty(ref _selectedAvItem, value);
+                SetProperty(ref _selectedMovie, value);
                 if (value == null) return;
 
-                MediaList.AddMedia(value.Path);
+                MediaList.AddMedia(value);
             }
         }
 
-        AvActorName _selectedActorName;
-        public AvActorName  SelectedActorName
+        ActorName _selectedName;
+        public ActorName  SelectedName
         {
-            get => _selectedActorName;
+            get => _selectedName;
             set
             {
-                SetProperty(ref _selectedActorName, value);
+                SetProperty(ref _selectedName, value);
                 if (value == null) return;
 
-                var movies = _dbPoll.GetAvMovies(value);
-                MediaList.LoadItems(movies);
+                //var movies = _dbPoll.GetAvMovies(value);
+                //MediaList.LoadItems(movies);
             }
         }
-        AvStudio _selectedStudio;
-        public AvStudio SelectedStudio
+        Maker _selectedMaker;
+        public Maker SelectedMaker
         {
-            get => _selectedStudio;
+            get => _selectedMaker;
             set
             {
-                SetProperty(ref _selectedStudio, value);
+                SetProperty(ref _selectedMaker, value);
                 if (value == null) return;
 
-                var movies = _dbPoll.GetAvMovies(value);
-                MediaList.LoadItems(movies);
+                //var movies = _dbPoll.GetAvMovies(value);
+                //MediaList.LoadItems(movies);
             }
         }
 
-        AvSeries _selectedSeries;
-        public AvSeries SelectedSeries
-        {
-            get => _selectedSeries;
-            set
-            {
-                SetProperty(ref _selectedSeries, value);
-                if (value == null) return;
-
-                var movies = _dbPoll.GetAvMovies(value);
-                MediaList.LoadItems(movies);
-            }
-        }
 
         readonly Dictionary<string, string> _typeToPropertyName = new ()
             {
-                { "Pid", nameof(AvItemList) },
-                { "Actor", nameof(AvActorNameList) },
-                { "Studio", nameof(AvStudioList) },
-                { "Series", nameof(AvSeriesList) },
+                { "Movies", nameof(Movies) },
+                { "Actors", nameof(Actors) },
+                { "Makers", nameof(Makers) },
+                { "Labels", nameof(Labels) },
+                { "Series", nameof(Series) },
+                { "Genres", nameof(Genres) },
             };
 
         public DbViewModel()
         {
             Title = "Database";
             ListType = _typeToPropertyName.Keys.ToList();
-            _dbPoll = new AvDbContextPool();
+
+            CmdGenresMerge = new RelayCommand<object>(
+                OnMergeGenres, p => p is IList<object> list && list.Count > 1);
+            CmdGenreDoubleClick = new RelayCommand(OnGenreDoubleClicked);
         }
 
-        public bool SelectPid(string pid)
+        private void OnTypeChanged()
         {
-            var movies = _dbPoll.GetAvMovies(pid);
+            string changeFunction = $"OnSelect{SelectedType}";
+            MethodInfo mi = GetType().GetMethod(changeFunction,
+                BindingFlags.NonPublic | BindingFlags.Instance);
+            mi?.Invoke(this, null);
+
+        }
+
+        public bool SelectMovie(string pid)
+        {
+#if false
+            //var movies = _dbPoll.GetAvMovies(pid);
             if (movies.Any())
             {
                 MediaList.AddMedia(movies.First().Path);
                 return true;
             }
             else
+#endif
             {
                 return false;
             }

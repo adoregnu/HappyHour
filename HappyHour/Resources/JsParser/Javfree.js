@@ -63,7 +63,12 @@
         }
 
         studio = txt.substring(txt.indexOf(header) + header.length);
-        msg['studio'] = studio.replace(/^[：: ]+/g, '');
+        if (header == 'メーカー') {
+            key = 'maker';
+        } else {
+            key = 'label';
+        }
+        msg[key] = studio.replace(/^[：: ]+/g, '');
         return true;
     }
 
@@ -147,6 +152,5 @@
         //console.log(key + ': ' + msg[key]);
     }
     msg['data'] = num_item;
-    console.log(JSON.stringify(msg));
-    CefSharp.PostMessage(msg);
+    _post_message(msg, 'jp');
 }) ();

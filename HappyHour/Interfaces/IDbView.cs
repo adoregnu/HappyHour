@@ -9,6 +9,6 @@ namespace HappyHour.Interfaces
     interface IDbView
     {
         string SearchText { set; get; }
-        bool SelectPid(string pid);
+        bool SelectMovie(string pid);
     }
 }

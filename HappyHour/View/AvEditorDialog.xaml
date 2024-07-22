@@ -12,7 +12,7 @@
     <Window.Resources>
         <DataTemplate x:Key="ActorMiniTemplate">
             <StackPanel Orientation="Horizontal">
-                <control:AsyncImage HorizontalAlignment="Center" Width="64" ImagePath="{Binding PicturePath}"/>
+                <control:AsyncImage HorizontalAlignment="Center" Width="64" ImageBlob="{Binding Thumb}"/>
                 <TextBlock Text="{Binding .}" VerticalAlignment="Center"/>
             </StackPanel>
         </DataTemplate>
@@ -46,14 +46,13 @@
         <DockPanel Grid.Row="0" Margin="5">
             <TextBlock Text="Path : " DockPanel.Dock="Left"
                        Width="60" TextAlignment="Right"/>
-            <TextBox Text="{Binding Av.Path}"
+            <TextBox Text="{Binding Movie.VideoUrl}"
                      Style="{StaticResource TextboxStyle}"/>
         </DockPanel>
         <DockPanel Grid.Row="1" Margin="5">
             <TextBlock Text="Title : " DockPanel.Dock="Left"
                        Width="60" TextAlignment="Right"/>
-            <TextBox Text="{Binding Av.Title}"
-                     Style="{StaticResource TextboxStyle}"/>
+            <ComboBox ItemsSource="{Binding Movie.Title}" Style="{StaticResource ComboBoxStyle}"/>
         </DockPanel>
         <Grid Grid.Row="2" Margin="5">
             <Grid.ColumnDefinitions>
@@ -66,15 +65,15 @@
                        TextAlignment="Right"/>
             <TextBox Grid.Column="1" 
                        Style="{StaticResource TextboxStyle}"
-                       Text="{Binding Av.DateReleased, StringFormat='{}{0:yyyy-MM-dd}'}"/>
+                       Text="{Binding Movie.DateReleased, StringFormat='{}{0:yyyy-MM-dd}'}"/>
             <StackPanel Grid.Column="2" Orientation="Horizontal">
                 <TextBlock Text="Leaked PID : " Margin="5,0,0,0"
                            VerticalAlignment="Center"/>
-                <TextBox Width="130" Text="{Binding Av.LeakedPid}"
+                <TextBox Width="130" Text="{Binding Movie.AltPID}"
                          Style="{StaticResource TextboxStyle}"/>
             </StackPanel>
             <CheckBox Grid.Column="3" Margin="5,0,5,0"
-                      IsChecked="{Binding Av.IsCensored}"
+                      IsChecked="{Binding Movie.Censored}"
                       VerticalAlignment="Center">
                 <TextBlock Text="Sensored" />
             </CheckBox>
@@ -85,16 +84,16 @@
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
             <DockPanel Grid.Column="0">
-                <TextBlock Text="Studio : " DockPanel.Dock="Left"
+                <TextBlock Text="Label : " DockPanel.Dock="Left"
                           Width="60" TextAlignment="Right" />
-                <TextBox Text="{Binding Studio, Mode=OneWay}"
-                         Style="{StaticResource TextboxStyle}"/>
+                <!--<TextBox Text="{Binding Label, Mode=OneWay}" Style="{StaticResource TextboxStyle}"/>-->
+                <ComboBox ItemsSource="{Binding Movie.Lable.Name}" Style="{StaticResource ComboBoxStyle}"/>
             </DockPanel>
             <DockPanel Grid.Column="1">
                 <Button DockPanel.Dock="Right" Content="Set" Margin="2,0,2,0"
                         Width="30" Command="{Binding CmdSetStudio}"/>
-                <ComboBox ItemsSource="{Binding AllStudios}" Margin="5,0,5,0"
-                          SelectedItem="{Binding SelectedStudio}"
+                <ComboBox ItemsSource="{Binding ComboBoxStyle}" Margin="5,0,5,0"
+                          SelectedItem="{Binding SelectedLabel}"
                           IsEditable="True" IsTextSearchEnabled="True"
                           Style="{StaticResource ComboBoxStyle}"/>
             </DockPanel>

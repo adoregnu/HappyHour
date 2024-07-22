@@ -56,7 +56,14 @@ namespace HappyHour.Converter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return Path.Exists(value.ToString()) ? Visibility.Visible : Visibility.Collapsed;
+            if (value is string path)
+            {
+                return Path.Exists(path) ? Visibility.Visible : Visibility.Collapsed;
+            }
+            else
+            {
+                return value != null ? Visibility.Visible : Visibility.Collapsed;
+            }
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) =>

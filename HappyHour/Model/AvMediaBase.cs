@@ -10,10 +10,11 @@ using CefSharp.DevTools.CSS;
 using System.Drawing;
 using System.Reflection.Metadata;
 using System.Drawing.Imaging;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace HappyHour.Model
 {
-    internal abstract class AvMediaBase : NotifyPropertyChanged, IAvMedia
+    internal abstract class AvMediaBase : ObservableObject, IAvMedia
     {
         private string _poster;
         private string _briefInfo;
@@ -26,13 +27,20 @@ namespace HappyHour.Model
             get => _poster;
             set 
             {
-                Set(ref _poster, value);
+                SetProperty(ref _poster, value);
             }
         }
         public string BriefInfo
         {
             get => _briefInfo;
-            set => Set(ref _briefInfo, value);
+            set => SetProperty(ref _briefInfo, value);
+        }
+
+        ImageBlob _imageBlob;
+        public ImageBlob ImageBlob
+        {
+            get => _imageBlob;
+            set => SetProperty(ref _imageBlob, value);
         }
 
         public bool IsPlayable
@@ -74,66 +82,14 @@ namespace HappyHour.Model
         {
             string ext = System.IO.Path.GetExtension(fileName);
             //return $@"{Path}\{Pid}\.actors\{name.Remove(' ', '_')}{ext}";
-            return $@"{App.Current.LocalAppData}\db\{actorName.Replace(' ', '_')}{ext}";
+            var rname = actorName.Split(';')[0];
+            return $@"{App.Current.LocalAppData}\db\{rname.Replace(' ', '_')}{ext}";
         }
 
-        public abstract void Reload(string[] files);
+        public abstract Task Reload(string[] files);
 
-        public static IAvMedia Create(string path)
+        public static IAvMedia Create(Movie movie)
         {
-            string[] video_exts = new string[] {
-                ".mp4", ".avi", ".mkv", ".ts", ".wmv", ".m4v"
-            };
-
-            string[] files;
-            try
-            {
-                files = Directory.GetFiles(path, "*", new EnumerationOptions { RecurseSubdirectories = true });
-            }
-            catch (Exception ex)
-            {
-                Log.Print("Create AvMedia failed!", ex);
-                return null;
-            }
-            if (files.Length > 20)
-            {
-                Log.Print("Too many files in media folder!");
-                return null;
-            }
-            bool downloaded = false, excluded = false;
-            bool torrent = false, movie = false;
-
-            foreach (string file in files)
-            {
-                if (file.EndsWith(".downloaded", StringComparison.OrdinalIgnoreCase))
-                {
-                    downloaded = true;
-                }
-                else if (file.EndsWith(".excluded", StringComparison.OrdinalIgnoreCase))
-                {
-                    excluded = true;
-                }
-                else if (file.EndsWith("torrent", StringComparison.OrdinalIgnoreCase) ||
-                    file.EndsWith("magnet", StringComparison.OrdinalIgnoreCase))
-                {
-                    torrent = true;
-                }
-                else if (video_exts.Any(e => file.EndsWith(e, StringComparison.OrdinalIgnoreCase)))
-                {
-                    movie = true;
-                }
-            }
-            if (downloaded || excluded) { return null; }
-
-            IAvMedia media = null;
-            if (torrent) { media = new AvTorrent(path); }
-            else if (movie) { media = new AvMovie(path); }
-
-            if (media != null)
-            {
-                media.Reload(files);
-                return media;
-            }
             return null;
         }
     }

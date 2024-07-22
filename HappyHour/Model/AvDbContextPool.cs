@@ -32,7 +32,7 @@ namespace HappyHour.Model
         static AvDbContextPool()
         {
             _options = new DbContextOptionsBuilder<AvDbContext>()
-                .UseSqlite($@"Data Source={App.Current.LocalAppData}\db\AvDb.db")
+                .UseSqlite($@"Data Source={App.Current.LocalAppData}\AvDb.db")
                 .Options;
 
             _pool = new PooledDbContextFactory<AvDbContext>(_options);

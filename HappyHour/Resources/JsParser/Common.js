@@ -29,3 +29,10 @@ function _jav_parse_multi_node(xpath, _getter = null) {
     }
     return null;
 }
+function _post_message(msg, lang) {
+    msg['url'] = window.location.hostname;
+    msg['lang'] = lang;
+    msg['pid'] = '{{pid}}';
+    console.log(JSON.stringify(msg));
+    CefSharp.PostMessage(msg);
+}

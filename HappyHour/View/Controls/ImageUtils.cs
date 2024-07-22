@@ -6,6 +6,8 @@ using System.IO;
 using System.Windows.Media.Imaging;
 using WebPWrapper;
 using System.Reflection;
+using MongoDB.Bson.Serialization.Serializers;
+using HappyHour.Model;
 
 namespace HappyHour.View.Controls
 {
@@ -53,6 +55,35 @@ namespace HappyHour.View.Controls
                     "HappyHour.Resources.default-fallback-image.png"));
                 return ConvertBitmap(bmp, width);
             }
+        }
+        public static BitmapImage LoadImage(ImageBlob blob, int width)
+        {
+            if (blob != null && blob.Data !=null)
+            {
+                try
+                {
+                    if (blob.Type == 3)
+                    {
+                        WebP webp = new();
+                        using var bitmap = webp.Decode(blob.Data);
+                        return ConvertBitmap(bitmap, width);
+                    }
+                    else
+                    {
+                        using var ms = new MemoryStream(blob.Data);
+                        using var bitmap = new Bitmap(ms);
+                        return ConvertBitmap(bitmap, width);
+                    }
+                }
+                catch (Exception e)
+                {
+                    Log.Print(e.Message);
+                }
+            }
+
+            using var bmp = new Bitmap(Assembly.GetEntryAssembly().GetManifestResourceStream(
+                "HappyHour.Resources.default-fallback-image.png"));
+            return ConvertBitmap(bmp, width);
         }
     }
 }

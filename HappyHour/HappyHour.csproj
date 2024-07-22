@@ -18,8 +18,8 @@
 
   <ItemGroup>
     <PackageReference Include="AvalonEdit" Version="6.3.0.90" />
-    <PackageReference Include="CefSharp.OffScreen.NETCore" Version="125.0.210" />
-    <PackageReference Include="CefSharp.Wpf.NETCore" Version="125.0.210" />
+    <PackageReference Include="CefSharp.OffScreen.NETCore" Version="126.2.70" />
+    <PackageReference Include="CefSharp.Wpf.NETCore" Version="126.2.70" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
     <PackageReference Include="DeepL.net" Version="1.9.0" />
     <PackageReference Include="Dirkster.AvalonDock" Version="4.72.1" />
@@ -33,9 +33,10 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.122" />
-    <PackageReference Include="MongoDB.Bson" Version="2.26.0" />
-    <PackageReference Include="MongoDB.Driver" Version="2.26.0" />
+    <PackageReference Include="MongoDB.Bson" Version="2.27.0" />
+    <PackageReference Include="MongoDB.Driver" Version="2.27.0" />
     <PackageReference Include="MvvmDialogs" Version="9.1.2" />
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.2" />
     <PackageReference Include="QBittorrent.Client" Version="1.9.23349.1" />
     <PackageReference Include="Scriban" Version="5.10.0" />
     <PackageReference Include="SimMetrics.Net" Version="1.0.5" />
@@ -94,7 +95,6 @@
     <None Remove="Resources\JsParser\Avdbs_search.js" />
     <None Remove="Resources\JsParser\Common.js" />
     <None Remove="Resources\JsParser\db.msin.js" />
-    <None Remove="Resources\JsParser\MaddawgJav.js" />
     <None Remove="Resources\Mgstage.js" />
     <None Remove="Resources\MMD.js" />
     <None Remove="Resources\R18.js" />
@@ -112,26 +112,17 @@
     <EmbeddedResource Include="Resources\JsParser\Avdbs_search.js" />
     <EmbeddedResource Include="Resources\JsParser\Common.js" />
     <EmbeddedResource Include="Resources\JsParser\db.msin.js" />
-    <EmbeddedResource Include="Resources\JsParser\MaddawgJav.js" />
-    <EmbeddedResource Include="Resources\JsParser\MMD.js" />
     <EmbeddedResource Include="Resources\JsParser\Sukebei.js" />
     <EmbeddedResource Include="Resources\JsParser\Dmm.js" />
     <EmbeddedResource Include="Resources\JsParser\AvWiki.js" />
     <EmbeddedResource Include="Resources\JsParser\Avdbs.js" />
-    <EmbeddedResource Include="Resources\JsParser\1pondo.js" />
-    <EmbeddedResource Include="Resources\JsParser\Sehuatang2.js" />
     <EmbeddedResource Include="Resources\JsParser\Sehuatang.js" />
-    <EmbeddedResource Include="Resources\JsParser\JavBus.js" />
-    <EmbeddedResource Include="Resources\JsParser\Avsox.js" />
     <EmbeddedResource Include="Resources\JsParser\Javfree.js" />
-    <EmbeddedResource Include="Resources\JsParser\JavMovie.js" />
     <EmbeddedResource Include="Resources\JsParser\Highlight.js" />
     <EmbeddedResource Include="Resources\JsParser\JavDb.js" />
     <EmbeddedResource Include="Resources\JsParser\AVE.js" />
-    <EmbeddedResource Include="Resources\JsParser\AvJamak.js" />
     <EmbeddedResource Include="Resources\JsParser\Mgstage.js" />
     <EmbeddedResource Include="Resources\JsParser\SearchText.js" />
-    <EmbeddedResource Include="Resources\JsParser\R18.js" />
     <EmbeddedResource Include="Resources\JsParser\JavLibrary.js" />
   </ItemGroup>
 
@@ -149,15 +140,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="chromiumembeddedframework.runtime.win-x64" Version="125.0.21" />
+    <PackageReference Update="chromiumembeddedframework.runtime.win-x64" Version="126.2.7" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="chromiumembeddedframework.runtime.win-x86" Version="125.0.21" />
+    <PackageReference Update="chromiumembeddedframework.runtime.win-x86" Version="126.2.7" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="chromiumembeddedframework.runtime.win-arm64" Version="125.0.21" />
+    <PackageReference Update="chromiumembeddedframework.runtime.win-arm64" Version="126.2.7" />
   </ItemGroup>
 
 </Project>

@@ -1,5 +1,4 @@
 ﻿(function () {
-    const _PID = '{{pid}}';
     function get_node(node) { return node; }
     function _parseActor(xpath) {
         var nodes = _jav_parse_multi_node(xpath, get_node);
@@ -27,13 +26,18 @@
         }
     }
 
-    function addAlias(alias, xpath, node) {
+    function addAlias(actor, alias, xpath, lang, node) {
         var txt = _jav_parse_single_node(xpath, null, node);
         if (txt != null && txt.length > 1) {
-            var tmp = txt.split('（');
-            alias.push(tmp[0]);
+            var tmp = txt.split(/[(（]/);
+            if (actor['name'] == null) {
+                actor['name'] = tmp[0].trim() + lang;
+            } else {
+                alias.push(tmp[0].trim() + lang);
+            }
+
             if (tmp.length > 1) {
-                alias.push(tmp[1].slice(0, -1))
+                alias.push(tmp[1].slice(0, -1).trim() + lang)
             }
         }
     }
@@ -46,16 +50,9 @@
             actor['thumb'] = anode.src;
         }
         var alias = [];
-        var txt = _jav_parse_single_node("//span[@class='inner_name_kr']", null, node);
-        if (txt != null && txt.length > 1) {
-            var tmp = txt.split('（');
-            actor['name'] = tmp[0];
-            if (tmp.length > 1) {
-                alias.push(tmp[1].slice(0, -1))
-            }
-        }
-        addAlias(alias, "//span[@class='inner_name_en']", node);
-        addAlias(alias, "//span[@class='inner_name_cn']", node);
+        addAlias(actor, alias, "//span[@class='inner_name_kr']", ';ko', node);
+        addAlias(actor, alias, "//span[@class='inner_name_en']", ';en', node);
+        addAlias(actor, alias, "//span[@class='inner_name_cn']", ';jp', node);
 /*
         var names = _jav_parse_multi_node("//span[contains(., '다른이름')]/*[contains(@class, 'actor_onm')]");
         if (names != null) {
@@ -74,8 +71,7 @@
             actor['alias'] = alias;
         }
         var msg = { type: 'items', data: 1, actor: [actor] };
-        console.log(JSON.stringify(msg));
-        CefSharp.PostMessage(msg);
+        _post_message(msg,'ko');
     }
 
     function parseStudio(xpath) {
@@ -86,16 +82,29 @@
         return null;
     }
 
+    function parse_series(xpath) {
+        var txt = _jav_parse_single_node(xpath);
+        if (txt != null && txt.length > 1) {
+            return txt.trim() + ';jp';
+        }
+        return null;
+    }
+
     function parsePage() {
 
         var items = {
             title: { xpath: "//div[@class='profile_gallery_text']/span[@id='title_kr']" },
-            studio: {
+            maker: {
                 xpath: "//span[contains(., '제작사:')]/following-sibling::a/text()",
                 handler: parseStudio
             },
-            series: { xpath: "//span[contains(., '시리즈:')]/following-sibling::text()" },
+            label: { xpath: "//span[contains(., '레이블:')]/following-sibling::text()" },
+            series: {
+                xpath: "//span[contains(., '시리즈:')]/following-sibling::text()",
+                handler: parse_series
+            },
             date: { xpath: "//span[contains(., '출시:')]/following-sibling::text()" },
+            rating: { xpath: "//span[@class='rating']"},
             actor_link: {
                 xpath: "//span[contains(., '출연:')]/following-sibling::a",
                 handler: _parseActor
@@ -121,8 +130,7 @@
                 num_item += 1;
             }
             msg['data'] = num_item;
-            console.log(JSON.stringify(msg));
-            CefSharp.PostMessage(msg);
+            _post_message(msg, 'ko');
         } catch (e) {
             console.log(e.stack);
         }

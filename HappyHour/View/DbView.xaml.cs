@@ -1,5 +1,8 @@
-﻿using System;
+﻿using HappyHour.Model;
+using HappyHour.ViewModel;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,5 +27,17 @@ namespace HappyHour.View
         {
             InitializeComponent();
         }
+#if false
+        void OnListBoxPreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            var listBoxItem = e.OriginalSource as TextBlock;
+            var selectedItem = listBoxItem.DataContext;
+            if (DataContext is DbViewModel dbVm && selectedItem is Genre genre)
+            {
+                dbVm.SelectedGenre2 = genre;
+            }
+            e.Handled = true;
+        }
+#endif
     }
 }

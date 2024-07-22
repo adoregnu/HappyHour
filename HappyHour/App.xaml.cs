@@ -42,6 +42,7 @@ namespace HappyHour
 
         public IniData GConf { get; private set; }
         public const string Name = "HappyHour";
+        public readonly MovieDbContext DbContext = new();
 
         public IServiceProvider Services { get; }
 

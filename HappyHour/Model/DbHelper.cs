@@ -124,7 +124,7 @@ namespace HappyHour.Model
                     bool exitLoop = false;
                     foreach (string a in alias.Cast<string>())
                     {
-                        if (action(a.ToString()))
+                        if (action(a.Split(';')[0]))
                         {
                             exitLoop = true;
                             break;
@@ -137,7 +137,8 @@ namespace HappyHour.Model
                 }
                 else if (item.Key == "name")
                 {
-                    if (action(item.Value.ToString()))
+                    string name = item.Value as string;
+                    if (action(name.Split(';')[0]))
                     {
                         break;
                     }
@@ -175,7 +176,7 @@ namespace HappyHour.Model
                 else
                 {
                     dbActor = new();
-                    List<AvActorName> ActorNames = new();
+                    List<AvActorName> ActorNames = [];
                     ForEachActor(actor, name =>
                     {
                         ActorNames.Add(new AvActorName { Name = name, Actor = dbActor });
@@ -191,12 +192,12 @@ namespace HappyHour.Model
                 {
                     _avInfo.Actors.Add(dbActor);
                 }
-                if (actor.ContainsKey("thumb"))
+                if (actor.TryGetValue("thumb", out object value))
                 {
                     if (string.IsNullOrEmpty(dbActor.PicturePath) || OverwriteActorPicture)
                     {
                         //dbActor.PicturePath = actor["thumb"].ToString();
-                        dbActor.PicturePath = $"{App.Current.LocalAppData}\\db\\{actor["thumb"]}";
+                        dbActor.PicturePath = $"{App.Current.LocalAppData}\\db\\{value}";
                     }
                 }
             }
@@ -211,7 +212,7 @@ namespace HappyHour.Model
             {
                 { "title", (_item, title) => _item.Title = title as string },
                 { "genre", (_item, list) => UpdateGenre(context, _item, list as List<object>) }, //(Action<List<object>>)UpdateGenre },
-                { "studio", (_item, studio) => UpdateStudio(context, _item, studio as string) }, //(Action<string>)UpdateStudio },
+                { "maker", (_item, studio) => UpdateStudio(context, _item, studio as string) }, //(Action<string>)UpdateStudio },
                 { "series", (_item, series) => UpdateSeries(context, _item, series as string) }, //(Action<string>)UpdateSeries },
                 { "actor", (_item, list) => UpdateActor(context, _item, list as List<object>) }, //(Action<List<object>>)UpdateActor },
                 { "date", (_item, date) => UpdateDate(context, _item, date as string) }, //(Action<string>)UpdateDate },

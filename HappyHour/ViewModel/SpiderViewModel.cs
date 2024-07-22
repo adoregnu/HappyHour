@@ -51,27 +51,21 @@ namespace HappyHour.ViewModel
 
         public SpiderViewModel() : base()
         {
-            Spiders = new List<SpiderBase>
-            {
+            Spiders =
+            [
                 new SpiderSehuatang(this),
                 new SpiderSukebei(this),
                 new SpideDbMsin(this),
                 new SpiderJavlibrary(this),
-                //new SpiderMmd(this),
-                new SpiderJavmoive(this),
                 new SpiderAvwiki(this),
                 new SpiderMgstage(this),
                 new SpiderDmm(this),
                 new SpiderAVE(this),
                 new SpiderJavDb(this),
-                new SpiderJavBus(this),
                 new SpiderJavfree(this),
-                //new SpiderPornav(this),
-                //new SpiderAvsox(this),
-                //new Spider1pondo(this),
                 new SpiderAvdbs(this),
-                new SpiderAvJamak(this),
-            };
+            ];
+
         }
 
         public void SetSpider(SpiderBase spider)

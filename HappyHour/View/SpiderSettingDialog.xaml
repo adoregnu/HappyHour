@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         WindowStartupLocation="CenterOwner"
         md:DialogServiceViews.IsRegistered="True"
-        Title="Setting for items to be scraped" Height="350" Width="450">
+        Title="Setting for items to be scraped" Height="450" Width="450">
     <Window.Resources>
         <ControlTemplate x:Key="SpiderTypeSehuatang">
             <Grid>
@@ -54,11 +54,20 @@
             </Grid>
         </ControlTemplate>
         <ControlTemplate  x:Key="SpiderTypeDefault">
-            <StackPanel Grid.Column="1" Orientation="Vertical">
+            <StackPanel Orientation="Vertical">
                 <CheckBox IsChecked="{Binding OverwritePoster}" Content="Overwrite Poster" Margin="5,0,0,5"/>
                 <CheckBox IsChecked="{Binding OverwriteActorThumb}" Content="Overwrite actor thumb file" Margin="5,0,0,5"/>
                 <CheckBox IsChecked="{Binding OverwriteActorThumbDb}" Content="Overwirte actor thumb DB" Margin="5,0,0,5"/>
                 <CheckBox IsChecked="{Binding CheckAll}" Content="Check All items below" Margin="5,5,0,5"/>
+                <DockPanel>
+                    <StackPanel Orientation="Vertical" VerticalAlignment="Center" DockPanel.Dock="Left">
+                        <Button Margin="5,5,5,0" Command="{Binding CmdAddChain}">Add</Button>
+                        <Button Margin="5,5,5,0" Command="{Binding CmdDelChain}">Del</Button>
+                        <Button Margin="5,5,5,0" Command="{Binding CmdMoveUp}">Up </Button>
+                        <Button Margin="5,5,5,0" Command="{Binding CmdMoveDown}">Down</Button>
+                    </StackPanel>
+                    <ListBox Margin="0,5,5,0" ItemsSource="{Binding SpiderChain}"  DockPanel.Dock="Right"/>
+                </DockPanel>
                 <ItemsControl ItemsSource="{Binding ScrapItems}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>

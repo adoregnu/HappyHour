@@ -1,5 +1,4 @@
 ﻿(function () {
-    const _PID = '{{pid}}';
     function _parseActor(xpath) {
         var array = _jav_parse_multi_node(xpath);
         if (array == null) {
@@ -92,6 +91,5 @@
         num_item += 1;
     }
     msg['data'] = num_item;
-    console.log(JSON.stringify(msg));
-    CefSharp.PostMessage(msg);
+    _post_message(msg, 'jp');
 }) ();

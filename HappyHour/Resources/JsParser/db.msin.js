@@ -1,6 +1,4 @@
 ﻿(function () {
-    const _PID = '{{pid}}';
-
     function get_node(node) { return node; }
 
     function parse_actor_page() {
@@ -34,8 +32,7 @@
         }
 
         var msg = { type: 'items', data: 1, actor: [actor] };
-        console.log(JSON.stringify(msg));
-        CefSharp.PostMessage(msg);
+        _post_message(msg, 'jp');
     }
 
     function parse_actor(xpath) {
@@ -145,6 +142,5 @@
         num_item += 1;
     }
     result['data'] = num_item;
-    console.log(JSON.stringify(result));
-    CefSharp.PostMessage(result);
+    _post_message(msg, 'jp');
 }) ();

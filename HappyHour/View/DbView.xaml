@@ -4,39 +4,88 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:HappyHour.View"
+             xmlns:vm="clr-namespace:HappyHour.ViewModel"
+             xmlns:bh="clr-namespace:HappyHour.View.Behavior"
+             xmlns:ctrls="clr-namespace:HappyHour.View.Controls"
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              mc:Ignorable="d" 
              d:DesignHeight="500" d:DesignWidth="400">
     <UserControl.Resources>
-        <ControlTemplate x:Key="AvSeriesTemplate">
-            <ListBox ItemsSource="{Binding AvSeriesList}"
-                     SelectedItem="{Binding SelectedSeries}"/>
-        </ControlTemplate>
-        <ControlTemplate x:Key="AvItemTemplate">
-            <ListBox ItemsSource="{Binding AvItemList}"
-                     SelectedItem="{Binding SelectedItem}"/>
-        </ControlTemplate>
-        <ControlTemplate x:Key="AvActorTemplate">
-            <ListBox ItemsSource="{Binding AvActorNameList}"
-                     SelectedItem="{Binding SelectedActorName}"/>
-        </ControlTemplate>
-        <ControlTemplate x:Key="AvStudioTemplate">
-            <ListBox ItemsSource="{Binding AvStudioList}" SelectedItem="{Binding SelectedStudio}"/>
-        </ControlTemplate>
-     
+        <DataTemplate x:Key="AvSeriesTemplate" DataType="vm:DbViewModel">
+            <ListBox ItemsSource="{Binding Series}" SelectedItem="{Binding SelectedSeries}"/>
+        </DataTemplate>
+        <DataTemplate x:Key="AvItemTemplate" DataType="vm:DbViewModel">
+            <ListBox ItemsSource="{Binding Movies}" SelectedItem="{Binding SelectedMovie}"/>
+        </DataTemplate>
+        <DataTemplate x:Key="AvActorTemplate" DataType="vm:DbViewModel">
+            <ListBox ItemsSource="{Binding Actors}" SelectedItem="{Binding SelectedActor}"/>
+        </DataTemplate>
+        <DataTemplate x:Key="AvStudioTemplate" DataType="vm:DbViewModel">
+            <ListBox ItemsSource="{Binding Makers}" SelectedItem="{Binding SelectedMakers}"/>
+        </DataTemplate>
+
+        <ContextMenu x:Key="_genreMenu">
+            <MenuItem
+                Header="Merge Genres"
+                CommandParameter="{Binding PlacementTarget.Tag.SelectedItems,
+                    RelativeSource={RelativeSource FindAncestor,
+                    AncestorType=ContextMenu}}"
+                Command="{Binding PlacementTarget.Tag.DataContext.CmdGenresMerge,
+                    RelativeSource={RelativeSource FindAncestor,
+                    AncestorType=ContextMenu}}"/>
+        </ContextMenu>
+        <DataTemplate x:Key="GenreTemplate" DataType="vm:DbViewModel">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="150"/>
+                </Grid.RowDefinitions>
+                <ListBox Grid.Row="0" x:Name="_genreListBox" ItemsSource="{Binding Genres}"
+                         SelectedItem="{Binding SelectedGenre}" SelectionMode="Extended">
+                    <ListBox.Resources>
+                        <Style TargetType="{x:Type ListBoxItem}">
+                            <Setter Property="Tag" Value="{Binding ElementName=_genreListBox}"/>
+                            <Setter Property="ContextMenu" Value="{StaticResource _genreMenu}"/>
+                        </Style>
+                    </ListBox.Resources>
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="MouseDoubleClick">
+                            <i:InvokeCommandAction Command="{Binding CmdGenreDoubleClick}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                    <i:Interaction.Behaviors>
+                        <bh:ListboxBehavior/>
+                    </i:Interaction.Behaviors>
+                    <ListBox.CommandBindings>
+                        <CommandBinding Command="ApplicationCommands.Copy" />
+                    </ListBox.CommandBindings>
+                </ListBox>
+                <StackPanel Grid.Row="1" Orientation="Vertical" Margin="0,10,0,0">
+                    <Label>Selected Genre</Label>
+                    <ListBox ItemsSource="{Binding GenreNames}">
+                    </ListBox>
+                </StackPanel>
+            </Grid>
+        </DataTemplate>
+    
         <Style x:Key="DbListStyle" TargetType="ContentControl">
             <Style.Triggers>
-                <DataTrigger Binding="{Binding SelectedType, Mode=TwoWay}" Value="Pid">
-                    <Setter Property="Template" Value="{StaticResource AvItemTemplate}"/>
+                <DataTrigger Binding="{Binding SelectedType, Mode=TwoWay}" Value="Movie">
+                    <Setter Property="ContentTemplate" Value="{StaticResource AvItemTemplate}"/>
                 </DataTrigger>
-                <DataTrigger Binding="{Binding SelectedType, Mode=TwoWay}" Value="Studio">
-                    <Setter Property="Template" Value="{StaticResource AvStudioTemplate}"/>
+                <DataTrigger Binding="{Binding SelectedType, Mode=TwoWay}" Value="Makers">
+                    <Setter Property="ContentTemplate" Value="{StaticResource AvStudioTemplate}"/>
                 </DataTrigger>
                 <DataTrigger Binding="{Binding SelectedType, Mode=TwoWay}" Value="Series">
-                    <Setter Property="Template" Value="{StaticResource AvSeriesTemplate}"/>
+                    <Setter Property="ContentTemplate" Value="{StaticResource AvSeriesTemplate}"/>
                 </DataTrigger>
-                <DataTrigger Binding="{Binding SelectedType, Mode=TwoWay}" Value="Actor">
-                    <Setter Property="Template" Value="{StaticResource AvActorTemplate}"/>
+                <DataTrigger Binding="{Binding SelectedType, Mode=TwoWay}" Value="Actors">
+                    <Setter Property="ContentTemplate" Value="{StaticResource AvActorTemplate}"/>
                 </DataTrigger>
+                <DataTrigger Binding="{Binding SelectedType, Mode=TwoWay}" Value="Genres">
+                    <Setter Property="ContentTemplate" Value="{StaticResource GenreTemplate}"/>
+                </DataTrigger>
+
             </Style.Triggers>
         </Style>
     </UserControl.Resources>
@@ -53,10 +102,9 @@
             <ComboBox Grid.Column="0" Width="80"
                       ItemsSource="{Binding ListType}"
                       SelectedItem="{Binding SelectedType}"/>
-            <TextBox Grid.Column="1" Text="{Binding SearchText,
-                        UpdateSourceTrigger=PropertyChanged}"/>
+            <ctrls:DelayedBindingTextBox Grid.Column="1" DelayTime="500" Text="{Binding SearchText}"/>
         </Grid>
-        <ContentControl Grid.Row="1" Style="{StaticResource DbListStyle}"
-                        Margin="0,2,0,0"/>
+        <ContentControl Grid.Row="1" Style="{StaticResource DbListStyle}" Margin="0,2,0,0" Content="{Binding}"/>
     </Grid>
+
 </UserControl>

@@ -12,8 +12,9 @@ namespace HappyHour.Interfaces
 
     internal interface IMediaList
     {
-        void AddMedia(string path);
-        void LoadItems(List<AvItem> movies);
+        Task AddMedia(string path);
+        void AddMedia(Movie movie);
+        void LoadItems(List<Movie> movies);
 
         IEnumerable<SpiderBase> SpiderList { get; set; }
         MediaListItemSelected ItemSelectedHandler { get; set; }

@@ -10,6 +10,7 @@ using HappyHour.ViewModel;
 using HappyHour.Interfaces;
 using HappyHour.Model;
 using CommunityToolkit.Mvvm.Input;
+using System.Collections.ObjectModel;
 
 namespace HappyHour.Spider
 {
@@ -46,6 +47,8 @@ namespace HappyHour.Spider
             get => _isSpiderWorking;
             set => Set(ref _isSpiderWorking, value);
         }
+
+        public List<SpiderBase> SpiderChains { get; set; } = [];
 
         public SpiderViewModel Browser { get; private set; }
         public ScrapCompletedHandler ScrapCompleted { get; set; }
@@ -315,6 +318,7 @@ namespace HappyHour.Spider
             {
                 SearchMedia.Reload();
             }
+            
             SearchMedia = null;
             ScrapCompleted?.Invoke(this);
         }
@@ -327,19 +331,10 @@ namespace HappyHour.Spider
             }
         }
 
-        private void ApplyItemSettings(IDictionary<string, object> items)
+        private void SkipDownloadIfNeeded(IDictionary<string, object> items)
         {
-            ScrapItems.ForEach(i =>
-            {
-                if (items.ContainsKey(i.Name) && !i.CanUpdate)
-                {
-                    _ = items.Remove(i.Name);
-                    Log.Print($"{Name}:: {i.Name} is dropped by setting!");
-                }
-            });
-
-            List<(string key, IDictionary<string, object> dict)> tmpList = new();
-            _ = IterateDynamic(items, (key, dict) =>
+            List<(string key, IDictionary<string, object> dict)> tmpList = [];
+            IterateDynamic(items, (key, dict) =>
             {
                 string path = null;
                 if (!OverwritePoster && key is "cover")
@@ -359,6 +354,17 @@ namespace HappyHour.Spider
                 return false;
             });
             tmpList.ForEach(tp => tp.dict.Remove(tp.key));
+        }
+        private void ApplyItemSettings(IDictionary<string, object> items)
+        {
+            ScrapItems.ForEach(i =>
+            {
+                if (items.ContainsKey(i.Name) && !i.CanUpdate)
+                {
+                    _ = items.Remove(i.Name);
+                    Log.Print($"{Name}:: {i.Name} is dropped by setting!");
+                }
+            });
         }
 
         public virtual bool OnJsMessageReceived(JavascriptMessageReceivedEventArgs msg)
@@ -387,6 +393,7 @@ namespace HappyHour.Spider
                 try
                 {
                     ApplyItemSettings(d);
+                    //SkipDownloadIfNeeded(d);
                     Downloader.Download(this, d);
                 }
                 catch (Exception ex)
@@ -398,21 +405,15 @@ namespace HappyHour.Spider
             return false;
         }
 
-
         public virtual void UpdateDownload()
         {
         }
 
         protected virtual void UpdateDb(IDictionary<string, object> items)
         {
-#if false
-            new ItemBase2(SearchMedia)
-            {
-                OverwriteActorPicture = OverwriteActorThumbDb
-            }.UpdateItems(items);
-#endif
-            DbHelper.OverwriteActorPicture = OverwriteActorThumb;
-            DbHelper.UpdateItems(SearchMedia, items);
+            items["path"] = SearchMedia.Path;
+            items["pid"] = SearchMedia.Pid;
+            App.Current.DbContext.SetMovie(items);
         }
 
         public void UpdateItems(IDictionary<string, object> items)

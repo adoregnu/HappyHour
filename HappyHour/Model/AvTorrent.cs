@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 
 using QBittorrent.Client;
@@ -69,13 +70,9 @@ namespace HappyHour.Model
             }
         }
 
-        public override void Reload(string[] files = null)
+        public async override Task Reload(string[] files = null)
         {
-            if (files == null)
-            {
-                //files = Directory.GetFiles(Path);
-                files = Directory.GetFiles(Path, "*", new EnumerationOptions { RecurseSubdirectories = true });
-            }
+            files ??= Directory.GetFiles(Path, "*", new EnumerationOptions { RecurseSubdirectories = true });
             Torrents.Clear();
             Screenshots.Clear();
             bool torrent_sht = false;

@@ -272,13 +272,18 @@ namespace HappyHour.ViewModel
                 SelectedMedia = media;
             }
         }
+        public void AddMedia(Movie movie)
+        {
+            var item = new AvMovie(movie);
+            MediaList.AddInOrder(item, i => i);
+        }
 
-        public void AddMedia(string path)
+        public async Task AddMedia(string path)
         {
             var media = MediaList.FirstOrDefault(m => m.Path == path);
             if (media == null)
             {
-                var item = AvMediaBase.Create(path);
+                var item = await AvMediaFactory.Create(path);
                 if (item != null)
                 {
                     MediaList.AddInOrder(item, i => i);
@@ -286,7 +291,7 @@ namespace HappyHour.ViewModel
             }
             else
             {
-                media.Reload();
+                await media.Reload();
             }
         }
 
@@ -340,13 +345,10 @@ namespace HappyHour.ViewModel
             MainView.DialogService.Show<AvEditorDialog>(this, dialog);
         }
 
-        private void UpdateMediaList(string path, CancellationToken token,
+        private async Task UpdateMediaList(string path, CancellationToken token,
             bool bRecursive = false, int level = 0)
         {
-            if (token.IsCancellationRequested)
-            {
-                return;
-            }
+            if (token.IsCancellationRequested) return;
 
             try
             {
@@ -354,13 +356,13 @@ namespace HappyHour.ViewModel
                 if (dirs.Length == 0 ||
                     dirs.Any(dir => dir.Contains("actors") || dir.Contains("sukebei")))
                 {
-                    AddMedia(path);
+                    await AddMedia(path);
                 }
                 else if (bRecursive || level < 1)
                 {
                     foreach (string dir in dirs)
                     {
-                        UpdateMediaList(dir, token, bRecursive, level + 1);
+                        await UpdateMediaList(dir, token, bRecursive, level + 1);
                     }
                 }
             }
@@ -370,17 +372,11 @@ namespace HappyHour.ViewModel
             }
         }
 
-        private void IterateMedia(string currDir, List<string> dbDirs, AvDbContext context, CancellationToken token)
+        private async Task IterateMedia(string currDir, List<string> dbDirs, CancellationToken token)
         {
-            if (token.IsCancellationRequested)
-            {
-                return;
-            }
+            if (token.IsCancellationRequested) return;
+            if (currDir.Contains("Western")) return;
 
-            if (currDir.Contains("Western"))
-            {
-                return;
-            }
             try
             {
                 string[] dirs = Directory.GetDirectories(currDir);
@@ -388,20 +384,14 @@ namespace HappyHour.ViewModel
                 {
                     if (dbDirs.BinarySearch(currDir) < 0)
                     {
-                        string pid = currDir.Split('\\').Last();
-                        var item = context.Items.FirstOrDefault(it => it.Pid == pid);
-                        if (item != null)
-                        {
-                            item.Path = currDir;
-                        }
-                        AddMedia(currDir);
+                       await AddMedia(currDir);
                     }
                 }
                 else
                 {
                     foreach (string dir in dirs)
                     {
-                        IterateMedia(dir, dbDirs, context, token);
+                        await IterateMedia(dir, dbDirs, token);
                     }
                 }
             }
@@ -411,16 +401,11 @@ namespace HappyHour.ViewModel
             }
         }
 
-        private Task _runningTask;
         private CancellationTokenSource _tokenSource;
 
         private void CancelTaskIfRunning()
         {
-            if (_runningTask != null && !_runningTask.IsCompleted)
-            {
-                _tokenSource.Cancel();
-                _runningTask.Wait();
-            }
+            _tokenSource?.Cancel();
         }
 
         private async void SortMedia()
@@ -431,7 +416,7 @@ namespace HappyHour.ViewModel
 
             _tokenSource = new CancellationTokenSource();
             var token = _tokenSource.Token;
-            _runningTask = Task.Run(() =>
+            await Task.Run(() =>
             {
                 foreach (var m in tmp)
                 {
@@ -442,7 +427,6 @@ namespace HappyHour.ViewModel
                     MediaList.AddInOrder(m, i => i);
                 }
             }, token);
-            await _runningTask;
         }
 
         private async void RefreshMediaList(DirectoryInfo msg)
@@ -453,8 +437,7 @@ namespace HappyHour.ViewModel
             _tokenSource = new CancellationTokenSource();
             var token = _tokenSource.Token;
             bool bSubFolder = _searchSubFolder;
-            _runningTask = Task.Run(() => UpdateMediaList(msg.FullName, token, bSubFolder), token);
-            await _runningTask;
+            await UpdateMediaList(msg.FullName, token, bSubFolder);
         }
 
         private async void SearchOrphanage()
@@ -464,76 +447,47 @@ namespace HappyHour.ViewModel
 
             string currDir = _fileList.CurrDirInfo.FullName;
 
-            using var context = AvDbContextPool.CreateContext();
-            var dbDirs = await context.Items
-                .Where(i => EF.Functions.Like(i.Path, $"{currDir}%"))
-                .Select(i => i.Path)
-                .ToListAsync();
+            var dbDirs = await App.Current.DbContext.GetMovieUrls(currDir);
 
             _tokenSource = new CancellationTokenSource();
             var token = _tokenSource.Token;
 
-            _runningTask = Task.Run(() =>
-            {
-                dbDirs.Sort();
-                IterateMedia(currDir, dbDirs, context, token);
-                Log.Print("Search orphanage media done!");
-            }, token);
-            await _runningTask;
-            context.SaveChanges();
+            await IterateMedia(currDir, dbDirs, token);
+            App.Current.DbContext.SaveChanges();
+            Log.Print("Search orphanage media done!");
         }
 
-        public async void LoadItems(List<AvItem> movies)
+        public void LoadItems(List<Movie> movies)
         {
-            CancelTaskIfRunning();
             MediaList.Clear();
-
-            _tokenSource = new CancellationTokenSource();
-            var token = _tokenSource.Token;
-
-            _runningTask = Task.Run(() =>
+            foreach (var movie in movies)
             {
-                foreach (var movie in movies)
-                {
-                    if (token.IsCancellationRequested)
-                    {
-                        break;
-                    }
-                    if (Directory.Exists(movie.Path))
-                    {
-                        AddMedia(movie.Path);
-                    }
-                    else
-                    {
-                        using var context = AvDbContextPool.CreateContext();
-                        context.Attach(movie);
-                        context.Items.Remove(movie);
-                    }
-                }
-            }, token);
-
-            await _runningTask;
+                AddMedia(movie);
+            }
         }
 
         private async void OnSearchEmptyActor()
         {
+#if false
             using var context = AvDbContextPool.CreateContext();
             var movies = await context.Items
                 .Include(i => i.Actors)
                 .Where(i => i.Actors.Count == 0)
                 //.Select(i => i.Path)
                 .ToListAsync();
-            LoadItems(movies);
+            //LoadItems(movies);
+#endif
         }
 
         private async void LastUpdatedMovies()
         {
+#if false
             using var context = AvDbContextPool.CreateContext();
             var movies = await context.Items
                 .OrderByDescending(i => i.DateAdded)
                 .Take(20).ToListAsync();
-
-            LoadItems(movies);
+#endif
+            //LoadItems(movies);
         }
 
         private void OnScrapCompleted(SpiderBase spider)

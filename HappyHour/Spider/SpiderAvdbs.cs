@@ -17,6 +17,7 @@ namespace HappyHour.Spider
             URL = "https://www.avdbs.com/";
             ScriptName = "Avdbs.js";
 
+            /*
             ScrapItems.ForEach(i =>
             {
                 if (i.Name is not "actor")
@@ -24,6 +25,7 @@ namespace HappyHour.Spider
                     i.CanUpdate = false;
                 }
             });
+            */
             OverwriteActorThumb = true;
         }
 

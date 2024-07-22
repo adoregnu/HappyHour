@@ -152,7 +152,7 @@ namespace HappyHour.Spider
 
             _spider = spider;
             _items = items;
-            _ = SpiderBase.IterateDynamic(items, (key, dict) =>
+            SpiderBase.IterateDynamic(items, (key, dict) =>
             {
                 if (_item2download.Contains(key)) { _numDownload++; }
                 return false;
@@ -161,7 +161,7 @@ namespace HappyHour.Spider
             Log.Print($"{spider.Name}: Num items to download: {_numDownload}");
             if (_numDownload > 0)
             {
-                _ = SpiderBase.IterateDynamic(items, (key, dict) =>
+                SpiderBase.IterateDynamic(items, (key, dict) =>
                 {
                     if (_item2download.Contains(key))
                     {

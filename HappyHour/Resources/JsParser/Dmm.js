@@ -43,6 +43,5 @@
         num_item += 1;
     }
     msg['data'] = num_item;
-    console.log(JSON.stringify(msg));
-    CefSharp.PostMessage(msg);
+    _post_message(msg, 'jp');
 }) ();
