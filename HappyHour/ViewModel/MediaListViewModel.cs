@@ -39,7 +39,7 @@ namespace HappyHour.ViewModel
         private IFileList _fileList;
         private IAvMedia _selectedMedia;
         private IEnumerable<SpiderBase> _spiderList;
-        private List<IAvMedia> _mitemsToSearch;
+        private List<IAvMedia> _mediasToSearch;
 
         public IAvMedia SelectedMedia
         {
@@ -177,10 +177,10 @@ namespace HappyHour.ViewModel
             });
             CmdScrap = new RelayCommand<object>(
                 p => OnScrapAvInfo(p as SpiderBase),
-                p => _mitemsToSearch == null);
+                p => _mediasToSearch == null);
             CmdStopBatchingScrap = new RelayCommand(
                 () => _forceStopScrapping = true,
-                () => _mitemsToSearch != null);
+                () => _mediasToSearch != null);
         }
 
         private static void PlayMedia(AvMovie media)
@@ -468,7 +468,6 @@ namespace HappyHour.ViewModel
 
         private async void OnSearchEmptyActor()
         {
-#if false
             using var context = AvDbContextPool.CreateContext();
             var movies = await context.Items
                 .Include(i => i.Actors)
@@ -476,25 +475,22 @@ namespace HappyHour.ViewModel
                 //.Select(i => i.Path)
                 .ToListAsync();
             //LoadItems(movies);
-#endif
         }
 
         private async void LastUpdatedMovies()
         {
-#if false
             using var context = AvDbContextPool.CreateContext();
             var movies = await context.Items
                 .OrderByDescending(i => i.DateAdded)
                 .Take(20).ToListAsync();
-#endif
             //LoadItems(movies);
         }
 
         private void OnScrapCompleted(SpiderBase spider)
         {
-            if (_mitemsToSearch.Count > 0)
+            if (_mediasToSearch.Count > 0)
             {
-                _mitemsToSearch.RemoveAt(0);
+                _mediasToSearch.RemoveAt(0);
             }
             OnScrapAvInfo(spider);
             Messenger.Send(new ViewEventArgs("RefreshActors", null));
@@ -502,23 +498,23 @@ namespace HappyHour.ViewModel
 
         private void OnScrapAvInfo(SpiderBase spider)
         {
-            if (_mitemsToSearch == null)
+            if (_mediasToSearch == null)
             {
                 _forceStopScrapping = false;
-                _mitemsToSearch = SelectedMedias.ToList();
+                _mediasToSearch = [.. SelectedMedias];
                 spider.ScrapCompleted += OnScrapCompleted;
             }
 
-            if (!_forceStopScrapping && _mitemsToSearch.Count > 0)
+            if (!_forceStopScrapping && _mediasToSearch.Count > 0)
             {
-                MainView.StatusMessage = $"{_mitemsToSearch.Count} remained";
-                spider.Navigate2(_mitemsToSearch[0]);
+                MainView.StatusMessage = $"{_mediasToSearch.Count} remained";
+                spider.Navigate2(_mediasToSearch[0]);
             }
             else
             {
                 spider.ScrapCompleted -= OnScrapCompleted;
                 MainView.StatusMessage = "";
-                _mitemsToSearch = null;
+                _mediasToSearch = null;
             }
         }
     }

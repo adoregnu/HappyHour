@@ -8,13 +8,14 @@ using System.Collections.ObjectModel;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
 using System.Linq;
+using HappyHour.Extension;
 
 namespace HappyHour.ViewModel
 {
     internal class SpiderSettingViewModel : ObservableObject, IModalDialogViewModel
     {
         private SpiderBase _selectedSpider;
-        private SpiderBase _selectedChain;
+        private SpiderBase _selectedSpiderToChains;
 
         public bool? DialogResult { get; set; }
         public List<SpiderBase> Spiders { get; set; }
@@ -28,10 +29,10 @@ namespace HappyHour.ViewModel
             }
         }
 
-        public SpiderBase SelectedChain
+        public SpiderBase SelectedSpiderToChains
         {
-            get => _selectedChain;
-            set => SetProperty(ref _selectedChain, value);
+            get => _selectedSpiderToChains;
+            set => SetProperty(ref _selectedSpiderToChains, value);
         }
 
         public IDialogService DialogService { get; set; }
@@ -43,22 +44,35 @@ namespace HappyHour.ViewModel
         public SpiderSettingViewModel()
         {
             CmdAddChain = new RelayCommand(OnAddChain);
-            CmdDelChain = new RelayCommand(OnDelChain);
-            CmdMoveUp = new RelayCommand(OnMoveUp);
-            CmdMoveDown = new RelayCommand(OnMoveDown);
+            CmdDelChain = new RelayCommand(OnDelChain,
+                () => SelectedSpiderToChains != null);
+            CmdMoveUp = new RelayCommand(OnMoveUp,
+                () => SelectedSpiderToChains != null);
+            CmdMoveDown = new RelayCommand(OnMoveDown,
+                () => SelectedSpiderToChains != null);
         }
 
         void OnAddChain()
         {
+            if (SelectedSpider != SelectedSpiderToChains)
+            {
+                SelectedSpider.SpiderChain.Add(SelectedSpiderToChains);
+            }
         }
         void OnDelChain()
         {
+            _selectedSpider.SpiderChain.Remove(SelectedSpiderToChains);
         }
         void OnMoveUp()
         {
+            var idx = _selectedSpider.SpiderChain.IndexOf(SelectedSpiderToChains);
+            _selectedSpider.SpiderChain.Move(idx, idx - 1);
         }
         void OnMoveDown()
         {
+            var idx = _selectedSpider.SpiderChain.IndexOf(SelectedSpiderToChains);
+            _selectedSpider.SpiderChain.Move(idx, idx + 1);
+
         }
 
     }

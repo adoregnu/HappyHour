@@ -14,6 +14,7 @@ namespace HappyHour.Spider
             Name = "Javlibrary";
             URL = "https://www.javlibrary.com/en/";
             ScriptName = "JavLibrary.js";
+            SpiderNamesToChain = ["Avdbs"];
         }
 
         protected override List<Cookie> CreateCookie()

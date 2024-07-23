@@ -9,6 +9,8 @@ using HappyHour.Spider;
 using HappyHour.CefHandler;
 using HappyHour.Interfaces;
 using MvvmDialogs;
+using System.Reflection.Metadata.Ecma335;
+using System.Windows.Markup;
 
 namespace HappyHour.ViewModel
 {
@@ -16,6 +18,7 @@ namespace HappyHour.ViewModel
     {
         private IMediaList _mediaList;
         private SpiderBase _selectedSpider;
+        private List<SpiderBase> _spiderChains;
 
         public List<SpiderBase> Spiders { get; set; }
         public SpiderBase SelectedSpider
@@ -23,6 +26,9 @@ namespace HappyHour.ViewModel
             get => _selectedSpider;
             set
             {
+                _spiderChains?.Clear();
+                _spiderChains = null;
+
                 SetSpider(value);
                 SetProperty(ref _selectedSpider, value);
             }
@@ -66,9 +72,13 @@ namespace HappyHour.ViewModel
                 new SpiderAvdbs(this),
             ];
 
+            foreach (var s in Spiders)
+            {
+                s.InitChain(Spiders);
+            }
         }
 
-        public void SetSpider(SpiderBase spider)
+        private void SetSpider(SpiderBase spider)
         {
             if (spider == null) { return; }
 
@@ -80,7 +90,20 @@ namespace HappyHour.ViewModel
                 UpdateBrowserHeader(spider.Name);
             }
 
+            _spiderChains ??= [.. spider.SpiderChain];
             spider.SetAddress();
+        }
+
+        public bool SetNextSpider()
+        {
+            if (_spiderChains != null && _spiderChains.Count > 0)
+            {
+                var nextSpider = _spiderChains[0];
+                _spiderChains.RemoveAt(0);
+                SetSpider(nextSpider);
+                return true;
+            }
+            return false;
         }
 
         private void UpdateBrowserHeader(string spiderName)

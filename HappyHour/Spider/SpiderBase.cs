@@ -11,6 +11,7 @@ using HappyHour.Interfaces;
 using HappyHour.Model;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace HappyHour.Spider
 {
@@ -40,6 +41,7 @@ namespace HappyHour.Spider
 
         protected readonly Queue<IDictionary<string, object>> _itemQueue = new();
         protected virtual IDownloader Downloader => _downloader;
+        protected List<string> SpiderNamesToChain = [];
 
         public List<ScrapItem> ScrapItems { get; set; }
         public bool IsSpiderWorking
@@ -48,7 +50,7 @@ namespace HappyHour.Spider
             set => Set(ref _isSpiderWorking, value);
         }
 
-        public List<SpiderBase> SpiderChains { get; set; } = [];
+        public ObservableCollection<SpiderBase> SpiderChain { get; set; } = [];
 
         public SpiderViewModel Browser { get; private set; }
         public ScrapCompletedHandler ScrapCompleted { get; set; }
@@ -318,9 +320,12 @@ namespace HappyHour.Spider
             {
                 SearchMedia.Reload();
             }
-            
-            SearchMedia = null;
-            ScrapCompleted?.Invoke(this);
+
+            if (!Browser.SetNextSpider())
+            {
+                SearchMedia = null;
+                ScrapCompleted?.Invoke(this);
+            }
         }
 
         public virtual void Scrap()
@@ -435,6 +440,17 @@ namespace HappyHour.Spider
         public override string ToString()
         {
             return URL;
+        }
+
+        public void InitChain(List<SpiderBase> spiders)
+        {
+            spiders.ForEach(s =>
+            {
+                if (SpiderNamesToChain.Any(n => n == s.Name))
+                {
+                    SpiderChain.Add(s);
+                }
+            });
         }
     }
 }

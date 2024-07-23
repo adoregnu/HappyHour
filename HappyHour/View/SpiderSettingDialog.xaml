@@ -58,7 +58,14 @@
                 <CheckBox IsChecked="{Binding OverwritePoster}" Content="Overwrite Poster" Margin="5,0,0,5"/>
                 <CheckBox IsChecked="{Binding OverwriteActorThumb}" Content="Overwrite actor thumb file" Margin="5,0,0,5"/>
                 <CheckBox IsChecked="{Binding OverwriteActorThumbDb}" Content="Overwirte actor thumb DB" Margin="5,0,0,5"/>
-                <CheckBox IsChecked="{Binding CheckAll}" Content="Check All items below" Margin="5,5,0,5"/>
+                <CheckBox IsChecked="{Binding CheckAll}" Content="Check All items below" Margin="5,0,0,5"/>
+                <ItemsControl ItemsSource="{Binding ScrapItems}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <CheckBox IsChecked="{Binding CanUpdate}" Content="{Binding Name}" Margin="5,5,0,0"/>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
                 <DockPanel>
                     <StackPanel Orientation="Vertical" VerticalAlignment="Center" DockPanel.Dock="Left">
                         <Button Margin="5,5,5,0" Command="{Binding CmdAddChain}">Add</Button>
@@ -68,13 +75,6 @@
                     </StackPanel>
                     <ListBox Margin="0,5,5,0" ItemsSource="{Binding SpiderChain}"  DockPanel.Dock="Right"/>
                 </DockPanel>
-                <ItemsControl ItemsSource="{Binding ScrapItems}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <CheckBox IsChecked="{Binding CanUpdate}" Content="{Binding Name}" Margin="5,5,0,0"/>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
             </StackPanel>
         </ControlTemplate>
         <DataTemplate x:Key="SpiderSettingTemplate">
@@ -103,7 +103,14 @@
             <ColumnDefinition/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <ListBox Grid.Column="0" ItemsSource="{Binding Spiders}" SelectedItem="{Binding SelectedSpider}" Margin="5"/>
+        <Grid Grid.Column="0" >
+            <Grid.RowDefinitions>
+                <RowDefinition Height="7*"/>
+                <RowDefinition Height="3*"/>
+            </Grid.RowDefinitions>
+            <ListBox Grid.Row="0" ItemsSource="{Binding Spiders}" SelectedItem="{Binding SelectedSpider}" Margin="5,5,5,0"/>
+            <ListBox Grid.Row="1" ItemsSource="{Binding Spiders}" SelectedItem="{Binding SelectedSpiderToChains}" Margin="5"/>
+        </Grid>
         <StackPanel Grid.Column="1" Orientation="Vertical">
             <TextBlock Text="{Binding SelectedSpider.Name}" Margin="5"/>
             <ContentPresenter Content="{Binding SelectedSpider}" ContentTemplate="{DynamicResource SpiderSettingTemplate}"/>
