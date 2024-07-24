@@ -343,7 +343,14 @@ namespace HappyHour.Spider
         {
             if (IsSpiderWorking && !string.IsNullOrEmpty(ScriptName))
             {
-                Browser.ExecJavaScript(GetScript(ScriptName));
+                Browser.ExecJavaScript(GetScript(ScriptName), bSuccess => {
+                    if (!bSuccess)
+                    {
+                        IsSpiderWorking = false;
+                        SearchMedia = null;
+                        ScrapCompleted?.Invoke(this);
+                    }
+                });
             }
         }
 

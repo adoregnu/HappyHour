@@ -17,6 +17,11 @@ namespace HappyHour.View.Behavior
             get { return (bool)GetValue(AutoScrollProperty); }
             set { SetValue(AutoScrollProperty, value); }
         }
+        public bool AutoCopy
+        {
+            get { return (bool)GetValue(AutoCopyProperty); }
+            set { SetValue(AutoCopyProperty, value); }
+        }
 
         public static readonly DependencyProperty AutoScrollProperty =
             DependencyProperty.Register(
@@ -24,6 +29,13 @@ namespace HappyHour.View.Behavior
                 typeof(bool),
                 typeof(ListboxBehavior),
                 new PropertyMetadata(null));
+
+        public static readonly DependencyProperty AutoCopyProperty =
+            DependencyProperty.RegisterAttached(
+                "AutoCopy",
+                typeof(bool),
+                typeof(ListboxBehavior),
+                new UIPropertyMetadata(AutoCopyChanged));
 
         /// <summary>
         ///  When Beahvior is attached
@@ -35,6 +47,28 @@ namespace HappyHour.View.Behavior
             AssociatedObject.SelectionChanged += AssociatedObject_SelectionChanged;
         }
 
+        static void AutoCopyChanged(DependencyObject obj_, DependencyPropertyChangedEventArgs e_)
+        {
+            if (obj_ is ListBox listBox)
+            {
+                if ((bool)e_.NewValue)
+                {
+                    ExecutedRoutedEventHandler handler =
+                        (sender_, arg_) =>
+                        {
+                            if (listBox.SelectedItem != null)
+                            {
+                                //Copy what ever your want here
+                                Clipboard.SetDataObject(listBox.SelectedItem.ToString());
+                            }
+                        };
+
+                    var command = new RoutedCommand("Copy", typeof(ListBox));
+                    command.InputGestures.Add(new KeyGesture(Key.C, ModifierKeys.Control, "Copy"));
+                    listBox.CommandBindings.Add(new CommandBinding(command, handler));
+                }
+            }
+        }
         /// <summary>
         /// On Selection Changed
         /// </summary>
@@ -52,18 +86,6 @@ namespace HappyHour.View.Behavior
             {
                 return;
             }
-
-            var command = new RoutedCommand("Copy", typeof(ListBox));
-            command.InputGestures.Add(new KeyGesture(Key.C, ModifierKeys.Control, "Copy"));
-            listBox.CommandBindings.Add(new CommandBinding(command, 
-                (sender_, arg_) =>
-                {
-                    if (listBox.SelectedItem != null)
-                    {
-                        //Copy what ever your want here
-                        Clipboard.SetDataObject(listBox.SelectedItem.ToString());
-                    }
-                }));
 
             if (AutoScroll)
             {

@@ -7,12 +7,10 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Security.Cryptography;
-using MvvmDialogs.FrameworkDialogs.SaveFile;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace HappyHour.Model
 {
-    public partial class MovieDbContext: DbContext
+    public partial class MovieDbContext : DbContext
     {
         public void MergeActors(List<Actor> actors, Action<Actor> onDelete = null)
         {
@@ -57,6 +55,77 @@ namespace HappyHour.Model
             }
             SaveChanges();
         }
+
+        public void MergeMakers(List<Maker> makers, Action<Maker> onDelete = null)
+        {
+            var target = makers[0];
+            makers.RemoveAt(0);
+            foreach (var maker in makers)
+            {
+                foreach (var name in maker.Name)
+                {
+                    target.Name.Add(name);
+                }
+                foreach (var label in maker.Labels)
+                {
+                    target.Labels.Add(label);
+                }
+                if (maker.Logo != null)
+                {
+                    Images.Remove(maker.Logo);
+                }
+                Makers.Remove(maker);
+                onDelete?.Invoke(maker);
+            }
+        }
+
+        public void MergeSeries(List<Series> series, Action<Series> onDelete = null)
+        {
+            var target = series[0];
+            series.RemoveAt(0);
+            foreach (var serie in series)
+            {
+                foreach (var name in serie.Name)
+                {
+                    target.Name.Add(name);
+                }
+                foreach (var movie in serie.Movies)
+                {
+                    target.Movies.Add(movie);
+                }
+                Series.Remove(serie);
+                onDelete.Invoke(serie);
+            }
+        }
+
+        public void MargeLabels(List<Label> labels, Action<Label> OnDelete = null)
+        {
+            var target = labels[0];
+            labels.RemoveAt(0);
+            foreach (var label in labels)
+            {
+                if (target.Maker != label.Maker)
+                {
+                    Log.Print($"{target} and {label} are not name maker!");
+                    continue;
+                }
+                foreach (var name in label.Name)
+                {
+                    target.Name.Add(name);
+                }
+                foreach (var movie in Movies)
+                {
+                    target.Movies.Add(movie);
+                }
+                if (label.Logo != null)
+                {
+                    Images.Remove(label.Logo);
+                }
+                Lables.Remove(label);
+                OnDelete?.Invoke(label);
+            }
+        }
+
         static string GetLang(IDictionary<string, object> data)
         {
             return data.TryGetValue("lang", out object _lang) ? _lang.ToString() : "no";

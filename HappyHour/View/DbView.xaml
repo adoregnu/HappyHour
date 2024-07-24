@@ -12,60 +12,113 @@
              d:DesignHeight="500" d:DesignWidth="400">
     <UserControl.Resources>
         <DataTemplate x:Key="AvSeriesTemplate" DataType="vm:DbViewModel">
-            <ListBox ItemsSource="{Binding Series}" SelectedItem="{Binding SelectedSeries}"/>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <ListBox Grid.Row="0" ItemsSource="{Binding Series}"
+                         SelectedItem="{Binding SelectedSeries}" SelectionMode="Extended">
+                    <ListBox.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Merge Series"
+                                      Command="{Binding CmdMergeSeries}"
+                                      CommandParameter="{Binding RelativeSource={RelativeSource
+                                AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.SelectedItems}"/>
+                        </ContextMenu>
+                    </ListBox.ContextMenu>
+                    <i:Interaction.Behaviors>
+                        <bh:ListboxBehavior AutoCopy="True"/>
+                    </i:Interaction.Behaviors>
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="MouseDoubleClick">
+                            <i:InvokeCommandAction Command="{Binding CmdSeriesoDubleClicked}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </ListBox>
+                <GridSplitter Grid.Row="1"/>
+                <DockPanel Grid.Row="2">
+                    <TextBox DockPanel.Dock="Left" Text="{Binding SeriesNameTranslated}"/>
+                    <Button DockPanel.Dock="Right" Command="{Binding CmdAddSeriesNameTranslated}">Add</Button>
+                </DockPanel>
+                <ListBox Grid.Row="3" ItemsSource="{Binding SelectedSeries.Name}">
+                    <i:Interaction.Behaviors>
+                        <bh:ListboxBehavior AutoCopy="True"/>
+                    </i:Interaction.Behaviors>
+                </ListBox>
+            </Grid>
         </DataTemplate>
         <DataTemplate x:Key="AvItemTemplate" DataType="vm:DbViewModel">
             <ListBox ItemsSource="{Binding Movies}" SelectedItem="{Binding SelectedMovie}"/>
         </DataTemplate>
-        <DataTemplate x:Key="AvActorTemplate" DataType="vm:DbViewModel">
-            <ListBox ItemsSource="{Binding Actors}" SelectedItem="{Binding SelectedActor}"/>
-        </DataTemplate>
+
         <DataTemplate x:Key="AvStudioTemplate" DataType="vm:DbViewModel">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
-                <ListBox Grid.Row="0" ItemsSource="{Binding Makers}" SelectedItem="{Binding SelectedMaker}"/>
-                <ListBox Grid.Row="1" ItemsSource="{Binding Labels}" SelectedItem="{Binding SelectedLabel}"/>
+                <ListBox Grid.Row="0" ItemsSource="{Binding Makers}"
+                         SelectedItem="{Binding SelectedMaker}" SelectionMode="Extended">
+                    <ListBox.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Merge Makers"
+                                      Command="{Binding CmdMergeMakers}"
+                                      CommandParameter="{Binding RelativeSource={RelativeSource
+                                AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.SelectedItems}"/>
+                        </ContextMenu>
+                    </ListBox.ContextMenu>
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="MouseDoubleClick">
+                            <i:InvokeCommandAction Command="{Binding CmdMakerDoubleClicked}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </ListBox>
+                <ListBox Grid.Row="1" ItemsSource="{Binding Labels}"
+                         SelectedItem="{Binding SelectedLabel}" SelectionMode="Extended">
+                    <ListBox.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Merge Labels"
+                                      Command="{Binding CmdMergeLables}"
+                                      CommandParameter="{Binding RelativeSource={RelativeSource
+                                AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.SelectedItems}"/>
+                        </ContextMenu>
+                    </ListBox.ContextMenu>
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="MouseDoubleClick">
+                            <i:InvokeCommandAction Command="{Binding CmdLabelDoubleClicked}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </ListBox>
             </Grid>
         </DataTemplate>
 
-        <ContextMenu x:Key="_genreMenu">
-            <MenuItem
-                Header="Merge Genres"
-                CommandParameter="{Binding PlacementTarget.Tag.SelectedItems,
-                    RelativeSource={RelativeSource FindAncestor,
-                    AncestorType=ContextMenu}}"
-                Command="{Binding PlacementTarget.Tag.DataContext.CmdGenresMerge,
-                    RelativeSource={RelativeSource FindAncestor,
-                    AncestorType=ContextMenu}}"/>
-        </ContextMenu>
         <DataTemplate x:Key="GenreTemplate" DataType="vm:DbViewModel">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="150"/>
                 </Grid.RowDefinitions>
-                <ListBox Grid.Row="0" x:Name="_genreListBox" ItemsSource="{Binding Genres}"
+                <ListBox Grid.Row="0" ItemsSource="{Binding Genres}"
                          SelectedItem="{Binding SelectedGenre}" SelectionMode="Extended">
-                    <ListBox.Resources>
-                        <Style TargetType="{x:Type ListBoxItem}">
-                            <Setter Property="Tag" Value="{Binding ElementName=_genreListBox}"/>
-                            <Setter Property="ContextMenu" Value="{StaticResource _genreMenu}"/>
-                        </Style>
-                    </ListBox.Resources>
+                    <ListBox.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Merge Genres"
+                                      Command="{Binding CmdGenresMerge}"
+                                      CommandParameter="{Binding RelativeSource={RelativeSource
+                                AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.SelectedItems}"/>
+                        </ContextMenu>
+                    </ListBox.ContextMenu>
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="MouseDoubleClick">
-                            <i:InvokeCommandAction Command="{Binding CmdGenreDoubleClick}"/>
+                            <i:InvokeCommandAction Command="{Binding CmdGenreDoubleClicked}"/>
                         </i:EventTrigger>
                     </i:Interaction.Triggers>
                     <i:Interaction.Behaviors>
                         <bh:ListboxBehavior/>
                     </i:Interaction.Behaviors>
-                    <ListBox.CommandBindings>
-                        <CommandBinding Command="ApplicationCommands.Copy" />
-                    </ListBox.CommandBindings>
                 </ListBox>
                 <StackPanel Grid.Row="1" Orientation="Vertical" Margin="0,10,0,0">
                     <Label>Selected Genre</Label>

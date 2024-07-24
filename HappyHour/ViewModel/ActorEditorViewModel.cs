@@ -6,20 +6,15 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 
-using Microsoft.EntityFrameworkCore;
-
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
 using MvvmDialogs;
-using MvvmDialogs.FrameworkDialogs.OpenFile;
 
 using HappyHour.Model;
 using HappyHour.Interfaces;
 using HappyHour.Spider;
 using CommunityToolkit.Mvvm.Messaging;
-using FFmpeg.AutoGen;
-using System.Windows.Documents;
 
 namespace HappyHour.ViewModel
 {
@@ -47,9 +42,6 @@ namespace HappyHour.ViewModel
 
     internal class ActorEditorViewModel : ObservableRecipient, IModalDialogViewModel, IRecipient<ViewEventArgs>
     {
-        private string _picturePath;
-        private string _actorName;
-        private string _newName;
         private string _searchText;
         private bool? _dialogResult = false;
         private readonly MovieDbContext _db = App.Current.DbContext;
@@ -93,7 +85,6 @@ namespace HappyHour.ViewModel
         public bool? DialogResult
         {
             get => _dialogResult;
-            //private set => SetProperty(nameof(DialogResult), ref _dialogResult, value);
             private set => SetProperty(ref _dialogResult, value);
         }
 
@@ -167,51 +158,8 @@ namespace HappyHour.ViewModel
             OnClearActors();
             initials.ForEach(i => i.IsChecked = true);
         }
-#if false
-        string ChoosePicture()
-        { 
-            var settings = new OpenFileDialogSettings
-            {
-                Title = "Select Actor Pciture",
-                InitialDirectory = Environment.GetFolderPath(
-                    Environment.SpecialFolder.MyPictures),
-                Filter = "Image files (*.png, *.jpg)|*.png;*.jpg|All files (*.*)|*.*"
-            };
 
-            bool? success = DialogService.ShowOpenFileDialog(this, settings);
-            if (success != true)
-                return null;
-
-            try
-            {
-                var fileName = Path.GetFileName(settings.FileName);
-                File.Copy(settings.FileName, $"{App.Current.LocalAppData}\\db\\{fileName}", true);
-                return settings.FileName;
-            }
-            catch (Exception ex)
-            {
-                Log.Print(ex.Message);
-            }
-            return null;
-        }
-
-        void OnAddNewActor()
-        {
-            if (string.IsNullOrEmpty(ActorName) ||
-                string.IsNullOrEmpty(PicturePath))
-            {
-                Log.Print("Actor name or picture path is empty!");
-                return;
-            }
-            var actor = _dbPool.AddActor(ActorName, PicturePath);
-            if (actor != null)
-            {
-                Actors.Add(actor);
-            }
-        }
-
-#endif
-        void OnDeleteActor()
+        private void OnDeleteActor()
         {
             if (SelectedActor == null) return;
 
@@ -222,26 +170,6 @@ namespace HappyHour.ViewModel
             SelectedActor = null;
         }
 
-#if false
-        private void OnChangePicture()
-        {
-            string file = ChoosePicture();
-            if (file == null) { return; }
-            _dbPool.UpdateActor(SelectedActor, (actor) => {
-                actor.PicturePath = Path.GetFileName(file);
-            });
-        }
-
-        private void OnAddNewName()
-        {
-            if (SelectedActor == null) { return; }
-            _dbPool.AddActorName(SelectedActor, NewName);
-            OnPropertyChanged(nameof(SelectedActor));
-
-            NewName = "";
-            NameListOfOneActor.Clear();
-        }
-#endif
         public async void OnActorAlphabet(string p, bool isSelected)
         {
             if (p == "All")

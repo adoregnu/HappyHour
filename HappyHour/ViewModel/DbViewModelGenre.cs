@@ -33,7 +33,7 @@ namespace HappyHour.ViewModel
         }
 
         public ICommand CmdGenresMerge { get; private set; }
-        public ICommand CmdGenreDoubleClick { get; private set; }
+        public ICommand CmdGenreDoubleClicked { get; private set; }
 
         private async void OnGenreDoubleClicked()
         {

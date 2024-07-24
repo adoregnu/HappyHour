@@ -8,7 +8,7 @@ using CommunityToolkit.Mvvm.Messaging;
 
 namespace HappyHour.ViewModel
 {
-    delegate void OnJsResult(object items);
+    delegate void OnJsResult(bool bsuccess);
 
     class BrowserBase : Pane
     {
@@ -112,9 +112,8 @@ namespace HappyHour.ViewModel
                 if (!response.Success)
                 {
                     Log.Print("ExecJavaScript:: " + response.Message);
-                    return;
                 }
-                callback?.Invoke(response.Result);
+                UiServices.Invoke(() => callback?.Invoke(response.Success)); 
             });
         }
 #if false

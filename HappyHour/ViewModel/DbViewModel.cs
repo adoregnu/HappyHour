@@ -52,7 +52,7 @@ namespace HappyHour.ViewModel
                 SetProperty(ref _searchText, value);
                 if (_typeToPropertyName.TryGetValue(SelectedType, out string type))
                 {
-                    OnPropertyChanged(type);
+                    OnSearchTextUpdated(type);
                 }
             }
         }
@@ -68,39 +68,10 @@ namespace HappyHour.ViewModel
         }
         public List<string> ListType { get; set; }
 
-        public ObservableCollection<Actor> Actors { get; set; } = [];
-        public ObservableCollection<Movie> Movies { get; set; } = [];
-
-        Movie _selectedMovie;
-        public Movie SelectedMovie
-        {
-            get => _selectedMovie;
-            set
-            {
-                SetProperty(ref _selectedMovie, value);
-                if (value == null) return;
-
-                MediaList.AddMedia(value);
-            }
-        }
-
-        ActorName _selectedName;
-        public ActorName  SelectedName
-        {
-            get => _selectedName;
-            set
-            {
-                SetProperty(ref _selectedName, value);
-                if (value == null) return;
-
-                //var movies = _dbPoll.GetAvMovies(value);
-                //MediaList.LoadItems(movies);
-            }
-        }
         readonly Dictionary<string, string> _typeToPropertyName = new ()
             {
                 { "Movies", nameof(Movies) },
-                { "Actors", nameof(Actors) },
+                //{ "Actors", nameof(Actors) },
                 { "Makers", nameof(Makers) },
                 { "Series", nameof(Series) },
                 { "Genres", nameof(Genres) },
@@ -113,7 +84,19 @@ namespace HappyHour.ViewModel
 
             CmdGenresMerge = new RelayCommand<object>(
                 OnMergeGenres, p => p is IList<object> list && list.Count > 1);
-            CmdGenreDoubleClick = new RelayCommand(OnGenreDoubleClicked);
+            CmdMergeMakers = new RelayCommand<object>(
+                OnMergeMakers, p => p is IList<object> list && list.Count > 1);
+            CmdMergeLables = new RelayCommand<object>(
+                OnMergeLabels, p => p is IList<object> list && list.Count > 1);
+            CmdMergeSeries = new RelayCommand<object>(
+                OnMergeSeries, p => p is IList<object> list && list.Count > 1);
+
+            CmdGenreDoubleClicked = new RelayCommand(OnGenreDoubleClicked);
+            CmdLabelDoubleClicked = new RelayCommand(OnLabelDoubleClicked);
+            CmdMakerDoubleClicked = new RelayCommand(OnMakerDoubleClicked);
+            CmdSeriesoDubleClicked = new RelayCommand(OnSeriesoDubleClicked);
+
+            CmdAddSeriesNameTranslated = new RelayCommand(OnAddSeriesNameTranslated);
         }
 
         private void OnTypeChanged()
@@ -122,23 +105,14 @@ namespace HappyHour.ViewModel
             MethodInfo mi = GetType().GetMethod(changeFunction,
                 BindingFlags.NonPublic | BindingFlags.Instance);
             mi?.Invoke(this, null);
-
         }
 
-        public bool SelectMovie(string pid)
+        private void OnSearchTextUpdated(string type)
         {
-#if false
-            //var movies = _dbPoll.GetAvMovies(pid);
-            if (movies.Any())
-            {
-                MediaList.AddMedia(movies.First().Path);
-                return true;
-            }
-            else
-#endif
-            {
-                return false;
-            }
+            string searchFunction = $"OnSearch{SelectedType}";
+            MethodInfo mi = GetType().GetMethod(searchFunction,
+                BindingFlags.NonPublic | BindingFlags.Instance);
+            mi?.Invoke(this, null);
         }
     }
 }

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace HappyHour.Model
 {
-    public partial class MovieDbContext: DbContext
+    public partial class MovieDbContext : DbContext
     {
         public List<ActorName> GetActorNames(string keyword)
         {
@@ -51,7 +51,7 @@ namespace HappyHour.Model
                     name = n.Name.Text;
                     break;
                 }
-                else if(n.Priority == 0)
+                else if (n.Priority == 0)
                 {
                     name = n.Name.Text;
                     break;
@@ -91,7 +91,7 @@ namespace HappyHour.Model
                         .ThenInclude(n => n.Name)
                     .Include(a => a.Movies)
                     .Include(a => a.Thumb)
-                    .Where(a => a.Movies.Count() >  0)
+                    .Where(a => a.Movies.Count() > 0)
                     .OrderByDescending(a => a.Key)
                     .ToListAsync();
             }
@@ -147,7 +147,7 @@ namespace HappyHour.Model
                     .ThenInclude(actor => actor.Names)
                     .ThenInclude(name => name.Name)
                 .Include(m => m.Cover)
-                .Include(m  => m.Title)
+                .Include(m => m.Title)
                 .Where(m => m.PID == pid)
                 .FirstOrDefaultAsync();
         }
@@ -160,8 +160,8 @@ namespace HappyHour.Model
                     .ThenInclude(actor => actor.Names)
                     .ThenInclude(name => name.Name)
                 .Include(m => m.Cover)
-                .Include(m  => m.Title)
-                .Where(m => EF.Functions.Like(m.PID,  $"%{pid}%"))
+                .Include(m => m.Title)
+                .Where(m => EF.Functions.Like(m.PID, $"%{pid}%"))
                 .ToListAsync();
         }
 
@@ -174,7 +174,7 @@ namespace HappyHour.Model
                     .ThenInclude(actor => actor.Names)
                     .ThenInclude(name => name.Name)
                 .Include(m => m.Cover)
-                .Include(m  => m.Title)
+                .Include(m => m.Title)
                 .Where(m => m.Actors.Contains(actor))
                 .ToListAsync();
         }
@@ -188,11 +188,46 @@ namespace HappyHour.Model
                     .ThenInclude(actor => actor.Names)
                     .ThenInclude(name => name.Name)
                 .Include(m => m.Cover)
-                .Include(m  => m.Title)
+                .Include(m => m.Title)
                 .Where(m => m.Genres.Contains(genre))
                 .ToListAsync();
         }
 
+        public async ValueTask<List<Movie>> GetMovies(Maker maker)
+        {
+            List<Movie> movies = [];
+            foreach (var label in maker.Labels)
+            {
+                movies.AddRange(await GetMovies(label));
+            }
+            return movies;
+        }
+        public async ValueTask<List<Movie>> GetMovies(Label label)
+        {
+            return await Movies
+                .Include(m => m.Label)
+                    .ThenInclude(l => l.Name)
+                .Include(m => m.Actors)
+                    .ThenInclude(actor => actor.Names)
+                    .ThenInclude(name => name.Name)
+                .Include(m => m.Cover)
+                .Include(m => m.Title)
+                .Where(m => m.Label == label)
+                .ToListAsync();
+        }
+        public async ValueTask<List<Movie>> GetMovies(Series series)
+        {
+            return await Movies
+                .Include(m => m.Label)
+                    .ThenInclude(l => l.Name)
+                .Include(m => m.Actors)
+                    .ThenInclude(actor => actor.Names)
+                    .ThenInclude(name => name.Name)
+                .Include(m => m.Cover)
+                .Include(m => m.Title)
+                .Where(m => m.Series == series)
+                .ToListAsync();
+        }
         public async ValueTask<List<Genre>> GetGenres(string keyword = null)
         {
             return await MovieGenres
@@ -212,16 +247,16 @@ namespace HappyHour.Model
         {
             return await Makers
                 .Include(m => m.Name)
+                .Include(m => m.Logo)
                 .Include(m => m.Labels)
                     .ThenInclude(l => l.Name)
-                .Include(m => m.Labels)
-                    .ThenInclude(l => l.Movies)
                 .ToListAsync();
         }
         public async ValueTask<List<Label>> GetLabels(string keyword = null)
         {
             return await Lables
                 .Include(l => l.Name)
+                .Include(l => l.Logo)
                 .ToListAsync();
         }
     }
