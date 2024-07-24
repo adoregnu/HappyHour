@@ -21,7 +21,14 @@
             <ListBox ItemsSource="{Binding Actors}" SelectedItem="{Binding SelectedActor}"/>
         </DataTemplate>
         <DataTemplate x:Key="AvStudioTemplate" DataType="vm:DbViewModel">
-            <ListBox ItemsSource="{Binding Makers}" SelectedItem="{Binding SelectedMakers}"/>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <ListBox Grid.Row="0" ItemsSource="{Binding Makers}" SelectedItem="{Binding SelectedMaker}"/>
+                <ListBox Grid.Row="1" ItemsSource="{Binding Labels}" SelectedItem="{Binding SelectedLabel}"/>
+            </Grid>
         </DataTemplate>
 
         <ContextMenu x:Key="_genreMenu">

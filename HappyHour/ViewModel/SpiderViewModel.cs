@@ -26,9 +26,6 @@ namespace HappyHour.ViewModel
             get => _selectedSpider;
             set
             {
-                _spiderChains?.Clear();
-                _spiderChains = null;
-
                 SetSpider(value);
                 SetProperty(ref _selectedSpider, value);
             }
@@ -54,7 +51,7 @@ namespace HappyHour.ViewModel
         }
 
         public IDbView DbView { get; set; }
-
+        public ScrapCompletedHandler OnScrapCompleted; 
         public SpiderViewModel() : base()
         {
             Spiders =
@@ -77,6 +74,10 @@ namespace HappyHour.ViewModel
                 s.InitChain(Spiders);
             }
         }
+        public void ResetChain()
+        {
+            _spiderChains = null;
+        }
 
         private void SetSpider(SpiderBase spider)
         {
@@ -89,20 +90,20 @@ namespace HappyHour.ViewModel
                 spider.SetCookies();
                 UpdateBrowserHeader(spider.Name);
             }
-
-            _spiderChains ??= [.. spider.SpiderChain];
+            _spiderChains ??= new(spider.SpiderChain);
             spider.SetAddress();
         }
 
-        public bool SetNextSpider()
+        public bool SetNextSpider(IAvMedia media)
         {
             if (_spiderChains != null && _spiderChains.Count > 0)
             {
                 var nextSpider = _spiderChains[0];
                 _spiderChains.RemoveAt(0);
-                SetSpider(nextSpider);
+                nextSpider.Navigate2(media, false);
                 return true;
             }
+            _spiderChains = null;
             return false;
         }
 

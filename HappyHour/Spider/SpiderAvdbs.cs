@@ -17,7 +17,7 @@ namespace HappyHour.Spider
             URL = "https://www.avdbs.com/";
             ScriptName = "Avdbs.js";
 
-            SpiderNamesToChain = ["Javlibrary"];
+            //SpiderNamesToChain = ["Javlibrary"];
             OverwriteActorThumb = true;
         }
 

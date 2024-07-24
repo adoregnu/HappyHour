@@ -264,7 +264,7 @@ namespace HappyHour.Spider
             _downloadTimer.Change(Timeout.Infinite, Timeout.Infinite);
         }
 
-        public override void Navigate2(IAvMedia _)
+        public override void Navigate2(IAvMedia media, bool resetChain)
         {
             IsSpiderWorking = true;
             _numDuplicatedPid = 0;

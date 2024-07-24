@@ -208,5 +208,21 @@ namespace HappyHour.Model
                 .Include(s => s.Name)
                 .ToListAsync();
         }
+        public async ValueTask<List<Maker>> GetMakers(string keyword = null)
+        {
+            return await Makers
+                .Include(m => m.Name)
+                .Include(m => m.Labels)
+                    .ThenInclude(l => l.Name)
+                .Include(m => m.Labels)
+                    .ThenInclude(l => l.Movies)
+                .ToListAsync();
+        }
+        public async ValueTask<List<Label>> GetLabels(string keyword = null)
+        {
+            return await Lables
+                .Include(l => l.Name)
+                .ToListAsync();
+        }
     }
 }

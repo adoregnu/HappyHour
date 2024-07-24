@@ -116,7 +116,15 @@ namespace HappyHour.Model
         public virtual ICollection<ShortText> Name { get; set; }
         public Maker Maker { get; set; }
         public ICollection<Movie> Movies { get; set; }
-
+        public override string ToString()
+        {
+            string str = "";
+            foreach (var name in Name)
+            {
+                str += $"{name.Text}({name.Lang}), ";
+            }
+            return str;
+        }
     }
 
     public class Maker
@@ -126,6 +134,16 @@ namespace HappyHour.Model
         public virtual ImageBlob Logo { get; set; }
         public virtual ICollection<ShortText> Name { get; set; }
         public virtual ICollection<Label> Labels { get; set; }
+
+        public override string ToString()
+        {
+            string str = "";
+            foreach (var name in Name)
+            {
+                str += $"{name.Text}({name.Lang}), ";
+            }
+            return str;
+        }
     }
 
     public class Series

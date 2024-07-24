@@ -53,7 +53,14 @@ namespace HappyHour.Spider
         public ObservableCollection<SpiderBase> SpiderChain { get; set; } = [];
 
         public SpiderViewModel Browser { get; private set; }
-        public ScrapCompletedHandler ScrapCompleted { get; set; }
+        public ScrapCompletedHandler ScrapCompleted
+        {
+            get => Browser.OnScrapCompleted;
+            set
+            {
+                Browser.OnScrapCompleted = value;
+            }
+        }
         public IRequestHandler ReqeustHandler;
         public IAvMedia SelectedMedia
         {
@@ -100,7 +107,7 @@ namespace HappyHour.Spider
         {
             Browser = br;
             _downloader ??= new DefaultDownloader(br);
-            CmdSearch = new RelayCommand(() => Navigate2());
+            CmdSearch = new RelayCommand(() => { Navigate2(); });
             CmdStopSpider = new RelayCommand(() => OnScrapCompleted(false));
             CmdScrap = new RelayCommand(() =>
             {
@@ -186,7 +193,7 @@ namespace HappyHour.Spider
             _isCookieSet = true;
         }
 
-        public virtual void Navigate2(IAvMedia searchMedia = null)
+        public virtual void Navigate2(IAvMedia searchMedia = null, bool resetChain = true)
         {
             if (string.IsNullOrEmpty(Keyword) && searchMedia == null)
             {
@@ -206,6 +213,10 @@ namespace HappyHour.Spider
                 SearchMedia = SelectedMedia;
             }
             AdjustKeyword();
+            if (resetChain)
+            {
+                Browser.ResetChain();
+            }
             Browser.SelectedSpider = this;
         }
 
@@ -321,7 +332,7 @@ namespace HappyHour.Spider
                 SearchMedia.Reload();
             }
 
-            if (!Browser.SetNextSpider())
+            if (!Browser.SetNextSpider(SearchMedia))
             {
                 SearchMedia = null;
                 ScrapCompleted?.Invoke(this);

@@ -68,9 +68,6 @@ namespace HappyHour.ViewModel
         }
         public List<string> ListType { get; set; }
 
-        public ObservableCollection<Maker> Makers;// => _dbPoll.GetAvStudios(SearchText);
-        public ObservableCollection<Label> Labels;// => _dbPoll.GetAvStudios(SearchText);
-
         public ObservableCollection<Actor> Actors { get; set; } = [];
         public ObservableCollection<Movie> Movies { get; set; } = [];
 
@@ -100,27 +97,11 @@ namespace HappyHour.ViewModel
                 //MediaList.LoadItems(movies);
             }
         }
-        Maker _selectedMaker;
-        public Maker SelectedMaker
-        {
-            get => _selectedMaker;
-            set
-            {
-                SetProperty(ref _selectedMaker, value);
-                if (value == null) return;
-
-                //var movies = _dbPoll.GetAvMovies(value);
-                //MediaList.LoadItems(movies);
-            }
-        }
-
-
         readonly Dictionary<string, string> _typeToPropertyName = new ()
             {
                 { "Movies", nameof(Movies) },
                 { "Actors", nameof(Actors) },
                 { "Makers", nameof(Makers) },
-                { "Labels", nameof(Labels) },
                 { "Series", nameof(Series) },
                 { "Genres", nameof(Genres) },
             };

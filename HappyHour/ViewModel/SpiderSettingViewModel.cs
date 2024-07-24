@@ -15,7 +15,8 @@ namespace HappyHour.ViewModel
     internal class SpiderSettingViewModel : ObservableObject, IModalDialogViewModel
     {
         private SpiderBase _selectedSpider;
-        private SpiderBase _selectedSpiderToChains;
+        private SpiderBase _selectedSpiderToChain;
+        private SpiderBase _selectedSpiderFromChain;
 
         public bool? DialogResult { get; set; }
         public List<SpiderBase> Spiders { get; set; }
@@ -29,12 +30,16 @@ namespace HappyHour.ViewModel
             }
         }
 
-        public SpiderBase SelectedSpiderToChains
+        public SpiderBase SelectedSpiderToChain
         {
-            get => _selectedSpiderToChains;
-            set => SetProperty(ref _selectedSpiderToChains, value);
+            get => _selectedSpiderToChain;
+            set => SetProperty(ref _selectedSpiderToChain, value);
         }
-
+        public SpiderBase SelectedSpiderFromChain
+        {
+            get => _selectedSpiderFromChain;
+            set => SetProperty(ref _selectedSpiderFromChain, value);
+        }
         public IDialogService DialogService { get; set; }
     
         public ICommand CmdAddChain { get; set; }
@@ -44,35 +49,43 @@ namespace HappyHour.ViewModel
         public SpiderSettingViewModel()
         {
             CmdAddChain = new RelayCommand(OnAddChain);
-            CmdDelChain = new RelayCommand(OnDelChain,
-                () => SelectedSpiderToChains != null);
-            CmdMoveUp = new RelayCommand(OnMoveUp,
-                () => SelectedSpiderToChains != null);
-            CmdMoveDown = new RelayCommand(OnMoveDown,
-                () => SelectedSpiderToChains != null);
+            CmdDelChain = new RelayCommand(OnDelChain);
+            CmdMoveUp = new RelayCommand(OnMoveUp);
+            CmdMoveDown = new RelayCommand(OnMoveDown);
         }
 
         void OnAddChain()
         {
-            if (SelectedSpider != SelectedSpiderToChains)
+            if (SelectedSpiderToChain != null && !SelectedSpider.SpiderChain.Any(s => s == SelectedSpiderToChain))
             {
-                SelectedSpider.SpiderChain.Add(SelectedSpiderToChains);
+                SelectedSpider.SpiderChain.Add(SelectedSpiderToChain);
             }
         }
         void OnDelChain()
         {
-            _selectedSpider.SpiderChain.Remove(SelectedSpiderToChains);
+            if (_selectedSpiderFromChain == null) return;
+
+            _selectedSpider.SpiderChain.Remove(SelectedSpiderFromChain);
         }
         void OnMoveUp()
         {
-            var idx = _selectedSpider.SpiderChain.IndexOf(SelectedSpiderToChains);
-            _selectedSpider.SpiderChain.Move(idx, idx - 1);
+            if (_selectedSpiderFromChain == null) return;
+
+            var idx = _selectedSpider.SpiderChain.IndexOf(SelectedSpiderFromChain);
+            if (idx > 0)
+            {
+                _selectedSpider.SpiderChain.Move(idx, idx - 1);
+            }
         }
         void OnMoveDown()
         {
-            var idx = _selectedSpider.SpiderChain.IndexOf(SelectedSpiderToChains);
-            _selectedSpider.SpiderChain.Move(idx, idx + 1);
+            if (_selectedSpiderFromChain == null) return;
 
+            var idx = _selectedSpider.SpiderChain.IndexOf(SelectedSpiderFromChain);
+            if (idx < _selectedSpider.SpiderChain.Count - 1)
+            {
+                _selectedSpider.SpiderChain.Move(idx, idx + 1);
+            }
         }
 
     }

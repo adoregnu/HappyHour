@@ -31,7 +31,7 @@ namespace HappyHour.Spider
             _dataPath = App.Current.GetConf("general", "data_path") ?? @"d:\tmp\sehuatang";
             _dataPath += "\\censored";
         }
-        public override void Navigate2(IAvMedia _)
+        public override void Navigate2(IAvMedia media, bool resetChain)
         {
             _numDuplicatedPid = 0;
             IsSpiderWorking = true;

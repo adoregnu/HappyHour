@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         WindowStartupLocation="CenterOwner"
         md:DialogServiceViews.IsRegistered="True"
-        Title="Setting for items to be scraped" Height="450" Width="450">
+        Title="Setting for items to be scraped" Height="450" Width="500">
     <Window.Resources>
         <ControlTemplate x:Key="SpiderTypeSehuatang">
             <Grid>
@@ -66,15 +66,7 @@
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
-                <DockPanel>
-                    <StackPanel Orientation="Vertical" VerticalAlignment="Center" DockPanel.Dock="Left">
-                        <Button Margin="5,5,5,0" Command="{Binding CmdAddChain}">Add</Button>
-                        <Button Margin="5,5,5,0" Command="{Binding CmdDelChain}">Del</Button>
-                        <Button Margin="5,5,5,0" Command="{Binding CmdMoveUp}">Up </Button>
-                        <Button Margin="5,5,5,0" Command="{Binding CmdMoveDown}">Down</Button>
-                    </StackPanel>
-                    <ListBox Margin="0,5,5,0" ItemsSource="{Binding SpiderChain}"  DockPanel.Dock="Right"/>
-                </DockPanel>
+
             </StackPanel>
         </ControlTemplate>
         <DataTemplate x:Key="SpiderSettingTemplate">
@@ -109,11 +101,22 @@
                 <RowDefinition Height="3*"/>
             </Grid.RowDefinitions>
             <ListBox Grid.Row="0" ItemsSource="{Binding Spiders}" SelectedItem="{Binding SelectedSpider}" Margin="5,5,5,0"/>
-            <ListBox Grid.Row="1" ItemsSource="{Binding Spiders}" SelectedItem="{Binding SelectedSpiderToChains}" Margin="5"/>
+            <ListBox Grid.Row="1" ItemsSource="{Binding Spiders}" SelectedItem="{Binding SelectedSpiderToChain}" Margin="5"/>
         </Grid>
         <StackPanel Grid.Column="1" Orientation="Vertical">
-            <TextBlock Text="{Binding SelectedSpider.Name}" Margin="5"/>
+            <TextBlock Text="{Binding SelectedSpider.Name}" Margin="5" HorizontalAlignment="Center"/>
             <ContentPresenter Content="{Binding SelectedSpider}" ContentTemplate="{DynamicResource SpiderSettingTemplate}"/>
+            <DockPanel>
+                <StackPanel Orientation="Vertical" VerticalAlignment="Center" DockPanel.Dock="Left">
+                    <Button Margin="5,5,5,0" Command="{Binding CmdAddChain}">Add</Button>
+                    <Button Margin="5,5,5,0" Command="{Binding CmdDelChain}">Del</Button>
+                    <Button Margin="5,5,5,0" Command="{Binding CmdMoveUp}">Up</Button>
+                    <Button Margin="5,5,5,0" Command="{Binding CmdMoveDown}">Down</Button>
+                </StackPanel>
+                <ListBox DockPanel.Dock="Right" Margin="0,5,5,0"
+                         ItemsSource="{Binding SelectedSpider.SpiderChain}"
+                         SelectedItem="{Binding SelectedSpiderFromChain}"/>
+            </DockPanel>
         </StackPanel>
     </Grid>
 </Window>
