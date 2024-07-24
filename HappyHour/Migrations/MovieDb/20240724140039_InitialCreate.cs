@@ -131,6 +131,25 @@ namespace HappyHour.Migrations.MovieDb
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "Labels",
+                columns: table => new
+                {
+                    Key = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    LogoKey = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Labels", x => x.Key);
+                    table.ForeignKey(
+                        name: "FK_Labels_Images_LogoKey",
+                        column: x => x.LogoKey,
+                        principalTable: "Images",
+                        principalColumn: "Key");
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "Makers",
                 columns: table => new
                 {
@@ -145,31 +164,6 @@ namespace HappyHour.Migrations.MovieDb
                         name: "FK_Makers_Images_LogoKey",
                         column: x => x.LogoKey,
                         principalTable: "Images",
-                        principalColumn: "Key");
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
-                name: "Lables",
-                columns: table => new
-                {
-                    Key = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    LogoKey = table.Column<int>(type: "int", nullable: true),
-                    MakerKey = table.Column<int>(type: "int", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Lables", x => x.Key);
-                    table.ForeignKey(
-                        name: "FK_Lables_Images_LogoKey",
-                        column: x => x.LogoKey,
-                        principalTable: "Images",
-                        principalColumn: "Key");
-                    table.ForeignKey(
-                        name: "FK_Lables_Makers_MakerKey",
-                        column: x => x.MakerKey,
-                        principalTable: "Makers",
                         principalColumn: "Key");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
@@ -203,15 +197,40 @@ namespace HappyHour.Migrations.MovieDb
                         principalTable: "Images",
                         principalColumn: "Key");
                     table.ForeignKey(
-                        name: "FK_Movies_Lables_LabelKey",
+                        name: "FK_Movies_Labels_LabelKey",
                         column: x => x.LabelKey,
-                        principalTable: "Lables",
+                        principalTable: "Labels",
                         principalColumn: "Key");
                     table.ForeignKey(
                         name: "FK_Movies_Series_SeriesKey",
                         column: x => x.SeriesKey,
                         principalTable: "Series",
                         principalColumn: "Key");
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "LabelMaker",
+                columns: table => new
+                {
+                    LabelsKey = table.Column<int>(type: "int", nullable: false),
+                    MakersKey = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LabelMaker", x => new { x.LabelsKey, x.MakersKey });
+                    table.ForeignKey(
+                        name: "FK_LabelMaker_Labels_LabelsKey",
+                        column: x => x.LabelsKey,
+                        principalTable: "Labels",
+                        principalColumn: "Key",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_LabelMaker_Makers_MakersKey",
+                        column: x => x.MakersKey,
+                        principalTable: "Makers",
+                        principalColumn: "Key",
+                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -280,9 +299,9 @@ namespace HappyHour.Migrations.MovieDb
                 {
                     table.PrimaryKey("PK_ShortTexts", x => x.Key);
                     table.ForeignKey(
-                        name: "FK_ShortTexts_Lables_LabelKey",
+                        name: "FK_ShortTexts_Labels_LabelKey",
                         column: x => x.LabelKey,
-                        principalTable: "Lables",
+                        principalTable: "Labels",
                         principalColumn: "Key");
                     table.ForeignKey(
                         name: "FK_ShortTexts_Makers_MakerKey",
@@ -343,14 +362,14 @@ namespace HappyHour.Migrations.MovieDb
                 column: "MovieKey");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Lables_LogoKey",
-                table: "Lables",
-                column: "LogoKey");
+                name: "IX_LabelMaker_MakersKey",
+                table: "LabelMaker",
+                column: "MakersKey");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Lables_MakerKey",
-                table: "Lables",
-                column: "MakerKey");
+                name: "IX_Labels_LogoKey",
+                table: "Labels",
+                column: "LogoKey");
 
             migrationBuilder.CreateIndex(
                 name: "IX_LongTexts_MovieKey",
@@ -481,6 +500,9 @@ namespace HappyHour.Migrations.MovieDb
                 name: "GenreMovie");
 
             migrationBuilder.DropTable(
+                name: "LabelMaker");
+
+            migrationBuilder.DropTable(
                 name: "LongTexts");
 
             migrationBuilder.DropTable(
@@ -488,6 +510,9 @@ namespace HappyHour.Migrations.MovieDb
 
             migrationBuilder.DropTable(
                 name: "ShortTexts");
+
+            migrationBuilder.DropTable(
+                name: "Makers");
 
             migrationBuilder.DropTable(
                 name: "MovieGenres");
@@ -499,13 +524,10 @@ namespace HappyHour.Migrations.MovieDb
                 name: "Movies");
 
             migrationBuilder.DropTable(
-                name: "Lables");
+                name: "Labels");
 
             migrationBuilder.DropTable(
                 name: "Series");
-
-            migrationBuilder.DropTable(
-                name: "Makers");
 
             migrationBuilder.DropTable(
                 name: "Images");

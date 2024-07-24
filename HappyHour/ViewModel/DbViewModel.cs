@@ -12,6 +12,7 @@ using System.Collections.ObjectModel;
 using HappyHour.Extension;
 using CommunityToolkit.Mvvm.Input;
 using System.Reflection;
+using System.Windows.Input;
 
 namespace HappyHour.ViewModel
 {
@@ -32,6 +33,7 @@ namespace HappyHour.ViewModel
                 if (_mediaList != null) return;
 
                 SetProperty(ref _mediaList, value);
+#if false
                 _mediaList.ItemSelectedHandler += (o, i) =>
                 {
                     if (i == null) return;
@@ -41,6 +43,7 @@ namespace HappyHour.ViewModel
                     }
                     SearchText = i.Pid;
                 };
+#endif
             }
         }
 
@@ -52,7 +55,7 @@ namespace HappyHour.ViewModel
                 SetProperty(ref _searchText, value);
                 if (_typeToPropertyName.TryGetValue(SelectedType, out string type))
                 {
-                    OnSearchTextUpdated(type);
+                    //OnSearchTextUpdated(type);
                 }
             }
         }
@@ -77,10 +80,12 @@ namespace HappyHour.ViewModel
                 { "Genres", nameof(Genres) },
             };
 
+        public ICommand CmdReload { get; private set; }
         public DbViewModel()
         {
             Title = "Database";
             ListType = _typeToPropertyName.Keys.ToList();
+            CmdReload = new RelayCommand(OnTypeChanged);
 
             CmdGenresMerge = new RelayCommand<object>(
                 OnMergeGenres, p => p is IList<object> list && list.Count > 1);

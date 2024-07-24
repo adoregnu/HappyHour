@@ -53,10 +53,6 @@ namespace HappyHour.ViewModel
         {
             Series.Clear();
             var list = await _db.GetSeries();
-            foreach (var item in list)
-            {
-                Log.Print($"{item.Name.First()}");
-            }
             list.ForEach(Series.Add);
         }
     }

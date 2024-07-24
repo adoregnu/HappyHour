@@ -14,10 +14,9 @@
         <DataTemplate x:Key="AvSeriesTemplate" DataType="vm:DbViewModel">
             <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition />
-                    <RowDefinition />
-                    <RowDefinition />
-                    <RowDefinition />
+                    <RowDefinition Height="9*"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="1*"/>
                 </Grid.RowDefinitions>
                 <ListBox Grid.Row="0" ItemsSource="{Binding Series}"
                          SelectedItem="{Binding SelectedSeries}" SelectionMode="Extended">
@@ -38,12 +37,11 @@
                         </i:EventTrigger>
                     </i:Interaction.Triggers>
                 </ListBox>
-                <GridSplitter Grid.Row="1"/>
-                <DockPanel Grid.Row="2">
+                <DockPanel Grid.Row="1"  Margin="5">
+                    <Button DockPanel.Dock="Right" Command="{Binding CmdAddSeriesNameTranslated}" >Add</Button>
                     <TextBox DockPanel.Dock="Left" Text="{Binding SeriesNameTranslated}"/>
-                    <Button DockPanel.Dock="Right" Command="{Binding CmdAddSeriesNameTranslated}">Add</Button>
                 </DockPanel>
-                <ListBox Grid.Row="3" ItemsSource="{Binding SelectedSeries.Name}">
+                <ListBox Grid.Row="2" ItemsSource="{Binding SelectedSeries.Name}">
                     <i:Interaction.Behaviors>
                         <bh:ListboxBehavior AutoCopy="True"/>
                     </i:Interaction.Behaviors>
@@ -57,8 +55,8 @@
         <DataTemplate x:Key="AvStudioTemplate" DataType="vm:DbViewModel">
             <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition/>
-                    <RowDefinition/>
+                    <RowDefinition Height="8*"/>
+                    <RowDefinition Height="2*"/>
                 </Grid.RowDefinitions>
                 <ListBox Grid.Row="0" ItemsSource="{Binding Makers}"
                          SelectedItem="{Binding SelectedMaker}" SelectionMode="Extended">
@@ -139,9 +137,6 @@
                 <DataTrigger Binding="{Binding SelectedType, Mode=TwoWay}" Value="Series">
                     <Setter Property="ContentTemplate" Value="{StaticResource AvSeriesTemplate}"/>
                 </DataTrigger>
-                <DataTrigger Binding="{Binding SelectedType, Mode=TwoWay}" Value="Actors">
-                    <Setter Property="ContentTemplate" Value="{StaticResource AvActorTemplate}"/>
-                </DataTrigger>
                 <DataTrigger Binding="{Binding SelectedType, Mode=TwoWay}" Value="Genres">
                     <Setter Property="ContentTemplate" Value="{StaticResource GenreTemplate}"/>
                 </DataTrigger>
@@ -158,11 +153,19 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <ComboBox Grid.Column="0" Width="80"
                       ItemsSource="{Binding ListType}"
                       SelectedItem="{Binding SelectedType}"/>
             <ctrls:DelayedBindingTextBox Grid.Column="1" DelayTime="500" Text="{Binding SearchText}"/>
+            <Button Style="{DynamicResource ModernButtonStyle2}" Grid.Column="2"
+                         Command="{Binding CmdReload}">
+                <Path Stretch="Uniform"
+                        Data="{Binding Source={StaticResource RefreshIcon}, Path=Data}"
+                        Fill="{Binding Path=Foreground, RelativeSource=
+                            {RelativeSource AncestorType={x:Type Button}}}" />
+            </Button>
         </Grid>
         <ContentControl Grid.Row="1" Style="{StaticResource DbListStyle}" Margin="0,2,0,0" Content="{Binding}"/>
     </Grid>

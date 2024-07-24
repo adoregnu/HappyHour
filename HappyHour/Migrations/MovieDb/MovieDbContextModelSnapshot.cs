@@ -162,16 +162,11 @@ namespace HappyHour.Migrations.MovieDb
                     b.Property<int?>("LogoKey")
                         .HasColumnType("int");
 
-                    b.Property<int?>("MakerKey")
-                        .HasColumnType("int");
-
                     b.HasKey("Key");
 
                     b.HasIndex("LogoKey");
 
-                    b.HasIndex("MakerKey");
-
-                    b.ToTable("Lables");
+                    b.ToTable("Labels");
                 });
 
             modelBuilder.Entity("HappyHour.Model.LongText", b =>
@@ -349,6 +344,21 @@ namespace HappyHour.Migrations.MovieDb
                     b.ToTable("ShortTexts");
                 });
 
+            modelBuilder.Entity("LabelMaker", b =>
+                {
+                    b.Property<int>("LabelsKey")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MakersKey")
+                        .HasColumnType("int");
+
+                    b.HasKey("LabelsKey", "MakersKey");
+
+                    b.HasIndex("MakersKey");
+
+                    b.ToTable("LabelMaker");
+                });
+
             modelBuilder.Entity("ActorMovie", b =>
                 {
                     b.HasOne("HappyHour.Model.Actor", null)
@@ -420,13 +430,7 @@ namespace HappyHour.Migrations.MovieDb
                         .WithMany()
                         .HasForeignKey("LogoKey");
 
-                    b.HasOne("HappyHour.Model.Maker", "Maker")
-                        .WithMany("Labels")
-                        .HasForeignKey("MakerKey");
-
                     b.Navigation("Logo");
-
-                    b.Navigation("Maker");
                 });
 
             modelBuilder.Entity("HappyHour.Model.LongText", b =>
@@ -498,6 +502,21 @@ namespace HappyHour.Migrations.MovieDb
                         .HasForeignKey("SeriesKey");
                 });
 
+            modelBuilder.Entity("LabelMaker", b =>
+                {
+                    b.HasOne("HappyHour.Model.Label", null)
+                        .WithMany()
+                        .HasForeignKey("LabelsKey")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HappyHour.Model.Maker", null)
+                        .WithMany()
+                        .HasForeignKey("MakersKey")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("HappyHour.Model.Actor", b =>
                 {
                     b.Navigation("Names");
@@ -519,8 +538,6 @@ namespace HappyHour.Migrations.MovieDb
 
             modelBuilder.Entity("HappyHour.Model.Maker", b =>
                 {
-                    b.Navigation("Labels");
-
                     b.Navigation("Name");
                 });
 

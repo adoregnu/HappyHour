@@ -25,7 +25,7 @@ namespace HappyHour.Model
         public DbSet<Genre> MovieGenres { get; set; }
         public DbSet<ActorName> ActorNames { get; set; }
         public DbSet<Actor> Actors { get; set; }
-        public DbSet<Label> Lables { get; set; } 
+        public DbSet<Label> Labels { get; set; } 
         public DbSet<Maker> Makers { get; set; }
         public DbSet<Series> Series { get; set; }
         public DbSet<Rating> Ratings { get; set; }

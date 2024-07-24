@@ -31,9 +31,9 @@ namespace HappyHour.ViewModel
             Movies.Clear();
         }
 
-        private async void OnSearchMovies(string searchText)
+        private async void OnSearchMovies()
         {
-            Movies = await _db.GetMovies(searchText);
+            Movies = await _db.GetMovies(SearchText);
         }
 
         public bool SelectMovie(string pid)

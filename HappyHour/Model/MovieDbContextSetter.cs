@@ -7,6 +7,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Security.Cryptography;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using MvvmDialogs.FrameworkDialogs.SaveFile;
+using FFmpeg.AutoGen;
 
 namespace HappyHour.Model
 {
@@ -55,30 +58,6 @@ namespace HappyHour.Model
             }
             SaveChanges();
         }
-
-        public void MergeMakers(List<Maker> makers, Action<Maker> onDelete = null)
-        {
-            var target = makers[0];
-            makers.RemoveAt(0);
-            foreach (var maker in makers)
-            {
-                foreach (var name in maker.Name)
-                {
-                    target.Name.Add(name);
-                }
-                foreach (var label in maker.Labels)
-                {
-                    target.Labels.Add(label);
-                }
-                if (maker.Logo != null)
-                {
-                    Images.Remove(maker.Logo);
-                }
-                Makers.Remove(maker);
-                onDelete?.Invoke(maker);
-            }
-        }
-
         public void MergeSeries(List<Series> series, Action<Series> onDelete = null)
         {
             var target = series[0];
@@ -87,7 +66,10 @@ namespace HappyHour.Model
             {
                 foreach (var name in serie.Name)
                 {
-                    target.Name.Add(name);
+                    if (!target.Name.Any(n => n.Text == name.Text))
+                    {
+                        target.Name.Add(name);
+                    }
                 }
                 foreach (var movie in serie.Movies)
                 {
@@ -98,32 +80,65 @@ namespace HappyHour.Model
             }
         }
 
+        public void MergeMakers(List<Maker> makers, Action<Maker> onDelete = null)
+        {
+            var target = makers[0];
+            makers.RemoveAt(0);
+            foreach (var maker in makers)
+            {
+                foreach (var name in maker.Name)
+                {
+                    if (!target.Name.Any(n => n.Text == name.Text))
+                    {
+                        target.Name.Add(name);
+                    }
+                }
+                foreach (var label in maker.Labels)
+                {
+                    if (!target.Labels.Any(lb => lb == label))
+                    {
+                        target.Labels.Add(label);
+                    }
+                }
+                if (maker.Logo != null)
+                {
+                    Images.Remove(maker.Logo);
+                }
+                Makers.Remove(maker);
+                onDelete?.Invoke(maker);
+            }
+            SaveChanges();
+        }
+
         public void MargeLabels(List<Label> labels, Action<Label> OnDelete = null)
         {
             var target = labels[0];
             labels.RemoveAt(0);
             foreach (var label in labels)
             {
-                if (target.Maker != label.Maker)
-                {
-                    Log.Print($"{target} and {label} are not name maker!");
-                    continue;
-                }
                 foreach (var name in label.Name)
                 {
                     target.Name.Add(name);
                 }
-                foreach (var movie in Movies)
+                foreach (var movie in label.Movies)
                 {
                     target.Movies.Add(movie);
+                }
+                foreach (var maker in label.Makers)
+                {
+                    if (!target.Makers.Any(m => m == maker))
+                    {
+                        target.Makers.Add(maker);
+                    }
                 }
                 if (label.Logo != null)
                 {
                     Images.Remove(label.Logo);
                 }
-                Lables.Remove(label);
+                Labels.Remove(label);
                 OnDelete?.Invoke(label);
             }
+            SaveChanges();
         }
 
         static string GetLang(IDictionary<string, object> data)
@@ -262,14 +277,14 @@ namespace HappyHour.Model
             }
             if (names == null || names.Count == 0) return null;
 
-            static Tuple<string, string> GetNameLang(string name, string lang)
+            static Tuple<string, string> GetNameLang(string name_lang, string lang)
             {
-                var name_lang = name.Split(';');
-                if (name_lang.Length > 1)
+                var name = name_lang.Split(';');
+                if (name.Length > 1)
                 {
-                    lang = name_lang[1];
+                    lang = name[1];
                 }
-                return new Tuple<string, string>(name_lang[0], lang);
+                return new Tuple<string, string>(name[0], lang);
             }
 
             ActorName dbName = null;
@@ -382,22 +397,28 @@ namespace HappyHour.Model
             return true;
         }
 
-        void SetMaker(Label lable, IDictionary<string, object> data)
+        void SetMaker(string maker, Label label, IDictionary<string, object> data)
         {
-            var newMaker = new Maker() { Name = [], Labels = [lable] };
             string lang = GetLang(data);
-            if (data.TryGetValue("maker", out object maker) && maker != null)
+            var dbMaker = GetMaker(maker);
+            if (dbMaker == null)
             {
-                newMaker.Name.Add(new ShortText() { Lang = lang, Text = maker.ToString() });
-            }
-            else
-            {
-                foreach (var name in lable.Name)
+                dbMaker = new Maker()
                 {
-                    newMaker.Name.Add(name);
-                }
+                    Name = [new ShortText() { Lang = lang, Text = maker }],
+                    Labels = [label]
+                };
+                Makers.Add(dbMaker);
             }
-            Makers.Add(newMaker);
+
+            if (!dbMaker.Labels.Any(lb => lb == label))
+            {
+                dbMaker.Labels.Add(label);
+            }
+            if (!label.Makers.Any(m => m == dbMaker))
+            {
+                label.Makers.Add(dbMaker);
+            }
         }
 
         void SetLable(Movie movie, IDictionary<string, object> data)
@@ -410,7 +431,7 @@ namespace HappyHour.Model
             maker ??= label;
 
             string lang = GetLang(data);
-            var dbLable = Lables
+            var dbLable = Labels
                 .Include(l => l.Name)
                 .Include(l => l.Movies)
                 .FirstOrDefault(lb => lb.Name.Any(n => n.Text.Equals(label.ToString())));
@@ -419,14 +440,13 @@ namespace HappyHour.Model
                 dbLable = new Label()
                 {
                     Name = [new ShortText() { Lang = lang, Text = label.ToString() }],
-                    Movies = [movie]
+                    Makers = [],
+                    Movies = []
                 };
-                SetMaker(dbLable, data);
+                Labels.Add(dbLable);
             }
-            else
-            {
-                dbLable.Movies.Add(movie);
-            }
+            SetMaker(maker.ToString(), dbLable, data);
+            dbLable.Movies.Add(movie);
         }
 
         static void SetReleaseDate(Movie movie, IDictionary<string, object> data)

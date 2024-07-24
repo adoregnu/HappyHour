@@ -26,7 +26,8 @@ namespace HappyHour.ViewModel
                 if (value == null) return;
 
                 Labels.Clear();
-                foreach (var label in value.Labels) Labels.Add(label);
+
+                _db.GetLabels(value).ForEach(Labels.Add);
             }
         }
         private Label _selectedLabel;

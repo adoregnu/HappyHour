@@ -82,7 +82,7 @@ namespace HappyHour.Model
                 .Where(a => a.Names.Contains(aname))
                 .FirstOrDefault();
         }
-        public async ValueTask<List<Actor>> GetActors(string keyword = null)
+        public async ValueTask<List<Actor>> GetActors(string keyword = null, int limit = 30)
         {
             if (string.IsNullOrEmpty(keyword))
             {
@@ -93,6 +93,7 @@ namespace HappyHour.Model
                     .Include(a => a.Thumb)
                     .Where(a => a.Movies.Count() > 0)
                     .OrderByDescending(a => a.Key)
+                    .Take(limit)
                     .ToListAsync();
             }
             else
@@ -243,21 +244,44 @@ namespace HappyHour.Model
                 .Include(s => s.Name)
                 .ToListAsync();
         }
+        public Maker GetMaker(string keyword)
+        {
+            return Makers
+                .Include(m => m.Name)
+                .Include(m => m.Logo)
+                .Include(m => m.Labels)
+                    .ThenInclude(lb => lb.Name)
+                .FirstOrDefault(m =>  m.Name.Any(n => n.Text == keyword));
+        }
         public async ValueTask<List<Maker>> GetMakers(string keyword = null)
         {
             return await Makers
                 .Include(m => m.Name)
                 .Include(m => m.Logo)
                 .Include(m => m.Labels)
-                    .ThenInclude(l => l.Name)
                 .ToListAsync();
         }
         public async ValueTask<List<Label>> GetLabels(string keyword = null)
         {
-            return await Lables
+            return await Labels
                 .Include(l => l.Name)
                 .Include(l => l.Logo)
+                .Include(l => l.Makers)
+                .Include(l => l.Movies)
                 .ToListAsync();
+        }
+        public List<Label> GetLabels(Maker maker)
+        {
+            var tmp = Makers
+                .Include(m => m.Labels)
+                    .ThenInclude(lb =>  lb.Name)
+                .Include(m => m.Labels)
+                    .ThenInclude(lb =>  lb.Makers)
+                .Include(m => m.Labels)
+                    .ThenInclude(lb =>  lb.Movies)
+                .FirstOrDefault(m => m == maker);
+
+            return [.. tmp.Labels];
         }
     }
 }
