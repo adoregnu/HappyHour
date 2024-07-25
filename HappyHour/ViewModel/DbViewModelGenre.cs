@@ -46,7 +46,7 @@ namespace HappyHour.ViewModel
             _db.MergeGenres(selectedGenres, g => Genres.Remove(g));
         }
 
-        private async void OnSelectGenres()
+        private async Task OnSelectGenres()
         {
             Genres.Clear();
             var list = await _db.GetGenres();

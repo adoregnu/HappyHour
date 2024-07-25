@@ -316,7 +316,7 @@ namespace HappyHour.Spider
             return FollowLink();
         }
 
-        protected virtual void OnScrapCompleted(bool bUpdated)
+        async protected virtual void OnScrapCompleted(bool bUpdated)
         {
             if (SearchMedia != null && SearchMedia.IsPlayable && FollowLink())
             {
@@ -329,7 +329,7 @@ namespace HappyHour.Spider
 
             if (bUpdated && SearchMedia != null)
             {
-                SearchMedia.Reload();
+                await SearchMedia.Reload();
             }
 
             if (!Browser.SetNextSpider(SearchMedia))

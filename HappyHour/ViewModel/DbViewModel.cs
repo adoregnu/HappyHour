@@ -80,8 +80,8 @@ namespace HappyHour.ViewModel
         {
             Title = "Database";
             //ListType = [.. _typeToPropertyName.Keys];
-            CmdReload = new RelayCommand(() => OnTypeChanged(SelectedType));
-            CmdReloadAll = new RelayCommand(OnReloadAll);
+            CmdReload = new RelayCommand(async () => await OnTypeChanged(SelectedType));
+            CmdReloadAll = new RelayCommand(async() => await OnReloadAll());
 
             CmdGenresMerge = new RelayCommand<object>(
                 OnMergeGenres, p => p is IList<object> list && list.Count > 1);
@@ -102,28 +102,32 @@ namespace HappyHour.ViewModel
             Messenger.Register(this);
         }
 
-        public void Receive(ViewEventArgs msg)
+        async public void Receive(ViewEventArgs msg)
         {
             if (msg.Message == "Refresh")
             {
-                OnReloadAll();
+                await OnReloadAll();
             }
         }
 
-        private void OnReloadAll()
+        async private Task OnReloadAll()
         {
             foreach (var type in ListType)
             {
-                OnTypeChanged(type);
+                await OnTypeChanged(type);
             }
         }
 
-        private void OnTypeChanged(string type)
+        private async Task OnTypeChanged(string type)
         {
             string changeFunction = $"OnSelect{type}";
             MethodInfo mi = GetType().GetMethod(changeFunction,
                 BindingFlags.NonPublic | BindingFlags.Instance);
-            mi?.Invoke(this, null);
+            var task = (Task)mi?.Invoke(this, null);
+            if (task != null)
+            {
+                await task;
+            }
         }
 
         private void OnSearchTextUpdated(string type)

@@ -63,7 +63,7 @@ namespace HappyHour.ViewModel
             _mediaList.LoadItems(await _db.GetMovies(SelectedMaker));
         }
 
-        private async void OnSelectMakers()
+        private async Task OnSelectMakers()
         {
             Makers.Clear();
             Labels.Clear();

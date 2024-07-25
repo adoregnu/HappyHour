@@ -177,16 +177,24 @@ namespace HappyHour.Model
                 .Include(m => m.Cover)
                 .Include(m => m.Title);
 
+            IQueryable<Movie> mquery = null;
             if (exp != null)
             {
-                query.Where(exp);
+                mquery = query.Where(exp);
             }
+
             if (limit > 0)
             {
-                query.OrderByDescending(m => m.Key)
-                    .Take(limit);
+                if (mquery != null)
+                {
+                    mquery = mquery.OrderByDescending(m => m.Key).Take(limit);
+                }
+                else
+                {
+                    mquery = query.OrderByDescending(m => m.Key).Take(limit);
+                }
             }
-            return await query.ToListAsync();
+            return await mquery.ToListAsync();
         }
 
         public async ValueTask<List<Movie>> GetMovies(string pid)
@@ -203,7 +211,7 @@ namespace HappyHour.Model
         }
         public async ValueTask<List<Movie>> GetMovies(Maker maker)
         {
-            return await GetMovies((Movie m) => m.Maker == maker);
+            return await GetMovies((Movie m) =>  m.Maker == maker);
         }
         public async ValueTask<List<Movie>> GetMovies(Label label)
         {

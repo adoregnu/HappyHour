@@ -49,7 +49,7 @@ namespace HappyHour.ViewModel
             _db.MergeSeries(selectedSeries, s => Series.Remove(s));
         }
 
-        private async void OnSelectSeries()
+        private async Task OnSelectSeries()
         {
             Series.Clear();
             var list = await _db.GetSeries();

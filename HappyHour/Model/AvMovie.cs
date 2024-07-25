@@ -124,7 +124,10 @@ namespace HappyHour.Model
                 {
                     tmp += label;
                 }
-                Actresses = string.Join('\n', MovieDbContext.GetActorsNames(MovieInfo));
+                var names = MovieDbContext.GetActorsNames(MovieInfo);
+                if (names != null) {
+                    Actresses = string.Join('\n', names);
+                }
                 if (MovieInfo.Cover != null)
                 {
                     ImageBlob = MovieInfo.Cover;

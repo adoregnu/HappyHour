@@ -114,7 +114,8 @@
     var items = {
         title: { xpath: "//div[@class='mv_title']/text()" },
         date: { xpath: "//a[@class='mv_releaseDate']/text()" },
-        studio: { xpath: "//a[@class='mv_label']/text()" },
+        maker: { xpath: "//a[@class='mv_mfr']/text()" },
+        label: { xpath: "//a[@class='mv_label']/text()" },
         cover: { xpath: "//div[@class='movie_top']/img/@src" },
         series: { xpath: "//a[@class='mv_series']"},
         genre: {
@@ -142,5 +143,5 @@
         num_item += 1;
     }
     result['data'] = num_item;
-    _post_message(msg, 'jp');
+    _post_message(result, 'jp');
 }) ();

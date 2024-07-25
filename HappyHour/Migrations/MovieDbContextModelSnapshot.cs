@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace HappyHour.Migrations.MovieDb
+namespace HappyHour.Migrations
 {
     [DbContext(typeof(MovieDbContext))]
     partial class MovieDbContextModelSnapshot : ModelSnapshot
@@ -90,8 +90,8 @@ namespace HappyHour.Migrations.MovieDb
                     b.Property<int>("Alias")
                         .HasColumnType("int");
 
-                    b.Property<int?>("NameKey")
-                        .HasColumnType("int");
+                    b.Property<long?>("NameKey")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("Priority")
                         .HasColumnType("int");
@@ -162,20 +162,25 @@ namespace HappyHour.Migrations.MovieDb
                     b.Property<int?>("LogoKey")
                         .HasColumnType("int");
 
+                    b.Property<int?>("MakerKey")
+                        .HasColumnType("int");
+
                     b.HasKey("Key");
 
                     b.HasIndex("LogoKey");
+
+                    b.HasIndex("MakerKey");
 
                     b.ToTable("Labels");
                 });
 
             modelBuilder.Entity("HappyHour.Model.LongText", b =>
                 {
-                    b.Property<int>("Key")
+                    b.Property<long>("Key")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("bigint");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Key"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Key"));
 
                     b.Property<string>("Lang")
                         .HasColumnType("longtext");
@@ -241,6 +246,9 @@ namespace HappyHour.Migrations.MovieDb
                     b.Property<int?>("LabelKey")
                         .HasColumnType("int");
 
+                    b.Property<int?>("MakerKey")
+                        .HasColumnType("int");
+
                     b.Property<string>("PID")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -256,6 +264,8 @@ namespace HappyHour.Migrations.MovieDb
                     b.HasIndex("CoverKey");
 
                     b.HasIndex("LabelKey");
+
+                    b.HasIndex("MakerKey");
 
                     b.HasIndex("SeriesKey");
 
@@ -301,11 +311,11 @@ namespace HappyHour.Migrations.MovieDb
 
             modelBuilder.Entity("HappyHour.Model.ShortText", b =>
                 {
-                    b.Property<int>("Key")
+                    b.Property<long>("Key")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("bigint");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Key"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Key"));
 
                     b.Property<int?>("GenreKey")
                         .HasColumnType("int");
@@ -342,21 +352,6 @@ namespace HappyHour.Migrations.MovieDb
                     b.HasIndex("SeriesKey");
 
                     b.ToTable("ShortTexts");
-                });
-
-            modelBuilder.Entity("LabelMaker", b =>
-                {
-                    b.Property<int>("LabelsKey")
-                        .HasColumnType("int");
-
-                    b.Property<int>("MakersKey")
-                        .HasColumnType("int");
-
-                    b.HasKey("LabelsKey", "MakersKey");
-
-                    b.HasIndex("MakersKey");
-
-                    b.ToTable("LabelMaker");
                 });
 
             modelBuilder.Entity("ActorMovie", b =>
@@ -430,6 +425,10 @@ namespace HappyHour.Migrations.MovieDb
                         .WithMany()
                         .HasForeignKey("LogoKey");
 
+                    b.HasOne("HappyHour.Model.Maker", null)
+                        .WithMany("Labels")
+                        .HasForeignKey("MakerKey");
+
                     b.Navigation("Logo");
                 });
 
@@ -459,6 +458,10 @@ namespace HappyHour.Migrations.MovieDb
                         .WithMany("Movies")
                         .HasForeignKey("LabelKey");
 
+                    b.HasOne("HappyHour.Model.Maker", "Maker")
+                        .WithMany()
+                        .HasForeignKey("MakerKey");
+
                     b.HasOne("HappyHour.Model.Series", "Series")
                         .WithMany("Movies")
                         .HasForeignKey("SeriesKey");
@@ -466,6 +469,8 @@ namespace HappyHour.Migrations.MovieDb
                     b.Navigation("Cover");
 
                     b.Navigation("Label");
+
+                    b.Navigation("Maker");
 
                     b.Navigation("Series");
                 });
@@ -502,21 +507,6 @@ namespace HappyHour.Migrations.MovieDb
                         .HasForeignKey("SeriesKey");
                 });
 
-            modelBuilder.Entity("LabelMaker", b =>
-                {
-                    b.HasOne("HappyHour.Model.Label", null)
-                        .WithMany()
-                        .HasForeignKey("LabelsKey")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("HappyHour.Model.Maker", null)
-                        .WithMany()
-                        .HasForeignKey("MakersKey")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("HappyHour.Model.Actor", b =>
                 {
                     b.Navigation("Names");
@@ -538,6 +528,8 @@ namespace HappyHour.Migrations.MovieDb
 
             modelBuilder.Entity("HappyHour.Model.Maker", b =>
                 {
+                    b.Navigation("Labels");
+
                     b.Navigation("Name");
                 });
 
