@@ -7,9 +7,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Security.Cryptography;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
-using MvvmDialogs.FrameworkDialogs.SaveFile;
-using FFmpeg.AutoGen;
 
 namespace HappyHour.Model
 {
@@ -123,13 +120,6 @@ namespace HappyHour.Model
                 foreach (var movie in label.Movies)
                 {
                     target.Movies.Add(movie);
-                }
-                foreach (var maker in label.Makers)
-                {
-                    if (!target.Makers.Any(m => m == maker))
-                    {
-                        target.Makers.Add(maker);
-                    }
                 }
                 if (label.Logo != null)
                 {
@@ -397,7 +387,7 @@ namespace HappyHour.Model
             return true;
         }
 
-        void SetMaker(string maker, Label label, IDictionary<string, object> data)
+        Maker SetMaker(string maker, Label label, IDictionary<string, object> data)
         {
             string lang = GetLang(data);
             var dbMaker = GetMaker(maker);
@@ -415,10 +405,7 @@ namespace HappyHour.Model
             {
                 dbMaker.Labels.Add(label);
             }
-            if (!label.Makers.Any(m => m == dbMaker))
-            {
-                label.Makers.Add(dbMaker);
-            }
+            return dbMaker;
         }
 
         void SetLable(Movie movie, IDictionary<string, object> data)
@@ -440,12 +427,11 @@ namespace HappyHour.Model
                 dbLable = new Label()
                 {
                     Name = [new ShortText() { Lang = lang, Text = label.ToString() }],
-                    Makers = [],
                     Movies = []
                 };
                 Labels.Add(dbLable);
             }
-            SetMaker(maker.ToString(), dbLable, data);
+            movie.Maker = SetMaker(maker.ToString(), dbLable, data);
             dbLable.Movies.Add(movie);
         }
 
@@ -465,7 +451,10 @@ namespace HappyHour.Model
                         date.ToString(), pattern, App.Current.enUS);
                     break;
                 }
-                catch { }
+                catch
+                {
+                    Log.Print($"SetReleaseDate:: Failed to parse \"{date}\"");
+                }
             }
         }
 
@@ -520,6 +509,9 @@ namespace HappyHour.Model
 
         public void DeleteMovie(Movie movie)
         {
+            Series.Remove(movie.Series);
+            Labels.Remove(movie.Label);
+            Makers.Remove(movie.Maker);
             Images.Remove(movie.Cover);
             Movies.Remove(movie);
             SaveChanges();

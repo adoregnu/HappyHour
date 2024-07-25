@@ -111,7 +111,6 @@ namespace HappyHour.ViewModel
         public IDialogService DialogService { get; set; }
 
         public ICommand CmdDoubleClick { get; private set; }
-        public ICommand CmdDeleteActorFromList { get; private set; }
         public ICommand CmdSearchNameDoubleClick { get; private set; }
         public ICommand CmdMergeActors { get; private set; }
         public ICommand CmdClearActors { get; private set; }
@@ -121,9 +120,6 @@ namespace HappyHour.ViewModel
         public ActorEditorViewModel()
         {
             CmdDoubleClick = new RelayCommand(OnDoubleClicked);
-            CmdDeleteActorFromList = new RelayCommand(() => {
-                if (SelectedActor != null) Actors.Remove(SelectedActor);
-            });
             CmdSearchNameDoubleClick  = new RelayCommand(OnSearchNameDoubleClicked);
             CmdMergeActors = new RelayCommand<object>(
                 OnMergeActors, 
@@ -147,7 +143,7 @@ namespace HappyHour.ViewModel
 
         public void Receive(ViewEventArgs msg)
         {
-            if (msg.Message != "RefreshActors")
+            if (msg.Message != "Refresh")
             {
                 return;
             }

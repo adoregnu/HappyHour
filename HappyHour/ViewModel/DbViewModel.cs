@@ -13,11 +13,12 @@ using HappyHour.Extension;
 using CommunityToolkit.Mvvm.Input;
 using System.Reflection;
 using System.Windows.Input;
+using CommunityToolkit.Mvvm.Messaging;
 
 namespace HappyHour.ViewModel
 {
 
-    partial class DbViewModel : Pane, IDbView
+    partial class DbViewModel : Pane, IDbView, IRecipient<ViewEventArgs>
     {
         string _selectedType = "Movies";
         string _searchText;
@@ -53,7 +54,7 @@ namespace HappyHour.ViewModel
             set
             {
                 SetProperty(ref _searchText, value);
-                if (_typeToPropertyName.TryGetValue(SelectedType, out string type))
+                if (ListType.Any(type => type == SelectedType))
                 {
                     //OnSearchTextUpdated(type);
                 }
@@ -66,26 +67,21 @@ namespace HappyHour.ViewModel
             {
                 SearchText = "";
                 SetProperty(ref _selectedType, value);
-                OnTypeChanged();
+                OnTypeChanged(value);
             }
         }
-        public List<string> ListType { get; set; }
+        public List<string> ListType { get; set; } = [
+                nameof(Movies), nameof(Makers), nameof(Series), nameof(Genres)
+        ];
 
-        readonly Dictionary<string, string> _typeToPropertyName = new ()
-            {
-                { "Movies", nameof(Movies) },
-                //{ "Actors", nameof(Actors) },
-                { "Makers", nameof(Makers) },
-                { "Series", nameof(Series) },
-                { "Genres", nameof(Genres) },
-            };
-
-        public ICommand CmdReload { get; private set; }
+       public ICommand CmdReload { get; private set; }
+        public ICommand CmdReloadAll { get; private set; }
         public DbViewModel()
         {
             Title = "Database";
-            ListType = _typeToPropertyName.Keys.ToList();
-            CmdReload = new RelayCommand(OnTypeChanged);
+            //ListType = [.. _typeToPropertyName.Keys];
+            CmdReload = new RelayCommand(() => OnTypeChanged(SelectedType));
+            CmdReloadAll = new RelayCommand(OnReloadAll);
 
             CmdGenresMerge = new RelayCommand<object>(
                 OnMergeGenres, p => p is IList<object> list && list.Count > 1);
@@ -102,11 +98,29 @@ namespace HappyHour.ViewModel
             CmdSeriesoDubleClicked = new RelayCommand(OnSeriesoDubleClicked);
 
             CmdAddSeriesNameTranslated = new RelayCommand(OnAddSeriesNameTranslated);
+
+            Messenger.Register(this);
         }
 
-        private void OnTypeChanged()
+        public void Receive(ViewEventArgs msg)
         {
-            string changeFunction = $"OnSelect{SelectedType}";
+            if (msg.Message == "Refresh")
+            {
+                OnReloadAll();
+            }
+        }
+
+        private void OnReloadAll()
+        {
+            foreach (var type in ListType)
+            {
+                OnTypeChanged(type);
+            }
+        }
+
+        private void OnTypeChanged(string type)
+        {
+            string changeFunction = $"OnSelect{type}";
             MethodInfo mi = GetType().GetMethod(changeFunction,
                 BindingFlags.NonPublic | BindingFlags.Instance);
             mi?.Invoke(this, null);

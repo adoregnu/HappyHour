@@ -14,8 +14,6 @@ using System.Globalization;
 using log4net;
 using log4net.Config;
 
-using Unosquare.FFME;
-
 using CefSharp;
 using CefSharp.Wpf;
 

@@ -12,7 +12,7 @@ namespace HappyHour.Model
     public abstract class MText
     {
         [Key]
-        public int Key { get; set; }
+        public long Key { get; set; }
         public string Lang { get; set; }
         public abstract string Text { get; set; }
         public override string ToString()
@@ -26,13 +26,11 @@ namespace HappyHour.Model
         public override string Text { set; get; }
     }
 
-
     public class LongText : MText
     {
         [MaxLength(4906)]
         public override string Text { set; get; }
     }
-
 
     public class ImageBlob
     {
@@ -114,7 +112,6 @@ namespace HappyHour.Model
         public int Key { get; set; }
         public virtual ImageBlob Logo { get; set; }
         public virtual ICollection<ShortText> Name { get; set; }
-        public ICollection<Maker> Makers { get; set; }
         public ICollection<Movie> Movies { get; set; }
         public override string ToString()
         {
@@ -185,6 +182,7 @@ namespace HappyHour.Model
         public virtual ICollection<Actor> Actors { set; get; }
         public ImageBlob Cover { set; get; }
         public virtual ICollection<ImageBlob> Screenshots { set; get; }
+        public Maker Maker { set; get; }
         public Label Label { set; get; }
         public Series Series { set; get; }
 

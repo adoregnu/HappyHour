@@ -53,15 +53,14 @@ namespace HappyHour.View.Behavior
             {
                 if ((bool)e_.NewValue)
                 {
-                    ExecutedRoutedEventHandler handler =
-                        (sender_, arg_) =>
+                    void handler(object sender_, ExecutedRoutedEventArgs arg_)
+                    {
+                        if (listBox.SelectedItem != null)
                         {
-                            if (listBox.SelectedItem != null)
-                            {
-                                //Copy what ever your want here
-                                Clipboard.SetDataObject(listBox.SelectedItem.ToString());
-                            }
-                        };
+                            //Copy what ever your want here
+                            Clipboard.SetDataObject(listBox.SelectedItem.ToString());
+                        }
+                    }
 
                     var command = new RoutedCommand("Copy", typeof(ListBox));
                     command.InputGestures.Add(new KeyGesture(Key.C, ModifierKeys.Control, "Copy"));

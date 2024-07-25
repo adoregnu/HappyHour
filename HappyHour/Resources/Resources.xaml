@@ -421,12 +421,4 @@
         </Style.Triggers>
     </Style>
 
-    <conv:TimeSpanToSecondsConverter x:Key="TimeSpanToSecondsConverter" />
-    <conv:TimeSpanFormatter x:Key="TimeSpanFormatter" />
-    <conv:PercentageFormatter x:Key="PercentageFormatter" />
-    <conv:ByteFormatter x:Key="ByteFormatter" />
-    <conv:BitFormatter x:Key="BitFormatter" />
-    <conv:UtcDateToLocalTimeString x:Key="UtcDateToLocalTimeString" />
-    <conv:InverseBooleanConverter x:Key="InverseBooleanConverter" />
-    <conv:ClosedCaptionsChannelConverter x:Key="ClosedCaptionsChannelConverter" />
 </ResourceDictionary>

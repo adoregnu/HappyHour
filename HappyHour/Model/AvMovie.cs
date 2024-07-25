@@ -3,10 +3,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 
-using Microsoft.EntityFrameworkCore;
-
 using HappyHour.Extension;
-using MongoDB.Bson;
 using System.Threading.Tasks;
 
 namespace HappyHour.Model
@@ -30,8 +27,8 @@ namespace HappyHour.Model
             set => SetProperty(ref _actresses, value);
         }
 
-        public List<string> Files { get; set; } = new();
-        public List<string> Subtitles { get; set; } = new();
+        public List<string> Files { get; set; } = [];
+        public List<string> Subtitles { get; set; } = [];
 
         private Movie _movieInfo;
         public Movie MovieInfo
@@ -58,7 +55,7 @@ namespace HappyHour.Model
             Pid = movie.PID;
             Path = movie.VideoUrl;
             MovieInfo = movie;
-            //LoadFiles();
+            LoadFiles();
         }
 
         public void ClearDb()
@@ -143,12 +140,24 @@ namespace HappyHour.Model
             ".mp4", ".avi", ".mkv", ".ts", ".wmv", ".m4v"
         ];
 
-        void LoadFiles(string[] files = null)
+        async Task LoadFiles(string[] files = null)
         {
-            files ??= Directory.GetFiles(Path);
             Files.Clear();
             Subtitles.Clear();
-            _date = File.GetCreationTime(Path);
+
+            await Task.Run(() =>
+            {
+                try
+                {
+                    files ??= Directory.GetFiles(Path);
+                    _date = File.GetCreationTime(Path);
+                }
+                catch (Exception ex)
+                {
+                    Log.Print($"{ex.Message}");
+                }
+            });
+
             foreach (string file in files)
             {
                 if (sub_exts.Any(s => file.EndsWith(s, StringComparison.OrdinalIgnoreCase)))
@@ -164,7 +173,7 @@ namespace HappyHour.Model
 
         public override async Task Reload(string[] files)
         {
-            LoadFiles(files);
+            await LoadFiles(files);
 
             MovieInfo = await _db.GetMovie(Pid);
             if (MovieInfo == null) return;

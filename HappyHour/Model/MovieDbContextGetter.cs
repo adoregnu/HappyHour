@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -82,6 +83,18 @@ namespace HappyHour.Model
                 .Where(a => a.Names.Contains(aname))
                 .FirstOrDefault();
         }
+
+        public List<Actor> GetActors(Movie movie)
+        {
+            return [.. Actors
+                .Include(a => a.Names)
+                    .ThenInclude(n => n.Name)
+                .Include(a => a.Movies)
+                .Include(a => a.Thumb)
+                .Where(a => a.Movies.Contains(movie))
+            ];
+        }
+
         public async ValueTask<List<Actor>> GetActors(string keyword = null, int limit = 30)
         {
             if (string.IsNullOrEmpty(keyword))
@@ -108,7 +121,7 @@ namespace HappyHour.Model
                         .ThenInclude(a => a.Thumb)
                     .Where(n => EF.Functions.Like(n.Name.Text, $"{keyword}%"))
                     .Where(n => n.Actor.Movies.Count() > 0)
-                    .OrderBy(n => n.Name)
+                    .OrderBy(n => n.Name.Text)
                     .ToListAsync();
 
                 var actors = names.Select(n => n.Actor).Distinct();
@@ -146,103 +159,95 @@ namespace HappyHour.Model
                     .ThenInclude(l => l.Name)
                 .Include(m => m.Actors)
                     .ThenInclude(actor => actor.Names)
-                    .ThenInclude(name => name.Name)
+                        .ThenInclude(name => name.Name)
                 .Include(m => m.Cover)
                 .Include(m => m.Title)
                 .Where(m => m.PID == pid)
                 .FirstOrDefaultAsync();
         }
+
+        public async ValueTask<List<Movie>> GetMovies(Expression<Func<Movie, bool>> exp, int limit = 0)
+        {
+            var query = Movies
+                .Include(m => m.Label)
+                    .ThenInclude(l => l.Name)
+                .Include(m => m.Actors)
+                    .ThenInclude(actor => actor.Names)
+                        .ThenInclude(name => name.Name)
+                .Include(m => m.Cover)
+                .Include(m => m.Title);
+
+            if (exp != null)
+            {
+                query.Where(exp);
+            }
+            if (limit > 0)
+            {
+                query.OrderByDescending(m => m.Key)
+                    .Take(limit);
+            }
+            return await query.ToListAsync();
+        }
+
         public async ValueTask<List<Movie>> GetMovies(string pid)
         {
-            return await Movies
-                .Include(m => m.Label)
-                    .ThenInclude(l => l.Name)
-                .Include(m => m.Actors)
-                    .ThenInclude(actor => actor.Names)
-                    .ThenInclude(name => name.Name)
-                .Include(m => m.Cover)
-                .Include(m => m.Title)
-                .Where(m => EF.Functions.Like(m.PID, $"%{pid}%"))
-                .ToListAsync();
+            return await GetMovies((Movie m) => EF.Functions.Like(m.PID, $"%{pid}%"));
         }
-
         public async ValueTask<List<Movie>> GetMovies(Actor actor)
         {
-            return await Movies
-                .Include(m => m.Label)
-                    .ThenInclude(l => l.Name)
-                .Include(m => m.Actors)
-                    .ThenInclude(actor => actor.Names)
-                    .ThenInclude(name => name.Name)
-                .Include(m => m.Cover)
-                .Include(m => m.Title)
-                .Where(m => m.Actors.Contains(actor))
-                .ToListAsync();
+            return await GetMovies((Movie m) => m.Actors.Contains(actor));
         }
-
         public async ValueTask<List<Movie>> GetMovies(Genre genre)
         {
-            return await Movies
-                .Include(m => m.Label)
-                    .ThenInclude(l => l.Name)
-                .Include(m => m.Actors)
-                    .ThenInclude(actor => actor.Names)
-                    .ThenInclude(name => name.Name)
-                .Include(m => m.Cover)
-                .Include(m => m.Title)
-                .Where(m => m.Genres.Contains(genre))
-                .ToListAsync();
+            return await GetMovies((Movie m) => m.Genres.Contains(genre));
         }
-
         public async ValueTask<List<Movie>> GetMovies(Maker maker)
         {
-            List<Movie> movies = [];
-            foreach (var label in maker.Labels)
-            {
-                movies.AddRange(await GetMovies(label));
-            }
-            return movies;
+            return await GetMovies((Movie m) => m.Maker == maker);
         }
         public async ValueTask<List<Movie>> GetMovies(Label label)
         {
-            return await Movies
-                .Include(m => m.Label)
-                    .ThenInclude(l => l.Name)
-                .Include(m => m.Actors)
-                    .ThenInclude(actor => actor.Names)
-                    .ThenInclude(name => name.Name)
-                .Include(m => m.Cover)
-                .Include(m => m.Title)
-                .Where(m => m.Label == label)
-                .ToListAsync();
+            return await GetMovies((Movie m) => m.Label == label);
         }
         public async ValueTask<List<Movie>> GetMovies(Series series)
         {
-            return await Movies
-                .Include(m => m.Label)
-                    .ThenInclude(l => l.Name)
-                .Include(m => m.Actors)
-                    .ThenInclude(actor => actor.Names)
-                    .ThenInclude(name => name.Name)
-                .Include(m => m.Cover)
-                .Include(m => m.Title)
-                .Where(m => m.Series == series)
-                .ToListAsync();
+            return await GetMovies((Movie m) => m.Series == series);
         }
-        public async ValueTask<List<Genre>> GetGenres(string keyword = null)
+
+        public List<Genre> GetGenres(Movie movie)
         {
-            return await MovieGenres
+            return [.. MovieGenres
                 .Include(g => g.Name)
                 .Include(g => g.Movies)
-                .ToListAsync();
+                .Where(g => g.Movies.Contains(movie))
+            ];
+        }
+
+        public async ValueTask<List<Genre>> GetGenres(string keyword = null)
+        {
+            var query = MovieGenres
+                .Include(g => g.Name)
+                .Include(g => g.Movies);
+
+            if (keyword != null)
+            {
+                query.Where(g => g.Name.Any(n => EF.Functions.Like(n.Text, $"%{keyword}%")));
+            }
+                
+            return await query.ToListAsync();
         }
 
         public async ValueTask<List<Series>> GetSeries(string keyword = null)
         {
-            return await Series
+            var query = Series
                 .Include(s => s.Movies)
-                .Include(s => s.Name)
-                .ToListAsync();
+                .Include(s => s.Name);
+            if (keyword != null)
+            {
+                query.Where(s => s.Name.Any(n => EF.Functions.Like(n.Text, $"%{keyword}%")));
+            }
+
+            return await query.ToListAsync();
         }
         public Maker GetMaker(string keyword)
         {
@@ -266,7 +271,6 @@ namespace HappyHour.Model
             return await Labels
                 .Include(l => l.Name)
                 .Include(l => l.Logo)
-                .Include(l => l.Makers)
                 .Include(l => l.Movies)
                 .ToListAsync();
         }
@@ -275,8 +279,6 @@ namespace HappyHour.Model
             var tmp = Makers
                 .Include(m => m.Labels)
                     .ThenInclude(lb =>  lb.Name)
-                .Include(m => m.Labels)
-                    .ThenInclude(lb =>  lb.Makers)
                 .Include(m => m.Labels)
                     .ThenInclude(lb =>  lb.Movies)
                 .FirstOrDefault(m => m == maker);

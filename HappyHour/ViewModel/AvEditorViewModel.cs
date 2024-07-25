@@ -18,7 +18,7 @@ namespace HappyHour.ViewModel
 {
     internal class AvEditorViewModel : ObservableObject, IModalDialogViewModel
     {
-        private readonly IEnumerable<Actor> _actors;
+        private readonly MovieDbContext _db = App.Current.DbContext;
         private string _searchActorName;
 
         private Maker _maker;
@@ -55,20 +55,28 @@ namespace HappyHour.ViewModel
                 }
             }
         }
-        public ObservableCollection<Actor> Actors { get; set; }
-        public ObservableCollection<Genre> Genres { get; set; }
+        public string Title { get; private set; }
+        public Label SelectedLabel { get; set; }
+        public Series SelectedSeries { get; set; }
+        public Actor SelectedActor { get; set; }
+        public Genre SelectedGenre { get; set; }
+
+        public ObservableCollection<Actor> Actors { get; set; } = [];
+        public ObservableCollection<Genre> Genres { get; set; } = [];
 
         public IEnumerable<Series> AllSeries { get; private set; }
         public IEnumerable<Genre> AllGenres { get; private set; }
-        public IEnumerable<Actor> AllActors
+
+        private readonly IEnumerable<Actor> _actorsSearched = [];
+        public IEnumerable<Actor> ActorsSearched
         {
             get
             {
                 if (string.IsNullOrEmpty(SearchActorName))
                 {
-                    return _actors;
+                    return _actorsSearched;
                 }
-                return _actors.Where(a => a.ToString().IndexOf(SearchActorName,
+                return _actorsSearched.Where(a => a.ToString().IndexOf(SearchActorName,
                         StringComparison.OrdinalIgnoreCase) >= 0);
             }
         }
@@ -79,7 +87,7 @@ namespace HappyHour.ViewModel
             set
             {
                 SetProperty(ref _searchActorName, value);
-                OnPropertyChanged(nameof(AllActors));
+                //OnPropertyChanged(nameof(AllActors));
             }
         }
 
@@ -89,16 +97,7 @@ namespace HappyHour.ViewModel
             private set => SetProperty(ref _dialogResult, value);
         }
 
-        public string Title { get; private set; }
-        public Label SelectedLabel { get; set; }
-        public Series SelectedSeries { get; set; }
-        public Actor SelectedActor { get; set; }
-        public Genre SelectedGenre { get; set; }
-
-        public Actor SelectedAvActor { get; set; }
-        public Genre SelectedAvGenre { get; set; }
-
-        public ICommand CmdSetStudio { get; private set; }
+        public ICommand CmdSetLabel { get; private set; }
         public ICommand CmdSetSeries { get; private set; }
         public ICommand CmdAddActor { get; private set; }
         public ICommand CmdRemoveActor { get; private set; }
@@ -110,48 +109,15 @@ namespace HappyHour.ViewModel
         {
             Title = movie.Pid;
 
-            CmdSetStudio = new RelayCommand(() => Label = SelectedLabel);
+            CmdSetLabel = new RelayCommand(() => Label = SelectedLabel);
             CmdSetSeries = new RelayCommand(() => Series = SelectedSeries);
             CmdAddActor = new RelayCommand(OnAddActor);
             CmdRemoveActor = new RelayCommand(OnRemoveActor);
             CmdAddGenre = new RelayCommand(OnAddGnere);
             CmdSave = new RelayCommand(OnSave);
 
-            if (movie.MovieInfo != null)
-            {
-                Movie = movie.MovieInfo;
-                //Actors = new ObservableCollection<AvActor>(Av.Actors);
-                //Genres = new ObservableCollection<AvGenre>(Av.Genres);
-                //Studio = Av.Studio;
-                //Series = Av.Series;
-            }
-#if false
-            else
-            {
-                Av = new AvItem
-                {
-                    Path = movie.Path,
-                    Pid = movie.Pid,
-                };
-                Actors = new ObservableCollection<AvActor>();
-                Genres = new ObservableCollection<AvGenre>();
-
-                //App.Current.DbContext.Items.Attach(Av);
-            }
-            using var context = AvDbContextPool.CreateContext();
-            context.Items.Attach(Av);
-
-            AllSeries = context.Series.ToList();
-            AllGenres = context.Genres.ToList();
-
-            var names = context.ActorNames
-                .Include(n => n.Actor)
-                .Where(n => n.Actor != null)
-                .OrderBy(n => n.Name)
-                .ToList();
-            _allActors = names.Select(n => n.Actor).Distinct();
-            AllStudios = context.Studios.ToList();
-#endif
+            _db.GetActors(Movie).ForEach(Actors.Add);
+            _db.GetGenres(Movie).ForEach(Genres.Add);
         }
 
         private void OnAddActor()
@@ -161,16 +127,15 @@ namespace HappyHour.ViewModel
             if (!Actors.Any(a => a == SelectedActor))
             {
                 Actors.Add(SelectedActor);
-                //_actorChanged = true;
-                Movie.Actors.Add(SelectedActor);
+                //Movie.Actors.Add(SelectedActor);
             }
         }
 
         private void OnRemoveActor()
         {
-            if (SelectedAvActor != null)
+            if (SelectedActor != null)
             {
-                Actors.Remove(SelectedAvActor);
+                Actors.Remove(SelectedActor);
                 _actorChanged = true;
             }
         }

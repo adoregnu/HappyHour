@@ -48,7 +48,7 @@ namespace HappyHour.ViewModel
         public IDialogService DialogService { get; set; }
         private readonly FileListViewModel _fileListMv;
         private readonly MediaListViewModel _mediaListMv;
-        private readonly DbViewModel _dbViewMode;
+        private readonly DbViewModel _dbViewModel;
 
         public MainViewModel(IDialogService dialogService)
         {
@@ -57,11 +57,11 @@ namespace HappyHour.ViewModel
 
             _fileListMv = new FileListViewModel();
             _mediaListMv = new MediaListViewModel { FileList = _fileListMv, };
-            _dbViewMode = new DbViewModel { MediaList = _mediaListMv };
+            _dbViewModel = new DbViewModel { MediaList = _mediaListMv };
             _fileListMv.MediaList = _mediaListMv;
 
             Anchors.Add(_fileListMv);
-            Anchors.Add(_dbViewMode);
+            //Anchors.Add(_dbViewMode);
 
             Anchors.Add(new DebugLogViewModel());
             Anchors.Add(new StatusLogViewModel());
@@ -74,12 +74,13 @@ namespace HappyHour.ViewModel
             Docs.Add(new SpiderViewModel
             {
                 MediaList = _mediaListMv,
-                DbView = _dbViewMode
+                DbView = _dbViewModel
             });
+            Docs.Add(_dbViewModel);
 
-            CmdActorEdtor = new RelayCommand(() => OnActorEditor());
-            CmdFileToFolder = new RelayCommand(() => OnFileToFolder());
-            CmdSpiderSetting = new RelayCommand(() => OnSpiderSetting());
+            CmdActorEdtor = new RelayCommand(OnActorEditor);
+            CmdFileToFolder = new RelayCommand(OnFileToFolder);
+            CmdSpiderSetting = new RelayCommand(OnSpiderSetting);
 
             //for update media list
             _fileListMv.DirChanged?.Invoke(this, _fileListMv.CurrDirInfo);

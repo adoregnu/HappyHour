@@ -35,37 +35,6 @@
         <local:BindingProxy x:Key="VmContext"
             Data="{Binding RelativeSource={RelativeSource FindAncestor,
                 AncestorType={x:Type local:ActorEditorDialog}}, Path=DataContext}"/>
-
-        <ContextMenu x:Key="_actorListCMenu">
-            <MenuItem
-                Header="Merge Actors"
-                CommandParameter="{Binding PlacementTarget.Tag.SelectedItems,
-                    RelativeSource={RelativeSource FindAncestor,
-                    AncestorType=ContextMenu}}"
-                Command="{Binding PlacementTarget.Tag.DataContext.CmdMergeActors,
-                    RelativeSource={RelativeSource FindAncestor,
-                    AncestorType=ContextMenu}}"/>
-            <MenuItem
-                Header="Change Pciture"
-                Command="{Binding PlacementTarget.Tag.DataContext.CmdChangePicture,
-                    RelativeSource={RelativeSource FindAncestor,
-                    AncestorType=ContextMenu}}"/>
-<!--
-            <MenuItem Header="Scrap"
-                        Visibility="{Binding Data.SpiderList, Source={StaticResource VmContext},
-                            Converter={StaticResource nulltoVis}}"
-                        ItemsSource="{Binding Data.SpiderList, Source={StaticResource VmContext}}">
-                <MenuItem.ItemTemplate>
-                    <DataTemplate>
-                        <MenuItem Header="{Binding Name}"
-                                  Command="{Binding Data.CmdScrap, Source={StaticResource VmContext}}"
-                                  CommandParameter="{Binding .}">
-                        </MenuItem>
-                    </DataTemplate>
-                </MenuItem.ItemTemplate>
-            </MenuItem>
--->
-        </ContextMenu>
     </Window.Resources>
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="Closed">
@@ -160,41 +129,25 @@
                         </i:EventTrigger>
                     </i:Interaction.Triggers>
                     <i:Interaction.Behaviors>
-                        <bh:ListboxBehavior/>
+                        <bh:ListboxBehavior />
                     </i:Interaction.Behaviors>
                     <ListBox.Resources>
                         <Style TargetType="{x:Type ListBoxItem}">
-                            <Setter Property="Tag"
-                                    Value="{Binding ElementName=_actorListbox}"/>
-                            <Setter Property="ContextMenu"
-                                    Value="{StaticResource _actorListCMenu}"/>
-                            <Setter Property="Template"
-                                    Value="{StaticResource _controlTpl}"/>
+                            <Setter Property="Template" Value="{StaticResource _controlTpl}"/>
                         </Style>
                     </ListBox.Resources>
-                    <ListBox.InputBindings>
-                        <KeyBinding Command="{Binding CmdDeleteActorFromList}" Key="Delete"/>
-                    </ListBox.InputBindings>
+                    <ListBox.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Merge Actors"
+                                      Command="{Binding CmdMergeActors}"
+                                      CommandParameter="{Binding RelativeSource={RelativeSource
+                                AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.SelectedItems}"/>
+                        </ContextMenu>
+                    </ListBox.ContextMenu>
                 </ListBox>
             </Grid>
             <DockPanel Grid.Column="1" Width="200">
                 <DockPanel DockPanel.Dock="Top">
-                <!--
-                    <DockPanel DockPanel.Dock="Top" Margin="5,0,5,5">
-                        <Button DockPanel.Dock="Right" Margin="5,0,0,0"
-                                Style="{StaticResource ModernButtonStyle2}"
-                                Command="{Binding CmdAddNewName}">
-                            <Path Stretch="Uniform"
-                                  Data="{Binding Source={StaticResource AddTextIcon}, Path=Data}"
-                                  Fill="{Binding Path=Foreground, RelativeSource=
-                                        {RelativeSource AncestorType={x:Type Button}}}"/>
-                            <Button.ToolTip>
-                                <TextBlock Text="Append Actor Name"/>
-                            </Button.ToolTip>
-                        </Button>
-                        <TextBox Text="{Binding NewName}"/>
-                    </DockPanel>
-                    -->
                     <ListBox  Height="150" Margin="5,10,5,0"
                               ItemsSource="{Binding ActorNames}"
                               SelectedItem="{Binding SelectedActorName}">

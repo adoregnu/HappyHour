@@ -87,10 +87,5 @@ namespace HappyHour.Model
         }
 
         public abstract Task Reload(string[] files);
-
-        public static IAvMedia Create(Movie movie)
-        {
-            return null;
-        }
     }
 }

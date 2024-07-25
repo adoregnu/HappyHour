@@ -36,8 +36,8 @@ namespace HappyHour.View.Pane
                 return MediaListViewTemplate;
             //if (item is SpiderViewModel)
             //    return SpiderViewTemplate;
-            if (item is PlayerViewModel)
-                return PlayerViewTemplate;
+            //if (item is PlayerViewModel)
+            //    return PlayerViewTemplate;
             if (item is BrowserBase)
                 return BrowserViewTemplate;
             if (item is ScreenshotViewModel)

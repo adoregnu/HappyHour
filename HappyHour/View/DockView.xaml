@@ -102,13 +102,13 @@
                         <view:BrowserView/>
                     </DataTemplate>
                 </pane:PanesTemplateSelector.BrowserViewTemplate>
-
+<!--
                 <pane:PanesTemplateSelector.PlayerViewTemplate>
                     <DataTemplate>
                         <view:PlayerView/>
                     </DataTemplate>
                 </pane:PanesTemplateSelector.PlayerViewTemplate>
-
+-->
                 <pane:PanesTemplateSelector.ScreenshotViewTemplate>
                     <DataTemplate>
                         <view:ScreenshotView/>
@@ -117,7 +117,7 @@
 
                 <pane:PanesTemplateSelector.DbViewTemplate>
                     <DataTemplate>
-                        <view:DbView/>
+                        <view:DbView2/>
                     </DataTemplate>
                 </pane:PanesTemplateSelector.DbViewTemplate>
             </pane:PanesTemplateSelector>

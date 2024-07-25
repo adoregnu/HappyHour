@@ -6,7 +6,6 @@ using System.IO;
 using System.Windows.Media.Imaging;
 using WebPWrapper;
 using System.Reflection;
-using MongoDB.Bson.Serialization.Serializers;
 using HappyHour.Model;
 
 namespace HappyHour.View.Controls

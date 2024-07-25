@@ -8,7 +8,7 @@
         mc:Ignorable="d"
         WindowStartupLocation="CenterOwner"
         Title="{Binding Title}"
-        Height="450" Width="600" SizeToContent="Height">
+        Height="500" Width="800" SizeToContent="Height">
     <Window.Resources>
         <DataTemplate x:Key="ActorMiniTemplate">
             <StackPanel Orientation="Horizontal">
@@ -36,25 +36,19 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="8*"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <DockPanel Grid.Row="0" Margin="5">
-            <TextBlock Text="Path : " DockPanel.Dock="Left"
-                       Width="60" TextAlignment="Right"/>
-            <TextBox Text="{Binding Movie.VideoUrl}"
-                     Style="{StaticResource TextboxStyle}"/>
-        </DockPanel>
-        <DockPanel Grid.Row="1" Margin="5">
-            <TextBlock Text="Title : " DockPanel.Dock="Left"
-                       Width="60" TextAlignment="Right"/>
-            <ComboBox ItemsSource="{Binding Movie.Title}" Style="{StaticResource ComboBoxStyle}"/>
-        </DockPanel>
-        <Grid Grid.Row="2" Margin="5">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <TextBox Grid.Row="0" Grid.ColumnSpan="4" Text="{Binding Movie.VideoUrl}" Style="{StaticResource TextboxStyle}"/>
+        <ListBox Grid.Row="1" Grid.ColumnSpan="4" ItemsSource="{Binding Movie.Title}" Height="50"/>
+        <Grid Grid.Row="2" Grid.ColumnSpan="4" Margin="5">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="60"/>
                 <ColumnDefinition Width="*"/>
@@ -63,42 +57,29 @@
             </Grid.ColumnDefinitions>
             <TextBlock Text="Released : " Grid.Column="0"
                        TextAlignment="Right"/>
-            <TextBox Grid.Column="1" 
-                       Style="{StaticResource TextboxStyle}"
+            <TextBox Grid.Column="1" Style="{StaticResource TextboxStyle}"
                        Text="{Binding Movie.DateReleased, StringFormat='{}{0:yyyy-MM-dd}'}"/>
             <StackPanel Grid.Column="2" Orientation="Horizontal">
-                <TextBlock Text="Leaked PID : " Margin="5,0,0,0"
-                           VerticalAlignment="Center"/>
-                <TextBox Width="130" Text="{Binding Movie.AltPID}"
-                         Style="{StaticResource TextboxStyle}"/>
+                <TextBlock Text="Leaked PID : " Margin="5,0,0,0" VerticalAlignment="Center"/>
+                <TextBox Width="130" Text="{Binding Movie.AltPID}" Style="{StaticResource TextboxStyle}"/>
             </StackPanel>
-            <CheckBox Grid.Column="3" Margin="5,0,5,0"
-                      IsChecked="{Binding Movie.Censored}"
-                      VerticalAlignment="Center">
+            <CheckBox Grid.Column="3" Margin="5,0,5,0" IsChecked="{Binding Movie.Censored}" VerticalAlignment="Center">
                 <TextBlock Text="Sensored" />
             </CheckBox>
         </Grid>
-        <Grid Grid.Row="3" Margin="5">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-            </Grid.ColumnDefinitions>
-            <DockPanel Grid.Column="0">
-                <TextBlock Text="Label : " DockPanel.Dock="Left"
-                          Width="60" TextAlignment="Right" />
-                <!--<TextBox Text="{Binding Label, Mode=OneWay}" Style="{StaticResource TextboxStyle}"/>-->
-                <ComboBox ItemsSource="{Binding Movie.Lable.Name}" Style="{StaticResource ComboBoxStyle}"/>
-            </DockPanel>
-            <DockPanel Grid.Column="1">
-                <Button DockPanel.Dock="Right" Content="Set" Margin="2,0,2,0"
-                        Width="30" Command="{Binding CmdSetStudio}"/>
-                <ComboBox ItemsSource="{Binding ComboBoxStyle}" Margin="5,0,5,0"
-                          SelectedItem="{Binding SelectedLabel}"
-                          IsEditable="True" IsTextSearchEnabled="True"
-                          Style="{StaticResource ComboBoxStyle}"/>
-            </DockPanel>
+        <Grid Grid.Row="3" Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition />
+                <RowDefinition Height="Auto"/>
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0" Text="Label/Maker" DockPanel.Dock="Left" TextAlignment="Center" />
+            <ListBox Grid.Row="1" ItemsSource="{Binding Movie.Lable.Name}"/>
+            <Button Grid.Row="2" Content="Set" Width="30" Command="{Binding CmdSetLabel}"/>
+            <ListBox Grid.Row="3" ItemsSource="{Binding ComboBoxStyle}" SelectedItem="{Binding SelectedLabel}" />
         </Grid>
-        <Grid Grid.Row="4" Margin="5">
+        <Grid Grid.Row="3" Grid.Column="1" Margin="5">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
                 <ColumnDefinition/>
@@ -118,7 +99,35 @@
                           Style="{StaticResource ComboBoxStyle}"/>
             </DockPanel>
         </Grid>
-        <Grid Grid.Row="5" Margin="5">
+        <Grid Grid.Row="3" Grid.Column="2" Margin="5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <DockPanel Grid.Column="0" VerticalAlignment="Top" Margin="0,0,2,0">
+                <TextBlock Text="Genres : " DockPanel.Dock="Left"
+                          Width="60" TextAlignment="Right" />
+                <ListBox MinHeight="50" MaxHeight="100" ItemsSource="{Binding Genres}"
+                         SelectedItem="{Binding SelectedAvGenre}"
+                         Style="{StaticResource ListBoxStyle}">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="MouseDoubleClick">
+                            <i:InvokeCommandAction Command="{Binding CmdRemoveGenre}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </ListBox>
+            </DockPanel>
+             <ListBox Grid.Column="2" MaxHeight="100" ItemsSource="{Binding AllGenres}"
+                      SelectedItem="{Binding SelectedGenre}"
+                      Style="{StaticResource ListBoxStyle}">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="MouseDoubleClick">
+                        <i:InvokeCommandAction Command="{Binding CmdAddGenre}"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </ListBox>
+        </Grid>
+        <Grid Grid.Row="3" Grid.Column="3" Margin="5">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
                 <ColumnDefinition/>
@@ -156,40 +165,9 @@
                 </ListBox>
             </DockPanel>
         </Grid>
-        <Grid Grid.Row="6" Margin="5">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-            </Grid.ColumnDefinitions>
-            <DockPanel Grid.Column="0" VerticalAlignment="Top" Margin="0,0,2,0">
-                <TextBlock Text="Genres : " DockPanel.Dock="Left"
-                          Width="60" TextAlignment="Right" />
-                <ListBox MinHeight="50" MaxHeight="100" ItemsSource="{Binding Genres}"
-                         SelectedItem="{Binding SelectedAvGenre}"
-                         Style="{StaticResource ListBoxStyle}">
-                    <i:Interaction.Triggers>
-                        <i:EventTrigger EventName="MouseDoubleClick">
-                            <i:InvokeCommandAction Command="{Binding CmdRemoveGenre}"/>
-                        </i:EventTrigger>
-                    </i:Interaction.Triggers>
-                </ListBox>
-            </DockPanel>
-             <ListBox Grid.Column="2" MaxHeight="100" ItemsSource="{Binding AllGenres}"
-                      SelectedItem="{Binding SelectedGenre}"
-                      Style="{StaticResource ListBoxStyle}">
-                <i:Interaction.Triggers>
-                    <i:EventTrigger EventName="MouseDoubleClick">
-                        <i:InvokeCommandAction Command="{Binding CmdAddGenre}"/>
-                    </i:EventTrigger>
-                </i:Interaction.Triggers>
-            </ListBox>
-        </Grid>
-        <DockPanel Grid.Row="7" Margin="5">
-            <TextBlock Text="Plot : " DockPanel.Dock="Left"
-                       Width="60" TextAlignment="Right"/>
-            <TextBox Height="60" Text="{Binding Av.Plot}" />
-        </DockPanel>
-        <StackPanel Grid.Row="8" Orientation="Horizontal"
+
+        <TextBox Grid.Row="4" Grid.ColumnSpan="4" Height="60" Text="{Binding Av.Plot}" />
+        <StackPanel Grid.Row="5" Grid.ColumnSpan="4" Orientation="Horizontal"
                     HorizontalAlignment="Right">
             <Button Content="Save" Margin="0,0,5,5"
                     Command="{Binding CmdSave}" Click="Close"/>

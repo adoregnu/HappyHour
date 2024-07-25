@@ -41,6 +41,8 @@ namespace HappyHour.ViewModel
         private IEnumerable<SpiderBase> _spiderList;
         private List<IAvMedia> _mediasToSearch;
 
+        private readonly MovieDbContext _db = App.Current.DbContext;
+
         public IAvMedia SelectedMedia
         {
             get => _selectedMedia;
@@ -185,7 +187,7 @@ namespace HappyHour.ViewModel
 
         private static void PlayMedia(AvMovie media)
         {
-            if (media != null)
+            if (media != null && media.Files.Count > 0)
             {
                 _ = new Process
                 {
@@ -447,13 +449,13 @@ namespace HappyHour.ViewModel
 
             string currDir = _fileList.CurrDirInfo.FullName;
 
-            var dbDirs = await App.Current.DbContext.GetMovieUrls(currDir);
+            var dbDirs = await _db.GetMovieUrls(currDir);
 
             _tokenSource = new CancellationTokenSource();
             var token = _tokenSource.Token;
 
             await IterateMedia(currDir, dbDirs, token);
-            App.Current.DbContext.SaveChanges();
+            _db.SaveChanges();
             Log.Print("Search orphanage media done!");
         }
 
@@ -468,22 +470,12 @@ namespace HappyHour.ViewModel
 
         private async void OnSearchEmptyActor()
         {
-            using var context = AvDbContextPool.CreateContext();
-            var movies = await context.Items
-                .Include(i => i.Actors)
-                .Where(i => i.Actors.Count == 0)
-                //.Select(i => i.Path)
-                .ToListAsync();
-            //LoadItems(movies);
+            LoadItems(await _db.GetMovies((Movie m) => m.Actors.Count == 0));
         }
 
         private async void LastUpdatedMovies()
         {
-            using var context = AvDbContextPool.CreateContext();
-            var movies = await context.Items
-                .OrderByDescending(i => i.DateAdded)
-                .Take(20).ToListAsync();
-            //LoadItems(movies);
+            LoadItems(await _db.GetMovies(null, 40));
         }
 
         private void OnScrapCompleted(SpiderBase spider)
@@ -493,7 +485,7 @@ namespace HappyHour.ViewModel
                 _mediasToSearch.RemoveAt(0);
             }
             OnScrapAvInfo(spider);
-            Messenger.Send(new ViewEventArgs("RefreshActors", null));
+            Messenger.Send(new ViewEventArgs("Refresh", null));
         }
 
         private void OnScrapAvInfo(SpiderBase spider)
