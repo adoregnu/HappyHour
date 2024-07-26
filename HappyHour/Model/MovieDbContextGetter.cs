@@ -84,15 +84,15 @@ namespace HappyHour.Model
                 .FirstOrDefault();
         }
 
-        public List<Actor> GetActors(Movie movie)
+        public async ValueTask<List<Actor>> GetActors(Movie movie)
         {
-            return [.. Actors
+            return await Actors
                 .Include(a => a.Names)
                     .ThenInclude(n => n.Name)
                 .Include(a => a.Movies)
                 .Include(a => a.Thumb)
                 .Where(a => a.Movies.Contains(movie))
-            ];
+                .ToListAsync();
         }
 
         public async ValueTask<List<Actor>> GetActors(string keyword = null, int limit = 30)
@@ -211,7 +211,7 @@ namespace HappyHour.Model
         }
         public async ValueTask<List<Movie>> GetMovies(Maker maker)
         {
-            return await GetMovies((Movie m) =>  m.Maker == maker);
+            return await GetMovies((Movie m) => m.Maker == maker);
         }
         public async ValueTask<List<Movie>> GetMovies(Label label)
         {
@@ -222,13 +222,13 @@ namespace HappyHour.Model
             return await GetMovies((Movie m) => m.Series == series);
         }
 
-        public List<Genre> GetGenres(Movie movie)
+        public async ValueTask<List<Genre>> GetGenres(Movie movie)
         {
-            return [.. MovieGenres
+            return await MovieGenres
                 .Include(g => g.Name)
                 .Include(g => g.Movies)
                 .Where(g => g.Movies.Contains(movie))
-            ];
+                .ToListAsync();
         }
 
         public async ValueTask<List<Genre>> GetGenres(string keyword = null)
@@ -241,7 +241,7 @@ namespace HappyHour.Model
             {
                 query.Where(g => g.Name.Any(n => EF.Functions.Like(n.Text, $"%{keyword}%")));
             }
-                
+
             return await query.ToListAsync();
         }
 
@@ -264,8 +264,16 @@ namespace HappyHour.Model
                 .Include(m => m.Logo)
                 .Include(m => m.Labels)
                     .ThenInclude(lb => lb.Name)
-                .FirstOrDefault(m =>  m.Name.Any(n => n.Text == keyword));
+                .FirstOrDefault(m => m.Name.Any(n => n.Text == keyword));
         }
+        public async ValueTask<List<Maker>> GetMakers(Movie movie)
+        {
+            return await Makers
+                .Include(m => m.Name)
+                .Where(m => m == movie.Maker)
+                .ToListAsync();
+        }
+
         public async ValueTask<List<Maker>> GetMakers(string keyword = null)
         {
             return await Makers
@@ -286,12 +294,22 @@ namespace HappyHour.Model
         {
             var tmp = Makers
                 .Include(m => m.Labels)
-                    .ThenInclude(lb =>  lb.Name)
+                    .ThenInclude(lb => lb.Name)
                 .Include(m => m.Labels)
-                    .ThenInclude(lb =>  lb.Movies)
+                    .ThenInclude(lb => lb.Movies)
                 .FirstOrDefault(m => m == maker);
 
             return [.. tmp.Labels];
+        }
+
+        public async ValueTask<List<Label>> GetLabels(Movie movie)
+        {
+            return await Labels
+                .Include(l => l.Name)
+                .Include(l => l.Logo)
+                .Include(l => l.Movies)
+                .Where(l => l.Movies.Contains(movie))
+                .ToListAsync();
         }
     }
 }

@@ -5,16 +5,20 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:control="clr-namespace:HappyHour.View.Controls"
+        xmlns:vm="clr-namespace:HappyHour.ViewModel"
         mc:Ignorable="d"
         WindowStartupLocation="CenterOwner"
         Title="{Binding Title}"
-        Height="500" Width="800" SizeToContent="Height">
+        Height="600" Width="1024" SizeToContent="Height">
     <Window.Resources>
         <DataTemplate x:Key="ActorMiniTemplate">
-            <StackPanel Orientation="Horizontal">
-                <control:AsyncImage HorizontalAlignment="Center" Width="64" ImageBlob="{Binding Thumb}"/>
-                <TextBlock Text="{Binding .}" VerticalAlignment="Center"/>
-            </StackPanel>
+            <Grid>
+                <control:AsyncImage HorizontalAlignment="Center" VerticalAlignment="Top"
+                                    ImageBlob="{Binding Thumb}" Width="64" />
+                <StackPanel VerticalAlignment="Bottom" Background="Black" Opacity="0.6">
+                    <TextBlock Text="{Binding .}" Foreground="White" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Grid>
         </DataTemplate>
         <Style x:Key="TextboxStyle" TargetType="TextBox">
             <Setter Property="BorderBrush" Value="LightGray"/>
@@ -45,133 +49,181 @@
             <ColumnDefinition/>
             <ColumnDefinition/>
             <ColumnDefinition/>
+            <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <TextBox Grid.Row="0" Grid.ColumnSpan="4" Text="{Binding Movie.VideoUrl}" Style="{StaticResource TextboxStyle}"/>
-        <ListBox Grid.Row="1" Grid.ColumnSpan="4" ItemsSource="{Binding Movie.Title}" Height="50"/>
-        <Grid Grid.Row="2" Grid.ColumnSpan="4" Margin="5">
+        <TextBox Grid.Row="0" Grid.ColumnSpan="5" Text="{Binding Movie.VideoUrl}"
+                 Margin="5,5,5,0" Style="{StaticResource TextboxStyle}"/>
+        <ListBox Grid.Row="1" Grid.ColumnSpan="5" ItemsSource="{Binding Movie.Title}" Height="40"
+                 Margin="5,5,5,0"/>
+        <Grid Grid.Row="2" Grid.ColumnSpan="5" Margin="5">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="60"/>
+                <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="60"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <TextBlock Text="Released : " Grid.Column="0"
-                       TextAlignment="Right"/>
+            <TextBlock Grid.Column="0" Text="Released : " TextAlignment="Right"/>
             <TextBox Grid.Column="1" Style="{StaticResource TextboxStyle}"
                        Text="{Binding Movie.DateReleased, StringFormat='{}{0:yyyy-MM-dd}'}"/>
-            <StackPanel Grid.Column="2" Orientation="Horizontal">
-                <TextBlock Text="Leaked PID : " Margin="5,0,0,0" VerticalAlignment="Center"/>
+            <TextBlock Grid.Column="2" Text="Added : " TextAlignment="Right"/>
+            <TextBox Grid.Column="3" Style="{StaticResource TextboxStyle}"
+                       Text="{Binding Movie.DateAdded, StringFormat='{}{0:yyyy-MM-dd}'}"/>
+
+            <StackPanel Grid.Column="4" Orientation="Horizontal">
+                <TextBlock Text="Alt PID : " Margin="5,0,0,0" VerticalAlignment="Center"/>
                 <TextBox Width="130" Text="{Binding Movie.AltPID}" Style="{StaticResource TextboxStyle}"/>
             </StackPanel>
-            <CheckBox Grid.Column="3" Margin="5,0,5,0" IsChecked="{Binding Movie.Censored}" VerticalAlignment="Center">
+            <CheckBox Grid.Column="5" Margin="5,0,5,0" IsChecked="{Binding Movie.Censored}">
                 <TextBlock Text="Sensored" />
             </CheckBox>
         </Grid>
         <Grid Grid.Row="3" Grid.Column="0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
-                <RowDefinition />
-                <RowDefinition Height="Auto"/>
-                <RowDefinition />
+                <RowDefinition Height="2*"/>
+                <RowDefinition Height="8*"/>
             </Grid.RowDefinitions>
-            <TextBlock Grid.Row="0" Text="Label/Maker" DockPanel.Dock="Left" TextAlignment="Center" />
-            <ListBox Grid.Row="1" ItemsSource="{Binding Movie.Lable.Name}"/>
-            <Button Grid.Row="2" Content="Set" Width="30" Command="{Binding CmdSetLabel}"/>
-            <ListBox Grid.Row="3" ItemsSource="{Binding ComboBoxStyle}" SelectedItem="{Binding SelectedLabel}" />
-        </Grid>
-        <Grid Grid.Row="3" Grid.Column="1" Margin="5">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-            </Grid.ColumnDefinitions>
-            <DockPanel Grid.Column="0">
-                <TextBlock Text="Series : " DockPanel.Dock="Left"
-                          Width="60" TextAlignment="Right" />
-                <TextBox Text="{Binding Series, Mode=OneWay}"
-                         Style="{StaticResource TextboxStyle}"/>
-            </DockPanel>
-            <DockPanel Grid.Column="1">
-                <Button DockPanel.Dock="Right" Content="Set" Margin="2,0,2,0"
-                        Width="30" Command="{Binding CmdSetSeries}"/>
-                <ComboBox ItemsSource="{Binding AllSeries}" Margin="5,0,5,0"
-                          SelectedItem="{Binding SelectedSeries}"
-                          IsEditable="True" IsTextSearchEnabled="True"
-                          Style="{StaticResource ComboBoxStyle}"/>
-            </DockPanel>
-        </Grid>
-        <Grid Grid.Row="3" Grid.Column="2" Margin="5">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-            </Grid.ColumnDefinitions>
-            <DockPanel Grid.Column="0" VerticalAlignment="Top" Margin="0,0,2,0">
-                <TextBlock Text="Genres : " DockPanel.Dock="Left"
-                          Width="60" TextAlignment="Right" />
-                <ListBox MinHeight="50" MaxHeight="100" ItemsSource="{Binding Genres}"
-                         SelectedItem="{Binding SelectedAvGenre}"
-                         Style="{StaticResource ListBoxStyle}">
-                    <i:Interaction.Triggers>
-                        <i:EventTrigger EventName="MouseDoubleClick">
-                            <i:InvokeCommandAction Command="{Binding CmdRemoveGenre}"/>
-                        </i:EventTrigger>
-                    </i:Interaction.Triggers>
-                </ListBox>
-            </DockPanel>
-             <ListBox Grid.Column="2" MaxHeight="100" ItemsSource="{Binding AllGenres}"
-                      SelectedItem="{Binding SelectedGenre}"
-                      Style="{StaticResource ListBoxStyle}">
+            <TextBlock Grid.Row="0" Text="Maker" TextAlignment="Center" />
+
+            <ListBox Grid.Row="1" Margin="5,0,0,5" ItemsSource="{Binding Movie.Maker}" x:Name="_movieMakers">
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="MouseDoubleClick">
-                        <i:InvokeCommandAction Command="{Binding CmdAddGenre}"/>
+                        <i:InvokeCommandAction
+                            Command="{Binding CmdRemove}"
+                            CommandParameter="{Binding ElementName=_movieMakers,Path=SelectedItem}"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </ListBox>
+            <ListBox Grid.Row="2" Margin="5,0,0,0" ItemsSource="{Binding AllMakers}" x:Name="_allMakers">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="MouseDoubleClick">
+                        <i:InvokeCommandAction
+                            Command="{Binding CmdAdd}"
+                            CommandParameter="{Binding ElementName=_allMakers,Path=SelectedItem}"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </ListBox>
+
+        </Grid>
+        <Grid Grid.Row="3" Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="2*"/>
+                <RowDefinition Height="8*"/>
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0" Text="Label" TextAlignment="Center" />
+            <ListBox Grid.Row="1" Margin="5,0,0,5" ItemsSource="{Binding Movie.Label}" x:Name="_movieLabel">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="MouseDoubleClick">
+                        <i:InvokeCommandAction
+                            Command="{Binding CmdRemove}"
+                            CommandParameter="{Binding ElementName=_movieLabel,Path=SelectedItem}"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </ListBox>
+            <ListBox Grid.Row="2" Margin="5,0,0,0" ItemsSource="{Binding AllLabels}" x:Name="_allLabels">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="MouseDoubleClick">
+                        <i:InvokeCommandAction
+                            Command="{Binding CmdAdd}"
+                            CommandParameter="{Binding ElementName=_allLabels,Path=SelectedItem}"/>
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
             </ListBox>
         </Grid>
-        <Grid Grid.Row="3" Grid.Column="3" Margin="5">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-            </Grid.ColumnDefinitions>
-            <DockPanel Grid.Column="0" VerticalAlignment="Top">
-                <TextBlock Text="Actors : " DockPanel.Dock="Left"
-                          Width="60" TextAlignment="Right" />
-                <ListBox MinHeight="60" MaxHeight="300" ItemsSource="{Binding Actors}"
-                         Style="{StaticResource ListBoxStyle}"
-                         SelectedItem="{Binding SelectedAvActor}"
-                         ItemTemplate="{StaticResource ActorMiniTemplate}">
-                    <i:Interaction.Triggers>
-                        <i:EventTrigger EventName="MouseDoubleClick">
-                            <i:InvokeCommandAction Command="{Binding CmdRemoveActor}"/>
-                        </i:EventTrigger>
-                    </i:Interaction.Triggers>
-                </ListBox>
-            </DockPanel>
-            <DockPanel Grid.Column="1" Margin="2,0,0,0">
-                <DockPanel DockPanel.Dock="Top">
-                    <TextBlock DockPanel.Dock="Left" Text="Search: "/>
-                    <TextBox Margin="0,0,0,2"
-                         Style="{StaticResource TextboxStyle}"
-                         Text="{Binding SearchActorName, UpdateSourceTrigger=PropertyChanged}"/>
-                </DockPanel>
-                <ListBox MaxHeight="300" ItemsSource="{Binding AllActors}"
-                     ItemTemplate="{StaticResource ActorMiniTemplate}"
-                     SelectedItem="{Binding SelectedActor}"
-                     Style="{StaticResource ListBoxStyle}">
-                    <i:Interaction.Triggers>
-                        <i:EventTrigger EventName="MouseDoubleClick">
-                            <i:InvokeCommandAction Command="{Binding CmdAddActor}"/>
-                        </i:EventTrigger>
-                    </i:Interaction.Triggers>
-                </ListBox>
-            </DockPanel>
+        <Grid Grid.Row="3" Grid.Column="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="2*"/>
+                <RowDefinition Height="8*"/>
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0" Text="Series" TextAlignment="Center"/>
+            <ListBox Grid.Row="1" Margin="5,0,0,5" ItemsSource="{Binding Series}" x:Name="_movieSeries">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="MouseDoubleClick">
+                        <i:InvokeCommandAction
+                            Command="{Binding CmdRemove}"
+                            CommandParameter="{Binding ElementName=_movieSeries,Path=SelectedItem}"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </ListBox>
+            <ListBox Grid.Row="2" Margin="5,0,0,0" ItemsSource="{Binding AllSeries}" x:Name="_allSeries">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="MouseDoubleClick">
+                        <i:InvokeCommandAction
+                            Command="{Binding CmdAdd}"
+                            CommandParameter="{Binding ElementName=_allSeries,Path=SelectedItem}"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+
+            </ListBox>
+        </Grid>
+        <Grid Grid.Row="3" Grid.Column="3">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="7*"/>
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0" Text="Genres" TextAlignment="Center" />
+            <ListBox Grid.Row="1" Margin="5,0,0,5" ItemsSource="{Binding Genres}" x:Name="_movieGenre">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="MouseDoubleClick">
+                        <i:InvokeCommandAction
+                            Command="{Binding CmdRemove}"
+                            CommandParameter="{Binding ElementName=_movieGenre,Path=SelectedItem}"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </ListBox>
+            <ListBox Grid.Row="2" Margin="5,0,0,0" ItemsSource="{Binding AllGenres}" x:Name="_allGenres"
+                      SelectedItem="{Binding SelectedGenre}">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="MouseDoubleClick">
+                        <i:InvokeCommandAction
+                            Command="{Binding CmdAdd}"
+                            CommandParameter="{Binding ElementName=_allGenres,Path=SelectedItem}"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </ListBox>
+        </Grid>
+        <Grid Grid.Row="3" Grid.Column="4">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="7*"/>
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0" Text="Actors" TextAlignment="Center" />
+            <ListBox Grid.Row="1" Margin="5,0,5,5" ItemsSource="{Binding Actors}" x:Name="_actors"
+                     ItemTemplate="{StaticResource ActorMiniTemplate}">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="MouseDoubleClick">
+                        <i:InvokeCommandAction
+                            Command="{Binding CmdRemove}"
+                            CommandParameter="{Binding ElementName=_actors,Path=SelectedItem}"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </ListBox>
+            <TextBox Grid.Row="2" Margin="5,0,5,5" Text="{Binding SearchText}"/>
+            <ListBox Grid.Row="3" Margin="5,0,5,0" ItemsSource="{Binding AllActors}" x:Name="_allActors"
+                 ItemTemplate="{StaticResource ActorMiniTemplate}">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="MouseDoubleClick">
+                        <i:InvokeCommandAction
+                            Command="{Binding CmdAddActor}"
+                            CommandParameter="{Binding ElementName=_allActors,Path=SelectedItem}"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </ListBox>
         </Grid>
 
-        <TextBox Grid.Row="4" Grid.ColumnSpan="4" Height="60" Text="{Binding Av.Plot}" />
-        <StackPanel Grid.Row="5" Grid.ColumnSpan="4" Orientation="Horizontal"
-                    HorizontalAlignment="Right">
-            <Button Content="Save" Margin="0,0,5,5"
-                    Command="{Binding CmdSave}" Click="Close"/>
-            <Button Content="Cancel" Margin="0,0,5,5" Click="Close"/>
+        <TextBox Grid.Row="4" Grid.ColumnSpan="5" Height="60" Margin="5,5,5,0"
+                 Text="{Binding Movie.Plot}" />
+        <StackPanel Grid.Row="5" Grid.ColumnSpan="5" Orientation="Horizontal"
+                    HorizontalAlignment="Center">
+            <Button Content="Save" Margin="0,5,5,5" Command="{Binding CmdSave}" Click="Close"/>
+            <Button Content="Cancel" Margin="0,5,5,5" Click="Close"/>
         </StackPanel>
     </Grid>
 </Window>

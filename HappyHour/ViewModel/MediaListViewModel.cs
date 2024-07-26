@@ -336,14 +336,14 @@ namespace HappyHour.ViewModel
             Messenger.Send(new ViewEventArgs("RefreshActors", null));
         }
 
-        private void EditMovieInfo(object param)
+        private async void EditMovieInfo(object param)
         {
             if (param is not AvMovie item)
             {
                 return;
             }
 
-            AvEditorViewModel dialog = new(item);
+            var dialog = await AvEditorViewModel.CreateAsync(item);
             MainView.DialogService.Show<AvEditorDialog>(this, dialog);
         }
 

@@ -1,92 +1,58 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
 
-//using GalaSoft.MvvmLight;
-//using GalaSoft.MvvmLight.Command;
-
 using MvvmDialogs;
 
 using HappyHour.Model;
-using Microsoft.EntityFrameworkCore;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using System.Threading.Tasks;
 
 namespace HappyHour.ViewModel
 {
     internal class AvEditorViewModel : ObservableObject, IModalDialogViewModel
     {
-        private readonly MovieDbContext _db = App.Current.DbContext;
-        private string _searchActorName;
+        public static Task<AvEditorViewModel> CreateAsync(AvMovie am)
+        {
+            var ret = new AvEditorViewModel(am);
+            return ret.InitializeAsync();
+        }
 
-        private Maker _maker;
-        private Label _label;
-        private Series _series;
+        private readonly MovieDbContext _db = App.Current.DbContext;
 
         private bool? _dialogResult;
-        private bool _actorChanged;
-        private bool _genreChanges;
+
+        private List<Actor> _allActors = [];
 
         public Movie Movie { get; private set; }
-        public Label Label 
-        {
-            get => _label;
-            set
-            {
-                if (value != null)
-                {
-                    SetProperty(ref _label, value);
-                    Movie.Label = value;
-                }
-            }
-        }
-
-        public Series Series
-        {
-            get => _series;
-            set
-            {
-                if (value != null)
-                {
-                    SetProperty(ref _series, value);
-                    Movie.Series = value;
-                }
-            }
-        }
         public string Title { get; private set; }
-        public Label SelectedLabel { get; set; }
-        public Series SelectedSeries { get; set; }
-        public Actor SelectedActor { get; set; }
-        public Genre SelectedGenre { get; set; }
 
-        public ObservableCollection<Actor> Actors { get; set; } = [];
-        public ObservableCollection<Genre> Genres { get; set; } = [];
+        public List<Maker> Makers { get; private set; }
+        public List<Label> Labels { get; private set; }
+        public List<Series> Series { get; private set; }
+        public List<Genre> Genres { get; private set; }
+        public List<Actor> Actors { get; set; } = [];
 
-        public IEnumerable<Series> AllSeries { get; private set; }
-        public IEnumerable<Genre> AllGenres { get; private set; }
-
-        private readonly IEnumerable<Actor> _actorsSearched = [];
-        public IEnumerable<Actor> ActorsSearched
+        public List<Maker> AllMakers { get; private set; }
+        public List<Label> AllLabels { get; private set; }
+        public List<Series> AllSeries { get; private set; }
+        public List<Genre> AllGenres { get; private set; }
+        public List<Actor> AllActors
         {
-            get
-            {
-                if (string.IsNullOrEmpty(SearchActorName))
-                {
-                    return _actorsSearched;
-                }
-                return _actorsSearched.Where(a => a.ToString().IndexOf(SearchActorName,
-                        StringComparison.OrdinalIgnoreCase) >= 0);
-            }
+            get => _allActors;
         }
-        public IEnumerable<Label> AllLables { get; private set; }
-        public string SearchActorName
+
+        private string _searchText;
+        public string SearchText
         {
-            get => _searchActorName;
+            get => _searchText;
             set
             {
-                SetProperty(ref _searchActorName, value);
+                SetProperty(ref _searchText, value);
                 //OnPropertyChanged(nameof(AllActors));
             }
         }
@@ -97,58 +63,82 @@ namespace HappyHour.ViewModel
             private set => SetProperty(ref _dialogResult, value);
         }
 
-        public ICommand CmdSetLabel { get; private set; }
-        public ICommand CmdSetSeries { get; private set; }
-        public ICommand CmdAddActor { get; private set; }
-        public ICommand CmdRemoveActor { get; private set; }
-        public ICommand CmdAddGenre { get; private set; }
-        public ICommand CmdRemoveGenre { get; private set; }
         public ICommand CmdSave { get; private set; }
 
-        public AvEditorViewModel(AvMovie movie)
+        public ICommand CmdRemove { get; private set; }
+        public ICommand CmdAdd { get; private set; }
+        private AvEditorViewModel(AvMovie movie)
         {
             Title = movie.Pid;
 
-            CmdSetLabel = new RelayCommand(() => Label = SelectedLabel);
-            CmdSetSeries = new RelayCommand(() => Series = SelectedSeries);
-            CmdAddActor = new RelayCommand(OnAddActor);
-            CmdRemoveActor = new RelayCommand(OnRemoveActor);
-            CmdAddGenre = new RelayCommand(OnAddGnere);
-            CmdSave = new RelayCommand(OnSave);
-
-            _db.GetActors(Movie).ForEach(Actors.Add);
-            _db.GetGenres(Movie).ForEach(Genres.Add);
+            CmdAdd = new RelayCommand<object>(OnAdd);
+            CmdRemove = new RelayCommand<object>(OnRemove);
         }
 
-        private void OnAddActor()
+        private async Task<AvEditorViewModel> InitializeAsync()
         {
-            if (SelectedActor == null) return;
+            (await _db.GetMakers(Movie)).ForEach(Makers.Add);
+            (await _db.GetLabels(Movie)).ForEach(Labels.Add);
+            (await _db.GetGenres(Movie)).ForEach(Genres.Add);
+            (await _db.GetActors(Movie)).ForEach(Actors.Add);
 
-            if (!Actors.Any(a => a == SelectedActor))
-            {
-                Actors.Add(SelectedActor);
-                //Movie.Actors.Add(SelectedActor);
-            }
+            (await _db.GetMakers()).ForEach(AllMakers.Add);
+            (await _db.GetLabels()).ForEach(AllLabels.Add);
+            (await _db.GetGenres()).ForEach(AllGenres.Add);
+            //(await _db.GetActors()).ForEach(AllActors.Add);
+
+            return this;
         }
 
-        private void OnRemoveActor()
+        private void OnAdd(object item)
         {
-            if (SelectedActor != null)
+            if (item is Maker maker)
             {
-                Actors.Remove(SelectedActor);
-                _actorChanged = true;
+                Movie.Maker = maker;
+                if (!maker.Labels.Contains(Movie.Label))
+                {
+                    maker.Labels.Add(Movie.Label);
+                }
             }
+            else if (item is Label label)
+            {
+                Movie.Label = label;
+                label.Movies.Add(Movie);
+                if (!Movie.Maker.Labels.Contains(label))
+                {
+                    Movie.Maker.Labels.Add(label);
+                }
+            }
+            else if (item is Genre genre)
+            {
+                Movie.Genres.Add(genre);
+                genre.Movies.Add(Movie);
+            }
+            else if (item is Actor actor)
+            {
+                Movie.Actors.Add(actor);
+                actor.Movies.Add(Movie);
+            }
+            else if (item is Series series)
+            {
+                Movie.Series = series;
+                series.Movies.Add(Movie);
+            }
+            OnPropertyChanged(nameof(Movie));
         }
-
-        private void OnAddGnere()
+        private void OnRemove(object item)
         {
-            if (SelectedGenre == null) return;
-
-            if (!Genres.Any(g => g == SelectedGenre))
+            if (item is Genre genre)
             {
-                Genres.Add(SelectedGenre);
-                _genreChanges = true;
+                genre.Movies.Remove(Movie);
+                Movie.Genres.Remove(genre);
             }
+            else if (item is Actor actor)
+            {
+                actor.Movies.Remove(Movie);
+                Movie.Actors.Remove(actor);
+            }
+            OnPropertyChanged(nameof(Movie));
         }
 
         private void OnSave()
