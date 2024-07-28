@@ -374,7 +374,7 @@ namespace HappyHour.ViewModel
             }
         }
 
-        private async Task IterateMedia(string currDir, List<string> dbDirs, CancellationToken token)
+        private void IterateMedia(string currDir, List<string> dbDirs, CancellationToken token)
         {
             if (token.IsCancellationRequested) return;
             if (currDir.Contains("Western")) return;
