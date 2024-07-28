@@ -4,6 +4,7 @@
              xmlns:conv="clr-namespace:HappyHour.Converter"
              xmlns:vm="clr-namespace:HappyHour.ViewModel"
              xmlns:vwp="clr-namespace:WpfToolkit.Controls;assembly=VirtualizingWrapPanel"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              StartupUri="View/MainWindow.xaml">
     <Application.Resources>
         <ResourceDictionary>
@@ -13,7 +14,10 @@
                 <!-- <WrapPanel/> -->
             </ItemsPanelTemplate>
             <ResourceDictionary.MergedDictionaries>
-
+                <!--
+                <materialDesign:BundledTheme BaseTheme="Light" PrimaryColor="DeepPurple" SecondaryColor="Lime" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign2.Defaults.xaml" />
+                -->
                 <ResourceDictionary>
                     <BooleanToVisibilityConverter x:Key="boolToVis" />
                     <conv:NullToVisivilityConverter x:Key="nulltoVis"/>

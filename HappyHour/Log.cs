@@ -14,10 +14,10 @@ namespace HappyHour
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(App));
 
-        public static void Print(string format, params object[] args)
+        public static void Print(string message)
         {
             //Debug.Print(format, args);
-            _log.Info(string.Format(format, args));
+            _log.Info(message);
         }
         public static void Print(string message, Exception e)
         {

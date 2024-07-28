@@ -67,13 +67,17 @@ namespace HappyHour.View.Controls {
                 //recreate the timer everytime the text changes
                 timer = new Timer(new TimerCallback((o) =>
                 {
+                    //create a delegate method to do the binding update on the main thread
+                    Method x = delegate {
+                        //update the binding
+                        bindingExpression.UpdateSource();
+                    };
 
                     //need to check if the binding is still valid, as this is a threaded timer the text box may have been unloaded etc.
                     if (BindingCanProceed(bindingExpression))
                     {
                         //invoke the delegate to update the binding source on the main (ui) thread
-                        UiServices.Invoke(() => bindingExpression.UpdateSource());
-                        //Dispatcher.Invoke(x, []);
+                        Dispatcher.Invoke(x, new object[] { });
                     }
                     //dispose of the timer so that it wont get called again
                     timer.Dispose();

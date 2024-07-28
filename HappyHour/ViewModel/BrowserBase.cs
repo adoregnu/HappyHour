@@ -111,7 +111,7 @@ namespace HappyHour.ViewModel
                 var response = x.Result;
                 if (!response.Success)
                 {
-                    Log.Print("ExecJavaScript:: " + response.Message);
+                    Log.Print($"ExecJavaScript:: {response.Message}");
                 }
                 UiServices.Invoke(() => callback?.Invoke(response.Success)); 
             });

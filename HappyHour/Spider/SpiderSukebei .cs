@@ -42,7 +42,7 @@ namespace HappyHour.Spider
             Browser.Address = URL;
         }
 
-        private void SaveMagenetLink(dynamic items)
+        private async void SaveMagenetLink(dynamic items)
         {
             var torrents = items.torrents as IList<object>;
             Match m;
@@ -76,7 +76,7 @@ namespace HappyHour.Spider
                     return;
                 }
                 File.WriteAllText(fileName, item.magnet.ToString());
-                Browser.MediaList.AddMedia(outPath);
+                await Browser.MediaList.AddMedia(outPath);
             }
 
             string nexPageLink = items.nextPage.ToString();

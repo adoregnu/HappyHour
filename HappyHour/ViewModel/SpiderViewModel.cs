@@ -8,9 +8,6 @@ using CefSharp;
 using HappyHour.Spider;
 using HappyHour.CefHandler;
 using HappyHour.Interfaces;
-using MvvmDialogs;
-using System.Reflection.Metadata.Ecma335;
-using System.Windows.Markup;
 
 namespace HappyHour.ViewModel
 {

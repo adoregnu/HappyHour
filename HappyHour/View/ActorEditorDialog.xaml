@@ -142,6 +142,11 @@
                                       Command="{Binding CmdMergeActors}"
                                       CommandParameter="{Binding RelativeSource={RelativeSource
                                 AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.SelectedItems}"/>
+                            <MenuItem Header="Remove"
+                                      Command="{Binding CmdRemoveActor}"
+                                      CommandParameter="{Binding RelativeSource={RelativeSource
+                                AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.SelectedItem}"/>
+
                         </ContextMenu>
                     </ListBox.ContextMenu>
                 </ListBox>

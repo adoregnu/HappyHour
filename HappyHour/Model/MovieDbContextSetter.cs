@@ -7,6 +7,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Security.Cryptography;
+using System.Linq.Expressions;
+using MvvmDialogs.FrameworkDialogs.SaveFile;
 
 namespace HappyHour.Model
 {
@@ -75,9 +77,10 @@ namespace HappyHour.Model
                 Series.Remove(serie);
                 onDelete.Invoke(serie);
             }
+            SaveChanges();
         }
 
-        public void MergeMakers(List<Maker> makers, Action<Maker> onDelete = null)
+        public async void MergeMakers(List<Maker> makers, Action<Maker> onDelete = null)
         {
             var target = makers[0];
             makers.RemoveAt(0);
@@ -101,6 +104,12 @@ namespace HappyHour.Model
                 {
                     Images.Remove(maker.Logo);
                 }
+                var movies = await GetMovies(maker);
+                foreach (var movie in movies)
+                {
+                    movie.Maker = target;
+                }
+                
                 Makers.Remove(maker);
                 onDelete?.Invoke(maker);
             }
@@ -117,8 +126,16 @@ namespace HappyHour.Model
                 {
                     target.Name.Add(name);
                 }
+                foreach (var maker in label.Makers)
+                {
+                    if (!target.Makers.Any(m  => m == maker))
+                    {
+                        target.Makers.Add(maker);
+                    }
+                }
                 foreach (var movie in label.Movies)
                 {
+                    movie.Label = target;
                     target.Movies.Add(movie);
                 }
                 if (label.Logo != null)
@@ -507,21 +524,12 @@ namespace HappyHour.Model
             movie.VideoUrl = data["path"].ToString();
         }
 
-        public void DeleteMovie(Movie movie)
-        {
-            Series.Remove(movie.Series);
-            Labels.Remove(movie.Label);
-            Makers.Remove(movie.Maker);
-            Images.Remove(movie.Cover);
-            Movies.Remove(movie);
-            SaveChanges();
-        }
 
-        public bool SetMovie(IDictionary<string, object> data)
+        public void SetMovie(IDictionary<string, object> data)
         {
             if (!data.TryGetValue("pid", out object pid) || pid == null)
             {
-                return false;
+                return;
             }
 
             var movie = Movies
@@ -558,7 +566,89 @@ namespace HappyHour.Model
             }
 
             SaveChanges();
-            return true;
+        }
+
+        public void RemoveMovie(Movie movie)
+        {
+            void CountAndRun(Expression<Func<Movie, bool>> exp, Action run)
+            {
+                var count = Movies.Where(exp).Count();
+                if (count == 1) run();
+            }
+
+            //CountAndRun((Movie m) => m.Maker == movie.Maker, () => Makers.Remove(movie.Maker));
+            //CountAndRun((Movie m) => m.Label == movie.Label, () => Labels.Remove(movie.Label));
+            //CountAndRun((Movie m) => m.Series == movie.Series, () => Series.Remove(movie.Series));
+
+            Ratings.Where(r => r.Movie == movie).ExecuteDelete();
+            if (movie.Cover != null)
+            {
+                Images.Remove(movie.Cover);
+            }
+            Movies.Remove(movie);
+            SaveChanges();
+        }
+
+        public void RemoveMaker(Maker maker)
+        {
+            foreach (var label in maker.Labels)
+            {
+                if (Makers.Where(m => m.Labels.Contains(label)).Count() == 1)
+                {
+                    Labels.Remove(label);
+                }
+            }
+            Makers.Remove(maker);
+            SaveChanges();
+        }
+
+        public void RemoveLabel(Label label)
+        {
+            Labels.Remove(label);
+            SaveChanges();
+        }
+        public void RemoveSeries(Series series)
+        {
+            Series.Remove(series);
+            SaveChanges();
+        }
+
+        public void RemoveActor(Actor actor)
+        {
+            foreach (var name in actor.Names)
+            {
+                ActorNames.Remove(name);
+            }
+            if (actor.Thumb != null)
+            {
+                Images.Remove(actor.Thumb);
+            }
+            Actors.Remove(actor);
+            SaveChanges();
+        }
+        public void UpdateMaker(Movie movie, Maker maker)
+        {
+            movie.Maker = maker;
+            if (!maker.Labels.Any(lb => lb == movie.Label))
+            {
+                maker.Labels.Add(movie.Label);
+            }
+            SaveChanges();
+        }
+
+        public void UpdateLabel(Movie movie, Label label)
+        {
+            movie.Label = label;
+            label.Movies.Add(movie);
+            SaveChanges();
+        }
+
+        public void UpdateActor(Movie movie, Actor actor)
+        {
+            movie.Actors.Add(actor);
+            actor.Movies.Add(movie);
+            SaveChanges();
         }
     }
+
 }

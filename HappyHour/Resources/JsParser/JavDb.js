@@ -46,7 +46,7 @@
         return null;
     }
 
-    function _parseStudio(xpath) {
+    function _parse_maker(xpath) {
         var text = _parseSingleNode(xpath);
         if (text != null) {
             return text.split(',')[0];
@@ -126,9 +126,13 @@
         //cover: { xpath: "//div[@class='column column-video-cover']/a/@href" },
         cover: { xpath: "//img[@class='video-cover']/@src" },
         date: { xpath: "//strong[contains(., 'Released Date')]/following-sibling::span/text()" },
-        studio: {
+        maker: {
             xpath: "//strong[contains(., 'Maker')]/following-sibling::span/a/text()",
-            handler: _parseStudio
+            handler: _parse_maker
+        },
+        label: {
+            xpath: "//strong[contains(., 'Publisher')]/following-sibling::span/a/text()",
+            handler: _parse_maker
         },
         series: { xpath: "//strong[contains(., 'Series')]/following-sibling::span/a/text()" },
         rating: {

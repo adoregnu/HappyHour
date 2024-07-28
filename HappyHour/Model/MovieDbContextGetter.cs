@@ -95,19 +95,21 @@ namespace HappyHour.Model
                 .ToListAsync();
         }
 
-        public async ValueTask<List<Actor>> GetActors(string keyword = null, int limit = 30)
+        public async ValueTask<List<Actor>> GetActors(string keyword = null, int limit = 0)
         {
             if (string.IsNullOrEmpty(keyword))
             {
-                return await Actors
-                    .Include(a => a.Names)
-                        .ThenInclude(n => n.Name)
-                    .Include(a => a.Movies)
-                    .Include(a => a.Thumb)
-                    .Where(a => a.Movies.Count() > 0)
-                    .OrderByDescending(a => a.Key)
-                    .Take(limit)
-                    .ToListAsync();
+                var query = Actors
+                   .Include(a => a.Names)
+                       .ThenInclude(n => n.Name)
+                   .Include(a => a.Movies)
+                   .Include(a => a.Thumb)
+                   .Where(a => a.Movies.Count() > 0)
+                   .OrderByDescending(a => a.Key);
+                if (limit > 0)
+                     return await query.Take(limit).ToListAsync();
+                else 
+                    return await query.ToListAsync();
             }
             else
             {
@@ -131,16 +133,6 @@ namespace HappyHour.Model
         }
 
 
-        public void RemoveMovie(Movie movie)
-        {
-            Movies.Remove(movie);
-        }
-
-        public void RemoveActor(Actor actor)
-        {
-            Actors.Remove(actor);
-        }
-
         private static readonly char[] separator = ['\\'];
         public async ValueTask<List<string>> GetMovieUrls(string ppath)
         {
@@ -155,13 +147,17 @@ namespace HappyHour.Model
         public async ValueTask<Movie> GetMovie(string pid)
         {
             return await Movies
+                .Include(m => m.Maker)
+                    .ThenInclude(m => m.Name)
                 .Include(m => m.Label)
                     .ThenInclude(l => l.Name)
                 .Include(m => m.Actors)
                     .ThenInclude(actor => actor.Names)
                         .ThenInclude(name => name.Name)
                 .Include(m => m.Cover)
+                .Include(m => m.Series)
                 .Include(m => m.Title)
+                .Include(m => m.Plot)
                 .Where(m => m.PID == pid)
                 .FirstOrDefaultAsync();
         }
@@ -175,6 +171,8 @@ namespace HappyHour.Model
                     .ThenInclude(actor => actor.Names)
                         .ThenInclude(name => name.Name)
                 .Include(m => m.Cover)
+                .Include(m => m.Series)
+                .Include(m => m.Plot)
                 .Include(m => m.Title);
 
             IQueryable<Movie> mquery = null;
@@ -266,13 +264,6 @@ namespace HappyHour.Model
                     .ThenInclude(lb => lb.Name)
                 .FirstOrDefault(m => m.Name.Any(n => n.Text == keyword));
         }
-        public async ValueTask<List<Maker>> GetMakers(Movie movie)
-        {
-            return await Makers
-                .Include(m => m.Name)
-                .Where(m => m == movie.Maker)
-                .ToListAsync();
-        }
 
         public async ValueTask<List<Maker>> GetMakers(string keyword = null)
         {
@@ -280,6 +271,7 @@ namespace HappyHour.Model
                 .Include(m => m.Name)
                 .Include(m => m.Logo)
                 .Include(m => m.Labels)
+                    .ThenInclude(lb => lb.Movies)
                 .ToListAsync();
         }
         public async ValueTask<List<Label>> GetLabels(string keyword = null)

@@ -40,10 +40,11 @@ namespace HappyHour.ViewModel
             _mediaList.LoadItems(await _db.GetMovies(SelectedGenre));
         }
 
-        void OnMergeGenres(object p)
+        async void OnMergeGenres(object p)
         {
             var selectedGenres = (p as IList<object>).Select(o => o as Genre).ToList();
             _db.MergeGenres(selectedGenres, g => Genres.Remove(g));
+            await OnSelectGenres();
         }
 
         private async Task OnSelectGenres()

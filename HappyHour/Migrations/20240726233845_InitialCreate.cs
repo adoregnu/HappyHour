@@ -131,6 +131,25 @@ namespace HappyHour.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "Labels",
+                columns: table => new
+                {
+                    Key = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    LogoKey = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Labels", x => x.Key);
+                    table.ForeignKey(
+                        name: "FK_Labels_Images_LogoKey",
+                        column: x => x.LogoKey,
+                        principalTable: "Images",
+                        principalColumn: "Key");
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "Makers",
                 columns: table => new
                 {
@@ -150,27 +169,27 @@ namespace HappyHour.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "Labels",
+                name: "LabelMaker",
                 columns: table => new
                 {
-                    Key = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    LogoKey = table.Column<int>(type: "int", nullable: true),
-                    MakerKey = table.Column<int>(type: "int", nullable: true)
+                    LabelsKey = table.Column<int>(type: "int", nullable: false),
+                    MakersKey = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Labels", x => x.Key);
+                    table.PrimaryKey("PK_LabelMaker", x => new { x.LabelsKey, x.MakersKey });
                     table.ForeignKey(
-                        name: "FK_Labels_Images_LogoKey",
-                        column: x => x.LogoKey,
-                        principalTable: "Images",
-                        principalColumn: "Key");
+                        name: "FK_LabelMaker_Labels_LabelsKey",
+                        column: x => x.LabelsKey,
+                        principalTable: "Labels",
+                        principalColumn: "Key",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Labels_Makers_MakerKey",
-                        column: x => x.MakerKey,
+                        name: "FK_LabelMaker_Makers_MakersKey",
+                        column: x => x.MakersKey,
                         principalTable: "Makers",
-                        principalColumn: "Key");
+                        principalColumn: "Key",
+                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -349,14 +368,14 @@ namespace HappyHour.Migrations
                 column: "MovieKey");
 
             migrationBuilder.CreateIndex(
+                name: "IX_LabelMaker_MakersKey",
+                table: "LabelMaker",
+                column: "MakersKey");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Labels_LogoKey",
                 table: "Labels",
                 column: "LogoKey");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Labels_MakerKey",
-                table: "Labels",
-                column: "MakerKey");
 
             migrationBuilder.CreateIndex(
                 name: "IX_LongTexts_MovieKey",
@@ -492,6 +511,9 @@ namespace HappyHour.Migrations
                 name: "GenreMovie");
 
             migrationBuilder.DropTable(
+                name: "LabelMaker");
+
+            migrationBuilder.DropTable(
                 name: "LongTexts");
 
             migrationBuilder.DropTable(
@@ -513,10 +535,10 @@ namespace HappyHour.Migrations
                 name: "Labels");
 
             migrationBuilder.DropTable(
-                name: "Series");
+                name: "Makers");
 
             migrationBuilder.DropTable(
-                name: "Makers");
+                name: "Series");
 
             migrationBuilder.DropTable(
                 name: "Images");

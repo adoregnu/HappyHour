@@ -5,6 +5,7 @@ using System.Linq;
 
 using HappyHour.Extension;
 using System.Threading.Tasks;
+using CefSharp.DevTools.CSS;
 
 namespace HappyHour.Model
 {
@@ -36,11 +37,7 @@ namespace HappyHour.Model
             get => _movieInfo;
             set
             {
-                if (_movieInfo != null && value == null)
-                {
-                    _db.DeleteMovie(_movieInfo);
-                }
-                _movieInfo = value;
+                SetProperty(ref _movieInfo, value);
                 UpdateProperties();
             }
         }
@@ -62,6 +59,7 @@ namespace HappyHour.Model
         {
             if (MovieInfo != null)
             {
+                _db.RemoveMovie(_movieInfo);
                 MovieInfo = null;
             }
         }
@@ -93,7 +91,7 @@ namespace HappyHour.Model
         {
             try
             {
-                MovieInfo = null;
+                ClearDb();
                 Directory.Delete(Path, true);
             }
             catch (Exception ex)
@@ -125,8 +123,13 @@ namespace HappyHour.Model
                     tmp += label;
                 }
                 var names = MovieDbContext.GetActorsNames(MovieInfo);
-                if (names != null) {
+                if (names != null)
+                {
                     Actresses = string.Join('\n', names);
+                }
+                else
+                {
+                    Actresses = "No Actors";
                 }
                 if (MovieInfo.Cover != null)
                 {
@@ -143,23 +146,20 @@ namespace HappyHour.Model
             ".mp4", ".avi", ".mkv", ".ts", ".wmv", ".m4v"
         ];
 
-        async Task LoadFiles(string[] files = null)
+        void LoadFiles(string[] files = null)
         {
             Files.Clear();
             Subtitles.Clear();
 
-            await Task.Run(() =>
+            try
             {
-                try
-                {
-                    files ??= Directory.GetFiles(Path);
-                    _date = File.GetCreationTime(Path);
-                }
-                catch (Exception ex)
-                {
-                    Log.Print($"{ex.Message}");
-                }
-            });
+                files ??= Directory.GetFiles(Path);
+                _date = File.GetCreationTime(Path);
+            }
+            catch (Exception ex)
+            {
+                Log.Print($"{ex.Message}");
+            }
 
             foreach (string file in files)
             {
@@ -174,9 +174,9 @@ namespace HappyHour.Model
             }
         }
 
-        public override async Task Reload(string[] files)
+        async public override Task Reload(string[] files)
         {
-            await LoadFiles(files);
+            LoadFiles(files);
 
             MovieInfo = await _db.GetMovie(Pid);
             if (MovieInfo == null) return;

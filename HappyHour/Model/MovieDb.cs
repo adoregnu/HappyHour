@@ -112,6 +112,7 @@ namespace HappyHour.Model
         public int Key { get; set; }
         public virtual ImageBlob Logo { get; set; }
         public virtual ICollection<ShortText> Name { get; set; }
+        public virtual ICollection<Maker> Makers { get; set; }
         public ICollection<Movie> Movies { get; set; }
         public override string ToString()
         {

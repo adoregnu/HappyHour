@@ -10,7 +10,7 @@ namespace HappyHour.Model
 {
     internal class AvMediaFactory
     {
-        public static async ValueTask<IAvMedia> Create(string path)
+        async public static ValueTask<IAvMedia> Create(string path)
         {
             string[] video_exts = [
                 ".mp4", ".avi", ".mkv", ".ts", ".wmv", ".m4v"

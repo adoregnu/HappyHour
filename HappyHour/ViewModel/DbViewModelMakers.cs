@@ -70,8 +70,8 @@ namespace HappyHour.ViewModel
             var mlist = await _db.GetMakers();
             mlist.ForEach(Makers.Add);
 
-            var llist = await _db.GetLabels();
-            llist.ForEach(Labels.Add);
+            //var llist = await _db.GetLabels();
+            //llist.ForEach(Labels.Add);
         }
     }
 }

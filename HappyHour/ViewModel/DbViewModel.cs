@@ -14,11 +14,12 @@ using CommunityToolkit.Mvvm.Input;
 using System.Reflection;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using System.Threading;
 
 namespace HappyHour.ViewModel
 {
 
-    partial class DbViewModel : Pane, IDbView, IRecipient<ViewEventArgs>
+    partial class DbViewModel : Pane, IDbView, IAsyncRecipient<AsyncViewMessage>
     {
         string _selectedType = "Movies";
         string _searchText;
@@ -75,13 +76,15 @@ namespace HappyHour.ViewModel
         ];
 
        public ICommand CmdReload { get; private set; }
+       public ICommand CmdRemove { get; private set; }
         public ICommand CmdReloadAll { get; private set; }
         public DbViewModel()
         {
             Title = "Database";
             //ListType = [.. _typeToPropertyName.Keys];
             CmdReload = new RelayCommand(async () => await OnTypeChanged(SelectedType));
-            CmdReloadAll = new RelayCommand(async() => await OnReloadAll());
+            CmdReloadAll = new RelayCommand(async () => await OnReloadAll());
+            CmdRemove = new RelayCommand<object>(OnRemove);
 
             CmdGenresMerge = new RelayCommand<object>(
                 OnMergeGenres, p => p is IList<object> list && list.Count > 1);
@@ -102,15 +105,17 @@ namespace HappyHour.ViewModel
             Messenger.Register(this);
         }
 
-        async public void Receive(ViewEventArgs msg)
+        public async Task ReceiveAsync(AsyncViewMessage msg, CancellationToken ct)
         {
-            if (msg.Message == "Refresh")
+            if (msg.Value.Message != "Refresh")
             {
-                await OnReloadAll();
+                return;
             }
+            Log.Print($"DbViewModel received {msg.Value.Message}");
+            await OnReloadAll();
         }
 
-        async private Task OnReloadAll()
+        private async Task OnReloadAll()
         {
             foreach (var type in ListType)
             {
@@ -136,6 +141,25 @@ namespace HappyHour.ViewModel
             MethodInfo mi = GetType().GetMethod(searchFunction,
                 BindingFlags.NonPublic | BindingFlags.Instance);
             mi?.Invoke(this, null);
+        }
+
+        private async void OnRemove(object item)
+        {
+            if (item is Maker maker)
+            {
+                _db.RemoveMaker(maker);
+                await OnSelectMakers();
+            }
+            else if (item is Label label)
+            {
+                _db.RemoveLabel(label);
+                Labels.Remove(label);
+            }
+            else if (item is Series series)
+            {
+                _db.RemoveSeries(series);
+                Series.Remove(series);
+            }
         }
     }
 }

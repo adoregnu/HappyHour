@@ -66,7 +66,7 @@ namespace HappyHour.Model
             }
             catch (Exception ex)
             {
-                Log.Print("Exclude: ", ex.Message);
+                Log.Print($"Exclude: {ex.Message}");
             }
         }
 

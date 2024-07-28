@@ -1,4 +1,6 @@
-﻿using System;
+﻿using HappyHour;
+using HappyHour.Extension;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,4 +20,10 @@ namespace HappyHour
 
         public object Data { get; }
     }
+    public class AsyncViewMessage : AsyncMessage<ViewEventArgs>
+    {
+        public AsyncViewMessage(ViewEventArgs value) : base(value) { }
+    }
 }
+
+

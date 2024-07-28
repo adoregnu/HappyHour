@@ -11,6 +11,7 @@ using HappyHour.Model;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace HappyHour.ViewModel
 {
@@ -26,34 +27,53 @@ namespace HappyHour.ViewModel
 
         private bool? _dialogResult;
 
-        private List<Actor> _allActors = [];
+        private List<Actor> _actors = [];
+        private List<Actor> _allActors;
+        private Maker _selectedMaker;
 
         public Movie Movie { get; private set; }
-        public string Title { get; private set; }
+        public List<Genre> Genres { get; private set; } = [];
+        public List<Actor> Actors
+        {
+            get => _actors;
+            set => SetProperty(ref _actors, value);
+        }
 
-        public List<Maker> Makers { get; private set; }
-        public List<Label> Labels { get; private set; }
-        public List<Series> Series { get; private set; }
-        public List<Genre> Genres { get; private set; }
-        public List<Actor> Actors { get; set; } = [];
-
-        public List<Maker> AllMakers { get; private set; }
-        public List<Label> AllLabels { get; private set; }
-        public List<Series> AllSeries { get; private set; }
-        public List<Genre> AllGenres { get; private set; }
+        public List<Maker> AllMakers { get; private set; } = [];
+        public List<Label> Labels { get; private set; } = [];
+        public List<Series> AllSeries { get; private set; } = [];
+        public List<Genre> AllGenres { get; private set; } = [];
         public List<Actor> AllActors
         {
             get => _allActors;
+            set => SetProperty(ref _allActors, value);
         }
 
-        private string _searchText;
-        public string SearchText
+        public Maker SelectedMaker
         {
-            get => _searchText;
+            get => _selectedMaker;
             set
             {
-                SetProperty(ref _searchText, value);
-                //OnPropertyChanged(nameof(AllActors));
+                SetProperty(ref _selectedMaker, value);
+                if (value != null)
+                {
+                    Labels = _db.GetLabels(value);
+                    OnPropertyChanged(nameof(Labels));
+                }
+            }
+        }
+
+        private string _searchActorName;
+        public string SearchActorName
+        {
+            get => _searchActorName;
+            set
+            {
+                SetProperty(ref _searchActorName, value);
+                if (!string.IsNullOrEmpty(value))
+                {
+                    Application.Current.Dispatcher.InvokeAsync(async () => AllActors = await _db.GetActors(value));
+                }
             }
         }
 
@@ -69,7 +89,7 @@ namespace HappyHour.ViewModel
         public ICommand CmdAdd { get; private set; }
         private AvEditorViewModel(AvMovie movie)
         {
-            Title = movie.Pid;
+            Movie = movie.MovieInfo;
 
             CmdAdd = new RelayCommand<object>(OnAdd);
             CmdRemove = new RelayCommand<object>(OnRemove);
@@ -77,16 +97,16 @@ namespace HappyHour.ViewModel
 
         private async Task<AvEditorViewModel> InitializeAsync()
         {
-            (await _db.GetMakers(Movie)).ForEach(Makers.Add);
-            (await _db.GetLabels(Movie)).ForEach(Labels.Add);
+            //(await _db.GetMakers(Movie)).ForEach(Makers.Add);
+            //(await _db.GetLabels(Movie)).ForEach(Labels.Add);
             (await _db.GetGenres(Movie)).ForEach(Genres.Add);
             (await _db.GetActors(Movie)).ForEach(Actors.Add);
 
             (await _db.GetMakers()).ForEach(AllMakers.Add);
-            (await _db.GetLabels()).ForEach(AllLabels.Add);
+            //(await _db.GetLabels()).ForEach(AllLabels.Add);
+            (await _db.GetSeries()).ForEach(AllSeries.Add);
             (await _db.GetGenres()).ForEach(AllGenres.Add);
             //(await _db.GetActors()).ForEach(AllActors.Add);
-
             return this;
         }
 
@@ -94,20 +114,11 @@ namespace HappyHour.ViewModel
         {
             if (item is Maker maker)
             {
-                Movie.Maker = maker;
-                if (!maker.Labels.Contains(Movie.Label))
-                {
-                    maker.Labels.Add(Movie.Label);
-                }
+                _db.UpdateMaker(Movie, maker);
             }
             else if (item is Label label)
             {
-                Movie.Label = label;
-                label.Movies.Add(Movie);
-                if (!Movie.Maker.Labels.Contains(label))
-                {
-                    Movie.Maker.Labels.Add(label);
-                }
+                _db.UpdateLabel(Movie, label);
             }
             else if (item is Genre genre)
             {
@@ -116,8 +127,8 @@ namespace HappyHour.ViewModel
             }
             else if (item is Actor actor)
             {
-                Movie.Actors.Add(actor);
-                actor.Movies.Add(Movie);
+                _db.UpdateActor(Movie, actor);
+                Actors = [.. Movie.Actors];
             }
             else if (item is Series series)
             {
@@ -143,26 +154,6 @@ namespace HappyHour.ViewModel
 
         private void OnSave()
         {
-#if false
-            using var context = AvDbContextPool.CreateContext();
-            _ = context.Items.Attach(Av);
-            if (_actorChanged)
-            {
-                Av.Actors = Actors;
-            }
-            if (_genreChanges)
-            {
-                Av.Genres = Genres;
-            }
-
-            if (_amovie.MovieInfo == null)
-            {
-                Av.DateAdded = DateTime.Now;
-                Av.DateModifed = DateTime.Now;
-            }
-           // _amovie.MovieInfo = Av;
-            context.SaveChanges();
-#endif
         }
     }
 }

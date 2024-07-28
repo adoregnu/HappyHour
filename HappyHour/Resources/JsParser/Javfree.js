@@ -21,7 +21,7 @@
         if (m == null) {
             return false;
         }
-        msg['date'] = m[1];
+        msg['date'] = m[1].trim();
         return true;
     }
 
@@ -44,8 +44,8 @@
         names = names.split(/[\/ ]+/)
         names.forEach(function (name) {
             actor = {};
-            name = name.replace(/[()\d]+/,'')
-            actor['name'] = name;
+            name = name.replace(/[()\d]+/, '');
+            actor['name'] = name.trim();
             array.push(actor);
         });
 
@@ -54,31 +54,39 @@
         return true;
     }
 
-    function _studio(txt, msg) {
-        const headers = ['レーベル', 'メーカー'];
+    function _extrac_item(txt, msg, key, headers) {
         var header = check_header(headers, txt);
 
         if (header == null) {
             return false;
         }
-
-        studio = txt.substring(txt.indexOf(header) + header.length);
-        if (header == 'メーカー') {
-            key = 'maker';
-        } else {
-            key = 'label';
+        item = txt.substring(txt.indexOf(header) + header.length);
+        msg[key] = item.replace(/^[：: —-]+/g, '').trim();
+        if (item.length < 2) {
+            return false;
         }
-        msg[key] = studio.replace(/^[：: ]+/g, '');
         return true;
     }
+    function _maker(txt, msg) {
+        return _extrac_item(txt, msg, 'maker', ['メーカー']);
+    }
 
+    function _label(txt, msg) {
+        return _extrac_item(txt, msg, 'label', ['レーベル']);
+    }
+
+    function _series(txt, msg) {
+        return _extrac_item(txt, msg, 'series', ['シリーズ']);
+    }
     function get_node(node) { return node; }
 
     function _parse_content(xpath, msg) {
         var parsers = [
             { func: _date, parsed: false },
             { func: _actor, parsed: false },
-            { func: _studio, parsed: false }
+            { func: _maker, parsed: false },
+            { func: _label, parsed: false },
+            { func: _series, parsed: false }
         ];
 
         var count = 0;

@@ -4,19 +4,20 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
-        xmlns:control="clr-namespace:HappyHour.View.Controls"
+        xmlns:c="clr-namespace:HappyHour.View.Controls"
         xmlns:vm="clr-namespace:HappyHour.ViewModel"
         mc:Ignorable="d"
         WindowStartupLocation="CenterOwner"
-        Title="{Binding Title}"
-        Height="600" Width="1024" SizeToContent="Height">
+        Title="{Binding Movie.PID}"
+        Height="700" Width="1024" >
     <Window.Resources>
         <DataTemplate x:Key="ActorMiniTemplate">
             <Grid>
-                <control:AsyncImage HorizontalAlignment="Center" VerticalAlignment="Top"
-                                    ImageBlob="{Binding Thumb}" Width="64" />
-                <StackPanel VerticalAlignment="Bottom" Background="Black" Opacity="0.6">
-                    <TextBlock Text="{Binding .}" Foreground="White" VerticalAlignment="Center"/>
+                <c:AsyncImage HorizontalAlignment="Center" VerticalAlignment="Top"
+                                    ImageBlob="{Binding Thumb}" Width="80" />
+                <StackPanel VerticalAlignment="Bottom" Background="Black" Opacity="0.60">
+                    <TextBlock Text="{Binding .}" Foreground="White" VerticalAlignment="Center"
+                               TextAlignment="Center"/>
                 </StackPanel>
             </Grid>
         </DataTemplate>
@@ -29,18 +30,13 @@
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Background" Value="Transparent"/>
         </Style>
-        <Style x:Key="ComboBoxStyle" TargetType="ComboBox">
-            <Setter Property="BorderBrush" Value="LightGray"/>
-            <Setter Property="BorderThickness" Value="0,0,0,1"/>
-            <Setter Property="Background" Value="Transparent"/>
-        </Style>
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="8*"/>
+            <RowDefinition Height="7*"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
@@ -53,8 +49,12 @@
         </Grid.ColumnDefinitions>
         <TextBox Grid.Row="0" Grid.ColumnSpan="5" Text="{Binding Movie.VideoUrl}"
                  Margin="5,5,5,0" Style="{StaticResource TextboxStyle}"/>
+        <c:LangComboBox Grid.Row="1" Grid.ColumnSpan="5" Margin="5,5,5,0"
+                        TextSource="{Binding Movie.Title}"/>
+        <!--
         <ListBox Grid.Row="1" Grid.ColumnSpan="5" ItemsSource="{Binding Movie.Title}" Height="40"
                  Margin="5,5,5,0"/>
+-->
         <Grid Grid.Row="2" Grid.ColumnSpan="5" Margin="5">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="60"/>
@@ -82,21 +82,15 @@
         <Grid Grid.Row="3" Grid.Column="0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
-                <RowDefinition Height="2*"/>
-                <RowDefinition Height="8*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             <TextBlock Grid.Row="0" Text="Maker" TextAlignment="Center" />
+            <c:LangComboBox Grid.Row="1" Margin="5,0,0,5" TextSource="{Binding Movie.Maker.Name}"/>
+            <!--<ListBox Grid.Row="1" Margin="5,0,0,5" ItemsSource="{Binding Movie.Maker.Name}"/>-->
 
-            <ListBox Grid.Row="1" Margin="5,0,0,5" ItemsSource="{Binding Movie.Maker}" x:Name="_movieMakers">
-                <i:Interaction.Triggers>
-                    <i:EventTrigger EventName="MouseDoubleClick">
-                        <i:InvokeCommandAction
-                            Command="{Binding CmdRemove}"
-                            CommandParameter="{Binding ElementName=_movieMakers,Path=SelectedItem}"/>
-                    </i:EventTrigger>
-                </i:Interaction.Triggers>
-            </ListBox>
-            <ListBox Grid.Row="2" Margin="5,0,0,0" ItemsSource="{Binding AllMakers}" x:Name="_allMakers">
+            <ListBox Grid.Row="2" Margin="5,0,0,0" x:Name="_allMakers"
+                     ItemsSource="{Binding AllMakers}" SelectedItem="{Binding SelectedMaker}">
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="MouseDoubleClick">
                         <i:InvokeCommandAction
@@ -104,26 +98,28 @@
                             CommandParameter="{Binding ElementName=_allMakers,Path=SelectedItem}"/>
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <c:LangComboBox Grid.Column="0" TextSource="{Binding Name}" Margin="10,0,0,0"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+                <ItemsControl.ItemContainerStyle>
+                    <Style TargetType="{x:Type ListBoxItem}">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                    </Style>
+                </ItemsControl.ItemContainerStyle>
             </ListBox>
 
         </Grid>
         <Grid Grid.Row="3" Grid.Column="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
-                <RowDefinition Height="2*"/>
-                <RowDefinition Height="8*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             <TextBlock Grid.Row="0" Text="Label" TextAlignment="Center" />
-            <ListBox Grid.Row="1" Margin="5,0,0,5" ItemsSource="{Binding Movie.Label}" x:Name="_movieLabel">
-                <i:Interaction.Triggers>
-                    <i:EventTrigger EventName="MouseDoubleClick">
-                        <i:InvokeCommandAction
-                            Command="{Binding CmdRemove}"
-                            CommandParameter="{Binding ElementName=_movieLabel,Path=SelectedItem}"/>
-                    </i:EventTrigger>
-                </i:Interaction.Triggers>
-            </ListBox>
-            <ListBox Grid.Row="2" Margin="5,0,0,0" ItemsSource="{Binding AllLabels}" x:Name="_allLabels">
+            <c:LangComboBox Grid.Row="1" Margin="5,0,0,5" TextSource="{Binding Movie.Label.Name}"/>
+            <ListBox Grid.Row="2" Margin="5,0,0,0" ItemsSource="{Binding Labels}" x:Name="_allLabels">
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="MouseDoubleClick">
                         <i:InvokeCommandAction
@@ -131,24 +127,26 @@
                             CommandParameter="{Binding ElementName=_allLabels,Path=SelectedItem}"/>
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <c:LangComboBox Grid.Column="0" TextSource="{Binding Name}" Margin="10,0,0,0"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+                <ItemsControl.ItemContainerStyle>
+                    <Style TargetType="{x:Type ListBoxItem}">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                    </Style>
+                </ItemsControl.ItemContainerStyle>
             </ListBox>
         </Grid>
         <Grid Grid.Row="3" Grid.Column="2">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
-                <RowDefinition Height="2*"/>
-                <RowDefinition Height="8*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             <TextBlock Grid.Row="0" Text="Series" TextAlignment="Center"/>
-            <ListBox Grid.Row="1" Margin="5,0,0,5" ItemsSource="{Binding Series}" x:Name="_movieSeries">
-                <i:Interaction.Triggers>
-                    <i:EventTrigger EventName="MouseDoubleClick">
-                        <i:InvokeCommandAction
-                            Command="{Binding CmdRemove}"
-                            CommandParameter="{Binding ElementName=_movieSeries,Path=SelectedItem}"/>
-                    </i:EventTrigger>
-                </i:Interaction.Triggers>
-            </ListBox>
+            <c:LangComboBox Grid.Row="1" Margin="5,0,0,5" TextSource="{Binding Movie.Series.Name}"/>
             <ListBox Grid.Row="2" Margin="5,0,0,0" ItemsSource="{Binding AllSeries}" x:Name="_allSeries">
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="MouseDoubleClick">
@@ -175,9 +173,18 @@
                             CommandParameter="{Binding ElementName=_movieGenre,Path=SelectedItem}"/>
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <c:LangComboBox Grid.Column="0" TextSource="{Binding Name}" Margin="10,0,0,0"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+                <ItemsControl.ItemContainerStyle>
+                    <Style TargetType="{x:Type ListBoxItem}">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                    </Style>
+                </ItemsControl.ItemContainerStyle>
             </ListBox>
-            <ListBox Grid.Row="2" Margin="5,0,0,0" ItemsSource="{Binding AllGenres}" x:Name="_allGenres"
-                      SelectedItem="{Binding SelectedGenre}">
+            <ListBox Grid.Row="2" Margin="5,0,0,0" ItemsSource="{Binding AllGenres}" x:Name="_allGenres">
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="MouseDoubleClick">
                         <i:InvokeCommandAction
@@ -185,18 +192,30 @@
                             CommandParameter="{Binding ElementName=_allGenres,Path=SelectedItem}"/>
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <c:LangComboBox Grid.Column="0" TextSource="{Binding Name}" Margin="10,0,0,0"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+                <ItemsControl.ItemContainerStyle>
+                    <Style TargetType="{x:Type ListBoxItem}">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                    </Style>
+                </ItemsControl.ItemContainerStyle>
             </ListBox>
         </Grid>
         <Grid Grid.Row="3" Grid.Column="4">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
-                <RowDefinition Height="3*"/>
+                <RowDefinition Height="4*"/>
                 <RowDefinition Height="Auto"/>
-                <RowDefinition Height="7*"/>
+                <RowDefinition Height="6*"/>
             </Grid.RowDefinitions>
             <TextBlock Grid.Row="0" Text="Actors" TextAlignment="Center" />
             <ListBox Grid.Row="1" Margin="5,0,5,5" ItemsSource="{Binding Actors}" x:Name="_actors"
-                     ItemTemplate="{StaticResource ActorMiniTemplate}">
+                    ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                    ItemsPanel="{DynamicResource ImagePanelTemplate}"
+                    ItemTemplate="{StaticResource ActorMiniTemplate}">
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="MouseDoubleClick">
                         <i:InvokeCommandAction
@@ -205,21 +224,23 @@
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
             </ListBox>
-            <TextBox Grid.Row="2" Margin="5,0,5,5" Text="{Binding SearchText}"/>
-            <ListBox Grid.Row="3" Margin="5,0,5,0" ItemsSource="{Binding AllActors}" x:Name="_allActors"
-                 ItemTemplate="{StaticResource ActorMiniTemplate}">
+            <!--<TextBox Grid.Row="2" Margin="5,0,5,5" Text="{Binding SearchActorName}"/>-->
+            <c:DelayedBindingTextBox DelayTime="500" Grid.Row="2" Margin="5,0,5,5" Text="{Binding SearchActorName}"/>
+            <ListBox Grid.Row="3" Margin="5,0,5,0" ItemsSource="{Binding AllActors}" x:Name="_allActors" 
+                     ItemTemplate="{StaticResource ActorMiniTemplate}">
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="MouseDoubleClick">
                         <i:InvokeCommandAction
-                            Command="{Binding CmdAddActor}"
+                            Command="{Binding CmdAdd}"
                             CommandParameter="{Binding ElementName=_allActors,Path=SelectedItem}"/>
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
             </ListBox>
         </Grid>
 
-        <TextBox Grid.Row="4" Grid.ColumnSpan="5" Height="60" Margin="5,5,5,0"
-                 Text="{Binding Movie.Plot}" />
+        <!--<TextBox Grid.Row="4" Grid.ColumnSpan="5" Height="60" Margin="5,5,5,0"
+                 Text="{Binding Movie.Plot}" />-->
+        <c:LangComboBox Grid.Row="4" TextSource="{Binding Movie.Plot}" Grid.ColumnSpan="5" Height="80" Margin="5,5,5,0"/>
         <StackPanel Grid.Row="5" Grid.ColumnSpan="5" Orientation="Horizontal"
                     HorizontalAlignment="Center">
             <Button Content="Save" Margin="0,5,5,5" Command="{Binding CmdSave}" Click="Close"/>

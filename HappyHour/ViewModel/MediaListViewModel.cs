@@ -338,7 +338,7 @@ namespace HappyHour.ViewModel
 
         private async void EditMovieInfo(object param)
         {
-            if (param is not AvMovie item)
+            if (param is not AvMovie item  || item  == null)
             {
                 return;
             }
@@ -374,7 +374,7 @@ namespace HappyHour.ViewModel
             }
         }
 
-        private void IterateMedia(string currDir, List<string> dbDirs, CancellationToken token)
+        private async Task IterateMedia(string currDir, List<string> dbDirs, CancellationToken token)
         {
             if (token.IsCancellationRequested) return;
             if (currDir.Contains("Western")) return;
@@ -478,14 +478,14 @@ namespace HappyHour.ViewModel
             LoadItems(await _db.GetMovies(null, 40));
         }
 
-        private void OnScrapCompleted(SpiderBase spider)
+        private async void OnScrapCompleted(SpiderBase spider)
         {
             if (_mediasToSearch.Count > 0)
             {
                 _mediasToSearch.RemoveAt(0);
             }
             OnScrapAvInfo(spider);
-            Messenger.Send(new ViewEventArgs("Refresh", null));
+            await Messenger.SendAsync(new AsyncViewMessage(new ViewEventArgs("Refresh", null)));
         }
 
         private void OnScrapAvInfo(SpiderBase spider)

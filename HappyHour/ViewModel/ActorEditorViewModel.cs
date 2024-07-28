@@ -15,6 +15,9 @@ using HappyHour.Model;
 using HappyHour.Interfaces;
 using HappyHour.Spider;
 using CommunityToolkit.Mvvm.Messaging;
+using System.Threading.Tasks;
+using HappyHour.Extension;
+using System.Threading;
 
 namespace HappyHour.ViewModel
 {
@@ -30,7 +33,7 @@ namespace HappyHour.ViewModel
             set
             {
                 SetProperty(ref _isChecked, value);
-                ActorEditor.OnActorAlphabet(Initial, value);
+                UiServices.Invoke(async () => await ActorEditor.OnActorAlphabet(Initial, value), true);
             }
         }
         public void UnCheck()
@@ -38,9 +41,15 @@ namespace HappyHour.ViewModel
             _isChecked = false;
             OnPropertyChanged(nameof(IsChecked));
         }
+        public async Task Check()
+        {
+            await ActorEditor.OnActorAlphabet(Initial, true);
+            _isChecked = true;
+            OnPropertyChanged(nameof(IsChecked));
+        }
     }
 
-    internal class ActorEditorViewModel : ObservableRecipient, IModalDialogViewModel, IRecipient<ViewEventArgs>
+    internal class ActorEditorViewModel : ObservableRecipient, IModalDialogViewModel, IAsyncRecipient<AsyncViewMessage>
     {
         private string _searchText;
         private bool? _dialogResult = false;
@@ -113,20 +122,22 @@ namespace HappyHour.ViewModel
         public ICommand CmdDoubleClick { get; private set; }
         public ICommand CmdSearchNameDoubleClick { get; private set; }
         public ICommand CmdMergeActors { get; private set; }
+        public ICommand CmdRemoveActor {  get; private set; }
         public ICommand CmdClearActors { get; private set; }
         public ICommand CmdDeleteNameOfActor { get; private set; }
         public ICommand CmdClosed { get; private set; }
-  
+
         public ActorEditorViewModel()
         {
             CmdDoubleClick = new RelayCommand(OnDoubleClicked);
-            CmdSearchNameDoubleClick  = new RelayCommand(OnSearchNameDoubleClicked);
+            CmdSearchNameDoubleClick = new RelayCommand(OnSearchNameDoubleClicked);
             CmdMergeActors = new RelayCommand<object>(
-                OnMergeActors, 
+                OnMergeActors,
                 p => p is IList<object> list && list.Count > 1);
+            CmdRemoveActor = new RelayCommand<Actor>(OnRemoveActor);
             CmdClearActors = new RelayCommand(OnClearActors);
             CmdClosed = new RelayCommand(OnClose);
- 
+
             ActorInitials = Enumerable.Range('A', 'Z' - 'A' + 1)
                 .Select(c => new ActorInitial
                 {
@@ -138,35 +149,40 @@ namespace HappyHour.ViewModel
                 ActorEditor = this,
                 Initial = "All",
             });
-            Messenger.Register(this);
+            //Messenger.Register(this);
         }
 
-        public void Receive(ViewEventArgs msg)
+        public async Task ReceiveAsync(AsyncViewMessage msg, CancellationToken ct)
         {
-            if (msg.Message != "Refresh")
+            if (msg.Value.Message != "Refresh")
             {
                 return;
             }
 
-            Log.Print(msg.Message);
+            Log.Print($"ActorEditorViewModel received {msg.Value.Message}");
             List<ActorInitial> initials = [];
             ActorInitials.ForEach(i => { if (i.IsChecked) initials.Add(i); });
             OnClearActors();
-            initials.ForEach(i => i.IsChecked = true);
+            foreach (var i in initials)
+            {
+                await i.Check();
+            }
+            Log.Print($"ActorEditorViewModel::ReceiveAsync End");
+            //initials.ForEach(async i => await i.Check());
         }
 
-        private void OnDeleteActor()
+        private void OnRemoveActor(Actor actor)
         {
-            if (SelectedActor == null) return;
-
-            ActorNames.Clear();
-            Actors.Remove(SelectedActor);
-            _db.RemoveActor(SelectedActor);
+            if (actor == null) return;
 
             SelectedActor = null;
+            ActorNames.Clear();
+            Actors.Remove(actor);
+
+            _db.RemoveActor(actor);
         }
 
-        public async void OnActorAlphabet(string p, bool isSelected)
+        public async Task OnActorAlphabet(string p, bool isSelected)
         {
             if (p == "All")
             {
@@ -178,7 +194,7 @@ namespace HappyHour.ViewModel
 
             if (isSelected)
             {
-                var actors = await _db.GetActors(p == "All" ? null : p);
+                var actors = await _db.GetActors(p == "All" ? null : p,50);
                 actors?.ForEach(Actors.Add);
             }
             else if (p == "All")
