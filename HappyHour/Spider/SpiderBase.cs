@@ -330,7 +330,7 @@ namespace HappyHour.Spider
 
             if (bUpdated && SearchMedia != null)
             {
-                SearchMedia.Reload();
+                await SearchMedia.ReloadAsync();
             }
 
             if (!Browser.SetNextSpider(SearchMedia))

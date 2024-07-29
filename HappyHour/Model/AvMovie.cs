@@ -31,6 +31,11 @@ namespace HappyHour.Model
         public List<string> Files { get; set; } = [];
         public List<string> Subtitles { get; set; } = [];
 
+        public string ColoredFileState
+        {
+            get => Files.IsNullOrEmpty() ? "MistyRose" : "AliceBlue";
+        }
+
         private Movie _movieInfo;
         public Movie MovieInfo
         {
@@ -40,6 +45,12 @@ namespace HappyHour.Model
                 SetProperty(ref _movieInfo, value);
                 UpdateProperties();
             }
+        }
+        ImageBlob _imageBlob;
+        public ImageBlob ImageBlob
+        {
+            get => _imageBlob;
+            set => SetProperty(ref _imageBlob, value);
         }
 
         public AvMovie(string path) : base()
@@ -158,8 +169,9 @@ namespace HappyHour.Model
             }
             catch (Exception ex)
             {
-                Log.Print($"{ex.Message}");
+                //Log.Print($"{ex.Message}");
             }
+            if (files == null) return;
 
             foreach (string file in files)
             {

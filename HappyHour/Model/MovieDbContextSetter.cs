@@ -303,6 +303,10 @@ namespace HappyHour.Model
                 dbName = ActorNames
                         .Include(an => an.Name)
                         .Include(an => an.Actor)
+                            .ThenInclude(a => a.Names)
+                                .ThenInclude(n => n.Name)
+                        .Include(an => an.Actor)
+                            .ThenInclude(a => a.Movies)
                         .FirstOrDefault(an => an.Name.Text == sname.Item1);
                 if (dbName != null) break;
             }
@@ -327,18 +331,16 @@ namespace HappyHour.Model
             else
             {
                 dbActor = dbName.Actor;
-                Entry(dbActor).Collection(a => a.Names).Load();
-                Entry(dbActor).Collection(a => a.Movies).Load();
                 foreach (var aname in names)
                 {
                     var sname = GetNameLang(aname, lang);
-                    if (ActorNames.Any(an => an.Name.Text == sname.Item1))
+                    if (dbActor.Names.Any(an => an.Name.Text == sname.Item1))
                     {
                         Log.Print($"{aname} alread exists!");
                         continue;
                     }
 
-                    ActorNames.Add(new ActorName()
+                    dbActor.Names.Add(new ActorName()
                     {
                         Name = new ShortText() { Lang = sname.Item2, Text = sname.Item1 },
                         Actor = dbActor

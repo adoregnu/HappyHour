@@ -36,12 +36,6 @@ namespace HappyHour.Model
             set => SetProperty(ref _briefInfo, value);
         }
 
-        ImageBlob _imageBlob;
-        public ImageBlob ImageBlob
-        {
-            get => _imageBlob;
-            set => SetProperty(ref _imageBlob, value);
-        }
 
         public bool IsPlayable
         {
