@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using System.Windows;
 using CefSharp;
 
 using HappyHour.Interfaces;
@@ -66,7 +66,8 @@ namespace HappyHour.Spider
             }
             if (_toDownload == _numDownloaded)
             {
-                UiServices.Invoke(() => _spider.UpdateItems(_items));
+                Application.Current.Dispatcher.InvokeAsync(
+                     async () =>  await _spider.UpdateItems(_items));
             }
         }
 
@@ -81,7 +82,7 @@ namespace HappyHour.Spider
             return false;
         }
 
-        public void Download(SpiderBase spider, IDictionary<string, object> items)
+        public async Task Download(SpiderBase spider, IDictionary<string, object> items)
         { 
             if (_toDownload != _numDownloaded)
             {
@@ -103,7 +104,7 @@ namespace HappyHour.Spider
                 return;
             }
 
-            if (items.ContainsKey("images") && items["images"] is List<object> images)
+            if (items.TryGetValue("images", out object ivalue) && ivalue is List<object> images)
             {
                 _toDownload = images.Count;
             }
@@ -111,16 +112,17 @@ namespace HappyHour.Spider
             {
                 images = null;
             }
-            if (items.ContainsKey("files") && items["files"] is List<object> files)
+            if (items.TryGetValue("files", out object fvalue) && fvalue is List<object> files)
             {
-                files.ForEach(f =>
+                //files.ForEach(f =>
+                foreach (var file in files)
                 {
-                    if (f is IJavascriptCallback cb)
+                    if (file is IJavascriptCallback cb)
                     {
                         _toDownload++;
-                        cb.ExecuteAsync();
+                        await cb.ExecuteAsync();
                     }
-                });
+                }
             }
 
             int i = 0;

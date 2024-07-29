@@ -62,7 +62,7 @@ namespace HappyHour.Model
 
             if (media != null)
             {
-                await media.Reload(files);
+                await media.ReloadAsync(files);
                 return media;
             }
             return null;

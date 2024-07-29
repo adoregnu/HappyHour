@@ -7,6 +7,7 @@ using System.Windows.Input;
 using CefSharp;
 using HappyHour.Interfaces;
 using HappyHour.ViewModel;
+using System.Threading.Tasks;
 
 namespace HappyHour.Spider
 {
@@ -55,7 +56,7 @@ namespace HappyHour.Spider
                 if (!string.IsNullOrEmpty(PidToStop) &&
                     pid.Equals(PidToStop, StringComparison.OrdinalIgnoreCase))
                 {
-                    OnScrapCompleted(false);
+                    await OnScrapCompleted(false);
                     return;
                 }
 
@@ -72,7 +73,7 @@ namespace HappyHour.Spider
                 }
                 if (_numDuplicatedPid > 3 && StopOnExistingId)
                 {
-                    OnScrapCompleted(false);
+                    await OnScrapCompleted(false);
                     return;
                 }
                 File.WriteAllText(fileName, item.magnet.ToString());
@@ -90,18 +91,18 @@ namespace HappyHour.Spider
             }
             else
             {
-                OnScrapCompleted(false);
+                await OnScrapCompleted(false);
             }
         }
 
-        public override bool OnJsMessageReceived(JavascriptMessageReceivedEventArgs msg)
+        public async override ValueTask<bool> OnJsMessageReceived(JavascriptMessageReceivedEventArgs msg)
         {
             dynamic d = msg.Message;
             Log.Print($"{d.type} : {d.data}");
 
             if (d.type == "items" && d.data == 0)
             {
-                OnScrapCompleted(false);
+                await OnScrapCompleted(false);
             }
             else
             {

@@ -26,7 +26,7 @@ namespace HappyHour.ViewModel
             }
         }
 
-        async private Task OnSelectMovies()
+        private async Task OnSelectMovies()
         {
             Movies.Clear();
         }

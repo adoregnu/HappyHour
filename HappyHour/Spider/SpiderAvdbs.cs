@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using HappyHour.ViewModel;
 using Scriban;
@@ -77,7 +78,7 @@ namespace HappyHour.Spider
             crop.Save(realPath);
         }
 
-        protected override void UpdateDb(IDictionary<string, object> items)
+        protected async override Task UpdateDb(IDictionary<string, object> items)
         {
             _ = IterateDynamic(items, (key, dict) =>
             {
@@ -88,7 +89,7 @@ namespace HappyHour.Spider
                 }
                 return false;
             });
-            base.UpdateDb(items);
+            await base.UpdateDb(items);
         }
     }
 }

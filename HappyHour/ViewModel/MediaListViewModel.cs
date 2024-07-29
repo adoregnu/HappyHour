@@ -293,7 +293,7 @@ namespace HappyHour.ViewModel
             }
             else
             {
-                await media.Reload();
+                await media.ReloadAsync();
             }
         }
 
@@ -478,7 +478,7 @@ namespace HappyHour.ViewModel
             LoadItems(await _db.GetMovies(null, 40));
         }
 
-        private async void OnScrapCompleted(SpiderBase spider)
+        private async Task OnScrapCompleted(SpiderBase spider)
         {
             if (_mediasToSearch.Count > 0)
             {
@@ -494,7 +494,7 @@ namespace HappyHour.ViewModel
             {
                 _forceStopScrapping = false;
                 _mediasToSearch = [.. SelectedMedias];
-                spider.ScrapCompleted += OnScrapCompleted;
+                spider.ScrapCompleted = OnScrapCompleted;
             }
 
             if (!_forceStopScrapping && _mediasToSearch.Count > 0)
@@ -504,7 +504,7 @@ namespace HappyHour.ViewModel
             }
             else
             {
-                spider.ScrapCompleted -= OnScrapCompleted;
+                spider.ScrapCompleted = null;
                 MainView.StatusMessage = "";
                 _mediasToSearch = null;
             }

@@ -70,14 +70,17 @@ namespace HappyHour.Model
             }
         }
 
-        public async override Task Reload(string[] files = null)
+        public async override Task ReloadAsync(string[] files = null)
+        {
+            await Task.Run(() => ReloadAsync(files));
+        }
+
+        public override void Reload(string[] files = null)
         {
             Torrents.Clear();
             Screenshots.Clear();
-            await Task.Run(() => {
-                files ??= Directory.GetFiles(Path, "*",
-                    new EnumerationOptions { RecurseSubdirectories = true });
-            });
+            files ??= Directory.GetFiles(Path, "*",
+                new EnumerationOptions { RecurseSubdirectories = true });
 
             bool torrent_sht = false;
             foreach (string file in files)

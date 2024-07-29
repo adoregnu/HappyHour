@@ -14,6 +14,7 @@ namespace HappyHour.Interfaces
 
         string GenPosterPath(string ext, bool isScreenshot = false);
         string GenActorThumbPath(string name, string ext);
-        Task Reload(string[] files = null);
+        void Reload(string[] files = null);
+        Task ReloadAsync(string[] files = null);
     }
 }

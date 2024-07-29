@@ -8,6 +8,7 @@ using CefSharp;
 using HappyHour.Spider;
 using HappyHour.CefHandler;
 using HappyHour.Interfaces;
+using System.Threading.Tasks;
 
 namespace HappyHour.ViewModel
 {
@@ -125,7 +126,7 @@ namespace HappyHour.ViewModel
             WebBrowser.LoadingStateChanged += (s, e) =>
                 UiServices.Invoke(() => OnStateChanged(s, e), true);
             WebBrowser.JavascriptMessageReceived += (s, e) =>
-                UiServices.Invoke(() => OnJavascriptMessageReceived(s, e), true);
+                Application.Current.Dispatcher.InvokeAsync(async () => await OnJavascriptMessageReceived(s, e));
             //WebBrowser.FrameLoadEnd += OnFrameLoaded;
             SelectedSpider = Spiders[0];
             SelectedSpider.SetCookies();
@@ -172,8 +173,7 @@ namespace HappyHour.ViewModel
             }
         }
 
-        private void OnJavascriptMessageReceived(object sender,
-            JavascriptMessageReceivedEventArgs e)
+        private async Task OnJavascriptMessageReceived(object sender, JavascriptMessageReceivedEventArgs e)
         {
             try
             {
@@ -188,7 +188,7 @@ namespace HappyHour.ViewModel
                 }
                 else
                 {
-                    SelectedSpider.OnJsMessageReceived(e);
+                    await SelectedSpider.OnJsMessageReceived(e);
                 }
             }
             catch (Exception ex)

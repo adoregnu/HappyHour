@@ -6,6 +6,8 @@ using CefSharp;
 
 using HappyHour.ViewModel;
 using HappyHour.Interfaces;
+using System.Windows;
+using System.Threading.Tasks;
 
 namespace HappyHour.Spider
 {
@@ -93,17 +95,19 @@ namespace HappyHour.Spider
         {
             if (e.IsComplete)
             {
-                _numDownloaded++;
                 Log.Print($"{_spider.SearchMedia.Pid} : Download Completed: " +
                     $"({_numDownloaded}/{_numDownload}){e.FullPath}");
                 lock (_timer)
                 {
-                    if (_numDownloaded == _numDownload)
+                    _numDownloaded++;
+                    if (_numDownloaded != _numDownload)
                     {
-                        _timer.Enabled = false;
-                        UiServices.Invoke(() => _spider.UpdateItems(_items));
+                        return;
                     }
+                    _timer.Enabled = false;
                 }
+
+                Application.Current.Dispatcher.InvokeAsync(async () => await _spider.UpdateItems(_items));
             }
         }
 
@@ -118,8 +122,7 @@ namespace HappyHour.Spider
                 {
                     if (_item2download.Contains(key))
                     {
-                        if (dic[key].ToString().StartsWith("http",
-                            System.StringComparison.OrdinalIgnoreCase))
+                        if (dic[key].ToString().StartsWith("http", System.StringComparison.OrdinalIgnoreCase))
                         {
                             _ = dic.Remove(key);
                             Log.Print($"{_spider.Name}: Downloading is timed out! Removing {key}");
@@ -127,13 +130,13 @@ namespace HappyHour.Spider
                     }
                     return false;
                 });
-
                 _numDownloaded = _numDownload = 0;
-                UiServices.Invoke(() => _spider.UpdateItems(_items));
             }
+
+            Application.Current.Dispatcher.InvokeAsync(async () => await _spider.UpdateItems(_items));
         }
 
-        public void Download(SpiderBase spider, IDictionary<string, object> items)
+        public async Task Download(SpiderBase spider, IDictionary<string, object> items)
         {
             if (_numDownload != _numDownloaded)
             {
@@ -175,7 +178,7 @@ namespace HappyHour.Spider
             }
             else
             {
-                spider.UpdateItems(items);
+                await spider.UpdateItems(items);
             }
         }
     }

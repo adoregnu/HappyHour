@@ -12,10 +12,11 @@ using HappyHour.Model;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace HappyHour.Spider
 {
-    internal delegate void ScrapCompletedHandler(SpiderBase spider);
+    internal delegate Task ScrapCompletedHandler(SpiderBase spider);
     internal class ScrapItem : NotifyPropertyChanged
     {
         private bool _canUpdate;
@@ -108,7 +109,7 @@ namespace HappyHour.Spider
             Browser = br;
             _downloader ??= new DefaultDownloader(br);
             CmdSearch = new RelayCommand(() => { Navigate2(); });
-            CmdStopSpider = new RelayCommand(() => OnScrapCompleted(false));
+            CmdStopSpider = new RelayCommand(async() => await OnScrapCompleted(false));
             CmdScrap = new RelayCommand(() =>
             {
                 IsSpiderWorking = true;
@@ -316,7 +317,7 @@ namespace HappyHour.Spider
             return FollowLink();
         }
 
-        async protected virtual void OnScrapCompleted(bool bUpdated)
+        protected async virtual Task OnScrapCompleted(bool bUpdated)
         {
             if (SearchMedia != null && SearchMedia.IsPlayable && FollowLink())
             {
@@ -329,13 +330,13 @@ namespace HappyHour.Spider
 
             if (bUpdated && SearchMedia != null)
             {
-                await SearchMedia.Reload();
+                SearchMedia.Reload();
             }
 
             if (!Browser.SetNextSpider(SearchMedia))
             {
                 SearchMedia = null;
-                ScrapCompleted?.Invoke(this);
+                await ScrapCompleted?.Invoke(this);
             }
         }
 
@@ -343,12 +344,12 @@ namespace HappyHour.Spider
         {
             if (IsSpiderWorking && !string.IsNullOrEmpty(ScriptName))
             {
-                Browser.ExecJavaScript(GetScript(ScriptName), bSuccess => {
+                Browser.ExecJavaScript(GetScript(ScriptName), async bSuccess => {
                     if (!bSuccess)
                     {
                         IsSpiderWorking = false;
                         SearchMedia = null;
-                        ScrapCompleted?.Invoke(this);
+                        await ScrapCompleted?.Invoke(this);
                     }
                 });
             }
@@ -390,7 +391,7 @@ namespace HappyHour.Spider
             });
         }
 
-        public virtual bool OnJsMessageReceived(JavascriptMessageReceivedEventArgs msg)
+        public async virtual ValueTask<bool> OnJsMessageReceived(JavascriptMessageReceivedEventArgs msg)
         {
             dynamic d = msg.Message;
             Log.Print($"{d.type} : {d.data}");
@@ -404,7 +405,7 @@ namespace HappyHour.Spider
                 if (d.data == 0)
                 {
                     Log.Print($"{Name}: {Keyword}: No exact matched ID");
-                    OnScrapCompleted(true);
+                    await OnScrapCompleted(true);
                     return true;
                 }
                 if (SearchMedia == null)
@@ -417,7 +418,7 @@ namespace HappyHour.Spider
                 {
                     ApplyItemSettings(d);
                     //SkipDownloadIfNeeded(d);
-                    Downloader.Download(this, d);
+                    await Downloader.Download(this, d);
                 }
                 catch (Exception ex)
                 {
@@ -432,27 +433,27 @@ namespace HappyHour.Spider
         {
         }
 
-        protected virtual void UpdateDb(IDictionary<string, object> items)
+        protected async virtual Task UpdateDb(IDictionary<string, object> items)
         {
             items["path"] = SearchMedia.Path;
             items["pid"] = SearchMedia.Pid;
-            App.Current.DbContext.SetMovie(items);
+            await App.Current.DbContext.SetMovie(items);
         }
 
-        public void UpdateItems(IDictionary<string, object> items)
+        public async Task UpdateItems(IDictionary<string, object> items)
         {
             if (_saveDb && SearchMedia is AvMovie)
             {
                 try
                 {
-                    UpdateDb(items);
+                    await UpdateDb(items);
                 }
                 catch (Exception ex)
                 {
                     Log.Print($"{Name}: UpdateItem", ex);
                 }
             }
-            OnScrapCompleted(true);
+            await OnScrapCompleted(true);
         }
 
         public override string ToString()

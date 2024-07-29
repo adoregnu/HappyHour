@@ -15,6 +15,7 @@ using HappyHour.CefHandler;
 using CefSharp.Handler;
 using CommunityToolkit.Mvvm.Input;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace HappyHour.Spider
 {
@@ -183,7 +184,7 @@ namespace HappyHour.Spider
             return true;
         }
 
-        private void MoveNextItem()
+        private async void MoveNextItem()
         {
             List<object> list = _currPage.data;
             if (list.Count > _index)
@@ -215,11 +216,11 @@ namespace HappyHour.Spider
 
             if (!_scrapRunning)
             {
-                OnScrapCompleted(false);
+                await OnScrapCompleted(false);
             }
         }
 
-        public override bool OnJsMessageReceived(JavascriptMessageReceivedEventArgs msg)
+        public async override ValueTask<bool> OnJsMessageReceived(JavascriptMessageReceivedEventArgs msg)
         {
             dynamic d = msg.Message;
             if (d.type == "url")
@@ -239,7 +240,7 @@ namespace HappyHour.Spider
             {
                 if (d.data == 0)
                 {
-                    OnScrapCompleted(false);
+                    await OnScrapCompleted(false);
                     return true;
                 }
                 Log.Print($"{Name}: article {_pid} = {d.pid}");
@@ -257,9 +258,9 @@ namespace HappyHour.Spider
             return false;
         }
 
-        protected override void OnScrapCompleted(bool bUpdated)
+        protected async override Task OnScrapCompleted(bool bUpdated)
         {
-            base.OnScrapCompleted(bUpdated);
+            await base.OnScrapCompleted(bUpdated);
             (Browser.WebBrowser.LifeSpanHandler, _popupHandler) = (_popupHandler, Browser.WebBrowser.LifeSpanHandler);
             _downloadTimer.Change(Timeout.Infinite, Timeout.Infinite);
         }

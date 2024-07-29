@@ -86,6 +86,7 @@ namespace HappyHour.Model
             return $@"{App.Current.LocalAppData}\db\{rname.Replace(' ', '_')}{ext}";
         }
 
-        public abstract Task Reload(string[] files);
+        public abstract void Reload(string[] files);
+        public abstract Task ReloadAsync(string[] files);
     }
 }

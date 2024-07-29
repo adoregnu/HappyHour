@@ -68,7 +68,6 @@ namespace HappyHour.ViewModel
             Anchors.Add(new ConsoleLogViewModel());
 
             Docs.Add(_mediaListMv);
-            //Docs.Add(new PlayerViewModel { MediaList = _mediaListMv });
             //Docs.Add(new BrowserBase());
             Docs.Add(new ScreenshotViewModel { MediaList = _mediaListMv });
             Docs.Add(new SpiderViewModel

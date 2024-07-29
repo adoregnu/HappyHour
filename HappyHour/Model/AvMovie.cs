@@ -174,7 +174,12 @@ namespace HappyHour.Model
             }
         }
 
-        async public override Task Reload(string[] files)
+        public override void Reload(string[] files)
+        {
+            LoadFiles(files);
+        }
+
+        public async override Task ReloadAsync(string[] files)
         {
             LoadFiles(files);
 

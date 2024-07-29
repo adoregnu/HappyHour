@@ -116,7 +116,7 @@ namespace HappyHour.Model
             SaveChanges();
         }
 
-        public void MargeLabels(List<Label> labels, Action<Label> OnDelete = null)
+        public async void MargeLabels(List<Label> labels, Action<Label> OnDelete = null)
         {
             var target = labels[0];
             labels.RemoveAt(0);
@@ -133,15 +133,17 @@ namespace HappyHour.Model
                         target.Makers.Add(maker);
                     }
                 }
-                foreach (var movie in label.Movies)
-                {
-                    movie.Label = target;
-                    target.Movies.Add(movie);
-                }
                 if (label.Logo != null)
                 {
                     Images.Remove(label.Logo);
                 }
+                var movies = await GetMovies(label);
+                foreach (var movie in movies)
+                {
+                    movie.Label = target;
+                    target.Movies.Add(movie);
+                }
+
                 Labels.Remove(label);
                 OnDelete?.Invoke(label);
             }
@@ -525,7 +527,7 @@ namespace HappyHour.Model
         }
 
 
-        public void SetMovie(IDictionary<string, object> data)
+        public async Task SetMovie(IDictionary<string, object> data)
         {
             if (!data.TryGetValue("pid", out object pid) || pid == null)
             {
@@ -565,7 +567,7 @@ namespace HappyHour.Model
                 Movies.Add(movie);
             }
 
-            SaveChanges();
+            await SaveChangesAsync();
         }
 
         public void RemoveMovie(Movie movie)
