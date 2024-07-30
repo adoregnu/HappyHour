@@ -32,7 +32,7 @@ namespace HappyHour.ViewModel
             }
         }
 
-        public ScreenshotViewModel()
+        public ScreenshotViewModel(IMainView mainView) : base(mainView)
         {
             Title = "Screenshot";
         }

@@ -1,11 +1,12 @@
 ﻿using CefSharp;
 using CommunityToolkit.Mvvm.Messaging;
+using HappyHour.Interfaces;
 
 namespace HappyHour.ViewModel
 {
     class StatusLogViewModel : TextViewModel, IRecipient<StatusMessageEventArgs>
     {
-        public StatusLogViewModel()
+        public StatusLogViewModel(IMainView mainView) : base(mainView)
         {
             Title = "CEF Status Log";
             Messenger.Register(this);

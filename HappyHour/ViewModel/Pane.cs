@@ -11,10 +11,11 @@ namespace HappyHour.ViewModel
         public IMainView MainView { get; set; }
         public ICommand CmdClose { get; set; }
 
-        public Pane()
+        public Pane(IMainView mainView)
         {
             Title = "Unknown";
             CmdClose = new RelayCommand(() => OnClose());
+            MainView = mainView;
         }
 
         private string _title = null;

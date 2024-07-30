@@ -19,7 +19,7 @@ using System.Threading;
 namespace HappyHour.ViewModel
 {
 
-    partial class DbViewModel : Pane, IDbView, IAsyncRecipient<AsyncViewMessage>
+    partial class DbViewModel : Pane, IDbView
     {
         string _selectedType = "Movies";
         string _searchText;
@@ -78,7 +78,7 @@ namespace HappyHour.ViewModel
        public ICommand CmdReload { get; private set; }
        public ICommand CmdRemove { get; private set; }
         public ICommand CmdReloadAll { get; private set; }
-        public DbViewModel()
+        public DbViewModel(IMainView mainView) : base(mainView) 
         {
             Title = "Database";
             //ListType = [.. _typeToPropertyName.Keys];
@@ -101,17 +101,16 @@ namespace HappyHour.ViewModel
             CmdSeriesoDubleClicked = new RelayCommand(OnSeriesoDubleClicked);
 
             CmdAddSeriesNameTranslated = new RelayCommand(OnAddSeriesNameTranslated);
-
-            Messenger.Register(this);
+            MainView.ViewEventHandler += ReceiveAsync;
         }
 
-        public async Task ReceiveAsync(AsyncViewMessage msg, CancellationToken ct)
+        async void ReceiveAsync(object sender, ViewEventArgs e)
         {
-            if (msg.Value.Message != "Refresh")
+            if (e.Message != "Refresh")
             {
                 return;
             }
-            Log.Print($"DbViewModel received {msg.Value.Message}");
+            Log.Print($"DbViewModel received {e.Message}");
             await OnReloadAll();
         }
 

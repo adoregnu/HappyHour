@@ -9,6 +9,7 @@ using HappyHour.View;
 using HappyHour.Interfaces;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using System;
 
 namespace HappyHour.ViewModel
 {
@@ -46,6 +47,8 @@ namespace HappyHour.ViewModel
         }
 #endif
         public IDialogService DialogService { get; set; }
+        public EventHandler<ViewEventArgs> ViewEventHandler { get; set; }
+
         private readonly FileListViewModel _fileListMv;
         private readonly MediaListViewModel _mediaListMv;
         private readonly DbViewModel _dbViewModel;
@@ -55,22 +58,22 @@ namespace HappyHour.ViewModel
             DialogService = dialogService;
             Docs.CollectionChanged += OnCollectionChanged;
 
-            _fileListMv = new FileListViewModel();
-            _mediaListMv = new MediaListViewModel { FileList = _fileListMv, };
-            _dbViewModel = new DbViewModel { MediaList = _mediaListMv };
+            _fileListMv = new FileListViewModel(this);
+            _mediaListMv = new MediaListViewModel(this) { FileList = _fileListMv };
+            _dbViewModel = new DbViewModel(this)  { MediaList = _mediaListMv, MainView = this };
             _fileListMv.MediaList = _mediaListMv;
 
             Anchors.Add(_fileListMv);
             //Anchors.Add(_dbViewMode);
 
-            Anchors.Add(new DebugLogViewModel());
-            Anchors.Add(new StatusLogViewModel());
-            Anchors.Add(new ConsoleLogViewModel());
+            Anchors.Add(new DebugLogViewModel(this));
+            Anchors.Add(new StatusLogViewModel(this));
+            Anchors.Add(new ConsoleLogViewModel(this));
 
             Docs.Add(_mediaListMv);
             //Docs.Add(new BrowserBase());
-            Docs.Add(new ScreenshotViewModel { MediaList = _mediaListMv });
-            Docs.Add(new SpiderViewModel
+            Docs.Add(new ScreenshotViewModel(this) { MediaList = _mediaListMv });
+            Docs.Add(new SpiderViewModel(this)
             {
                 MediaList = _mediaListMv,
                 DbView = _dbViewModel
@@ -119,7 +122,7 @@ namespace HappyHour.ViewModel
                 }
             }
 
-            var browser = new BrowserBase
+            var browser = new BrowserBase(this)
             {
                 CanClose = true,
                 IsActive = true
@@ -154,13 +157,13 @@ namespace HappyHour.ViewModel
 #endif
         private void OnFileToFolder()
         {
-            var dialog = new FileToFolderViewModel { MediaPath = _fileListMv.CurrPath };
+            var dialog = new FileToFolderViewModel(this) { MediaPath = _fileListMv.CurrPath };
             _ = DialogService.ShowDialog<FileToFolderDialog>(this, dialog);
         }
 
         private void OnActorEditor()
         {
-            var dialog = new ActorEditorViewModel
+            var dialog = new ActorEditorViewModel(this)
             {
                 MediaList = _mediaListMv,
                 DialogService = DialogService

@@ -1,8 +1,9 @@
-﻿using ICSharpCode.AvalonEdit.Document;
+﻿using HappyHour.Interfaces;
+using ICSharpCode.AvalonEdit.Document;
 
 namespace HappyHour.ViewModel
 {
-    class TextViewModel : Pane
+    class TextViewModel(IMainView mainView) : Pane(mainView)
     {
         protected int _lastLineCount = 1;
         protected TextDocument _document = new();
@@ -11,6 +12,7 @@ namespace HappyHour.ViewModel
         {
             get { return _document; }
         }
+
         protected void AppendText(string line)
         {
             _document.Insert(_document.TextLength, line);

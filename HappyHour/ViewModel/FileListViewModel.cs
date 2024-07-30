@@ -109,7 +109,7 @@ namespace HappyHour.ViewModel
         public ICommand CmdRefreshDir { get; set; }
         public ICommand CmdDownToSubfolder { get; set; }
         public ICommand CmdRename { get; set; }
-        public FileListViewModel()
+        public FileListViewModel(IMainView mainView) : base(mainView)
         {
             Title = "Files";
             FileList = new ObservableCollection<FileSystemInfo>();

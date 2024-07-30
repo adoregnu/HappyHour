@@ -43,6 +43,8 @@ namespace HappyHour.ViewModel
 
         private readonly MovieDbContext _db = App.Current.DbContext;
 
+        public EventHandler<ViewEventArgs> ViewEventHandler { get; set; }
+
         public IAvMedia SelectedMedia
         {
             get => _selectedMedia;
@@ -146,7 +148,7 @@ namespace HappyHour.ViewModel
         public MediaListItemSelected ItemSelectedHandler { get; set; }
         public MediaListItemSelected ItemDoubleClickedHandler { get; set; }
 
-        public MediaListViewModel()
+        public MediaListViewModel(IMainView mainView) : base(mainView)
         {
             Title = "AVList";
             MediaList = [];
@@ -485,7 +487,9 @@ namespace HappyHour.ViewModel
                 _mediasToSearch.RemoveAt(0);
             }
             OnScrapAvInfo(spider);
-            await Messenger.SendAsync(new AsyncViewMessage(new ViewEventArgs("Refresh", null)));
+            await MainView.ViewEventHandler
+                .InvokeAsync(this, new ViewEventArgs("Refresh", null), false, false)
+                .ConfigureAwait(false);
         }
 
         private void OnScrapAvInfo(SpiderBase spider)

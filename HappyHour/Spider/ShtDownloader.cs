@@ -114,7 +114,6 @@ namespace HappyHour.Spider
             }
             if (items.TryGetValue("files", out object fvalue) && fvalue is List<object> files)
             {
-                //files.ForEach(f =>
                 foreach (var file in files)
                 {
                     if (file is IJavascriptCallback cb)

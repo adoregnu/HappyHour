@@ -36,16 +36,15 @@ namespace HappyHour.ViewModel
             private set => SetProperty(ref _dialogResult, value);
         }
 
-        public ObservableCollection<FileItem> Files { get; set; }
+        public ObservableCollection<FileItem> Files { get; set; } = [];
 
         public ICommand CmdPreview { get; set; }
         public ICommand CmdRename { get; set; }
 
         public string MediaPath { get; set; }
         public string Pattern { get; set; }
-        public FileToFolderViewModel()
+        public FileToFolderViewModel(IMainView mainView) : base(mainView)
         {
-            Files = new ObservableCollection<FileItem>();
             /// query current path to MediaViewModel
 
             CmdPreview = new RelayCommand(() => OnPreview());

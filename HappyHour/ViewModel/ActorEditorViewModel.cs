@@ -49,7 +49,7 @@ namespace HappyHour.ViewModel
         }
     }
 
-    internal class ActorEditorViewModel : ObservableRecipient, IModalDialogViewModel, IAsyncRecipient<AsyncViewMessage>
+    internal class ActorEditorViewModel : ObservableRecipient, IModalDialogViewModel
     {
         private string _searchText;
         private bool? _dialogResult = false;
@@ -117,6 +117,7 @@ namespace HappyHour.ViewModel
         }
 
         public IMediaList MediaList { get; set; }
+        public IMainView MainView { get; set; }
         public IDialogService DialogService { get; set; }
 
         public ICommand CmdDoubleClick { get; private set; }
@@ -127,8 +128,9 @@ namespace HappyHour.ViewModel
         public ICommand CmdDeleteNameOfActor { get; private set; }
         public ICommand CmdClosed { get; private set; }
 
-        public ActorEditorViewModel()
+        public ActorEditorViewModel(IMainView mainView)
         {
+            MainView = mainView;
             CmdDoubleClick = new RelayCommand(OnDoubleClicked);
             CmdSearchNameDoubleClick = new RelayCommand(OnSearchNameDoubleClicked);
             CmdMergeActors = new RelayCommand<object>(
@@ -149,17 +151,17 @@ namespace HappyHour.ViewModel
                 ActorEditor = this,
                 Initial = "All",
             });
-            //Messenger.Register(this);
+            MainView.ViewEventHandler += ReceiveAsync;//(s, e) => { };
         }
 
-        public async Task ReceiveAsync(AsyncViewMessage msg, CancellationToken ct)
+        async void ReceiveAsync(object sender, ViewEventArgs e)
         {
-            if (msg.Value.Message != "Refresh")
+            if (e.Message != "Refresh")
             {
                 return;
             }
 
-            Log.Print($"ActorEditorViewModel received {msg.Value.Message}");
+            Log.Print($"ActorEditorViewModel received {e.Message}");
             List<ActorInitial> initials = [];
             ActorInitials.ForEach(i => { if (i.IsChecked) initials.Add(i); });
             OnClearActors();

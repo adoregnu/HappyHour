@@ -1,13 +1,14 @@
 ﻿using log4net;
 using CefSharp;
 using CommunityToolkit.Mvvm.Messaging;
+using HappyHour.Interfaces;
 
 namespace HappyHour.ViewModel
 {
     class ConsoleLogViewModel : TextViewModel, IRecipient<ConsoleMessageEventArgs>
     {
         static readonly ILog logger = LogManager.GetLogger("CefConsoleLogger");
-        public ConsoleLogViewModel()
+        public ConsoleLogViewModel(IMainView mainView) : base(mainView)
         {
             Title = "CEF Console Log";
             Messenger.Register(this);

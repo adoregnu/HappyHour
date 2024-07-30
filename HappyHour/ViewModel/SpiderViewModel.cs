@@ -50,7 +50,7 @@ namespace HappyHour.ViewModel
 
         public IDbView DbView { get; set; }
         public ScrapCompletedHandler OnScrapCompleted; 
-        public SpiderViewModel() : base()
+        public SpiderViewModel(IMainView mainView) : base(mainView)
         {
             Spiders =
             [

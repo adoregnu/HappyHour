@@ -5,6 +5,7 @@ using CefSharp.Wpf;
 
 using HappyHour.CefHandler;
 using CommunityToolkit.Mvvm.Messaging;
+using HappyHour.Interfaces;
 
 namespace HappyHour.ViewModel
 {
@@ -39,7 +40,7 @@ namespace HappyHour.ViewModel
 
         public IRequestHandler RequestHandler { get; set; }
 
-        public BrowserBase()
+        public BrowserBase(IMainView mainview) : base(mainview) 
         {
             Title = "Browser";
             HeaderType = "base";

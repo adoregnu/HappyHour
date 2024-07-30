@@ -1,11 +1,12 @@
 ﻿using System.Linq;
+using HappyHour.Interfaces;
 using log4net;
 
 namespace HappyHour.ViewModel
 {
     class DebugLogViewModel : TextViewModel
     {
-        public DebugLogViewModel()
+        public DebugLogViewModel(IMainView mainView) : base(mainView) 
         {
             Title = "Debug";
             var appenders = LogManager.GetRepository().GetAppenders();
