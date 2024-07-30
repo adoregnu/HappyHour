@@ -101,10 +101,10 @@ namespace HappyHour.ViewModel
             CmdSeriesoDubleClicked = new RelayCommand(OnSeriesoDubleClicked);
 
             CmdAddSeriesNameTranslated = new RelayCommand(OnAddSeriesNameTranslated);
-            MainView.ViewEventHandler += ReceiveAsync;
+            MainView.OnViewUpdate += ReceiveAsync;
         }
 
-        async void ReceiveAsync(object sender, ViewEventArgs e)
+        async void ReceiveAsync(ViewEventArgs e)
         {
             if (e.Message != "Refresh")
             {

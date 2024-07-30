@@ -47,7 +47,7 @@ namespace HappyHour.ViewModel
         }
 #endif
         public IDialogService DialogService { get; set; }
-        public EventHandler<ViewEventArgs> ViewEventHandler { get; set; }
+        public ViewEventHandler OnViewUpdate { get; set; }
 
         private readonly FileListViewModel _fileListMv;
         private readonly MediaListViewModel _mediaListMv;

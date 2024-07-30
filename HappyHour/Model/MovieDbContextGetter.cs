@@ -138,7 +138,7 @@ namespace HappyHour.Model
         {
             //string escaped = string.Join("\\", ppath.Split(separator));
             return await Movies
-                .Where(m => EF.Functions.Like(m.VideoUrl, $"{ppath}%"))
+                .Where(m => EF.Functions.Like(m.VideoUrl, $"{ppath}%", "|"))
                 .OrderBy(m => m.VideoUrl)
                 .Select(m => m.VideoUrl)
                 .ToListAsync();

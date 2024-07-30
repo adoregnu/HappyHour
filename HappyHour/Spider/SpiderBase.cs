@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace HappyHour.Spider
 {
-    internal delegate Task ScrapCompletedHandler(SpiderBase spider);
+    internal delegate void ScrapCompletedHandler(SpiderBase spider);
     internal class ScrapItem : NotifyPropertyChanged
     {
         private bool _canUpdate;
@@ -336,7 +336,7 @@ namespace HappyHour.Spider
             if (!Browser.SetNextSpider(SearchMedia))
             {
                 SearchMedia = null;
-                await ScrapCompleted?.Invoke(this);
+                ScrapCompleted?.Invoke(this);
             }
         }
 
@@ -344,12 +344,12 @@ namespace HappyHour.Spider
         {
             if (IsSpiderWorking && !string.IsNullOrEmpty(ScriptName))
             {
-                Browser.ExecJavaScript(GetScript(ScriptName), async bSuccess => {
+                Browser.ExecJavaScript(GetScript(ScriptName), bSuccess => {
                     if (!bSuccess)
                     {
                         IsSpiderWorking = false;
                         SearchMedia = null;
-                        await ScrapCompleted?.Invoke(this);
+                        ScrapCompleted?.Invoke(this);
                     }
                 });
             }

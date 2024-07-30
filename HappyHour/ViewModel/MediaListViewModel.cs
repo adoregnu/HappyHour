@@ -480,16 +480,17 @@ namespace HappyHour.ViewModel
             LoadItems(await _db.GetMovies(null, 40));
         }
 
-        private async Task OnScrapCompleted(SpiderBase spider)
+        private void OnScrapCompleted(SpiderBase spider)
         {
             if (_mediasToSearch.Count > 0)
             {
                 _mediasToSearch.RemoveAt(0);
             }
             OnScrapAvInfo(spider);
-            await MainView.ViewEventHandler
-                .InvokeAsync(this, new ViewEventArgs("Refresh", null), false, false)
-                .ConfigureAwait(false);
+            MainView.OnViewUpdate(new ViewEventArgs("Refresh", null));
+                //.Invoke(this, new ViewEventArgs("Refresh", null));
+                //.InvokeAsync(this, new ViewEventArgs("Refresh", null), true, true)
+                //.ConfigureAwait(false);
         }
 
         private void OnScrapAvInfo(SpiderBase spider)

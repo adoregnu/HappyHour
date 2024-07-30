@@ -151,10 +151,10 @@ namespace HappyHour.ViewModel
                 ActorEditor = this,
                 Initial = "All",
             });
-            MainView.ViewEventHandler += ReceiveAsync;//(s, e) => { };
+            //MainView.OnViewUpdate += ReceiveAsync;//(s, e) => { };
         }
 
-        async void ReceiveAsync(object sender, ViewEventArgs e)
+        async void ReceiveAsync(ViewEventArgs e)
         {
             if (e.Message != "Refresh")
             {

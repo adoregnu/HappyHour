@@ -78,6 +78,15 @@ namespace HappyHour.Spider
             crop.Save(realPath);
         }
 
+        protected override void AdjustKeyword()
+        {
+            const string Value = "V";
+            if (Keyword.EndsWith(Value))
+            {
+                Keyword = Keyword[..^1];
+            }
+        }
+
         protected async override Task UpdateDb(IDictionary<string, object> items)
         {
             _ = IterateDynamic(items, (key, dict) =>
