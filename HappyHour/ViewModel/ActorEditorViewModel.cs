@@ -196,7 +196,7 @@ namespace HappyHour.ViewModel
 
             if (isSelected)
             {
-                var actors = await _db.GetActors(p == "All" ? null : p,50);
+                var actors = await _db.GetActors(p == "All" ? null : p, 50);
                 actors?.ForEach(Actors.Add);
             }
             else if (p == "All")

@@ -11,6 +11,23 @@ using HappyHour.Spider;
 
 namespace HappyHour.Converter
 {
+    internal class ActorToNumMovie : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is Actor actor)
+            {
+                if (actor.Movies != null && actor.Movies.Count > 0)
+                {
+                    return $"{actor.Movies.Count}";
+                }
+            }
+            return null; 
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) =>
+            throw new NotImplementedException();
+    }
 
     internal class AvMediaTypeConverter : IValueConverter
     {

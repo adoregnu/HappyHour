@@ -77,6 +77,59 @@ namespace HappyHour.ViewModel
             }
         }
 
+        private string _searchMaker;
+        public string SearchMaker
+        {
+            get => _searchMaker;
+            set
+            {
+                SetProperty(ref _searchMaker, value);
+                if (!string.IsNullOrEmpty(value))
+                {
+                    Application.Current.Dispatcher.InvokeAsync(async () => AllMakers = await _db.GetMakers(value));
+                }
+            }
+        }
+
+        private string _searchLabel;
+        public string SearchLabel
+        {
+            get => _searchLabel;
+            set
+            {
+                SetProperty(ref _searchLabel, value);
+                if (!string.IsNullOrEmpty(value))
+                {
+                    Application.Current.Dispatcher.InvokeAsync(async () => Labels = await _db.GetLabels(value));
+                }
+            }
+        }
+        private string _searchGenre;
+        public string SearchGenre
+        {
+            get => _searchGenre;
+            set
+            {
+                SetProperty(ref _searchGenre, value);
+                if (!string.IsNullOrEmpty(value))
+                {
+                    Application.Current.Dispatcher.InvokeAsync(async () => AllGenres = await _db.GetGenres(value));
+                }
+            }
+        }
+        private string _searchSeries;
+        public string SearchSeries
+        {
+            get => _searchSeries;
+            set
+            {
+                SetProperty(ref _searchSeries, value);
+                if (!string.IsNullOrEmpty(value))
+                {
+                    Application.Current.Dispatcher.InvokeAsync(async () => AllSeries = await _db.GetSeries(value));
+                }
+            }
+        }
         public bool? DialogResult
         {
             get => _dialogResult;

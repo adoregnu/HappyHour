@@ -126,17 +126,15 @@ namespace HappyHour.Model
                     .OrderBy(n => n.Name.Text)
                     .ToListAsync();
 
-                var actors = names.Select(n => n.Actor).Distinct();
+                var actors = names.Select(n => n.Actor).Distinct().OrderByDescending(a => a.Key);
                 if (!actors.Any()) return [];
-                return actors.ToList();
+                return [.. actors];
             }
         }
 
 
-        private static readonly char[] separator = ['\\'];
         public async ValueTask<List<string>> GetMovieUrls(string ppath)
         {
-            //string escaped = string.Join("\\", ppath.Split(separator));
             return await Movies
                 .Where(m => EF.Functions.Like(m.VideoUrl, $"{ppath}%", "|"))
                 .OrderBy(m => m.VideoUrl)
@@ -173,7 +171,7 @@ namespace HappyHour.Model
                 .Include(m => m.Cover)
                 .Include(m => m.Series)
                 .Include(m => m.Plot)
-                .Include(m => m.Title);
+                .Include(m => m.Title.OrderByDescending(t => t.Lang));
 
             IQueryable<Movie> mquery = null;
             if (exp != null)
@@ -223,7 +221,7 @@ namespace HappyHour.Model
         public async ValueTask<List<Genre>> GetGenres(Movie movie)
         {
             return await MovieGenres
-                .Include(g => g.Name)
+                .Include(g => g.Name.OrderByDescending(n => n.Lang))
                 .Include(g => g.Movies)
                 .Where(g => g.Movies.Contains(movie))
                 .ToListAsync();
@@ -232,15 +230,22 @@ namespace HappyHour.Model
         public async ValueTask<List<Genre>> GetGenres(string keyword = null)
         {
             var query = MovieGenres
-                .Include(g => g.Name)
+                .Include(g => g.Name.OrderByDescending(n => n.Lang))
                 .Include(g => g.Movies);
 
+            IQueryable<Genre> where = null;
             if (keyword != null)
             {
-                query.Where(g => g.Name.Any(n => EF.Functions.Like(n.Text, $"%{keyword}%")));
+                where = query.Where(g => g.Name.Any(n => EF.Functions.Like(n.Text, $"%{keyword}%")));
             }
-
-            return await query.ToListAsync();
+            if (where != null)
+            {
+                return await where.ToListAsync();
+            }
+            else
+            {
+                return await query.ToListAsync();
+            }
         }
 
         public async ValueTask<List<Series>> GetSeries(string keyword = null)
@@ -248,12 +253,20 @@ namespace HappyHour.Model
             var query = Series
                 .Include(s => s.Movies)
                 .Include(s => s.Name);
+
+            IQueryable<Series> where = null;
             if (keyword != null)
             {
-                query.Where(s => s.Name.Any(n => EF.Functions.Like(n.Text, $"%{keyword}%")));
+                where = query.Where(s => s.Name.Any(n => EF.Functions.Like(n.Text, $"%{keyword}%")));
             }
-
-            return await query.ToListAsync();
+            if (where != null)
+            {
+                return await where.ToListAsync();
+            }
+            else
+            {
+                return await query.ToListAsync();
+            }
         }
         public Maker GetMaker(string keyword)
         {
@@ -267,21 +280,48 @@ namespace HappyHour.Model
 
         public async ValueTask<List<Maker>> GetMakers(string keyword = null)
         {
-            return await Makers
+            var query = Makers
                 .Include(m => m.Name)
                 .Include(m => m.Logo)
                 .Include(m => m.Labels)
-                    .ThenInclude(lb => lb.Movies)
-                .ToListAsync();
+                    .ThenInclude(lb => lb.Movies);
+
+            IQueryable<Maker> where = null;
+            if (!string.IsNullOrEmpty(keyword))
+            {
+                where = query.Where(m => m.Name.Any(n => EF.Functions.Like(n.Text, $"%{keyword}%")));
+            }
+            if (where != null)
+            {
+                return await where.ToListAsync();
+            }
+            else
+            {
+                return await query.ToListAsync();
+            }
         }
         public async ValueTask<List<Label>> GetLabels(string keyword = null)
         {
-            return await Labels
+            var query = Labels
                 .Include(l => l.Name)
                 .Include(l => l.Logo)
-                .Include(l => l.Movies)
-                .ToListAsync();
+                .Include(l => l.Movies);
+
+            IQueryable<Label> where = null;
+            if (!string.IsNullOrEmpty(keyword))
+            {
+                where = query.Where(l => l.Name.Any(n => EF.Functions.Like(n.Text, $"%{keyword}%")));
+            }
+            if (where != null)
+            {
+                return await where.ToListAsync();
+            }
+            else
+            {
+                return await query.ToListAsync();
+            }
         }
+
         public List<Label> GetLabels(Maker maker)
         {
             var tmp = Makers

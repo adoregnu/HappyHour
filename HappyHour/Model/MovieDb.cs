@@ -96,9 +96,12 @@ namespace HappyHour.Model
             foreach (var name in Names)
             {
                 aname = name;
-                if (name.Priority == 0)
+                if (name.Name.Lang == "ko")
                 {
-                    aname = name;
+                    break;
+                }
+                if (name.Name.Lang == "en")
+                {
                     break;
                 }
             }
@@ -163,6 +166,10 @@ namespace HappyHour.Model
         public float Rate { set; get; }
         public string SiteUrl { set; get; }
         public Movie Movie { set; get; }
+        public override string ToString()
+        {
+            return $"{Rate} ({SiteUrl})";
+        }
     }
 
     public class Movie

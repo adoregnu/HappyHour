@@ -17,20 +17,9 @@ namespace HappyHour.ViewModel
         public Genre SelectedGenre
         {
             get => _selectedGenre;
-            set
-            {
-                SetProperty(ref _selectedGenre, value);
-                GenreNames = value.Name;
-            }
+            set => SetProperty(ref _selectedGenre, value);
         }
         public ObservableCollection<Genre> Genres { get; set; } = [];
-
-        IEnumerable<ShortText> _genreNames;
-        public IEnumerable<ShortText> GenreNames 
-        {
-            get => _genreNames;
-            set => SetProperty(ref _genreNames, value);
-        }
 
         public ICommand CmdGenresMerge { get; private set; }
         public ICommand CmdGenreDoubleClicked { get; private set; }
