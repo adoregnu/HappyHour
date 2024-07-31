@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using HappyHour.ViewModel;
@@ -80,8 +81,8 @@ namespace HappyHour.Spider
 
         protected override void AdjustKeyword()
         {
-            const string Value = "V";
-            if (Keyword.EndsWith(Value))
+            string[] ends = { "V", "E" };
+            if (ends.Any(e => Keyword.EndsWith(e)))
             {
                 Keyword = Keyword[..^1];
             }

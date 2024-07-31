@@ -13,10 +13,8 @@
             <Setter Property="Background" Value="White"/>
         </Style>
     </UserControl.Resources>
-        <ComboBox ItemsSource="{Binding TextSource,
-            RelativeSource={RelativeSource AncestorType=local:LangComboBox}}"
-                  IsSynchronizedWithCurrentItem="True"
-                  Style="{StaticResource ComboBoxStyle}">
+        <ComboBox ItemsSource="{Binding TextSource, RelativeSource={RelativeSource AncestorType=local:LangComboBox}}"
+                  IsSynchronizedWithCurrentItem="True" Style="{StaticResource ComboBoxStyle}">
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <Grid>

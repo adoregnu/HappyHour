@@ -100,10 +100,6 @@ namespace HappyHour.Model
                 {
                     break;
                 }
-                if (name.Name.Lang == "en")
-                {
-                    break;
-                }
             }
             return aname.ToString();
         }

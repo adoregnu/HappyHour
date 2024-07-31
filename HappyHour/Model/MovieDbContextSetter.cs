@@ -16,7 +16,16 @@ namespace HappyHour.Model
     {
         public void MergeActors(List<Actor> actors, Action<Actor> onDelete = null)
         {
-            var target = actors.First(a => a.Thumb != null);
+            Actor target = null;
+            try
+            {
+                target = actors.First(a => a.Thumb != null);
+            }
+            catch (InvalidOperationException ex)
+            {
+                target = actors.First();
+            }
+
             foreach (var actor in actors)
             {
                 if (actor == target) continue;
