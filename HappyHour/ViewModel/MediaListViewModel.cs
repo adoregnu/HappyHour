@@ -461,13 +461,16 @@ namespace HappyHour.ViewModel
             Log.Print("Search orphanage media done!");
         }
 
-        public void LoadItems(List<Movie> movies)
+        public async void LoadItems(List<Movie> movies)
         {
             MediaList.Clear();
-            foreach (var movie in movies)
+            await Task.Run(() =>
             {
-                AddMedia(movie);
-            }
+                foreach (var movie in movies)
+                {
+                    AddMedia(movie);
+                }
+            });
         }
 
         private async void OnSearchEmptyActor()
