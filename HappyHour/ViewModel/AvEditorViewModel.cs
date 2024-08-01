@@ -158,7 +158,7 @@ namespace HappyHour.ViewModel
             (await _db.GetMakers()).ForEach(AllMakers.Add);
             //(await _db.GetLabels()).ForEach(AllLabels.Add);
             (await _db.GetSeries()).ForEach(AllSeries.Add);
-            (await _db.GetGenres()).ForEach(AllGenres.Add);
+            //(await _db.GetGenres()).ForEach(AllGenres.Add);
             //(await _db.GetActors()).ForEach(AllActors.Add);
             return this;
         }

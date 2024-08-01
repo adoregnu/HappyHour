@@ -160,6 +160,7 @@ namespace HappyHour.Model
                 .Include(m => m.Series)
                 .Include(m => m.Title)
                 .Include(m => m.Plot)
+                .Include(m => m.Ratings)
                 .Where(m => m.PID == pid)
                 .FirstOrDefaultAsync();
         }
@@ -285,7 +286,7 @@ namespace HappyHour.Model
         public async ValueTask<List<Maker>> GetMakers(string keyword = null)
         {
             var query = Makers
-                .Include(m => m.Name)
+                .Include(m => m.Name.OrderByDescending(n => n.Lang))
                 .Include(m => m.Logo)
                 .Include(m => m.Labels)
                     .ThenInclude(lb => lb.Movies);
@@ -307,7 +308,7 @@ namespace HappyHour.Model
         public async ValueTask<List<Label>> GetLabels(string keyword = null)
         {
             var query = Labels
-                .Include(l => l.Name)
+                .Include(l => l.Name.OrderByDescending(n => n.Lang))
                 .Include(l => l.Logo)
                 .Include(l => l.Movies);
 
@@ -330,7 +331,7 @@ namespace HappyHour.Model
         {
             var tmp = Makers
                 .Include(m => m.Labels)
-                    .ThenInclude(lb => lb.Name)
+                    .ThenInclude(lb => lb.Name.OrderByDescending(n => n.Lang))
                 .Include(m => m.Labels)
                     .ThenInclude(lb => lb.Movies)
                 .FirstOrDefault(m => m == maker);

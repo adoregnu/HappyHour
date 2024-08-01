@@ -36,8 +36,8 @@
                 <RowDefinition Height="2*"/>
             </Grid.RowDefinitions>
             <TextBlock Grid.Row="0" HorizontalAlignment="Center" Margin="5,5,0,5">Maker/Label</TextBlock>
-            <ListBox Grid.Row="1" ItemsSource="{Binding Makers}" Margin="5,0,0,5"
-                     SelectedItem="{Binding SelectedMaker}" SelectionMode="Extended">
+            <ListBox Grid.Row="1" ItemsSource="{Binding Makers}" Margin="5,0,0,5" ItemTemplate="{StaticResource _langText}"
+                     SelectedItem="{Binding SelectedMaker}" SelectionMode="Extended" ItemContainerStyle="{StaticResource _stretch}">
                 <ListBox.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="Merge Makers"
@@ -56,8 +56,8 @@
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
             </ListBox>
-            <ListBox Grid.Row="2" ItemsSource="{Binding Labels}" Margin="5,0,0,5"
-                     SelectedItem="{Binding SelectedLabel}" SelectionMode="Extended">
+            <ListBox Grid.Row="2" ItemsSource="{Binding Labels}" Margin="5,0,0,5" ItemTemplate="{StaticResource _langText}"
+                     SelectedItem="{Binding SelectedLabel}" SelectionMode="Extended" ItemContainerStyle="{StaticResource _stretch}">
                 <ListBox.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="Merge Labels"

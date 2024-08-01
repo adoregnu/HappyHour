@@ -33,10 +33,10 @@ namespace HappyHour.View.Controls
               "TextSource",
               typeof(IEnumerable<MText>),
               typeof(LangComboBox),
-              new PropertyMetadata(null, OnShortTextChanged));
+              new PropertyMetadata(null, OnTextSourceChanged));
 
 
-        private static void OnShortTextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        private static void OnTextSourceChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             //var lbox = sender as LangComboBox;
         }
