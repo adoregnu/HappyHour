@@ -9,9 +9,6 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Data;
 
-using Microsoft.EntityFrameworkCore;
-
-//using GalaSoft.MvvmLight.Command;
 
 using MvvmDialogs.FrameworkDialogs.FolderBrowser;
 
@@ -486,16 +483,20 @@ namespace HappyHour.ViewModel
             LoadItems(await _db.GetMovies(null, 40));
         }
 
-        private void OnScrapCompleted(SpiderBase spider)
+        private void OnScrapCompleted(SpiderBase spider, bool bSuccess)
         {
-            if (_mediasToSearch.Count > 0)
+            if (bSuccess)
             {
-                _mediasToSearch.RemoveAt(0);
+                if (_mediasToSearch.Count > 0)
+                {
+                    _mediasToSearch.RemoveAt(0);
+                }
+                MainView.OnViewUpdate(new ViewEventArgs("Refresh", null));
             }
-            MainView.OnViewUpdate(new ViewEventArgs("Refresh", null));
-                //.Invoke(this, new ViewEventArgs("Refresh", null));
-                //.InvokeAsync(this, new ViewEventArgs("Refresh", null), true, true)
-                //.ConfigureAwait(false);
+            else
+            {
+                _mediasToSearch.Clear();
+            }
             OnScrapAvInfo(spider);
         }
 
@@ -505,19 +506,16 @@ namespace HappyHour.ViewModel
             {
                 _forceStopScrapping = false;
                 _mediasToSearch = [.. SelectedMedias];
-                Spider.OnScanCompleted = OnScrapCompleted;
-                //spider.ScrapCompleted = OnScrapCompleted;
+                Spider.OnScrapCompleted = OnScrapCompleted;
             }
 
             if (!_forceStopScrapping && _mediasToSearch.Count > 0)
             {
                 MainView.StatusMessage = $"{_mediasToSearch.Count} remained";
-                //spider.Navigate2(_mediasToSearch[0]);
                 Spider.Scan(spider, _mediasToSearch[0]);
             }
             else
             {
-                //spider.ScrapCompleted = null;
                 Spider.ScanDone(spider);
                 MainView.StatusMessage = "";
                 _mediasToSearch = null;

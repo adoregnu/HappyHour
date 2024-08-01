@@ -53,14 +53,6 @@ namespace HappyHour.Spider
         public ObservableCollection<SpiderBase> SpiderChain { get; set; } = [];
 
         public SpiderViewModel Browser { get; private set; }
-        public ScrapCompletedHandler ScrapCompleted
-        {
-            get => Browser.OnScrapCompleted;
-            set
-            {
-                Browser.OnScrapCompleted = value;
-            }
-        }
         public IRequestHandler ReqeustHandler;
         public IAvMedia SelectedMedia
         {
@@ -335,7 +327,7 @@ namespace HappyHour.Spider
             if (!Browser.SetNextSpider(SearchMedia))
             {
                 SearchMedia = null;
-                ScrapCompleted?.Invoke(this);
+                Browser.OnScrapCompleted?.Invoke(this, true);
             }
         }
 
@@ -348,7 +340,7 @@ namespace HappyHour.Spider
                     {
                         IsSpiderWorking = false;
                         SearchMedia = null;
-                        ScrapCompleted?.Invoke(this);
+                        Browser.OnScrapCompleted?.Invoke(this, false);
                     }
                 });
             }

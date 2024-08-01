@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 
 namespace HappyHour.Interfaces
 {
-    internal delegate void ScrapCompletedHandler(SpiderBase spider);
+    internal delegate void ScrapCompletedHandler(SpiderBase spider, bool bSuccess);
 
     interface ISpider
     {
-        ScrapCompletedHandler OnScanCompleted { get; set; }
+        ScrapCompletedHandler OnScrapCompleted { get; set; }
         void Scan(SpiderBase spider, IAvMedia media);
         void ScanDone(SpiderBase spider);
     }
