@@ -166,11 +166,8 @@ namespace HappyHour.Model
             {
                 files ??= Directory.GetFiles(Path);
                 _date = File.GetCreationTime(Path);
-            }
-            catch (Exception ex)
-            {
-                //Log.Print($"{ex.Message}");
-            }
+            } catch { }
+
             if (files == null) return;
 
             foreach (string file in files)

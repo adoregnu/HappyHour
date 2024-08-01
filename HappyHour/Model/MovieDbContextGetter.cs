@@ -8,6 +8,10 @@ using System.Threading.Tasks;
 
 namespace HappyHour.Model
 {
+    public enum ActorOrderType
+    {
+        Key, NumMovies, NumNames
+    };
     public partial class MovieDbContext : DbContext
     {
         public List<ActorName> GetActorNames(string keyword)
@@ -95,43 +99,43 @@ namespace HappyHour.Model
                 .ToListAsync();
         }
 
-        public async ValueTask<List<Actor>> GetActors(string keyword = null, int limit = 0)
+        public async ValueTask<List<Actor>> GetActors(string keyword = null,
+            ActorOrderType order = ActorOrderType.Key, int limit = 0)
         {
-            if (string.IsNullOrEmpty(keyword))
+            var query = Actors
+               .Include(a => a.Names)
+                   .ThenInclude(n => n.Name)
+               .Include(a => a.Movies)
+               .Include(a => a.Thumb)
+               .Where(a => a.Movies.Count() > 0);
+
+            IQueryable<Actor> where = null;
+            if (!string.IsNullOrEmpty(keyword))
             {
-                var query = Actors
-                   .Include(a => a.Names)
-                       .ThenInclude(n => n.Name)
-                   .Include(a => a.Movies)
-                   .Include(a => a.Thumb)
-                   .Where(a => a.Movies.Count() > 0)
-                   .OrderByDescending(a => a.Key);
-                if (limit > 0)
-                     return await query.Take(limit).ToListAsync();
-                else 
-                    return await query.ToListAsync();
+                where = query
+                    .Where(a => a.Names.Any(n => EF.Functions.Like(n.Name.Text, $"{keyword}%")));
+            }
+
+            IOrderedQueryable<Actor> OrderBy(IQueryable<Actor> query)
+            {
+                return order switch
+                {
+                    ActorOrderType.NumMovies => query.OrderByDescending(a => a.Movies.Count()),
+                    ActorOrderType.NumNames => query.OrderByDescending(a => a.Names.Count()),
+                    _ => query.OrderByDescending(a => a.Key),
+                };
+            }
+
+            IOrderedQueryable<Actor> orderBy = OrderBy(where ?? query);
+            if (limit > 0)
+            {
+                return await orderBy.Take(limit).ToListAsync();
             }
             else
             {
-                var names = await ActorNames
-                    .Include(n => n.Actor)
-                        .ThenInclude(a => a.Names)
-                            .ThenInclude(n => n.Name)
-                    .Include(n => n.Actor)
-                        .ThenInclude(a => a.Movies)
-                    .Include(n => n.Actor)
-                        .ThenInclude(a => a.Thumb)
-                    .Where(n => EF.Functions.Like(n.Name.Text, $"{keyword}%"))
-                    .Where(n => n.Actor.Movies.Count() > 0)
-                    .OrderBy(n => n.Name.Text)
-                    .ToListAsync();
-
-                var actors = names.Select(n => n.Actor).Distinct().OrderByDescending(a => a.Key);
-                if (!actors.Any()) return [];
-                return [.. actors];
+                return await orderBy.ToListAsync();
             }
         }
-
 
         public async ValueTask<List<string>> GetMovieUrls(string ppath)
         {

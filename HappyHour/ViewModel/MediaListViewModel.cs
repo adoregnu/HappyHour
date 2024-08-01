@@ -130,6 +130,9 @@ namespace HappyHour.ViewModel
                 }
             }
         }
+
+        public ISpider Spider { get; set; }
+
         public ICommand CmdExternalPlayer { get; set; }
         public ICommand CmdCopyPath { get; set; }
         public ICommand CmdExclude { get; set; }
@@ -489,11 +492,11 @@ namespace HappyHour.ViewModel
             {
                 _mediasToSearch.RemoveAt(0);
             }
-            OnScrapAvInfo(spider);
             MainView.OnViewUpdate(new ViewEventArgs("Refresh", null));
                 //.Invoke(this, new ViewEventArgs("Refresh", null));
                 //.InvokeAsync(this, new ViewEventArgs("Refresh", null), true, true)
                 //.ConfigureAwait(false);
+            OnScrapAvInfo(spider);
         }
 
         private void OnScrapAvInfo(SpiderBase spider)
@@ -502,17 +505,20 @@ namespace HappyHour.ViewModel
             {
                 _forceStopScrapping = false;
                 _mediasToSearch = [.. SelectedMedias];
-                spider.ScrapCompleted = OnScrapCompleted;
+                Spider.OnScanCompleted = OnScrapCompleted;
+                //spider.ScrapCompleted = OnScrapCompleted;
             }
 
             if (!_forceStopScrapping && _mediasToSearch.Count > 0)
             {
                 MainView.StatusMessage = $"{_mediasToSearch.Count} remained";
-                spider.Navigate2(_mediasToSearch[0]);
+                //spider.Navigate2(_mediasToSearch[0]);
+                Spider.Scan(spider, _mediasToSearch[0]);
             }
             else
             {
-                spider.ScrapCompleted = null;
+                //spider.ScrapCompleted = null;
+                Spider.ScanDone(spider);
                 MainView.StatusMessage = "";
                 _mediasToSearch = null;
             }

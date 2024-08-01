@@ -12,10 +12,11 @@ using System.Threading.Tasks;
 
 namespace HappyHour.ViewModel
 {
-    internal class SpiderViewModel : BrowserBase
+    internal class SpiderViewModel : BrowserBase, ISpider
     {
         private IMediaList _mediaList;
         private SpiderBase _selectedSpider;
+        private SpiderBase _chainStartSpider;
         private List<SpiderBase> _spiderChains;
 
         public List<SpiderBase> Spiders { get; set; }
@@ -50,6 +51,7 @@ namespace HappyHour.ViewModel
 
         public IDbView DbView { get; set; }
         public ScrapCompletedHandler OnScrapCompleted; 
+        public ScrapCompletedHandler OnScanCompleted { get; set; }
         public SpiderViewModel(IMainView mainView) : base(mainView)
         {
             Spiders =
@@ -72,6 +74,26 @@ namespace HappyHour.ViewModel
                 s.InitChain(Spiders);
             }
         }
+
+        public void Scan(SpiderBase spider, IAvMedia media)
+        {
+            if (_chainStartSpider != null)
+            {
+                _chainStartSpider.Navigate2(media);
+            }
+            else
+            {
+                _chainStartSpider = spider;
+                spider.Navigate2(media);
+            }
+        }
+
+        public void ScanDone(SpiderBase spider)
+        {
+            _chainStartSpider = null;
+            OnScanCompleted = null;
+        }
+
         public void ResetChain()
         {
             _spiderChains = null;
