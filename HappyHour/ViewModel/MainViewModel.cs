@@ -57,11 +57,15 @@ namespace HappyHour.ViewModel
         {
             DialogService = dialogService;
             Docs.CollectionChanged += OnCollectionChanged;
+            var spider = new SpiderViewModel(this);
 
             _fileListMv = new FileListViewModel(this);
-            _mediaListMv = new MediaListViewModel(this) { FileList = _fileListMv };
+            _mediaListMv = new MediaListViewModel(this) { FileList = _fileListMv , Spider = spider};
             _dbViewModel = new DbViewModel(this)  { MediaList = _mediaListMv, MainView = this };
             _fileListMv.MediaList = _mediaListMv;
+
+            spider.MediaList = _mediaListMv;
+            spider.DbView = _dbViewModel;
 
             Anchors.Add(_fileListMv);
             //Anchors.Add(_dbViewMode);
@@ -73,11 +77,7 @@ namespace HappyHour.ViewModel
             Docs.Add(_mediaListMv);
             //Docs.Add(new BrowserBase());
             Docs.Add(new ScreenshotViewModel(this) { MediaList = _mediaListMv });
-            Docs.Add(new SpiderViewModel(this)
-            {
-                MediaList = _mediaListMv,
-                DbView = _dbViewModel
-            });
+            Docs.Add(spider);
             Docs.Add(_dbViewModel);
 
             CmdActorEdtor = new RelayCommand(OnActorEditor);

@@ -109,7 +109,7 @@ namespace HappyHour.Model
                 {
                     movie.Maker = target;
                 }
-                
+
                 Makers.Remove(maker);
                 onDelete?.Invoke(maker);
             }
@@ -128,7 +128,7 @@ namespace HappyHour.Model
                 }
                 foreach (var maker in label.Makers)
                 {
-                    if (!target.Makers.Any(m  => m == maker))
+                    if (!target.Makers.Any(m => m == maker))
                     {
                         target.Makers.Add(maker);
                     }
@@ -286,12 +286,23 @@ namespace HappyHour.Model
             }
             if (names == null || names.Count == 0) return null;
 
+            string strBirth = null, strDebut = null;
+            if (data.TryGetValue("birth", out object birth) && birth != null)
+            {
+                strBirth = birth.ToString().Trim();
+            }
+
+            if (data.TryGetValue("debut", out object debut) && debut != null)
+            {
+                strDebut = debut.ToString().Trim();
+            }
+
             static Tuple<string, string> GetNameLang(string name_lang, string lang)
             {
                 var name = name_lang.Split(';');
                 if (name.Length > 1)
                 {
-                    lang = name[1];
+                    lang = name[1].Trim();
                 }
                 return new Tuple<string, string>(name[0], lang);
             }
@@ -346,7 +357,10 @@ namespace HappyHour.Model
                         Actor = dbActor
                     });
                 }
+
             }
+            if (strBirth != null) dbActor.DateBirth = ParseDate(strBirth);
+            if (strDebut != null) dbActor.DateDebut = ParseDate(strDebut);
 
             if (data.TryGetValue("thumb", out object thumb) && thumb != null)
             {
@@ -381,7 +395,7 @@ namespace HappyHour.Model
         bool SetActor(Movie movie, IDictionary<string, object> data)
         {
             /*
-            actor : [ { name : name, alias = [ name, ...]}, ... ]
+            actor : [ { name : name, alias = [ name, ...], birth = '', debut = ''}, ... ]
              */
             if (!data.TryGetValue("actor", out object actorList) || actorList == null)
             {
@@ -456,27 +470,31 @@ namespace HappyHour.Model
             dbLable.Movies.Add(movie);
         }
 
-        static void SetReleaseDate(Movie movie, IDictionary<string, object> data)
+        static DateTime ParseDate(string strDate)
         {
-            if (!data.TryGetValue("date", out object date) || date == null)
-            {
-                return;
-            }
+            DateTime dt = DateTime.MinValue;
+            if (string.IsNullOrEmpty(strDate)) return dt;
 
             string[] patterns = ["yyyy-MM-dd", "yyyy/MM/dd", "yyyy.MM.dd", "MMM d yyyy"];
             foreach (string pattern in patterns)
             {
                 try
                 {
-                    movie.DateReleased = DateTime.ParseExact(
-                        date.ToString(), pattern, App.Current.enUS);
-                    break;
+                    return DateTime.ParseExact(strDate, pattern, App.Current.enUS);
                 }
-                catch
-                {
-                    Log.Print($"SetReleaseDate:: Failed to parse \"{date}\"");
-                }
+                catch { }
             }
+            Log.Print($"SetReleaseDate:: Failed to parse \"{strDate}\"");
+            return dt;
+        }
+
+        static void SetReleaseDate(Movie movie, IDictionary<string, object> data)
+        {
+            if (!data.TryGetValue("date", out object date) || date == null)
+            {
+                return;
+            }
+            movie.DateReleased = ParseDate(date.ToString().Trim());
         }
 
         void SetSeries(Movie movie, IDictionary<string, object> data)

@@ -88,6 +88,13 @@ namespace HappyHour.ViewModel
             }
         }
 
+        private ActorOrderType _orderType = ActorOrderType.Key;
+        public ActorOrderType OrderType
+        {
+            get => _orderType;
+            set => SetProperty(ref _orderType, value);
+        }
+
         public List<ActorInitial> ActorInitials { get; private set; }
         public List<SpiderBase> SpiderList { get; set; }
 
@@ -186,17 +193,21 @@ namespace HappyHour.ViewModel
 
         public async Task OnActorAlphabet(string p, bool isSelected)
         {
+            string keyword = p;
+            int limit = 0;
             if (p == "All")
             {
                 foreach (var initial in ActorInitials)
                 {
                     if (initial.Initial != "All") { initial.UnCheck(); }
                 }
+                keyword = null;
+                limit = 50;
             }
 
             if (isSelected)
             {
-                var actors = await _db.GetActors(p == "All" ? null : p, 50);
+                var actors = await _db.GetActors(keyword, OrderType, limit);
                 actors?.ForEach(Actors.Add);
             }
             else if (p == "All")

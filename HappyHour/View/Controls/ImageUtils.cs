@@ -57,7 +57,7 @@ namespace HappyHour.View.Controls
         }
         public static BitmapImage LoadImage(ImageBlob blob, int width)
         {
-            if (blob != null && blob.Data !=null)
+            if (blob != null && blob.Data !=null && blob.Data.Length > 0)
             {
                 try
                 {

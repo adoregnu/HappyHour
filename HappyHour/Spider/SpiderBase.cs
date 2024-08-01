@@ -16,7 +16,6 @@ using System.Threading.Tasks;
 
 namespace HappyHour.Spider
 {
-    internal delegate void ScrapCompletedHandler(SpiderBase spider);
     internal class ScrapItem : NotifyPropertyChanged
     {
         private bool _canUpdate;

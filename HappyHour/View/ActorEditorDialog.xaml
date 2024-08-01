@@ -7,6 +7,7 @@
         xmlns:bh="clr-namespace:HappyHour.View.Behavior"
         xmlns:md="https://github.com/fantasticfiasco/mvvm-dialogs"
         xmlns:local="clr-namespace:HappyHour.View"
+        xmlns:model="clr-namespace:HappyHour.Model"
         xmlns:ctrls="clr-namespace:HappyHour.View.Controls"
         xmlns:converter="clr-namespace:HappyHour.Converter"
         mc:Ignorable="d"
@@ -15,6 +16,7 @@
         Title="View Actors" Height="600" Width="1060">
     <Window.Resources>
         <converter:ActorToNumMovie x:Key="ActorToNumMovie" />
+        <converter:EnumToBooleanConverter x:Key="EnumToBool"/>
         <ControlTemplate x:Key="_controlTpl" TargetType="ListBoxItem">
             <Border Name="_Border" Padding="2" SnapsToDevicePixels="true"
                     Width="128" Height="128">
@@ -62,6 +64,7 @@
             <Grid Grid.Column="0">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <WrapPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center" Margin="5">
@@ -84,8 +87,18 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
                 </WrapPanel>
-
-                <ListBox Margin="5,0,0,5" Grid.Row="1"
+                <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center">
+                    <RadioButton GroupName="OrderBy" Content="Recent"
+                                 IsChecked="{Binding OrderType, Converter={StaticResource EnumToBool},
+                        ConverterParameter={x:Static model:ActorOrderType.Key}}"/>
+                    <RadioButton GroupName="OrderBy" Content="Movies"
+                                 IsChecked="{Binding OrderType, Converter={StaticResource EnumToBool},
+                        ConverterParameter={x:Static model:ActorOrderType.NumMovies}}"/>
+                    <RadioButton GroupName="OrderBy" Content="Names"
+                                 IsChecked="{Binding OrderType, Converter={StaticResource EnumToBool},
+                        ConverterParameter={x:Static model:ActorOrderType.NumNames}}"/>
+                </StackPanel>
+                <ListBox Margin="5,0,0,5" Grid.Row="2"
                     SelectionMode="Extended" x:Name="_actorListbox"
                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                     ItemsPanel="{StaticResource ImagePanelTemplate}"
