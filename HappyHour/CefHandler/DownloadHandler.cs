@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using CefSharp;
+using HappyHour.Interfaces;
 
 namespace HappyHour.CefHandler
 {
@@ -16,10 +17,10 @@ namespace HappyHour.CefHandler
 
         public bool ShowDialog { get; set; } = false;
 
-        //string _basePath;
-        public DownloadHandler()
+        private readonly ISpider _spider = null;
+        public DownloadHandler(ISpider spider)
         {
-            //_basePath = Directory.GetCurrentDirectory() + "\\";
+            _spider = spider;
         }
 
         public bool CanDownload(IWebBrowser chromiumWebBrowser, IBrowser browser, string url, string requestMethod)
@@ -32,7 +33,7 @@ namespace HappyHour.CefHandler
             DownloadItem downloadItem,
             IBeforeDownloadCallback callback)
         {
-            OnBeforeDownloadFired?.Invoke(this, downloadItem);
+            OnBeforeDownloadFired?.Invoke(_spider, downloadItem);
 
             if (callback.IsDisposed)
                 return true;
@@ -62,7 +63,7 @@ namespace HappyHour.CefHandler
                     browser.GetHost().Dispose();
                 }
             }
-            OnDownloadUpdatedFired?.Invoke(this, downloadItem);
+            OnDownloadUpdatedFired?.Invoke(_spider, downloadItem);
             if (downloadItem.IsCancelled)
             {
                 Log.Print($"Cancel downalod {downloadItem.SuggestedFileName}");

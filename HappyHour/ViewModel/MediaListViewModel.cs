@@ -84,34 +84,6 @@ namespace HappyHour.ViewModel
                 RefreshMediaList(_fileList.CurrDirInfo);
             }
         }
-        public bool SorByDateReleased
-        {
-            get => _sortByDateReleased;
-            set
-            {
-                _ = SetProperty(ref _sortByDateReleased, value);
-                if (value)
-                {
-                    AvMovie.DateType = DateType.Released;
-                    SorByDateAdded = !value;
-                    SortMedia();
-                }
-            }
-        }
-        public bool SorByDateAdded
-        {
-            get => _sortByDateAdded;
-            set
-            {
-                _ = SetProperty(ref _sortByDateAdded, value);
-                if (value)
-                {
-                    AvMovie.DateType = DateType.Added;
-                    SorByDateReleased = !value;
-                    SortMedia();
-                }
-            }
-        }
 
         public IFileList FileList
         {
@@ -126,6 +98,44 @@ namespace HappyHour.ViewModel
                     _fileList.FileSelected += OnFileSelected;
                 }
             }
+        }
+
+        private List<string> _sortTypes = ["ReleaseDate", "AddedDate", "Rating"];
+        public List<string> SortTypes
+        {
+            get => _sortTypes;
+            set => SetProperty(ref _sortTypes, value);
+        }
+        private string _selectedSortType;
+        public string SelectedSortType
+        {
+            get => _selectedSortType;
+            set
+            {
+                SetProperty(ref _selectedSortType, value);
+                if (value == "Rating")
+                {
+                    RatingSitesVisibility = Visibility.Visible;
+                }
+            }
+        }
+        private List<string> _ratingSites;
+        public List<string> RatingSites
+        {
+            get => _ratingSites;
+            set => SetProperty(ref _ratingSites, value);
+        }
+        private string  _selectedRatingSite;
+        public string SelectedRatingSite
+        {
+            get => _selectedRatingSite;
+            set => SetProperty(ref _selectedRatingSite, value);
+        }
+        private Visibility _ratingSitesVisibility = Visibility.Collapsed;
+        public Visibility RatingSitesVisibility
+        {
+            get => _ratingSitesVisibility;
+            set => SetProperty(ref _ratingSitesVisibility, value);
         }
 
         public ISpider Spider { get; set; }

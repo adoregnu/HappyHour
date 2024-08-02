@@ -12,6 +12,7 @@ namespace HappyHour.Interfaces
     interface ISpider
     {
         ScrapCompletedHandler OnScrapCompleted { get; set; }
+        IAvMedia AvMedia { get; set; }
         void Scan(SpiderBase spider, IAvMedia media);
         void ScanDone(SpiderBase spider);
     }

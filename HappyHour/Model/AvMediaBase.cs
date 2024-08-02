@@ -42,7 +42,7 @@ namespace HappyHour.Model
             get => this is AvMovie;
         }
 
-        public int CompareTo(IAvMedia media)
+        public virtual int CompareTo(IAvMedia media)
         {
             int result = Date.CompareTo(media.Date);
             return result == 0 ? Pid.CompareTo(media.Pid) : result;

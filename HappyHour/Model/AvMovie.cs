@@ -5,27 +5,37 @@ using System.Linq;
 
 using HappyHour.Extension;
 using System.Threading.Tasks;
-using CefSharp.DevTools.CSS;
+using HappyHour.Interfaces;
 
 namespace HappyHour.Model
 {
-    internal enum DateType { Released, Added, Updated }
-
     internal class AvMovie : AvMediaBase
     {
-        public static DateType DateType = DateType.Released;
-        private string _actresses;
-        private DateTime _date;
+        public static SortType Sort = SortType.ReleasedDate;
         private readonly MovieDbContext _db = App.Current.DbContext;
 
-        public override DateTime Date => _movieInfo == null ? _date
-            : DateType == DateType.Released ? MovieInfo.DateReleased
-            : MovieInfo.DateAdded;
+        private string _actresses;
+        private DateTime _dateCreated;
 
         public string Actresses
         {
             get => _actresses;
             set => SetProperty(ref _actresses, value);
+        }
+
+        public override DateTime Date
+        {
+            get
+            {
+                if (_movieInfo == null) return _dateCreated;
+
+                return Sort switch
+                {
+                    SortType.ReleasedDate => _movieInfo.DateReleased,
+                    SortType.AddedDate => _movieInfo.DateAdded,
+                    _ => _dateCreated
+                };
+            }
         }
 
         public List<string> Files { get; set; } = [];
@@ -123,7 +133,7 @@ namespace HappyHour.Model
             tmp += "\n";
             if (MovieInfo == null)
             {
-                tmp += Date.ToString("u");
+                tmp += _dateCreated.ToString("u");
                 Actresses = "Not Scrapped";
                 ImageBlob = null;
             }
@@ -165,7 +175,7 @@ namespace HappyHour.Model
             try
             {
                 files ??= Directory.GetFiles(Path);
-                _date = File.GetCreationTime(Path);
+                _dateCreated = File.GetCreationTime(Path);
             } catch { }
 
             if (files == null) return;

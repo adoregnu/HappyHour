@@ -51,7 +51,7 @@ namespace HappyHour.Spider
 
         private void OnBeforeDownload(object sender, DownloadItem e)
         {
-            if (!_urls.ContainsKey(e.OriginalUrl))
+            if (!_urls.TryGetValue(e.OriginalUrl, out var dict))
             {
                 Log.Print($"{e.OriginalUrl} not found in download list!");
                 foreach (var url in _urls)
@@ -64,21 +64,20 @@ namespace HappyHour.Spider
 
             lock (_timer)
             {
-                var dict = _urls[e.OriginalUrl];
-                var item = _spider.SearchMedia;
+                var movie = _spider.SearchMedia;
                 if (dict.Item1 == "cover")
                 {
-                    e.SuggestedFileName = item.GenPosterPath(e.SuggestedFileName);
+                    e.SuggestedFileName = movie.GenPosterPath(e.SuggestedFileName);
                     dict.Item2["cover"] = e.SuggestedFileName;
                 }
                 else if (dict.Item1 == "screenshot")
                 {
-                    e.SuggestedFileName = item.GenPosterPath(e.SuggestedFileName, true);
+                    e.SuggestedFileName = movie.GenPosterPath(e.SuggestedFileName, true);
                     dict.Item2["screenshot"] = e.SuggestedFileName;
                 }
                 else if (dict.Item1 == "thumb")
                 {
-                    var path = item.GenActorThumbPath(dict.Item2["name"].ToString(), e.SuggestedFileName);
+                    var path = movie.GenActorThumbPath(dict.Item2["name"].ToString(), e.SuggestedFileName);
                     dict.Item2["thumb"] = Path.GetFileName(path);
                     e.SuggestedFileName = path;
                 }
@@ -111,7 +110,7 @@ namespace HappyHour.Spider
             }
         }
 
-        readonly List<string> _item2download = ["cover", "thumb", "screenshot"];
+        readonly List<string> _item2download = ["cover", "thumb", "screenshot", "picture"];
         private void OnDownloadTimeout(object sender, ElapsedEventArgs e)
         {
             lock (_timer)

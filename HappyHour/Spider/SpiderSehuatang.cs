@@ -61,21 +61,15 @@ namespace HappyHour.Spider
         {
             Name = "sehuatang";
             URL = "https://www.sehuatang.org/";
-            //URL = "https://tupd.xsmy54s.com/tupian/forum/202302/28/205120gxjzpj8jkk558kea.jpg";
             ScriptName = "Sehuatang.js";
+            Boards = [ "censored", "uncensored", "subtitle" ];
 
-            Boards = new List<string>
-            {
-                "censored", "uncensored", "subtitle"
-            };
             CmdStop = new RelayCommand(() => _scrapRunning = false);
             SelectedBoard = "censored";
 
-            ResourcesToBeFiltered = new Dictionary<string, string>();
-            //browser.RequestHandler = new AvRequestHandler(this);
-
+            ResourcesToBeFiltered = [];
             _popupHandler = new OffScreenPopupHandler(Browser);
-            ReqeustHandler = new AvRequestHandler(this);
+            ReqeustHandler = new ShtRequestHandler(this);
             _downloadTimer = new Timer(TimerCallback, null, Timeout.Infinite, Timeout.Infinite);
         }
 

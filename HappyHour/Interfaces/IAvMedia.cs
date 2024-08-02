@@ -3,6 +3,8 @@ using System.Threading.Tasks;
 
 namespace HappyHour.Interfaces
 {
+    enum SortType { ReleasedDate, AddedDate, Rating }
+
     internal interface IAvMedia : IComparable<IAvMedia>
     {
         string Pid { get; set; }

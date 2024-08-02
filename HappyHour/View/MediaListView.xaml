@@ -253,6 +253,7 @@
                       Fill="{Binding Path=Foreground, RelativeSource=
                             {RelativeSource AncestorType={x:Type ToggleButton}}}"/>
             </ToggleButton>
+<!--
             <ToggleButton Style="{DynamicResource ModernToggleButtonStyle2}"
                           IsChecked="{Binding SorByDateReleased, Mode=TwoWay}"
                           ToolTip="Sort by Date Released">
@@ -269,6 +270,13 @@
                       Fill="{Binding Path=Foreground, RelativeSource=
                             {RelativeSource AncestorType={x:Type ToggleButton}}}"/>
             </ToggleButton>
+-->
+            <Label VerticalAlignment="Center">Sort By</Label>
+            <ComboBox ItemsSource="{Binding SortTypes}" SelectedItem="{Binding SelectedSortType}"
+                      IsSynchronizedWithCurrentItem="True" Width="100" Margin="5"/>
+            <ComboBox ItemsSource="{Binding RatingSites}" SelectedItem="{Binding SelectedRatingSite}"
+                      IsSynchronizedWithCurrentItem="True" Width="150" Margin="5"
+                      Visibility="{Binding RatingSitesVisibility}"/>
         </StackPanel>
         <ListBox Grid.Row="1"
             x:Name="ImageListBox"

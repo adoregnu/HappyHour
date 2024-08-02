@@ -1,4 +1,5 @@
-﻿using HappyHour.Interfaces;
+﻿using CefSharp.DevTools.CSS;
+using HappyHour.Interfaces;
 using HappyHour.Model;
 using System;
 using System.Collections.Generic;
@@ -6,6 +7,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 using System.Windows.Markup;
 
@@ -13,7 +15,12 @@ namespace HappyHour.ViewModel
 {
     partial class DbViewModel : Pane, IDbView
     {
-        public ObservableCollection<Maker> Makers { get; set; } = [];
+        private List<Maker> _makers = [];
+        public List<Maker> Makers
+        {
+            get => _makers;
+            set => SetProperty(ref _makers, value);
+        }
         public ObservableCollection<Label> Labels { get; set; } = [];
 
         private Maker _selectedMaker;
@@ -37,6 +44,20 @@ namespace HappyHour.ViewModel
             set => SetProperty(ref _selectedLabel, value);
         }
 
+        private string _searchMaker;
+        public string SearchMaker
+        {
+            get => _searchMaker;
+            set
+            {
+                SetProperty(ref _searchMaker, value);
+                if (!string.IsNullOrEmpty(value))
+                {
+                    Application.Current.Dispatcher.InvokeAsync(async () => Makers = await _db.GetMakers(value));
+                }
+            }
+        }
+
         public ICommand CmdMergeMakers { get; private set; }
         public ICommand CmdMergeLables { get; private set; }
         public ICommand CmdLabelDoubleClicked { get; private set; }
@@ -46,6 +67,7 @@ namespace HappyHour.ViewModel
         {
             var selectedMakers = (m as IList<object>).Select(o => o as Maker).ToList();
             _db.MergeMakers(selectedMakers, m => Makers.Remove(m));
+            OnPropertyChanged(nameof(Makers));
         }
         void OnMergeLabels(object m)
         {
@@ -69,6 +91,7 @@ namespace HappyHour.ViewModel
             Labels.Clear();
             var mlist = await _db.GetMakers();
             mlist.ForEach(Makers.Add);
+            OnPropertyChanged(nameof(Makers));
 
             //var llist = await _db.GetLabels();
             //llist.ForEach(Labels.Add);

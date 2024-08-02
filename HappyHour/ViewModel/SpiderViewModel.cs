@@ -19,6 +19,9 @@ namespace HappyHour.ViewModel
         private SpiderBase _chainStartSpider = null;
         private List<SpiderBase> _spiderChains;
 
+        public ScrapCompletedHandler OnScrapCompleted { get; set; }
+        public IAvMedia AvMedia { get; set; }
+
         public List<SpiderBase> Spiders { get; set; }
         public SpiderBase SelectedSpider
         {
@@ -50,7 +53,6 @@ namespace HappyHour.ViewModel
         }
 
         public IDbView DbView { get; set; }
-        public ScrapCompletedHandler OnScrapCompleted { get; set; }
         public SpiderViewModel(IMainView mainView) : base(mainView)
         {
             Spiders =
@@ -76,6 +78,7 @@ namespace HappyHour.ViewModel
 
         public void Scan(SpiderBase spider, IAvMedia media)
         {
+            AvMedia = media;
             if (_chainStartSpider != null)
             {
                 _chainStartSpider.Navigate2(media);
@@ -89,6 +92,7 @@ namespace HappyHour.ViewModel
 
         public void ScanDone(SpiderBase spider)
         {
+            AvMedia = null;
             _chainStartSpider = null;
             OnScrapCompleted = null;
         }
@@ -140,7 +144,7 @@ namespace HappyHour.ViewModel
         protected override void InitBrowser()
         {
             base.InitBrowser();
-            DownloadHandler = new DownloadHandler();
+            DownloadHandler = new DownloadHandler(this);
             WebBrowser.DownloadHandler = DownloadHandler;
             WebBrowser.MenuHandler = new MenuHandler(this);
 

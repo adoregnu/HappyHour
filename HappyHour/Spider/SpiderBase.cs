@@ -449,7 +449,7 @@ namespace HappyHour.Spider
 
         public override string ToString()
         {
-            return URL;
+            return Name;
         }
 
         public void InitChain(List<SpiderBase> spiders)

@@ -79,10 +79,10 @@ namespace HappyHour.CefHandler
             _spider.UpdateDownload();
         }
     }
-    class AvResourceRequestHandler : ResourceRequestHandler
+    class ShtResourceRequestHandler : ResourceRequestHandler
     {
         readonly SpiderBase _spider;
-        public AvResourceRequestHandler(SpiderBase spider)
+        public ShtResourceRequestHandler(SpiderBase spider)
         {
             _spider = spider;
         }
@@ -112,11 +112,11 @@ namespace HappyHour.CefHandler
             return CefReturnValue.Continue;
         }
     }
-    class AvRequestHandler : RequestHandler
+    class ShtRequestHandler : RequestHandler
     {
 
         readonly SpiderBase _spider;
-        public AvRequestHandler(SpiderBase spider)
+        public ShtRequestHandler(SpiderBase spider)
         {
             _spider = spider;
         }
@@ -130,7 +130,7 @@ namespace HappyHour.CefHandler
                 string requestInitiator,
                 ref bool disableDefaultHandling)
         {
-            return new AvResourceRequestHandler(_spider);
+            return new ShtResourceRequestHandler(_spider);
         }
     }
 }

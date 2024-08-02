@@ -32,11 +32,13 @@
         <Grid Grid.Row="1" Grid.Column="0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
-                <RowDefinition Height="8*"/>
-                <RowDefinition Height="2*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="7*"/>
+                <RowDefinition Height="3*"/>
             </Grid.RowDefinitions>
             <TextBlock Grid.Row="0" HorizontalAlignment="Center" Margin="5,5,0,5">Maker/Label</TextBlock>
-            <ListBox Grid.Row="1" ItemsSource="{Binding Makers}" Margin="5,0,0,5" ItemTemplate="{StaticResource _langText}"
+            <c:DelayedBindingTextBox Grid.Row="1" DelayTime="500" Margin="5,0,0,5" Text="{Binding SearchMaker}"/>
+            <ListBox Grid.Row="2" ItemsSource="{Binding Makers}" Margin="5,0,0,5" ItemTemplate="{StaticResource _langText}"
                      SelectedItem="{Binding SelectedMaker}" SelectionMode="Extended" ItemContainerStyle="{StaticResource _stretch}">
                 <ListBox.ContextMenu>
                     <ContextMenu>
@@ -56,7 +58,7 @@
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
             </ListBox>
-            <ListBox Grid.Row="2" ItemsSource="{Binding Labels}" Margin="5,0,0,5" ItemTemplate="{StaticResource _langText}"
+            <ListBox Grid.Row="3" ItemsSource="{Binding Labels}" Margin="5,0,0,5" ItemTemplate="{StaticResource _langText}"
                      SelectedItem="{Binding SelectedLabel}" SelectionMode="Extended" ItemContainerStyle="{StaticResource _stretch}">
                 <ListBox.ContextMenu>
                     <ContextMenu>
