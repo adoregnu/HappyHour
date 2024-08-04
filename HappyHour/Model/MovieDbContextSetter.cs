@@ -373,8 +373,7 @@ namespace HappyHour.Model
 
             if (data.TryGetValue("thumb", out object thumb) && thumb != null)
             {
-                var path = $"{App.Current.LocalAppData}\\db\\{thumb}";
-                if (SetImageBlob(path) is ImageBlob blob)
+                if (SetImageBlob(thumb.ToString()) is ImageBlob blob)
                 {
                     dbActor.Thumb = blob;
                 }
@@ -393,6 +392,7 @@ namespace HappyHour.Model
             {
                 var blob = File.ReadAllBytes(path);
                 var hash = GenHash(blob);
+                File.Delete(path);
                 if (!Images.Any(i => i.Hash == hash))
                 {
                     return new ImageBlob() { Data = blob, Type = type, Hash = hash };
@@ -546,13 +546,15 @@ namespace HappyHour.Model
             {
                 return;
             }
-            var path = cover.ToString();
-            if (SetImageBlob(path) is ImageBlob blob)
+            if (new FileInfo(cover.ToString()).Length < 10 * 1024)
+            {
+                File.Delete(cover.ToString());
+                return;
+            }
+            if (SetImageBlob(cover.ToString()) is ImageBlob blob)
             {
                 movie.Cover = blob;
             }
-
-            movie.VideoUrl = data["path"].ToString();
         }
 
 

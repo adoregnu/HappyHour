@@ -15,8 +15,8 @@ namespace HappyHour.ViewModel
 {
     partial class DbViewModel : Pane, IDbView
     {
-        private List<Maker> _makers = [];
-        public List<Maker> Makers
+        private ObservableCollection<Maker> _makers = [];
+        public ObservableCollection<Maker> Makers
         {
             get => _makers;
             set => SetProperty(ref _makers, value);
@@ -53,7 +53,12 @@ namespace HappyHour.ViewModel
                 SetProperty(ref _searchMaker, value);
                 if (!string.IsNullOrEmpty(value))
                 {
-                    Application.Current.Dispatcher.InvokeAsync(async () => Makers = await _db.GetMakers(value));
+                    Application.Current.Dispatcher.InvokeAsync(async () =>
+                    {
+                        Makers.Clear();
+                        var makers = await _db.GetMakers(value);
+                        makers.ForEach(Makers.Add);
+                    });
                 }
             }
         }
@@ -89,9 +94,8 @@ namespace HappyHour.ViewModel
         {
             Makers.Clear();
             Labels.Clear();
-            var mlist = await _db.GetMakers();
-            mlist.ForEach(Makers.Add);
-            OnPropertyChanged(nameof(Makers));
+            var makers = await _db.GetMakers();
+            makers.ForEach(Makers.Add);
 
             //var llist = await _db.GetLabels();
             //llist.ForEach(Labels.Add);

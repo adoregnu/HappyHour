@@ -8,6 +8,8 @@ using HappyHour.ViewModel;
 using HappyHour.Interfaces;
 using System.Windows;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Primitives;
+using HappyHour.Model;
 
 namespace HappyHour.Spider
 {
@@ -49,6 +51,10 @@ namespace HappyHour.Spider
             }
         }
 
+        private static string GetTempFileName(string orgName)
+        {
+            return $@"{Path.GetTempPath()}/{Path.GetFileName(orgName)}";
+        }
         private void OnBeforeDownload(object sender, DownloadItem e)
         {
             if (!_urls.TryGetValue(e.OriginalUrl, out var dict))
@@ -67,7 +73,7 @@ namespace HappyHour.Spider
                 var movie = _spider.SearchMedia;
                 if (dict.Item1 == "cover")
                 {
-                    e.SuggestedFileName = movie.GenPosterPath(e.SuggestedFileName);
+                    e.SuggestedFileName = GetTempFileName(e.SuggestedFileName);
                     dict.Item2["cover"] = e.SuggestedFileName;
                 }
                 else if (dict.Item1 == "screenshot")
@@ -77,9 +83,8 @@ namespace HappyHour.Spider
                 }
                 else if (dict.Item1 == "thumb")
                 {
-                    var path = movie.GenActorThumbPath(dict.Item2["name"].ToString(), e.SuggestedFileName);
-                    dict.Item2["thumb"] = Path.GetFileName(path);
-                    e.SuggestedFileName = path;
+                    e.SuggestedFileName = GetTempFileName(e.SuggestedFileName);
+                    dict.Item2["thumb"] = e.SuggestedFileName;
                 }
                 else
                 {

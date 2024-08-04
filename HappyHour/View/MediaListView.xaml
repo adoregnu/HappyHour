@@ -4,7 +4,9 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:md="https://github.com/fantasticfiasco/mvvm-dialogs"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:System="clr-namespace:System;assembly=mscorlib"
              xmlns:bh="clr-namespace:HappyHour.View.Behavior"
+             xmlns:if="clr-namespace:HappyHour.Interfaces"
              xmlns:viewmodel="clr-namespace:HappyHour.ViewModel"
              xmlns:control="clr-namespace:HappyHour.View.Controls"
              xmlns:local="clr-namespace:HappyHour.View"
@@ -196,7 +198,12 @@
                 </ContentControl.Style>
             </ContentControl>
         </DataTemplate>
-
+        <ObjectDataProvider x:Key="_sortTypes" MethodName="GetValues"
+                            ObjectType="{x:Type System:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="if:SortType"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -272,11 +279,11 @@
             </ToggleButton>
 -->
             <Label VerticalAlignment="Center">Sort By</Label>
-            <ComboBox ItemsSource="{Binding SortTypes}" SelectedItem="{Binding SelectedSortType}"
-                      IsSynchronizedWithCurrentItem="True" Width="100" Margin="5"/>
+            <ComboBox ItemsSource="{Binding Source={StaticResource _sortTypes}}" SelectedItem="{Binding SelectedSortType}"
+                  IsSynchronizedWithCurrentItem="True" Width="100" Margin="5"/>
             <ComboBox ItemsSource="{Binding RatingSites}" SelectedItem="{Binding SelectedRatingSite}"
-                      IsSynchronizedWithCurrentItem="True" Width="150" Margin="5"
-                      Visibility="{Binding RatingSitesVisibility}"/>
+                  IsSynchronizedWithCurrentItem="True" Width="150" Margin="5"
+                  Visibility="{Binding RatingSitesVisibility}"/>
         </StackPanel>
         <ListBox Grid.Row="1"
             x:Name="ImageListBox"

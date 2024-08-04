@@ -100,36 +100,42 @@ namespace HappyHour.ViewModel
             }
         }
 
-        private List<string> _sortTypes = ["ReleaseDate", "AddedDate", "Rating"];
-        public List<string> SortTypes
+        public SortType SelectedSortType
         {
-            get => _sortTypes;
-            set => SetProperty(ref _sortTypes, value);
-        }
-        private string _selectedSortType;
-        public string SelectedSortType
-        {
-            get => _selectedSortType;
+            get => AvMediaBase.Sort; 
             set
             {
-                SetProperty(ref _selectedSortType, value);
-                if (value == "Rating")
+                SetProperty(ref AvMediaBase.Sort, value);
+                if (value == SortType.Rating) 
                 {
                     RatingSitesVisibility = Visibility.Visible;
                 }
+                else
+                {
+                    RatingSitesVisibility = Visibility.Collapsed;
+                    SortMedia();
+                }
             }
         }
-        private List<string> _ratingSites;
+        private List<string> _ratingSites = ["javlibrary", "avdbs" ];
         public List<string> RatingSites
         {
             get => _ratingSites;
-            set => SetProperty(ref _ratingSites, value);
+            set
+            {
+                SetProperty(ref _ratingSites, value);
+            }
         }
         private string  _selectedRatingSite;
         public string SelectedRatingSite
         {
             get => _selectedRatingSite;
-            set => SetProperty(ref _selectedRatingSite, value);
+            set
+            {
+                SetProperty(ref _selectedRatingSite, value);
+                AvMovie.SpiderName = value;
+                SortMedia();
+            }
         }
         private Visibility _ratingSitesVisibility = Visibility.Collapsed;
         public Visibility RatingSitesVisibility
@@ -137,7 +143,6 @@ namespace HappyHour.ViewModel
             get => _ratingSitesVisibility;
             set => SetProperty(ref _ratingSitesVisibility, value);
         }
-
         public ISpider Spider { get; set; }
 
         public ICommand CmdExternalPlayer { get; set; }
@@ -176,7 +181,7 @@ namespace HappyHour.ViewModel
             CmdDeleteItem = new RelayCommand<object>(p => Delete(p.ToList<AvMovie>()));
             CmdClearDb = new RelayCommand<object>(p => ClearDb(p.ToList<AvMovie>()));
             CmdEditItem = new RelayCommand<object>(EditMovieInfo);
-            CmdSearchOrphanageMedia = new RelayCommand(SearchOrphanage);
+            CmdSearchOrphanageMedia = new RelayCommand(async () => await SearchOrphanage());
             CmdSearchEmptyActor = new RelayCommand(OnSearchEmptyActor);
             CmdDoubleClick = new RelayCommand(() =>
             {
@@ -193,8 +198,7 @@ namespace HappyHour.ViewModel
                 p => OnScrapAvInfo(p as SpiderBase),
                 p => _mediasToSearch == null);
             CmdStopBatchingScrap = new RelayCommand(
-                () => _forceStopScrapping = true,
-                () => _mediasToSearch != null);
+                () => _forceStopScrapping = true);
         }
 
         private static void PlayMedia(AvMovie media)
@@ -454,7 +458,7 @@ namespace HappyHour.ViewModel
             await UpdateMediaList(msg.FullName, token, bSubFolder);
         }
 
-        private async void SearchOrphanage()
+        private async Task SearchOrphanage()
         {
             CancelTaskIfRunning();
             MediaList.Clear();

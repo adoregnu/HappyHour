@@ -19,6 +19,7 @@ namespace HappyHour.Model
         private string _poster;
         private string _briefInfo;
 
+        public static SortType Sort = SortType.DateCreated;
         public string Pid { get; set; }
         public string Path { get; set; }
         public virtual DateTime Date { get; set; }
@@ -44,8 +45,11 @@ namespace HappyHour.Model
 
         public virtual int CompareTo(IAvMedia media)
         {
-            int result = Date.CompareTo(media.Date);
-            return result == 0 ? Pid.CompareTo(media.Pid) : result;
+            return Sort switch 
+            {
+                SortType.Pid => Pid.CompareTo(media.Pid),
+                _ => Date.CompareTo(media.Date)
+            };
         }
 
         public string GenPosterPath(string fileName, bool isScreenshot = false)

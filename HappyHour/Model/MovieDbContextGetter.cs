@@ -88,6 +88,11 @@ namespace HappyHour.Model
                 .FirstOrDefault();
         }
 
+        public void LoadActorMovie(Actor actor)
+        {
+            Entry(actor).Collection(a => a.Movies).Load();
+        }
+
         public async ValueTask<List<Actor>> GetActors(Movie movie)
         {
             return await Actors
@@ -105,7 +110,7 @@ namespace HappyHour.Model
             var query = Actors
                .Include(a => a.Names)
                    .ThenInclude(n => n.Name)
-               .Include(a => a.Movies)
+               //.Include(a => a.Movies)
                .Include(a => a.Thumb)
                .Where(a => a.Movies.Count() > 0);
 
@@ -176,6 +181,7 @@ namespace HappyHour.Model
                 .Include(m => m.Cover)
                 .Include(m => m.Series)
                 .Include(m => m.Plot)
+                .Include(m => m.Ratings)
                 .Include(m => m.Title.OrderByDescending(t => t.Lang));
 
             IQueryable<Movie> mquery = null;

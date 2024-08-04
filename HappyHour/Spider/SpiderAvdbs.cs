@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -64,19 +65,16 @@ namespace HappyHour.Spider
 
         private void CropImage(string fname)
         {
-            Log.Print($"{Name}: CropImage: {fname}");
-            string realPath = @$"{App.Current.LocalAppData}\db\{fname}";
+            using var ms = new MemoryStream(File.ReadAllBytes(fname));
+            using var org = new Bitmap(ms);
+            File.Delete(fname);
 
-            var org = new Bitmap(realPath);
             if (org.Height <= org.Width) { return; }
 
             //Log.Print($"width: {org.Width}, height:{org.Height}");
             var cropArea = new Rectangle(0, 0, org.Width, org.Width);
-            var crop = org.Clone(cropArea, org.PixelFormat);
-            org.Dispose();
-
-            //Log.Print($"width:{crop.Width}, height:{crop.Height}");
-            crop.Save(realPath);
+            using var crop = org.Clone(cropArea, org.PixelFormat);
+            crop.Save(fname);
         }
 
         protected override void AdjustKeyword()

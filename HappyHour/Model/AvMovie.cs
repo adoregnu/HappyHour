@@ -6,16 +6,18 @@ using System.Linq;
 using HappyHour.Extension;
 using System.Threading.Tasks;
 using HappyHour.Interfaces;
+using CefSharp.DevTools.WebAudio;
+using System.Windows.Navigation;
 
 namespace HappyHour.Model
 {
     internal class AvMovie : AvMediaBase
     {
-        public static SortType Sort = SortType.ReleasedDate;
         private readonly MovieDbContext _db = App.Current.DbContext;
 
         private string _actresses;
         private DateTime _dateCreated;
+        public static string SpiderName = "";
 
         public string Actresses
         {
@@ -31,8 +33,8 @@ namespace HappyHour.Model
 
                 return Sort switch
                 {
-                    SortType.ReleasedDate => _movieInfo.DateReleased,
-                    SortType.AddedDate => _movieInfo.DateAdded,
+                    SortType.DateAdded => _movieInfo.DateAdded,
+                    SortType.DateReleased => _movieInfo.DateReleased,
                     _ => _dateCreated
                 };
             }
@@ -76,6 +78,29 @@ namespace HappyHour.Model
             LoadFiles();
         }
 
+        public Rating GetRate(string spiderName)
+        {
+            if (MovieInfo == null || MovieInfo.Ratings == null) return null;
+            return MovieInfo.Ratings.FirstOrDefault(r => r.SiteUrl.Contains(spiderName));
+        }
+        int CompareRating(IAvMedia media)
+        {
+            string site = SpiderName;
+            var thisRate = GetRate(site);
+            var otherRate = ((AvMovie)media).GetRate(site);
+            if (thisRate == null && otherRate == null) return 0;
+            if (thisRate != null) return -1;
+            if (otherRate != null) return 1;
+            return thisRate.Rate > otherRate.Rate ? -1 : 1;
+        }
+        public override int CompareTo(IAvMedia media)
+        {
+            return Sort switch
+            {
+                SortType.Rating => CompareRating(media),
+                _ => base.CompareTo(media)
+            };
+        }
         public void ClearDb()
         {
             if (MovieInfo != null)
