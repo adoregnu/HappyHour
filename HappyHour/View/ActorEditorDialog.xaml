@@ -134,11 +134,11 @@
             </Grid>
             <DockPanel Grid.Column="1" Width="200">
                 <DockPanel DockPanel.Dock="Top">
-                    <ListBox  Height="150" Margin="5,10,5,0"
-                              ItemsSource="{Binding ActorNames}"
-                              SelectedItem="{Binding SelectedActorName}">
+                    <ListBox  Height="150" Margin="5,10,5,0" ItemsSource="{Binding ActorNames}" x:Name="_actorNames">
                         <ListBox.InputBindings>
-                            <KeyBinding Command="{Binding CmdDeleteNameOfActor}" Key="Delete"/>
+                            <KeyBinding Command="{Binding CmdRemoveName}"
+                                        CommandParameter="{Binding ElementName=_actorNames, Path=SelectedItem}"
+                                        Key="Delete"/>
                         </ListBox.InputBindings>
                         <i:Interaction.Behaviors>
                             <bh:ListboxBehavior/>

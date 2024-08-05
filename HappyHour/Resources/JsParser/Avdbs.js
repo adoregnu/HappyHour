@@ -29,15 +29,18 @@
     function addAlias(actor, alias, xpath, lang, node) {
         var txt = _jav_parse_single_node(xpath, null, node);
         if (txt != null && txt.length > 1) {
-            var tmp = txt.split(/[(（]/);
+            var tmp = txt.split(/[(（）),、]/);
             if (actor['name'] == null) {
                 actor['name'] = tmp[0].trim() + lang;
             } else {
                 alias.push(tmp[0].trim() + lang);
             }
 
-            if (tmp.length > 1) {
-                alias.push(tmp[1].slice(0, -1).trim() + lang)
+            for (var i = 1; i < tmp.length; i++) {
+                var name = tmp[i].trim();
+                if (name.length > 0) {
+                    alias.push(name + lang)
+                }
             }
         }
     }

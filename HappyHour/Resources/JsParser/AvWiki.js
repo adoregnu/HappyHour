@@ -19,9 +19,8 @@
                     console.log('unknown actor!');
                     continue;
                 }
-                var tmp = m[1].replace('-', ' ');
-                tmp = tmp.replace(/^([a-z])| ([a-z])/gi,
-                    function (m) { return m.toUpperCase(); });
+                var tmp = m[1].replace(/[-–]/, ' ');
+                tmp = tmp.replace(/^([a-z])| ([a-z])/gi, function (m) { return m.toUpperCase(); });
                 actor['name'] = tmp.split(' ').reverse().join(' ');
                 actor['alias'] = [node.textContent.trim()];
             } else {

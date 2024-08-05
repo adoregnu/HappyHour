@@ -81,7 +81,7 @@ namespace HappyHour.Model
         public Rating GetRate(string spiderName)
         {
             if (MovieInfo == null || MovieInfo.Ratings == null) return null;
-            return MovieInfo.Ratings.FirstOrDefault(r => r.SiteUrl.Contains(spiderName));
+            return MovieInfo.Ratings.FirstOrDefault(r => r.SiteUrl.Contains(spiderName, StringComparison.OrdinalIgnoreCase));
         }
         int CompareRating(IAvMedia media)
         {
@@ -89,8 +89,8 @@ namespace HappyHour.Model
             var thisRate = GetRate(site);
             var otherRate = ((AvMovie)media).GetRate(site);
             if (thisRate == null && otherRate == null) return 0;
-            if (thisRate != null) return -1;
-            if (otherRate != null) return 1;
+            if (thisRate != null && otherRate == null) return -1;
+            if (otherRate != null && thisRate ==  null) return 1;
             return thisRate.Rate > otherRate.Rate ? -1 : 1;
         }
         public override int CompareTo(IAvMedia media)

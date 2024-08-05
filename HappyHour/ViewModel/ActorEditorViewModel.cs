@@ -61,8 +61,6 @@ namespace HappyHour.ViewModel
             get => _actorNames;
             set => SetProperty(ref _actorNames, value);
         }
-        public ActorName SelectedActorName { get; set; }
-
         private ObservableCollection<Actor> _actors = [];
         public ObservableCollection<Actor> Actors
         {
@@ -77,14 +75,7 @@ namespace HappyHour.ViewModel
             set
             {
                 SetProperty(ref _actor, value);
-                if (value != null)
-                {
-                    ActorNames.Clear();
-                    foreach (var an in _actor.Names)
-                    {
-                        ActorNames.Add(an);
-                    }
-                }
+                UpdateActorNames(value);
             }
         }
 
@@ -132,7 +123,7 @@ namespace HappyHour.ViewModel
         public ICommand CmdMergeActors { get; private set; }
         public ICommand CmdRemoveActor {  get; private set; }
         public ICommand CmdClearActors { get; private set; }
-        public ICommand CmdDeleteNameOfActor { get; private set; }
+        public ICommand CmdRemoveName { get; private set; }
         public ICommand CmdClosed { get; private set; }
 
         public ActorEditorViewModel(IMainView mainView)
@@ -144,6 +135,7 @@ namespace HappyHour.ViewModel
                 OnMergeActors,
                 p => p is IList<object> list && list.Count > 1);
             CmdRemoveActor = new RelayCommand<Actor>(OnRemoveActor);
+            CmdRemoveName = new RelayCommand<ActorName>(OnRemoveName);
             CmdClearActors = new RelayCommand(OnClearActors);
             CmdClosed = new RelayCommand(OnClose);
 
@@ -180,6 +172,18 @@ namespace HappyHour.ViewModel
             //initials.ForEach(async i => await i.Check());
         }
 
+        private void UpdateActorNames(Actor actor)
+        {
+            if (actor != null)
+            {
+                ActorNames.Clear();
+                foreach (var an in actor.Names)
+                {
+                    ActorNames.Add(an);
+                }
+            }
+        }
+
         private void OnRemoveActor(Actor actor)
         {
             if (actor == null) return;
@@ -189,6 +193,21 @@ namespace HappyHour.ViewModel
             Actors.Remove(actor);
 
             _db.RemoveActor(actor);
+        }
+        private void OnRemoveName(ActorName name)
+        {
+            if (name == null) return;
+
+            var ret = DialogService.ShowMessageBox(this,
+                $"Delete {name.Name} from Actor",
+                "Warning", MessageBoxButton.YesNo);
+
+            if (ret == MessageBoxResult.Yes)
+            {
+                SelectedActor.Names.Remove(name);
+                _db.RemoveActorName(name);
+                UpdateActorNames(SelectedActor);
+            }
         }
 
         public async Task OnActorAlphabet(string p, bool isSelected)

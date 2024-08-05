@@ -152,6 +152,7 @@ namespace HappyHour.Model
                     movie.Label = target;
                     target.Movies.Add(movie);
                 }
+                SaveChanges();
 
                 Labels.Remove(label);
                 OnDelete?.Invoke(label);
@@ -480,7 +481,8 @@ namespace HappyHour.Model
 
         static void SetReleaseDate(Movie movie, IDictionary<string, object> data)
         {
-            if (!data.TryGetValue("date", out object date) || date == null)
+            if (!data.TryGetValue("date", out object date) || date == null
+                || string.IsNullOrEmpty(date.ToString()))
             {
                 return;
             }
@@ -489,7 +491,8 @@ namespace HappyHour.Model
 
         void SetSeries(Movie movie, IDictionary<string, object> data)
         {
-            if (!data.TryGetValue("series", out object series) || series == null)
+            if (!data.TryGetValue("series", out object series) || series == null
+                || string.IsNullOrEmpty(series.ToString()))
             {
                 return;
             }
@@ -640,6 +643,14 @@ namespace HappyHour.Model
             Actors.Remove(actor);
             SaveChanges();
         }
+
+        public void RemoveActorName(ActorName name)
+        {
+            ShortTexts.Remove(name.Name);
+            ActorNames.Remove(name);
+            SaveChanges();
+        }
+
         public void UpdateMaker(Movie movie, Maker maker)
         {
             movie.Maker = maker;
