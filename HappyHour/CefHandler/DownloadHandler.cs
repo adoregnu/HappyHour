@@ -17,8 +17,8 @@ namespace HappyHour.CefHandler
 
         public bool ShowDialog { get; set; } = false;
 
-        private readonly ISpider _spider = null;
-        public DownloadHandler(ISpider spider)
+        private readonly ISpiderManager _spider = null;
+        public DownloadHandler(ISpiderManager spider)
         {
             _spider = spider;
         }

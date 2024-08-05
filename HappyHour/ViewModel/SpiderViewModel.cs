@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace HappyHour.ViewModel
 {
-    internal class SpiderViewModel : BrowserBase, ISpider
+    internal class SpiderViewModel : BrowserBase, ISpiderManager
     {
         private IMediaList _mediaList;
         private SpiderBase _selectedSpider;

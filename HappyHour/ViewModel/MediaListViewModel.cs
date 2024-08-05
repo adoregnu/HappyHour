@@ -143,7 +143,7 @@ namespace HappyHour.ViewModel
             get => _ratingSitesVisibility;
             set => SetProperty(ref _ratingSitesVisibility, value);
         }
-        public ISpider Spider { get; set; }
+        public ISpiderManager SpiderManager { get; set; }
 
         public ICommand CmdExternalPlayer { get; set; }
         public ICommand CmdCopyPath { get; set; }
@@ -520,17 +520,17 @@ namespace HappyHour.ViewModel
             {
                 _forceStopScrapping = false;
                 _mediasToSearch = [.. SelectedMedias];
-                Spider.OnScrapCompleted = OnScrapCompleted;
+                SpiderManager.OnScrapCompleted = OnScrapCompleted;
             }
 
             if (!_forceStopScrapping && _mediasToSearch.Count > 0)
             {
                 MainView.StatusMessage = $"{_mediasToSearch.Count} remained";
-                Spider.Scan(spider, _mediasToSearch[0]);
+                SpiderManager.Scan(spider, _mediasToSearch[0]);
             }
             else
             {
-                Spider.ScanDone(spider);
+                SpiderManager.ScanDone(spider);
                 MainView.StatusMessage = "";
                 _mediasToSearch = null;
             }

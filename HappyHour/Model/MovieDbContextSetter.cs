@@ -164,25 +164,6 @@ namespace HappyHour.Model
             return data.TryGetValue("lang", out object _lang) ? _lang.ToString() : "no";
         }
 
-        /*
-        public bool SetActor(string pid, IDictionary<string, object> data)
-        {
-            return true;
-        }
-        static void SetMText<T>(ICollection<T> list, string text, string lang)
-            where T : MText, new()
-        {
-            var org = list.FirstOrDefault(t => t.Lang == lang);
-            if (org != null)
-            {
-                org.Text = text;
-            }
-            else
-            {
-               list.Add(new T() { Lang = lang, Text = text });
-            }
-        }
-        */
         static string GenHash(byte[] blob)
         {
             int i;

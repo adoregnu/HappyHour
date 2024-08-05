@@ -60,7 +60,7 @@ namespace HappyHour.ViewModel
             var spider = new SpiderViewModel(this);
 
             _fileListMv = new FileListViewModel(this);
-            _mediaListMv = new MediaListViewModel(this) { FileList = _fileListMv , Spider = spider};
+            _mediaListMv = new MediaListViewModel(this) { FileList = _fileListMv , SpiderManager = spider};
             _dbViewModel = new DbViewModel(this)  { MediaList = _mediaListMv, MainView = this };
             _fileListMv.MediaList = _mediaListMv;
 

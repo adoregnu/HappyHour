@@ -9,7 +9,7 @@ namespace HappyHour.Interfaces
 {
     internal delegate void ScrapCompletedHandler(SpiderBase spider, bool bSuccess);
 
-    interface ISpider
+    interface ISpiderManager
     {
         ScrapCompletedHandler OnScrapCompleted { get; set; }
         IAvMedia AvMedia { get; set; }
