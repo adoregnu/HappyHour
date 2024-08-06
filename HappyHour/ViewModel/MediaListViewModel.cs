@@ -20,9 +20,19 @@ using HappyHour.View;
 using System.Diagnostics;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using MaterialDesignThemes.Wpf;
 
 namespace HappyHour.ViewModel
 {
+    class PathComparer : IComparer<string>
+    {
+        public int Compare(string left, string right)
+        {
+            var ret = left.CompareTo(right);
+            Log.Print($"{left} , {right}, {ret}");
+            return ret;
+        }
+    }
     internal class MediaListViewModel : Pane, IMediaList
     {
         private readonly object _lock = new();
@@ -32,6 +42,7 @@ namespace HappyHour.ViewModel
         private bool _sortByDateAdded;
         private bool _searchSubFolder;
         private bool _forceStopScrapping;
+        private readonly PathComparer _pathComparer = new();
 
         private IFileList _fileList;
         private IAvMedia _selectedMedia;
@@ -181,7 +192,7 @@ namespace HappyHour.ViewModel
             CmdDeleteItem = new RelayCommand<object>(p => Delete(p.ToList<AvMovie>()));
             CmdClearDb = new RelayCommand<object>(p => ClearDb(p.ToList<AvMovie>()));
             CmdEditItem = new RelayCommand<object>(EditMovieInfo);
-            CmdSearchOrphanageMedia = new RelayCommand(async () => await SearchOrphanage());
+            CmdSearchOrphanageMedia = new RelayCommand(SearchOrphanage);
             CmdSearchEmptyActor = new RelayCommand(OnSearchEmptyActor);
             CmdDoubleClick = new RelayCommand(() =>
             {
@@ -395,6 +406,7 @@ namespace HappyHour.ViewModel
             if (token.IsCancellationRequested) return;
             if (currDir.Contains("Western")) return;
 
+
             try
             {
                 string[] dirs = Directory.GetDirectories(currDir);
@@ -458,12 +470,12 @@ namespace HappyHour.ViewModel
             await UpdateMediaList(msg.FullName, token, bSubFolder);
         }
 
-        private async Task SearchOrphanage()
+        private async void SearchOrphanage()
         {
             CancelTaskIfRunning();
             MediaList.Clear();
 
-            string currDir = _fileList.CurrDirInfo.FullName;
+            string currDir = $"{_fileList.CurrDirInfo.FullName}\\";
 
             var dbDirs = await _db.GetMovieUrls(currDir);
 
@@ -471,7 +483,7 @@ namespace HappyHour.ViewModel
             var token = _tokenSource.Token;
 
             await IterateMedia(currDir, dbDirs, token);
-            _db.SaveChanges();
+            //_db.SaveChanges();
             Log.Print("Search orphanage media done!");
         }
 

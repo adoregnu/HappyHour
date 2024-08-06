@@ -28,7 +28,11 @@ namespace HappyHour.ViewModel
         private bool? _dialogResult;
 
         private List<Actor> _actors = [];
-        private List<Actor> _allActors;
+        private List<Actor> _allActors = [];
+        private List<Label> _labels = [];
+        private List<Series> _allSereis = [];
+        private List<Genre> _allGenres = [];
+        private List<Maker> _allMakers = [];
         private Maker _selectedMaker;
 
         public Movie Movie { get; private set; }
@@ -39,10 +43,26 @@ namespace HappyHour.ViewModel
             set => SetProperty(ref _actors, value);
         }
 
-        public List<Maker> AllMakers { get; private set; } = [];
-        public List<Label> Labels { get; private set; } = [];
-        public List<Series> AllSeries { get; private set; } = [];
-        public List<Genre> AllGenres { get; private set; } = [];
+        public List<Maker> AllMakers
+        {
+            get => _allMakers;
+            set => SetProperty(ref _allMakers, value); 
+        } 
+        public List<Label> Labels
+        {
+            get => _labels;
+            set => SetProperty(ref _labels, value);
+        }
+        public List<Series> AllSeries
+        {
+            get => _allSereis;
+            set => SetProperty(ref _allSereis, value); 
+        } 
+        public List<Genre> AllGenres
+        {
+            get => _allGenres;
+            set => SetProperty(ref _allGenres, value);
+        }
         public List<Actor> AllActors
         {
             get => _allActors;
@@ -100,7 +120,10 @@ namespace HappyHour.ViewModel
                 SetProperty(ref _searchLabel, value);
                 if (!string.IsNullOrEmpty(value))
                 {
-                    Application.Current.Dispatcher.InvokeAsync(async () => Labels = await _db.GetLabels(value));
+                    Application.Current.Dispatcher.InvokeAsync(async () =>
+                    {
+                        Labels = await _db.GetLabels(value);
+                    });
                 }
             }
         }
