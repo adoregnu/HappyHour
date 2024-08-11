@@ -651,6 +651,16 @@ namespace HappyHour.Model
             SaveChanges();
         }
 
+        public void RemoveActor(Movie movie, Actor actor)
+        {
+            Entry(movie).Collection(m => m.Actors).Load();
+            Entry(actor).Collection(a => a.Movies).Load();
+
+            movie.Actors.Remove(actor);
+            actor.Movies.Remove(movie);
+            SaveChanges();
+        }
+
         public void UpdateMaker(Movie movie, Maker maker)
         {
             movie.Maker = maker;

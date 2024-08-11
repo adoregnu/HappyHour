@@ -401,34 +401,36 @@ namespace HappyHour.ViewModel
             }
         }
 
-        private async Task IterateMedia(string currDir, List<string> dbDirs, CancellationToken token)
+        private async Task IterateMedia(Stack<string> dirStack, List<string> dbDirs, CancellationToken token)
         {
-            if (token.IsCancellationRequested) return;
-            if (currDir.Contains("Western")) return;
-
-
-            try
+            int dirCOunt = 0;
+            while (dirStack.TryPop(out string stackdir))
             {
-                string[] dirs = Directory.GetDirectories(currDir);
+                if (token.IsCancellationRequested) return;
+                if (stackdir.Contains("Western")) continue;
+                string[] dirs;
+
+                try { dirs = Directory.GetDirectories(stackdir); }
+                catch { continue; }
+
                 if (dirs.Length == 0 || dirs[0].EndsWith(".actors", StringComparison.OrdinalIgnoreCase))
                 {
-                    if (dbDirs.BinarySearch(currDir) < 0)
+                    dirCOunt++;
+                    //if (dbDirs.BinarySearch(stackdir) < 0)
+                    if (dbDirs.Find(dir => dir == stackdir) == null)
                     {
-                       await AddMedia(currDir);
+                        await AddMedia(stackdir);
                     }
+                    continue;
                 }
-                else
+
+                foreach (string dir in dirs)
                 {
-                    foreach (string dir in dirs)
-                    {
-                        await IterateMedia(dir, dbDirs, token);
-                    }
+                    dirStack.Push(dir);
                 }
             }
-            catch (Exception ex)
-            {
-                Log.Print("IterateMedia: " + ex.Message);
-            }
+
+            Log.Print($"Real dir count : {dirCOunt}");
         }
 
         private CancellationTokenSource _tokenSource;
@@ -475,15 +477,18 @@ namespace HappyHour.ViewModel
             CancelTaskIfRunning();
             MediaList.Clear();
 
-            string currDir = $"{_fileList.CurrDirInfo.FullName}\\";
+            string currDir = _fileList.CurrDirInfo.FullName;
+            if (!currDir.EndsWith("\\")) currDir += "\\";
 
             var dbDirs = await _db.GetMovieUrls(currDir);
 
             _tokenSource = new CancellationTokenSource();
             var token = _tokenSource.Token;
 
-            await IterateMedia(currDir, dbDirs, token);
-            //_db.SaveChanges();
+            Stack<string> dirstack = [];
+            dirstack.Push(currDir);
+            await IterateMedia(dirstack, dbDirs, token);
+            _db.SaveChanges();
             Log.Print("Search orphanage media done!");
         }
 

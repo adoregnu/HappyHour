@@ -19,7 +19,10 @@ namespace HappyHour.ViewModel
             if (string.IsNullOrEmpty(msg.Message))
                 return;
 
-            if (msg.Message.StartsWith("Third-party cookie"))
+            if (msg.Message.StartsWith("Third-party cookie") ||
+                msg.Message.StartsWith("[object") ||
+                msg.Message.StartsWith("A parser-blocking")
+                )
                 return;
 
             UiServices.Invoke(delegate ()

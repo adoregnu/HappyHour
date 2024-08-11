@@ -107,7 +107,18 @@ namespace HappyHour.ViewModel
                 return;
             }
 
-            WebBrowser.EvaluateScriptAsync(s).ContinueWith(x =>
+            WebBrowser.ExecuteScriptAsync(s);
+#if false
+            var response = await WebBrowser.EvaluateScriptAsync(s);
+            if (!response.Success)
+            {
+                Log.Print($"ExecJavaScript:: {response.Message}");
+            }
+#endif
+            callback?.Invoke(true); 
+
+
+            /*.ContinueWith(x =>
             {
                 var response = x.Result;
                 if (!response.Success)
@@ -116,6 +127,7 @@ namespace HappyHour.ViewModel
                 }
                 UiServices.Invoke(() => callback?.Invoke(response.Success)); 
             });
+            */
         }
 #if false
         public void Login(string jsTpl)

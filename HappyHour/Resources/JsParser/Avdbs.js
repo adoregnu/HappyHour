@@ -77,7 +77,7 @@
         _post_message(msg,'ko');
     }
 
-    function parseStudio(xpath) {
+    function parse_maker(xpath) {
         var txt = _jav_parse_single_node(xpath);
         if (txt != null && txt.length > 1) {
             return txt.trim().substring(1);
@@ -92,14 +92,13 @@
         }
         return null;
     }
-
     function parsePage() {
 
         var items = {
             title: { xpath: "//div[@class='profile_gallery_text']/span[@id='title_kr']" },
             maker: {
                 xpath: "//span[contains(., '제작사:')]/following-sibling::a/text()",
-                handler: parseStudio
+                handler: parse_maker
             },
             label: { xpath: "//span[contains(., '레이블:')]/following-sibling::text()" },
             series: {

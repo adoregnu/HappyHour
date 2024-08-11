@@ -231,8 +231,8 @@ namespace HappyHour.Model
             if (MovieInfo == null) return;
             if (MovieInfo.VideoUrl != Path)
             {
+                Log.Print($"{MovieInfo.VideoUrl}, {Path}");
                 MovieInfo.VideoUrl = Path;
-                //App.Current.DbContext.SaveChanges();
             }
         }
     }

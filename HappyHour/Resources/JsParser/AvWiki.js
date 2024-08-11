@@ -45,7 +45,7 @@
         actor = {};
         alias_array = [];
         var name = _jav_parse_single_node("div[@class='actress-data']//dt[contains(.,'女優名')]/following-sibling::dd", null ,node);
-        names = name.split('-');
+        names = name.split(/[-–]/);
         //if (names.length > 1) { alias_array.push(names[1].trim()); }
 
         const regex = /(.+)(（.+）)?/;

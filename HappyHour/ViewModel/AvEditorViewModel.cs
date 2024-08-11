@@ -222,8 +222,8 @@ namespace HappyHour.ViewModel
             }
             else if (item is Actor actor)
             {
-                actor.Movies.Remove(Movie);
-                Movie.Actors.Remove(actor);
+                _db.RemoveActor(Movie, actor);
+                Actors.Remove(actor);
             }
             OnPropertyChanged(nameof(Movie));
         }
