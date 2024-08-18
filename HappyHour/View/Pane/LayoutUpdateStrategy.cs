@@ -77,7 +77,7 @@ namespace HappyHour.View.Pane
                     parentDocumentGroup.InsertChildAt(indexOfParentPane + 1,
                         new LayoutDocumentPane(anchorableShown)
                         {
-                            DockWidth = new GridLength(1.5, GridUnitType.Star)
+                            DockWidth = new GridLength(0.8, GridUnitType.Star)
                         });
 
                 }

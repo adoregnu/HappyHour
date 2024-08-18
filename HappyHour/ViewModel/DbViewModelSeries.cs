@@ -1,4 +1,5 @@
-﻿using HappyHour.Interfaces;
+﻿using AsyncAwaitBestPractices.MVVM;
+using HappyHour.Interfaces;
 using HappyHour.Model;
 using System;
 using System.Collections.Generic;
@@ -29,7 +30,7 @@ namespace HappyHour.ViewModel
         public ObservableCollection<Series> Series { get; set; } = [];
 
         public ICommand CmdAddSeriesNameTranslated { get; private set; }
-        public ICommand CmdSeriesoDubleClicked { get; private set; }
+        public IAsyncCommand CmdSeriesoDubleClicked { get; private set; }
         public ICommand CmdMergeSeries { get; private set; }
 
         void OnAddSeriesNameTranslated()
@@ -38,9 +39,11 @@ namespace HappyHour.ViewModel
             SelectedSeries.Name.Add(new ShortText() { Lang = "ko", Text = SeriesNameTranslated });
         }
 
-        async void OnSeriesoDubleClicked()
+        async Task OnSeriesoDubleClicked()
         {
-            _mediaList.LoadItems(await _db.GetMovies(SelectedSeries));
+            UiServices.WaitCursor(true);
+            await _mediaList.LoadItems(await _db.GetMovies(SelectedSeries));
+            UiServices.WaitCursor(false);
         }
 
         void OnMergeSeries(object p)

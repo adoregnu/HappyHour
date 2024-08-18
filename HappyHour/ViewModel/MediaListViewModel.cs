@@ -21,6 +21,7 @@ using System.Diagnostics;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using MaterialDesignThemes.Wpf;
+using AsyncAwaitBestPractices.MVVM;
 
 namespace HappyHour.ViewModel
 {
@@ -154,6 +155,8 @@ namespace HappyHour.ViewModel
             get => _ratingSitesVisibility;
             set => SetProperty(ref _ratingSitesVisibility, value);
         }
+
+        public int ScrapDelay { get; set; } = 1000;
         public ISpiderManager SpiderManager { get; set; }
 
         public ICommand CmdExternalPlayer { get; set; }
@@ -164,13 +167,13 @@ namespace HappyHour.ViewModel
         public ICommand CmdMoveItemTo { get; set; }
         public ICommand CmdDeleteItem { get; set; }
         public ICommand CmdClearDb { get; set; }
-        public ICommand CmdEditItem { get; set; }
+        public IAsyncCommand<object> CmdEditItem { get; set; }
         public ICommand CmdDoubleClick { get; set; }
-        public ICommand CmdSearchOrphanageMedia { get; set; }
-        public ICommand CmdSearchEmptyActor { get; set; }
+        public IAsyncCommand CmdSearchOrphanageMedia { get; set; }
+        public IAsyncCommand CmdSearchEmptyActor { get; set; }
         public ICommand CmdScrap { get; private set; }
         public ICommand CmdStopBatchingScrap { get; set; }
-        public ICommand CmdNewMovie { get; set; }
+        public IAsyncCommand CmdShowLastUpdated { get; set; }
         public MediaListItemSelected ItemSelectedHandler { get; set; }
         public MediaListItemSelected ItemDoubleClickedHandler { get; set; }
 
@@ -182,7 +185,7 @@ namespace HappyHour.ViewModel
 
             BindingOperations.EnableCollectionSynchronization(MediaList, _lock);
 
-            CmdNewMovie = new RelayCommand(LastUpdatedMovies);
+            CmdShowLastUpdated = new AsyncCommand(LastUpdatedMovies);
             CmdExternalPlayer = new RelayCommand<AvMovie>(PlayMedia);
             CmdExclude = new RelayCommand<AvTorrent>(ExcludeFromList);
             CmdDownloadTorrent = new RelayCommand<AvTorrent>(p => DownloadMedia(p, "torrent"));
@@ -191,9 +194,9 @@ namespace HappyHour.ViewModel
             CmdMoveItemTo = new RelayCommand<object>(p => MoveTo(p.ToList<AvMovie>()));
             CmdDeleteItem = new RelayCommand<object>(p => Delete(p.ToList<AvMovie>()));
             CmdClearDb = new RelayCommand<object>(p => ClearDb(p.ToList<AvMovie>()));
-            CmdEditItem = new RelayCommand<object>(EditMovieInfo);
-            CmdSearchOrphanageMedia = new RelayCommand(SearchOrphanage);
-            CmdSearchEmptyActor = new RelayCommand(OnSearchEmptyActor);
+            CmdEditItem = new AsyncCommand<object>(EditMovieInfo);
+            CmdSearchOrphanageMedia = new AsyncCommand(SearchOrphanage);
+            CmdSearchEmptyActor = new AsyncCommand(OnSearchEmptyActor);
             CmdDoubleClick = new RelayCommand(() =>
             {
                 if (ItemDoubleClickedHandler != null)
@@ -248,7 +251,7 @@ namespace HappyHour.ViewModel
         {
             if (list != null)
             {
-                list.ForEach(m => m.ClearDb());
+                list.ForEach(m => m.ClearDb(true));
             }
         }
 
@@ -363,7 +366,7 @@ namespace HappyHour.ViewModel
             Messenger.Send(new ViewEventArgs("RefreshActors", null));
         }
 
-        private async void EditMovieInfo(object param)
+        private async Task EditMovieInfo(object param)
         {
             if (param is not AvMovie item  || item  == null)
             {
@@ -472,7 +475,7 @@ namespace HappyHour.ViewModel
             await UpdateMediaList(msg.FullName, token, bSubFolder);
         }
 
-        private async void SearchOrphanage()
+        private async Task SearchOrphanage()
         {
             CancelTaskIfRunning();
             MediaList.Clear();
@@ -488,11 +491,11 @@ namespace HappyHour.ViewModel
             Stack<string> dirstack = [];
             dirstack.Push(currDir);
             await IterateMedia(dirstack, dbDirs, token);
-            _db.SaveChanges();
+            await _db.SaveChangesAsync();
             Log.Print("Search orphanage media done!");
         }
 
-        public async void LoadItems(List<Movie> movies)
+        public async Task LoadItems(List<Movie> movies)
         {
             MediaList.Clear();
             await Task.Run(() =>
@@ -504,31 +507,50 @@ namespace HappyHour.ViewModel
             });
         }
 
-        private async void OnSearchEmptyActor()
+        private async Task OnSearchEmptyActor()
         {
-            LoadItems(await _db.GetMovies((Movie m) => m.Actors.Count == 0));
+            UiServices.WaitCursor(true);
+            await LoadItems(await _db.GetMovies((Movie m) => m.Actors.Count == 0));
+            UiServices.WaitCursor(false);
         }
 
-        private async void LastUpdatedMovies()
+        private async Task LastUpdatedMovies()
         {
-            LoadItems(await _db.GetMovies(null, 40));
+            UiServices.WaitCursor(true);
+            await LoadItems(await _db.GetMovies(null, 40));
+            UiServices.WaitCursor(false);
         }
 
         private void OnScrapCompleted(SpiderBase spider, bool bSuccess)
         {
             if (bSuccess)
             {
+                MainView.OnViewUpdate?.Invoke(new ViewEventArgs("Refresh", null));
                 if (_mediasToSearch.Count > 0)
                 {
                     _mediasToSearch.RemoveAt(0);
                 }
-                MainView.OnViewUpdate(new ViewEventArgs("Refresh", null));
             }
             else
             {
                 _mediasToSearch.Clear();
             }
-            OnScrapAvInfo(spider);
+
+            if (_mediasToSearch.Count > 0)
+            {
+                Timer timer = null;
+                Log.Print($"delay {ScrapDelay}ms");
+                void callback(object state)
+                {
+                    UiServices.Invoke(() => OnScrapAvInfo(spider));
+                    timer.Dispose();
+                }
+                timer = new Timer(callback, null, ScrapDelay, Timeout.Infinite);
+            }
+            else
+            {
+                OnScrapAvInfo(spider);
+            }
         }
 
         private void OnScrapAvInfo(SpiderBase spider)

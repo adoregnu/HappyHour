@@ -13,6 +13,7 @@ using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace HappyHour.Spider
 {
@@ -49,6 +50,8 @@ namespace HappyHour.Spider
             get => _isSpiderWorking;
             set => Set(ref _isSpiderWorking, value);
         }
+
+        public Visibility ChainVisibility { set; get; } = Visibility.Visible;
 
         public ObservableCollection<SpiderBase> SpiderChain { get; set; } = [];
 
@@ -100,7 +103,10 @@ namespace HappyHour.Spider
             Browser = br;
             _downloader ??= new DefaultDownloader(br);
             CmdSearch = new RelayCommand(() => { Navigate2(); });
-            CmdStopSpider = new RelayCommand(async() => await OnScrapCompleted(false));
+            CmdStopSpider = new RelayCommand(async() =>
+            {
+                await OnScrapCompleted(false);
+            });
             CmdScrap = new RelayCommand(() =>
             {
                 IsSpiderWorking = true;
@@ -116,7 +122,8 @@ namespace HappyHour.Spider
                 //new ScrapItem() { CanUpdate = true, Name = "runtime" },
                 //new ScrapItem() { CanUpdate = true, Name = "director" },
                 new ScrapItem() { CanUpdate = true, Name = "series" },
-                new ScrapItem() { CanUpdate = true, Name = "studio" },
+                new ScrapItem() { CanUpdate = true, Name = "maker" },
+                new ScrapItem() { CanUpdate = true, Name = "label" },
                 new ScrapItem() { CanUpdate = true, Name = "genre" },
                 new ScrapItem() { CanUpdate = true, Name = "plot" },
                 new ScrapItem() { CanUpdate = true, Name = "cover" },
@@ -326,6 +333,7 @@ namespace HappyHour.Spider
 
             if (!Browser.SetNextSpider(SearchMedia))
             {
+                //await Task.Delay(1000);
                 SearchMedia = null;
                 Browser.OnScrapCompleted?.Invoke(this, true);
             }

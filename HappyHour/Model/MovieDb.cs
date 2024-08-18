@@ -1,4 +1,6 @@
-﻿using System;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using SQLitePCL;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -11,6 +13,7 @@ namespace HappyHour.Model
 {
     public abstract class MText
     {
+
         [Key]
         public long Key { get; set; }
         public string Lang { get; set; }
@@ -61,7 +64,7 @@ namespace HappyHour.Model
         }
     }
 
-    public class ActorName
+    public  class ActorName 
     {
         [Key]
         public int Key { get; set; }
@@ -71,7 +74,14 @@ namespace HappyHour.Model
         public Actor Actor { get; set; }
         public override string ToString()
         {
-            return Name.Text;
+            if (Name != null)
+            {
+                return Name.Text;
+            }
+            else
+            {
+                return "Name not loaded!";
+            }
         }
     }
 

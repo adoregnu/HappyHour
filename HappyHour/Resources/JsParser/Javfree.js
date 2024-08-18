@@ -61,10 +61,11 @@
             return false;
         }
         item = txt.substring(txt.indexOf(header) + header.length);
-        msg[key] = item.replace(/^[：: —-]+/g, '').trim();
+        item = item.replace(/^[：: —-]+/g, '').trim();
         if (item.length < 2) {
             return false;
         }
+        msg[key] = item
         return true;
     }
     function _maker(txt, msg) {

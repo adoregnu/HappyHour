@@ -132,7 +132,7 @@
                     <ad:LayoutDocumentPane x:Name="center"/>
                     <!--<ad:LayoutAnchorablePane DockWidth="800" Name="right"/>-->
                 </ad:LayoutPanel>
-                <ad:LayoutAnchorablePane DockHeight="150" Name="bottom"/>
+                <ad:LayoutAnchorablePane DockHeight="250" Name="bottom"/>
             </ad:LayoutPanel>
         </ad:LayoutRoot>
 

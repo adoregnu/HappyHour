@@ -27,7 +27,6 @@ namespace HappyHour.ViewModel
 
         private bool? _dialogResult;
 
-        private List<Actor> _actors = [];
         private List<Actor> _allActors = [];
         private List<Label> _labels = [];
         private List<Series> _allSereis = [];
@@ -37,11 +36,7 @@ namespace HappyHour.ViewModel
 
         public Movie Movie { get; private set; }
         public List<Genre> Genres { get; private set; } = [];
-        public List<Actor> Actors
-        {
-            get => _actors;
-            set => SetProperty(ref _actors, value);
-        }
+        public ObservableCollection<Actor> Actors { get; set; } = [];
 
         public List<Maker> AllMakers
         {
@@ -204,7 +199,11 @@ namespace HappyHour.ViewModel
             else if (item is Actor actor)
             {
                 _db.UpdateActor(Movie, actor);
-                Actors = [.. Movie.Actors];
+                Actors.Clear();
+                foreach (var newActor in Movie.Actors)
+                {
+                    Actors.Add(newActor);
+                }
             }
             else if (item is Series series)
             {
@@ -225,7 +224,6 @@ namespace HappyHour.ViewModel
                 _db.RemoveActor(Movie, actor);
                 Actors.Remove(actor);
             }
-            OnPropertyChanged(nameof(Movie));
         }
 
         private void OnSave()

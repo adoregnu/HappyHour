@@ -9,13 +9,21 @@ using System.Windows;
 using System.Security.Cryptography;
 using System.Linq.Expressions;
 using MvvmDialogs.FrameworkDialogs.SaveFile;
+using System.Drawing.Printing;
+using System.Windows.Media.Converters;
 
 namespace HappyHour.Model
 {
     public partial class MovieDbContext : DbContext
     {
-        public void MergeActors(List<Actor> actors, Action<Actor> onDelete = null)
+        public async ValueTask<Actor> MergeActors(List<Actor> actors, Action<Actor> onDelete = null)
         {
+
+            for (int i = 0; i < actors.Count; i++)
+            {
+                if (actors[i].Thumb != null) continue;
+                actors[i] = await LoadActor(actors[i], true);
+            }
             Actor target = null;
             try
             {
@@ -32,7 +40,10 @@ namespace HappyHour.Model
 
                 foreach (var name in actor.Names)
                 {
-                    target.Names.Add(name);
+                    if (!target.Names.Any(n => n.Name.Text == name.Name.Text))
+                    {
+                        target.Names.Add(name);
+                    }
                 }
                 foreach (var movie in actor.Movies)
                 {
@@ -44,7 +55,8 @@ namespace HappyHour.Model
                 Actors.Remove(actor);
                 onDelete?.Invoke(actor);
             }
-            SaveChanges();
+            await SaveChangesAsync();
+            return target;
         }
 
         public void MergeGenres(List<Genre> genres, Action<Genre> onDelete = null)
@@ -125,7 +137,7 @@ namespace HappyHour.Model
             SaveChanges();
         }
 
-        public async void MargeLabels(List<Label> labels, Action<Label> OnDelete = null)
+        public async Task MargeLabels(List<Label> labels, Action<Label> OnDelete = null)
         {
             var target = labels[0];
             labels.RemoveAt(0);
@@ -152,12 +164,12 @@ namespace HappyHour.Model
                     movie.Label = target;
                     target.Movies.Add(movie);
                 }
-                SaveChanges();
+                await SaveChangesAsync();
 
                 Labels.Remove(label);
                 OnDelete?.Invoke(label);
             }
-            SaveChanges();
+            await SaveChangesAsync();
         }
 
         static string GetLang(IDictionary<string, object> data)
@@ -223,7 +235,7 @@ namespace HappyHour.Model
         }
 
         //TODO: pop-up new genre window 
-        bool SetGenre(Movie movie, IDictionary<string, object> data)
+        async ValueTask<bool> SetGenre(Movie movie, IDictionary<string, object> data)
         {
             if (!data.TryGetValue("genre", out object value) || value == null)
             {
@@ -234,19 +246,15 @@ namespace HappyHour.Model
             var genres = value as IList<object>;
             foreach (string genre in genres.Cast<string>())
             {
-                var dbGenre = MovieGenres
+                var dbGenre = await MovieGenres
                     .Include(g => g.Name)
-                    .FirstOrDefault(g => g.Name.Any(n => n.Text == genre));
+                    .FirstOrDefaultAsync(g => g.Name.Any(n => n.Text == genre));
                 if (dbGenre != null)
                 {
-                    Entry(dbGenre).Collection(g => g.Movies).Load();
+                    await Entry(dbGenre).Collection(g => g.Movies).LoadAsync();
                     if (!dbGenre.Movies.Any(m => m.PID == movie.PID))
                     {
                         dbGenre.Movies.Add(movie);
-                    }
-                    else
-                    {
-                        Log.Print($"{genre} already has {movie.PID}");
                     }
                 }
                 else
@@ -261,7 +269,7 @@ namespace HappyHour.Model
             return true;
         }
 
-        Actor SetActorName(string lang, IDictionary<string, object> data)
+        async ValueTask<Actor> SetActorName(string lang, IDictionary<string, object> data)
         {
             List<string> names = null;
             if (data.TryGetValue("name", out object name) && name != null)
@@ -295,44 +303,63 @@ namespace HappyHour.Model
                 {
                     lang = name[1].Trim();
                 }
-                return new Tuple<string, string>(name[0], lang);
+                return new Tuple<string, string>(name[0].Trim(), lang);
             }
 
-            ActorName dbName = null;
+            List<Actor> dbActors = [];
             foreach (var aname in names)
             {
                 var sname = GetNameLang(aname, lang);
-                dbName = ActorNames
+                var dbName = await ActorNames
                         .Include(an => an.Name)
                         .Include(an => an.Actor)
+/*
                             .ThenInclude(a => a.Names)
                                 .ThenInclude(n => n.Name)
                         .Include(an => an.Actor)
                             .ThenInclude(a => a.Movies)
-                        .FirstOrDefault(an => an.Name.Text == sname.Item1);
-                if (dbName != null) break;
+                        .Include(an => an.Actor)
+                            .ThenInclude(a => a.Thumb)
+*/
+                        .FirstOrDefaultAsync(an => an.Name.Text == sname.Item1);
+                if (dbName != null)
+                {
+                    dbActors.Add(dbName.Actor);
+                }
             }
 
+            dbActors = dbActors.Distinct().ToList();
+            Log.Print($"actor distinct count: {dbActors.Count}");
+
             Actor dbActor = null;
-            if (dbName == null)
+            if (dbActors == null || dbActors.Count == 0)
             {
+                int prio = 0;
                 dbActor = new Actor() { Names = [], Movies = [] };
                 foreach (var aname in names)
                 {
                     var sname = GetNameLang(aname, lang);
-                    dbName = new ActorName()
+                    var newName = new ActorName()
                     {
-                        Priority = (sname.Item2 == "ko") ? 0 : 1,
+                        Priority = (sname.Item2 == "ko") ? prio++ : 10,
                         Name = new ShortText() { Lang = sname.Item2, Text = sname.Item1 },
                         Actor = dbActor
                     };
-                    dbActor.Names.Add(dbName);
+                    dbActor.Names.Add(newName);
                 }
                 Actors.Add(dbActor);
             }
             else
             {
-                dbActor = dbName.Actor;
+                if (dbActors.Count > 1)
+                {
+                     dbActor = await MergeActors(dbActors);
+                }
+                else
+                {
+                    dbActor = await LoadActor(dbActors[0]);
+                }
+
                 foreach (var aname in names)
                 {
                     var sname = GetNameLang(aname, lang);
@@ -348,14 +375,19 @@ namespace HappyHour.Model
                         Actor = dbActor
                     });
                 }
-
+                if (data.TryGetValue("link", out object url) && url != null)
+                {
+                    Log.Print($"{string.Join(",", names)} is(are) known actor(s)");
+                    data.Remove("link");
+                }
             }
             if (strBirth != null) dbActor.DateBirth = ParseDate(strBirth);
             if (strDebut != null) dbActor.DateDebut = ParseDate(strDebut);
 
             if (data.TryGetValue("thumb", out object thumb) && thumb != null)
             {
-                if (SetImageBlob(thumb.ToString()) is ImageBlob blob)
+                (ImageBlob blob, bool fromdb) = await SetImageBlob(thumb.ToString());
+                if (blob != null)
                 {
                     dbActor.Thumb = blob;
                 }
@@ -364,7 +396,7 @@ namespace HappyHour.Model
             return dbActor;
         }
 
-        ImageBlob SetImageBlob(string path)
+        async ValueTask<(ImageBlob, bool)> SetImageBlob(string path)
         {
             var exts = new Dictionary<string, int>(){
                 { "jpeg", 1 }, { "jpg", 1 }, { "png", 2 } , { "webp", 3 }
@@ -372,18 +404,23 @@ namespace HappyHour.Model
             var ext = path.Split('.').Last();
             if (exts.TryGetValue(ext.ToLower(), out int type) && Path.Exists(path))
             {
-                var blob = File.ReadAllBytes(path);
+                var blob = await File.ReadAllBytesAsync(path);
                 var hash = GenHash(blob);
                 File.Delete(path);
                 if (!Images.Any(i => i.Hash == hash))
                 {
-                    return new ImageBlob() { Data = blob, Type = type, Hash = hash };
+                    return (new ImageBlob() { Data = blob, Type = type, Hash = hash }, false);
+                }
+                else// if (updatefromdb)
+                {
+                    Log.Print($"hash {hash} already exists!");
+                    //return (await Images.Where(i => i.Hash == hash).FirstOrDefaultAsync(), true);
                 }
             }
-            return null;
+            return (null, false);
         }
 
-        bool SetActor(Movie movie, IDictionary<string, object> data)
+        async ValueTask<bool> SetActor(Movie movie, IDictionary<string, object> data)
         {
             /*
             actor : [ { name : name, alias = [ name, ...], birth = '', debut = ''}, ... ]
@@ -396,7 +433,7 @@ namespace HappyHour.Model
             var actors = actorList as List<object>;
             foreach (var actor in actors.Cast<IDictionary<string, object>>())
             {
-                var dbActor = SetActorName(lang, actor);
+                var dbActor = await SetActorName(lang, actor);
                 if (dbActor == null)
                 {
                     continue;
@@ -404,10 +441,6 @@ namespace HappyHour.Model
                 if (!dbActor.Movies.Any(m => m.PID == movie.PID))
                 {
                     dbActor.Movies.Add(movie);
-                }
-                else
-                {
-                    Log.Print($"{actor} alreay has PID:{movie.PID}!");
                 }
             }
             return true;
@@ -434,7 +467,7 @@ namespace HappyHour.Model
             return dbMaker;
         }
 
-        void SetLable(Movie movie, IDictionary<string, object> data)
+        async Task SetLable(Movie movie, IDictionary<string, object> data)
         {
             data.TryGetValue("label", out object label);
             data.TryGetValue("maker", out object maker);
@@ -444,10 +477,10 @@ namespace HappyHour.Model
             maker ??= label;
 
             string lang = GetLang(data);
-            var dbLable = Labels
+            var dbLable = await Labels
                 .Include(l => l.Name)
                 .Include(l => l.Movies)
-                .FirstOrDefault(lb => lb.Name.Any(n => n.Text.Equals(label.ToString())));
+                .FirstOrDefaultAsync(lb => lb.Name.Any(n => n.Text.Equals(label.ToString())));
             if (dbLable == null)
             {
                 dbLable = new Label()
@@ -489,7 +522,7 @@ namespace HappyHour.Model
             movie.DateReleased = ParseDate(date.ToString().Trim());
         }
 
-        void SetSeries(Movie movie, IDictionary<string, object> data)
+        async Task SetSeries(Movie movie, IDictionary<string, object> data)
         {
             if (!data.TryGetValue("series", out object series) || series == null
                 || string.IsNullOrEmpty(series.ToString()))
@@ -501,11 +534,11 @@ namespace HappyHour.Model
             if (tmp.Length > 1) lang = tmp[^1];
 
             string pid = data["pid"] as string;
-            var db_ser = Series
+            var db_ser = await Series
                 .Include(s => s.Movies)
                 .Include(s => s.Name)
                 .Where(s => s.Name.Any(n => n.Text == tmp[0]))
-                .FirstOrDefault();
+                .FirstOrDefaultAsync();
 
             if (db_ser == null)
             {
@@ -524,7 +557,7 @@ namespace HappyHour.Model
                 }
             }
         }
-        void SetCover(Movie movie, IDictionary<string, object> data)
+        async Task SetCover(Movie movie, IDictionary<string, object> data)
         {
             if (!data.TryGetValue("cover", out object cover) || cover == null)
             {
@@ -535,9 +568,25 @@ namespace HappyHour.Model
                 File.Delete(cover.ToString());
                 return;
             }
-            if (SetImageBlob(cover.ToString()) is ImageBlob blob)
+
+            (ImageBlob blob, bool fromdb) = await SetImageBlob(cover.ToString());
+            if (blob != null)
             {
-                movie.Cover = blob;
+                if (fromdb)
+                {
+                    var movies = Movies
+                        //.Include(m => m.Cover)
+                        .Where(m => m.Cover == blob)
+                        .ToList();
+                    foreach (var m in movies)
+                    {
+                        Log.Print($"same cover in {m.PID}, {m.VideoUrl}");
+                    }
+                }
+                else
+                {
+                    movie.Cover = blob;
+                }
             }
         }
 
@@ -549,15 +598,16 @@ namespace HappyHour.Model
                 return;
             }
 
-            var movie = Movies
+            var movie = await Movies
                 .Include(m => m.Title)
                 .Include(m => m.Plot)
                 .Include(m => m.Ratings)
-                .FirstOrDefault(m => m.PID == pid.ToString());
+                .FirstOrDefaultAsync(m => m.PID == pid.ToString());
             movie ??= new Movie()
             {
                 PID = pid.ToString(),
                 DateAdded = DateTime.Now,
+                DateDeleted = default,
                 VideoUrl = data["path"].ToString(),
                 Title = [],
                 Plot = [],
@@ -569,13 +619,13 @@ namespace HappyHour.Model
             SetMText(movie.Title, data, "title");
             SetMText(movie.Plot, data, "plot");
             SetRating(movie, data);
-            SetGenre(movie, data);
-            SetActor(movie, data);
-            SetLable(movie, data);
+            await SetGenre(movie, data);
+            await SetActor(movie, data);
+            await SetLable(movie, data);
             SetReleaseDate(movie, data);
 
-            SetSeries(movie, data);
-            SetCover(movie, data);
+            await SetSeries(movie, data);
+            await SetCover(movie, data);
 
             if (movie.Key == 0)
             {
@@ -585,7 +635,7 @@ namespace HappyHour.Model
             await SaveChangesAsync();
         }
 
-        public void RemoveMovie(Movie movie)
+        public void RemoveMovie(Movie movie, bool realClear)
         {
             void CountAndRun(Expression<Func<Movie, bool>> exp, Action run)
             {
@@ -597,12 +647,20 @@ namespace HappyHour.Model
             //CountAndRun((Movie m) => m.Label == movie.Label, () => Labels.Remove(movie.Label));
             //CountAndRun((Movie m) => m.Series == movie.Series, () => Series.Remove(movie.Series));
 
-            Ratings.Where(r => r.Movie == movie).ExecuteDelete();
-            if (movie.Cover != null)
+            //Ratings.Where(r => r.Movie == movie).ExecuteDelete();
+
+            if (realClear)
             {
-                Images.Remove(movie.Cover);
+                if (movie.Cover != null)
+                {
+                    Images.Remove(movie.Cover);
+                }
+                Movies.Remove(movie);
             }
-            Movies.Remove(movie);
+            else
+            {
+                movie.DateDeleted = DateTime.Now;
+            }
             SaveChanges();
         }
 
@@ -664,7 +722,7 @@ namespace HappyHour.Model
         public void UpdateMaker(Movie movie, Maker maker)
         {
             movie.Maker = maker;
-            if (!maker.Labels.Any(lb => lb == movie.Label))
+            if (movie.Label != null && !maker.Labels.Any(lb => lb == movie.Label))
             {
                 maker.Labels.Add(movie.Label);
             }
@@ -680,6 +738,14 @@ namespace HappyHour.Model
 
         public void UpdateActor(Movie movie, Actor actor)
         {
+            if (actor.Movies == null)
+            {
+                Entry(actor).Collection(a => a.Movies).Load();
+            }
+            if (movie.Actors == null)
+            {
+                Entry(movie).Collection(m => m.Actors).Load();
+            }
             movie.Actors.Add(actor);
             actor.Movies.Add(movie);
             SaveChanges();

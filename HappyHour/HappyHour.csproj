@@ -15,20 +15,22 @@
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <WarningsAsErrors />
   </PropertyGroup>
-
   <ItemGroup>
+    <PackageReference Include="AsyncAwaitBestPractices" Version="8.0.0" />
+    <PackageReference Include="AsyncAwaitBestPractices.MVVM" Version="8.0.0" />
     <PackageReference Include="AvalonEdit" Version="6.3.0.90" />
-    <PackageReference Include="CefSharp.OffScreen.NETCore" Version="126.2.70" />
-    <PackageReference Include="CefSharp.Wpf.NETCore" Version="126.2.70" />
+    <PackageReference Include="CefSharp.OffScreen.NETCore" Version="126.2.180" />
+    <PackageReference Include="CefSharp.Wpf.NETCore" Version="126.2.180" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
     <PackageReference Include="DeepL.net" Version="1.9.0" />
     <PackageReference Include="Dirkster.AvalonDock" Version="4.72.1" />
     <PackageReference Include="Dirkster.AvalonDock.Themes.VS2013" Version="4.72.1" />
+    <PackageReference Include="Dirkster.NumericUpDownLib" Version="3.4.0" />
     <PackageReference Include="ini-parser-netstandard" Version="2.5.2" />
     <PackageReference Include="log4net" Version="2.0.17" />
     <PackageReference Include="MaterialDesignThemes" Version="5.1.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.6" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.6">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.8">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -40,7 +42,7 @@
     <PackageReference Include="SimMetrics.Net" Version="1.0.5" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="8.0.0" />
     <PackageReference Include="Ude.NET" Version="1.0.0" />
-    <PackageReference Include="VirtualizingWrapPanel" Version="2.0.6" />
+    <PackageReference Include="VirtualizingWrapPanel" Version="2.0.10" />
     <PackageReference Include="WPF.ListViewLayoutManager" Version="2.0.0" />
   </ItemGroup>
 
@@ -131,15 +133,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="chromiumembeddedframework.runtime.win-x64" Version="126.2.7" />
+    <PackageReference Update="chromiumembeddedframework.runtime.win-x64" Version="126.2.18" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="chromiumembeddedframework.runtime.win-x86" Version="126.2.7" />
+    <PackageReference Update="chromiumembeddedframework.runtime.win-x86" Version="126.2.18" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="chromiumembeddedframework.runtime.win-arm64" Version="126.2.7" />
+    <PackageReference Update="chromiumembeddedframework.runtime.win-arm64" Version="126.2.18" />
   </ItemGroup>
 
 </Project>

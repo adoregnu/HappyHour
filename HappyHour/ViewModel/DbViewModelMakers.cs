@@ -1,4 +1,5 @@
-﻿using CefSharp.DevTools.CSS;
+﻿using AsyncAwaitBestPractices.MVVM;
+using CefSharp.DevTools.CSS;
 using HappyHour.Interfaces;
 using HappyHour.Model;
 using System;
@@ -64,9 +65,9 @@ namespace HappyHour.ViewModel
         }
 
         public ICommand CmdMergeMakers { get; private set; }
-        public ICommand CmdMergeLables { get; private set; }
-        public ICommand CmdLabelDoubleClicked { get; private set; }
-        public ICommand CmdMakerDoubleClicked { get; private set; }
+        public IAsyncCommand<object, object> CmdMergeLables { get; private set; }
+        public IAsyncCommand CmdLabelDoubleClicked { get; private set; }
+        public IAsyncCommand CmdMakerDoubleClicked { get; private set; }
 
         void OnMergeMakers(object m)
         {
@@ -74,20 +75,24 @@ namespace HappyHour.ViewModel
             _db.MergeMakers(selectedMakers, m => Makers.Remove(m));
             OnPropertyChanged(nameof(Makers));
         }
-        void OnMergeLabels(object m)
+        async Task OnMergeLabels(object m)
         {
             var selectedLabels = (m as IList<object>).Select(o => o as Label).ToList();
-            _db.MargeLabels(selectedLabels, m => Labels.Remove(m));
+            await _db.MargeLabels(selectedLabels, m => Labels.Remove(m));
         }
 
-        private async void OnLabelDoubleClicked()
+        private async Task OnLabelDoubleClicked()
         {
-            _mediaList.LoadItems(await _db.GetMovies(SelectedLabel));
+            UiServices.WaitCursor(true);
+            await _mediaList.LoadItems(await _db.GetMovies(SelectedLabel));
+            UiServices.WaitCursor(false);
         }
 
-        private async void OnMakerDoubleClicked()
+        private async Task OnMakerDoubleClicked()
         {
-            _mediaList.LoadItems(await _db.GetMovies(SelectedMaker));
+            UiServices.WaitCursor(true);
+            await _mediaList.LoadItems(await _db.GetMovies(SelectedMaker));
+            UiServices.WaitCursor(false);
         }
 
         private async Task OnSelectMakers()

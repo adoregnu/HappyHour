@@ -15,6 +15,7 @@ using System.Reflection;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using System.Threading;
+using AsyncAwaitBestPractices.MVVM;
 
 namespace HappyHour.ViewModel
 {
@@ -77,31 +78,34 @@ namespace HappyHour.ViewModel
 
        public ICommand CmdReload { get; private set; }
        public ICommand CmdRemove { get; private set; }
-        public ICommand CmdReloadAll { get; private set; }
+        public IAsyncCommand CmdReloadAll { get; private set; }
         public DbViewModel(IMainView mainView) : base(mainView) 
         {
             Title = "Database";
             //ListType = [.. _typeToPropertyName.Keys];
             CmdReload = new RelayCommand(async () => await OnTypeChanged(SelectedType));
-            CmdReloadAll = new RelayCommand(async () => await OnReloadAll());
+            CmdReloadAll = new AsyncCommand(OnReloadAll);
             CmdRemove = new RelayCommand<object>(OnRemove);
 
             CmdGenresMerge = new RelayCommand<object>(
                 OnMergeGenres, p => p is IList<object> list && list.Count > 1);
             CmdMergeMakers = new RelayCommand<object>(
                 OnMergeMakers, p => p is IList<object> list && list.Count > 1);
-            CmdMergeLables = new RelayCommand<object>(
+            CmdMergeLables = new AsyncCommand<object, object>(
                 OnMergeLabels, p => p is IList<object> list && list.Count > 1);
             CmdMergeSeries = new RelayCommand<object>(
                 OnMergeSeries, p => p is IList<object> list && list.Count > 1);
 
-            CmdGenreDoubleClicked = new RelayCommand(OnGenreDoubleClicked);
-            CmdLabelDoubleClicked = new RelayCommand(OnLabelDoubleClicked);
-            CmdMakerDoubleClicked = new RelayCommand(OnMakerDoubleClicked);
-            CmdSeriesoDubleClicked = new RelayCommand(OnSeriesoDubleClicked);
+            CmdGenreDoubleClicked = new AsyncCommand<object>(OnGenreDoubleClicked);
+            CmdLabelDoubleClicked = new AsyncCommand(OnLabelDoubleClicked);
+            CmdMakerDoubleClicked = new AsyncCommand(OnMakerDoubleClicked);
+            CmdSeriesoDubleClicked = new AsyncCommand(OnSeriesoDubleClicked);
+
+            CmdMoveDownSelectedGenre = new RelayCommand(OnMoveDownGenre);
+            CmdMoveUpSelectedGenre = new RelayCommand(OnMoveUpGenre);
 
             CmdAddSeriesNameTranslated = new RelayCommand(OnAddSeriesNameTranslated);
-            MainView.OnViewUpdate += ReceiveAsync;
+            //MainView.OnViewUpdate += ReceiveAsync;
         }
 
         async void ReceiveAsync(ViewEventArgs e)
@@ -110,7 +114,6 @@ namespace HappyHour.ViewModel
             {
                 return;
             }
-            Log.Print($"DbViewModel received {e.Message}");
             await OnReloadAll();
         }
 

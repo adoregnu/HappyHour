@@ -13,18 +13,11 @@
             var node = actorArray[i];
             //console.log('href : ' + node.href);
             var actor = {};
-            var m = /av-actress\/([a-z-]+)/i.exec(node.href);
-            if (m != null) {
-                if (m[1] == 'unknown') {
-                    console.log('unknown actor!');
-                    continue;
-                }
-                var tmp = m[1].replace(/[-–]/, ' ');
-                tmp = tmp.replace(/^([a-z])| ([a-z])/gi, function (m) { return m.toUpperCase(); });
-                actor['name'] = tmp.split(' ').reverse().join(' ');
-                actor['alias'] = [node.textContent.trim()];
-            } else {
-                actor['name'] = node.textContent.trim();
+
+            var names = node.textContent.split(/[(),]/).filter(name => name.length > 1);
+            actor['name'] = names[0].trim();
+            if (names.length > 1) {
+                actor['alias'] = names.slice(1);
             }
             actor['link'] = node.href;
             array.push(actor);
@@ -42,23 +35,28 @@
             CefSharp.PostMessage({ type: 'items', data:0 });
             return;
         }
-        actor = {};
-        alias_array = [];
         var name = _jav_parse_single_node("div[@class='actress-data']//dt[contains(.,'女優名')]/following-sibling::dd", null ,node);
-        names = name.split(/[-–]/);
-        //if (names.length > 1) { alias_array.push(names[1].trim()); }
-
-        const regex = /(.+)(（.+）)?/;
-        m = regex.exec(names[0]);
-        if (m == null) {
+        var names = name.split(/[（）()]/).filter(n => n.trim().length > 1);
+        if (names.length < 1) {
             console.log('failed to parse actor name!');
             CefSharp.PostMessage({ type: 'items', data:0 });
             return;
         }
-        names = m[1].split('（')
-        actor['name'] = names[0];
+        var actor = {};
+        var alias_array = [];
+
+        actor['name'] = names[0].trim();
         if (names.length > 1) {
-            alias_array.push(names[1].slice(0,-1));
+            names.slice(1).forEach(n => {
+                tmp = n.trim();
+                const check = /^[-–]/;
+                if (check.test(tmp)) {
+                    // discard english name, duplicated names are found!
+                    //tmp = tmp.slice(1).trim().split(/[- ]/).reverse().join(' ')
+                } else {
+                    alias_array.push(tmp);
+                }
+            });
         }
 
         var img = _jav_parse_single_node("div[@class='actress-image']/img/@src", null, node);
@@ -67,16 +65,11 @@
         }
         var alias = _jav_parse_single_node("div[@class='actress-data']//dt[contains(.,'別名義')]/following-sibling::dd", null, node);
         if (alias != null) {
-            var array = alias.split(/、|・/);
-            array.forEach(function (item) {
+            var array = alias.split(/[（）、|・]/).filter(a => a.trim().length > 1);
+            array.forEach(item => { 
                 if (item.startsWith('– –')) { return; }
-                m = regex.exec(item);
-                if (m != null) {
-                    names = m[1].split('（')
-                    alias_array.push(names[0]);
-                    if (names.length > 1) {
-                        alias_array.push(names[1].slice(0, -1));
-                    }
+                if (!alias_array.includes(item.trim())) {
+                    alias_array.push(item.trim());
                 }
             });
         }

@@ -48,19 +48,21 @@ namespace HappyHour.Model
         public static string GetActorName(Actor actor, string lang = null)
         {
             string name = null;
+            int priority = -1;
             foreach (var n in actor.Names)
             {
                 name = n.Name.Text;
                 if (lang != null && n.Name.Lang == lang)
                 {
                     name = n.Name.Text;
-                    break;
+                    priority = 0;
                 }
                 else if (n.Priority == 0)
                 {
                     name = n.Name.Text;
-                    break;
+                    priority = 1;
                 }
+                if (priority == 0) break;
             }
             return name;
         }
@@ -77,7 +79,7 @@ namespace HappyHour.Model
             return names.Count > 0 ? names : null;
         }
 
-        public Actor GetActor(ActorName aname)
+        public  Actor GetActor(ActorName aname)
         {
             return Actors
                 .Include(a => a.Names)
@@ -88,9 +90,25 @@ namespace HappyHour.Model
                 .FirstOrDefault();
         }
 
-        public void LoadActorMovie(Actor actor)
+        public async ValueTask<Actor> LoadActor(Actor actor, bool includeThumb = false)
         {
-            Entry(actor).Collection(a => a.Movies).Load();
+            var query = Actors
+                .Include(a => a.Names)
+                    .ThenInclude(n => n.Name)
+                .Include(a => a.Movies)
+                .Where(a => a == actor);
+
+            if (includeThumb)
+            {
+                query = query.Include(a => a.Thumb);
+            }
+
+            return await query.FirstOrDefaultAsync();
+        }
+
+        public async Task LoadActorMovie(Actor actor)
+        {
+            await Entry(actor).Collection(a => a.Movies).LoadAsync();
         }
 
         public async ValueTask<List<Actor>> GetActors(Movie movie)
@@ -101,6 +119,16 @@ namespace HappyHour.Model
                 .Include(a => a.Movies)
                 .Include(a => a.Thumb)
                 .Where(a => a.Movies.Contains(movie))
+                .ToListAsync();
+        }
+
+        public async ValueTask<List<Actor>> GetActors()
+        {
+            return await Actors
+               .Include(a => a.Names)
+                   .ThenInclude(n => n.Name)
+                .Include(a => a.Movies)
+                .Where(a => a.Thumb == null)
                 .ToListAsync();
         }
 

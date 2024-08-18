@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         WindowStartupLocation="CenterOwner"
         md:DialogServiceViews.IsRegistered="True"
-        Title="Setting for items to be scraped" Height="450" Width="500">
+        Title="Setting for items to be scraped" Height="470" Width="500">
     <Window.Resources>
         <ControlTemplate x:Key="SpiderTypeSehuatang">
             <Grid>
@@ -97,8 +97,8 @@
         </Grid.ColumnDefinitions>
         <Grid Grid.Column="0" >
             <Grid.RowDefinitions>
-                <RowDefinition Height="7*"/>
-                <RowDefinition Height="3*"/>
+                <RowDefinition Height="6*"/>
+                <RowDefinition Height="4*"/>
             </Grid.RowDefinitions>
             <ListBox Grid.Row="0" ItemsSource="{Binding Spiders}" SelectedItem="{Binding SelectedSpider}" Margin="5,5,5,0"/>
             <ListBox Grid.Row="1" ItemsSource="{Binding Spiders}" SelectedItem="{Binding SelectedSpiderToChain}" Margin="5"/>
@@ -106,7 +106,7 @@
         <StackPanel Grid.Column="1" Orientation="Vertical">
             <TextBlock Text="{Binding SelectedSpider.Name}" Margin="5" HorizontalAlignment="Center"/>
             <ContentPresenter Content="{Binding SelectedSpider}" ContentTemplate="{DynamicResource SpiderSettingTemplate}"/>
-            <DockPanel>
+            <DockPanel Visibility="{Binding SelectedSpider.ChainVisibility}">
                 <StackPanel Orientation="Vertical" VerticalAlignment="Center" DockPanel.Dock="Left">
                     <Button Margin="5,5,5,0" Command="{Binding CmdAddChain}">Add</Button>
                     <Button Margin="5,5,5,0" Command="{Binding CmdDelChain}">Del</Button>

@@ -18,6 +18,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using System.Threading.Tasks;
 using HappyHour.Extension;
 using System.Threading;
+using AsyncAwaitBestPractices.MVVM;
 
 namespace HappyHour.ViewModel
 {
@@ -89,6 +90,8 @@ namespace HappyHour.ViewModel
         public List<ActorInitial> ActorInitials { get; private set; }
         public List<SpiderBase> SpiderList { get; set; }
 
+        public List<string> Languages { get; } = ["ko", "en", "jp"];
+
         public bool? DialogResult
         {
             get => _dialogResult;
@@ -118,26 +121,29 @@ namespace HappyHour.ViewModel
         public IMainView MainView { get; set; }
         public IDialogService DialogService { get; set; }
 
-        public ICommand CmdDoubleClick { get; private set; }
+        public IAsyncCommand CmdDoubleClick { get; private set; }
         public ICommand CmdSearchNameDoubleClick { get; private set; }
-        public ICommand CmdMergeActors { get; private set; }
-        public ICommand CmdRemoveActor {  get; private set; }
+        public IAsyncCommand<object, object> CmdMergeActors { get; private set; }
+        public ICommand CmdRemoveActor { get; private set; }
         public ICommand CmdClearActors { get; private set; }
         public ICommand CmdRemoveName { get; private set; }
         public ICommand CmdClosed { get; private set; }
-
+        public IAsyncCommand CmdUpdateNames { get; set; }
+        public IAsyncCommand CmdShowThumblessActors { get; set; }
         public ActorEditorViewModel(IMainView mainView)
         {
             MainView = mainView;
-            CmdDoubleClick = new RelayCommand(OnDoubleClicked);
+            CmdDoubleClick = new AsyncCommand(OnDoubleClicked);
             CmdSearchNameDoubleClick = new RelayCommand(OnSearchNameDoubleClicked);
-            CmdMergeActors = new RelayCommand<object>(
-                OnMergeActors,
+            CmdMergeActors = new AsyncCommand<object, object>(OnMergeActors,
                 p => p is IList<object> list && list.Count > 1);
             CmdRemoveActor = new RelayCommand<Actor>(OnRemoveActor);
             CmdRemoveName = new RelayCommand<ActorName>(OnRemoveName);
             CmdClearActors = new RelayCommand(OnClearActors);
             CmdClosed = new RelayCommand(OnClose);
+            CmdUpdateNames = new AsyncCommand(OnUpdateNames);
+            CmdShowThumblessActors = new AsyncCommand(OnShowThumblessActors);
+
 
             ActorInitials = Enumerable.Range('A', 'Z' - 'A' + 1)
                 .Select(c => new ActorInitial
@@ -205,8 +211,8 @@ namespace HappyHour.ViewModel
             if (ret == MessageBoxResult.Yes)
             {
                 SelectedActor.Names.Remove(name);
-                _db.RemoveActorName(name);
                 UpdateActorNames(SelectedActor);
+                _db.RemoveActorName(name);
             }
         }
 
@@ -227,7 +233,12 @@ namespace HappyHour.ViewModel
             if (isSelected)
             {
                 var actors = await _db.GetActors(keyword, OrderType, limit);
-                actors?.ForEach(a => { _db.LoadActorMovie(a); Actors.Add(a); });
+
+                foreach(var actor in actors)
+                {
+                    await _db.LoadActorMovie(actor);
+                    Actors.Add(actor);
+                }
             }
             else if (p == "All")
             {
@@ -238,7 +249,7 @@ namespace HappyHour.ViewModel
                 List<Actor> tmpList = [];
                 foreach (var actor in Actors)
                 {
-                    if (actor.Names.Any(n => n.Name.Text.StartsWith(p)))
+                    if (actor.Names.Any(n => n.Name.Text.StartsWith(p, StringComparison.OrdinalIgnoreCase)))
                     {
                         tmpList.Add(actor);
                     }
@@ -246,12 +257,12 @@ namespace HappyHour.ViewModel
                 tmpList.ForEach(a => Actors.Remove(a));
             }
         }
-        private async void OnDoubleClicked()
+        private async Task OnDoubleClicked()
         {
             if (SelectedActor == null) { return; }
-
-            var movies = await _db.GetMovies(SelectedActor);
-            MediaList?.LoadItems(movies);
+            UiServices.WaitCursor(true);
+            await MediaList?.LoadItems(await _db.GetMovies(SelectedActor));
+            UiServices.WaitCursor(false);
         }
 
         private void OnSearchNameDoubleClicked()
@@ -272,15 +283,27 @@ namespace HappyHour.ViewModel
             Actors.Clear();
         }
 
-        private void OnMergeActors(object p)
+        private async Task OnMergeActors(object p)
         {
             var selectedActors = (p as IList<object>).Select(o => o as Actor).ToList();
-            _db.MergeActors(selectedActors, a => Actors.Remove(a));
+            await _db.MergeActors(selectedActors, a => Actors.Remove(a));
+        }
+        private async Task OnUpdateNames()
+        {
+            await _db.SaveChangesAsync();
+        }
+
+        private async Task OnShowThumblessActors()
+        {
+            var actors = await _db.GetActors();
+            Actors.Clear();
+            actors.ForEach(Actors.Add);
         }
 
         private void OnClose()
         {
-            Messenger.Unregister<ViewEventArgs>(this);
+            Log.Print("OnClose!");
+            //Messenger.Unregister<ViewEventArgs>(this);
         }
     }
 }

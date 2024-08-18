@@ -91,6 +91,10 @@ namespace HappyHour.Spider
                     Log.Print("OnBeforeDownload: Cancel " + e.SuggestedFileName);
                     e.IsCancelled = true;
                 }
+                if (File.Exists(e.SuggestedFileName))
+                {
+                    File.Delete(e.SuggestedFileName);
+                }
             }
             //Log.Print("OnBeforeDownload: " + e.SuggestedFileName);
         }
@@ -99,8 +103,6 @@ namespace HappyHour.Spider
         {
             if (e.IsComplete)
             {
-                Log.Print($"{_spider.SearchMedia.Pid} : Download Completed: " +
-                    $"({_numDownloaded}/{_numDownload}){e.FullPath}");
                 lock (_timer)
                 {
                     _numDownloaded++;
@@ -108,8 +110,10 @@ namespace HappyHour.Spider
                     {
                         return;
                     }
-                    _timer.Enabled = false;
+                    _timer.Stop();
                 }
+                Log.Print($"{_spider.SearchMedia.Pid} : Download Completed: " +
+                    $"({_numDownloaded}/{_numDownload}){e.FullPath}");
 
                 Application.Current.Dispatcher.InvokeAsync(async () => await _spider.UpdateItems(_items));
             }
@@ -137,7 +141,7 @@ namespace HappyHour.Spider
                 _numDownloaded = _numDownload = 0;
             }
 
-            Application.Current.Dispatcher.InvokeAsync(async () => await _spider.UpdateItems(_items));
+            //Application.Current.Dispatcher.InvokeAsync(async () => await _spider.UpdateItems(_items));
         }
 
         public async Task Download(SpiderBase spider, IDictionary<string, object> items)

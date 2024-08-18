@@ -11,12 +11,31 @@
         return null;
     }
 
+    function _parse_genre(xpath) {
+        var genres = _jav_parse_multi_node(xpath);
+        if (genres == null || genres.length < 1) {
+            return null;
+        }
+        var drops = ['独占配信', '配信専用', 'フルハイビジョン' ];
+        genres = genres.filter(genre => !drops.some(drop => genre.includes(drop)));
+        if (genres.length < 1) {
+            return null;
+        }
+        return genres;
+    }
+
     var items = {
         //id: { xpath: "//th[contains(., '品番：')]/following-sibling::td" },
         title: { xpath: "//div[@class='common_detail_cover']/h1[@class='tag']" },
         cover: { xpath: "//a[@id='EnlargeImage']/@href" },
-        studio: { xpath: "//th[contains(., 'メーカー：')]/following-sibling::td/a" },
+        maker: { xpath: "//th[contains(., 'メーカー：')]/following-sibling::td/a" },
+        label: { xpath: "//th[contains(., 'レーベル：')]/following-sibling::td/a" },
+        series: { xpath: "//th[contains(., 'シリーズ：')]/following-sibling::td/a" },
         date: { xpath: "//th[contains(., '配信開始日：')]/following-sibling::td" },
+        genre: {
+            xpath: "//th[contains(., 'ジャンル：')]/following-sibling::td/a/text()",
+            handler:  _parse_genre
+        },
         rating: {
             xpath: "//th[contains(., '評価：')]/following-sibling::td",
             handler: _parseRating

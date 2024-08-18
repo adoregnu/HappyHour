@@ -9,6 +9,7 @@
         xmlns:local="clr-namespace:HappyHour.View"
         xmlns:model="clr-namespace:HappyHour.Model"
         xmlns:ctrls="clr-namespace:HappyHour.View.Controls"
+        xmlns:nud="clr-namespace:NumericUpDownLib;assembly=NumericUpDownLib"
         xmlns:converter="clr-namespace:HappyHour.Converter"
         mc:Ignorable="d"
         WindowStartupLocation="CenterOwner"
@@ -17,7 +18,7 @@
     <Window.Resources>
         <converter:ActorToNumMovie x:Key="ActorToNumMovie" />
         <converter:EnumToBooleanConverter x:Key="EnumToBool"/>
-        <ControlTemplate x:Key="_controlTpl" TargetType="ListBoxItem">
+        <ControlTemplate x:Key="_actorTemplate" TargetType="ListBoxItem">
             <Border Name="_Border" Padding="2" SnapsToDevicePixels="true"
                     Width="128" Height="128">
                 <Grid>
@@ -42,132 +43,166 @@
                 </Trigger>
             </ControlTemplate.Triggers>
         </ControlTemplate>
+
         <local:BindingProxy x:Key="VmContext"
             Data="{Binding RelativeSource={RelativeSource FindAncestor,
                 AncestorType={x:Type local:ActorEditorDialog}}, Path=DataContext}"/>
+
+        <ControlTemplate x:Key="_nameTemplate" TargetType="ListBoxItem">
+            <Grid Margin="2,2,2,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="8*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="2.5*"/>
+                </Grid.ColumnDefinitions>
+                <TextBox Grid.Column="0" Text="{Binding Name.Text}" Margin="0,0,2,0" IsReadOnly="True"/>
+                <nud:UIntegerUpDown Grid.Column="1" Value="{Binding Priority, Mode=TwoWay}" MinValue="0" MaxValue="10" Margin="0,0,2,0"/>
+                <ComboBox Grid.Column="2"
+                          ItemsSource="{Binding Data.Languages, Source={StaticResource VmContext}}"
+                          SelectedItem="{Binding Name.Lang, Mode=TwoWay}" />
+            </Grid>
+        </ControlTemplate>
     </Window.Resources>
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="Closed">
             <i:InvokeCommandAction Command="{Binding CmdClosed}" />
         </i:EventTrigger>
     </i:Interaction.Triggers>
-    <DockPanel>
-        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Center">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="7*"/>
+            <ColumnDefinition Width="3*"/>
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Vertical" HorizontalAlignment="Center">
+            <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="5">
+                <ItemsControl ItemsSource="{Binding ActorInitials}">
+                    <ItemsControl.ItemsPanel>
+                        <!-- specify the panel that is the container for your items -->
+                        <ItemsPanelTemplate>
+                            <UniformGrid Rows="1"  HorizontalAlignment="Left" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <!-- specify the template used to render each item -->
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <ToggleButton
+                                Margin="5,0,0,5"
+                                Content="{Binding Initial}"
+                                IsChecked="{Binding IsChecked}">
+                            </ToggleButton>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </WrapPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"  Margin="0,0,0,5">
+                <RadioButton GroupName="OrderBy" Content="Recent" Margin="0,2,0,0"
+                             IsChecked="{Binding OrderType, Converter={StaticResource EnumToBool},
+                    ConverterParameter={x:Static model:ActorOrderType.Key}}"/>
+                <RadioButton GroupName="OrderBy" Content="Movies" Margin="0,2,0,0"
+                             IsChecked="{Binding OrderType, Converter={StaticResource EnumToBool},
+                    ConverterParameter={x:Static model:ActorOrderType.NumMovies}}"/>
+                <RadioButton GroupName="OrderBy" Content="Names" Margin="0,2,0,0"
+                             IsChecked="{Binding OrderType, Converter={StaticResource EnumToBool},
+                    ConverterParameter={x:Static model:ActorOrderType.NumNames}}"/>
+                <Button Style="{DynamicResource ModernButtonStyle2}"
+                        Command="{Binding CmdShowThumblessActors}" Margin="5,0,0,0" ToolTip="Show actors not having thubmail">
+                    <Path Stretch="Uniform"
+                      Data="{Binding Source={StaticResource no-image}, Path=Data}"
+                      Fill="{Binding Path=Foreground, RelativeSource=
+                            {RelativeSource AncestorType={x:Type Button}}}" />
+                </Button>
+            </StackPanel>
+        </StackPanel>
+        <StackPanel Grid.Row="0" Grid.Column="1" VerticalAlignment="Bottom">
+            <Button Width="100" HorizontalAlignment="Center" Margin="5" Command="{Binding CmdUpdateNames}">Update Names</Button>
+        </StackPanel>
+
+        <ListBox  Grid.Row="1" Grid.Column="0" Margin="5,0,0,5"
+            SelectionMode="Extended" x:Name="_actorListbox"
+            ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+            ItemsPanel="{StaticResource ImagePanelTemplate}"
+            ItemsSource="{Binding Actors}"
+            SelectedItem="{Binding SelectedActor}">
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="MouseDoubleClick">
+                    <i:InvokeCommandAction Command="{Binding CmdDoubleClick}"/>
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+            <i:Interaction.Behaviors>
+                <bh:ListboxBehavior />
+            </i:Interaction.Behaviors>
+            <ListBox.Resources>
+                <Style TargetType="{x:Type ListBoxItem}">
+                    <Setter Property="Template" Value="{StaticResource _actorTemplate}"/>
+                </Style>
+            </ListBox.Resources>
+            <ListBox.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Merge Actors"
+                              Command="{Binding CmdMergeActors}"
+                              CommandParameter="{Binding RelativeSource={RelativeSource
+                        AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.SelectedItems}"/>
+                    <MenuItem Header="Remove"
+                              Command="{Binding CmdRemoveActor}"
+                              CommandParameter="{Binding RelativeSource={RelativeSource
+                        AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.SelectedItem}"/>
+
+                </ContextMenu>
+            </ListBox.ContextMenu>
+        </ListBox>
+
+        <Grid Grid.Row="1" Grid.Column="1" >
+            <Grid.RowDefinitions>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="4*"/>
+            </Grid.RowDefinitions>
+            <ListBox Grid.Row="0" Margin="5,0,5,0" ItemsSource="{Binding ActorNames}" x:Name="_actorNames">
+                <ListBox.InputBindings>
+                    <KeyBinding Command="{Binding CmdRemoveName}"
+                            CommandParameter="{Binding ElementName=_actorNames, Path=SelectedItem}"
+                            Key="Delete"/>
+                </ListBox.InputBindings>
+                <i:Interaction.Behaviors>
+                    <bh:ListboxBehavior/>
+                </i:Interaction.Behaviors>
+                <ListBox.Resources>
+                    <Style TargetType="{x:Type ListBoxItem}">
+                        <Setter Property="Template" Value="{StaticResource _nameTemplate}"/>
+                    </Style>
+                </ListBox.Resources>
+            </ListBox>
+            <ctrls:DelayedBindingTextBox Grid.Row="1" DelayTime="500" DockPanel.Dock="Top" Margin="5,5,5,0"
+                 Text="{Binding SearchText}"/>
+            <ListBox Grid.Row="2" ItemsSource="{Binding SearchNames}" Margin="5"
+                 SelectedItem="{Binding SelectedSearchName}">
+                <!--
+            <ListBox.InputBindings>
+                <MouseBinding MouseAction="LeftDoubleClick"
+                              Command="{Binding CmdActorNameDoubleClick}"/>
+            </ListBox.InputBindings>
+-->
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="MouseDoubleClick">
+                        <i:InvokeCommandAction
+                        Command="{Binding CmdSearchNameDoubleClick }"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+                <i:Interaction.Behaviors>
+                    <bh:ListboxBehavior/>
+                </i:Interaction.Behaviors>
+            </ListBox>
+        </Grid>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center">
             <Button Content="Clear" Margin="0,0,5,5" Padding="2" Command="{Binding CmdClearActors}"/>
             <Button Content="Close" Margin="0,0,5,5" Padding="2" IsCancel="True" Click="Close"/>
         </StackPanel>
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            <Grid Grid.Column="0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-                <WrapPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center" Margin="5">
-                    <ItemsControl Grid.Row="1" ItemsSource="{Binding ActorInitials}">
-                        <ItemsControl.ItemsPanel>
-                            <!-- specify the panel that is the container for your items -->
-                            <ItemsPanelTemplate>
-                                <UniformGrid Rows="1"  HorizontalAlignment="Left" />
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <!-- specify the template used to render each item -->
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <ToggleButton
-                                    Margin="5,0,0,5"
-                                    Content="{Binding Initial}"
-                                    IsChecked="{Binding IsChecked}">
-                                </ToggleButton>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </WrapPanel>
-                <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center">
-                    <RadioButton GroupName="OrderBy" Content="Recent"
-                                 IsChecked="{Binding OrderType, Converter={StaticResource EnumToBool},
-                        ConverterParameter={x:Static model:ActorOrderType.Key}}"/>
-                    <RadioButton GroupName="OrderBy" Content="Movies"
-                                 IsChecked="{Binding OrderType, Converter={StaticResource EnumToBool},
-                        ConverterParameter={x:Static model:ActorOrderType.NumMovies}}"/>
-                    <RadioButton GroupName="OrderBy" Content="Names"
-                                 IsChecked="{Binding OrderType, Converter={StaticResource EnumToBool},
-                        ConverterParameter={x:Static model:ActorOrderType.NumNames}}"/>
-                </StackPanel>
-                <ListBox Margin="5,0,0,5" Grid.Row="2"
-                    SelectionMode="Extended" x:Name="_actorListbox"
-                    ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                    ItemsPanel="{StaticResource ImagePanelTemplate}"
-                    ItemsSource="{Binding Actors}"
-                    SelectedItem="{Binding SelectedActor}">
-                    <i:Interaction.Triggers>
-                        <i:EventTrigger EventName="MouseDoubleClick">
-                            <i:InvokeCommandAction Command="{Binding CmdDoubleClick}"/>
-                        </i:EventTrigger>
-                    </i:Interaction.Triggers>
-                    <i:Interaction.Behaviors>
-                        <bh:ListboxBehavior />
-                    </i:Interaction.Behaviors>
-                    <ListBox.Resources>
-                        <Style TargetType="{x:Type ListBoxItem}">
-                            <Setter Property="Template" Value="{StaticResource _controlTpl}"/>
-                        </Style>
-                    </ListBox.Resources>
-                    <ListBox.ContextMenu>
-                        <ContextMenu>
-                            <MenuItem Header="Merge Actors"
-                                      Command="{Binding CmdMergeActors}"
-                                      CommandParameter="{Binding RelativeSource={RelativeSource
-                                AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.SelectedItems}"/>
-                            <MenuItem Header="Remove"
-                                      Command="{Binding CmdRemoveActor}"
-                                      CommandParameter="{Binding RelativeSource={RelativeSource
-                                AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.SelectedItem}"/>
-
-                        </ContextMenu>
-                    </ListBox.ContextMenu>
-                </ListBox>
-            </Grid>
-            <DockPanel Grid.Column="1" Width="200">
-                <DockPanel DockPanel.Dock="Top">
-                    <ListBox  Height="150" Margin="5,10,5,0" ItemsSource="{Binding ActorNames}" x:Name="_actorNames">
-                        <ListBox.InputBindings>
-                            <KeyBinding Command="{Binding CmdRemoveName}"
-                                        CommandParameter="{Binding ElementName=_actorNames, Path=SelectedItem}"
-                                        Key="Delete"/>
-                        </ListBox.InputBindings>
-                        <i:Interaction.Behaviors>
-                            <bh:ListboxBehavior/>
-                        </i:Interaction.Behaviors>
-                    </ListBox>
-                </DockPanel>
-                <DockPanel>
-                    <ctrls:DelayedBindingTextBox DelayTime="500" DockPanel.Dock="Top" Margin="5,5,5,0"
-                             Text="{Binding SearchText}"/>
-                    <ListBox ItemsSource="{Binding SearchNames}" Margin="5"
-                             SelectedItem="{Binding SelectedSearchName}">
-<!--
-                        <ListBox.InputBindings>
-                            <MouseBinding MouseAction="LeftDoubleClick"
-                                          Command="{Binding CmdActorNameDoubleClick}"/>
-                        </ListBox.InputBindings>
--->
-                        <i:Interaction.Triggers>
-                            <i:EventTrigger EventName="MouseDoubleClick">
-                                <i:InvokeCommandAction
-                                    Command="{Binding CmdSearchNameDoubleClick }"/>
-                            </i:EventTrigger>
-                        </i:Interaction.Triggers>
-                        <i:Interaction.Behaviors>
-                            <bh:ListboxBehavior/>
-                        </i:Interaction.Behaviors>
-                    </ListBox>
-                </DockPanel>
-            </DockPanel>
-        </Grid>
-    </DockPanel>
+    </Grid>
 </Window>

@@ -21,6 +21,7 @@ namespace HappyHour.ViewModel
 
             if (msg.Message.StartsWith("Third-party cookie") ||
                 msg.Message.StartsWith("[object") ||
+                msg.Message.StartsWith("Slow network") ||
                 msg.Message.StartsWith("A parser-blocking")
                 )
                 return;

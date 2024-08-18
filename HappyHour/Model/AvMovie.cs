@@ -101,11 +101,11 @@ namespace HappyHour.Model
                 _ => base.CompareTo(media)
             };
         }
-        public void ClearDb()
+        public void ClearDb(bool realClear = false)
         {
             if (MovieInfo != null)
             {
-                _db.RemoveMovie(_movieInfo);
+                _db.RemoveMovie(_movieInfo, realClear);
                 MovieInfo = null;
             }
         }
@@ -168,7 +168,7 @@ namespace HappyHour.Model
                 {
                     tmp += label;
                 }
-                var names = MovieDbContext.GetActorsNames(MovieInfo);
+                var names = MovieDbContext.GetActorsNames(MovieInfo, "ko");
                 if (names != null)
                 {
                     Actresses = string.Join('\n', names);

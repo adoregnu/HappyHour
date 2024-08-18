@@ -1,12 +1,19 @@
 ﻿(function () {
     function get_node(node) { return node; }
-    function _parseActor(xpath) {
+    function parse_actor(xpath) {
         var nodes = _jav_parse_multi_node(xpath, get_node);
         if (nodes == null) { return null; }
 
         var actors = [];
         nodes.forEach(function (node) {
-            actors.push({ name: node.textContent.substring(1), link: node.href });
+            var names = node.textContent.substring(1).split(/[(),]/);
+            var name = names[0];
+            if (names.length > 1) {
+                var alias = names.filter(item => name != item && item.length > 0);
+                actors.push({ name: name, alias:alias, link: node.href });
+            } else {
+                actors.push({ name: name, link: node.href });
+            }
         });
         return actors;
     }
@@ -56,6 +63,19 @@
         addAlias(actor, alias, "//span[@class='inner_name_kr']", ';ko', node);
         addAlias(actor, alias, "//span[@class='inner_name_en']", ';en', node);
         addAlias(actor, alias, "//span[@class='inner_name_cn']", ';jp', node);
+
+        var names = _jav_parse_multi_node("//span[@class='actor_onm']");
+        if (names != null) {
+            const checkHan = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/;
+            names.forEach(name => {
+                array = name.split(/[()\/#]/).filter(n => n.trim().length > 1);
+                array.forEach((item, idx, arr) => {
+                    arr[idx] = checkHan.test(item) ? item.trim() + ';ko' : item.trim() + ';jp';
+                });
+
+                alias.push(...array);
+            });
+        } 
 /*
         var names = _jav_parse_multi_node("//span[contains(., '다른이름')]/*[contains(@class, 'actor_onm')]");
         if (names != null) {
@@ -107,9 +127,9 @@
             },
             date: { xpath: "//span[contains(., '출시:')]/following-sibling::text()" },
             rating: { xpath: "//span[@class='rating']"},
-            actor_link: {
+            actor: {
                 xpath: "//span[contains(., '출연:')]/following-sibling::a",
-                handler: _parseActor
+                handler: parse_actor
             },
             plot: { xpath: "//p[@id='story_kr']"},
             genre: { xpath: "//li[@class='gen_list']/a/text()", handler: _jav_parse_multi_node },
@@ -144,7 +164,8 @@
     }
 
     if (document.location.href.includes('/menu/search.php')) {
-        window.setTimeout(parseSearchResult, 100);
+        window.setTimeout(parseSearchResult, 1000);
+        //parseSearchResult();
         //parseSearchResult();
         return;
     }

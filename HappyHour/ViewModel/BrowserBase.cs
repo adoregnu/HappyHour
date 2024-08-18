@@ -11,7 +11,7 @@ namespace HappyHour.ViewModel
 {
     delegate void OnJsResult(bool bsuccess);
 
-    class BrowserBase : Pane
+    internal class BrowserBase : Pane
     {
         string _address;
         string _headerType;

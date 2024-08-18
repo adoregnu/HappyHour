@@ -71,6 +71,7 @@ namespace HappyHour.Spider
             _popupHandler = new OffScreenPopupHandler(Browser);
             ReqeustHandler = new ShtRequestHandler(this);
             _downloadTimer = new Timer(TimerCallback, null, Timeout.Infinite, Timeout.Infinite);
+            ChainVisibility = System.Windows.Visibility.Collapsed;
         }
 
         protected override string GetScript(string name)

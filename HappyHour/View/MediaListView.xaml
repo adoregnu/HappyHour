@@ -213,7 +213,7 @@
 
         <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center">
               <Button Style="{StaticResource ModernButtonStyle2}"
-                    Command="{Binding CmdNewMovie}">
+                    Command="{Binding CmdShowLastUpdated}">
                 <Path Stretch="Uniform"
                       Data="{Binding Source={StaticResource new-box}, Path=Data}"
                       Fill="{Binding Path=Foreground, RelativeSource=
@@ -284,6 +284,8 @@
             <ComboBox ItemsSource="{Binding RatingSites}" SelectedItem="{Binding SelectedRatingSite}"
                   IsSynchronizedWithCurrentItem="True" Width="150" Margin="5"
                   Visibility="{Binding RatingSitesVisibility}"/>
+            <Label VerticalAlignment="Center">Scap Delay(ms)</Label>
+            <TextBox Text="{Binding ScrapDelay}" Width="50" Margin="0,5,5,5"/>
         </StackPanel>
         <ListBox Grid.Row="1"
             x:Name="ImageListBox"
