@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -116,7 +117,7 @@ namespace HappyHour.Model
             return await Actors
                 .Include(a => a.Names)
                     .ThenInclude(n => n.Name)
-                .Include(a => a.Movies)
+                //.Include(a => a.Movies)
                 .Include(a => a.Thumb)
                 .Where(a => a.Movies.Contains(movie))
                 .ToListAsync();
@@ -170,18 +171,29 @@ namespace HappyHour.Model
             }
         }
 
-        public async ValueTask<List<string>> GetMovieUrls(string ppath)
+        async ValueTask<List<string>> GetMovieUrls(Expression<Func<Movie, bool>> exp)
         {
-            return await Movies
-                .Where(m => EF.Functions.Like(m.VideoUrl, $"{ppath}%", "|"))
+            UiServices.WaitCursor(true);
+            var urls = await Movies
+                .Where(exp)
                 .OrderBy(m => m.VideoUrl)
                 .Select(m => m.VideoUrl)
                 .ToListAsync();
+            UiServices.WaitCursor(false);
+            return urls;
+        }
+        public async ValueTask<List<string>> GetMovieUrls(string ppath)
+        {
+            return await GetMovieUrls((Movie m) => EF.Functions.Like(m.VideoUrl, $"{ppath}%", "|"));
+        }
+        public async ValueTask<List<string>> GetMovieUrls(Actor actor)
+        {
+            return await GetMovieUrls((Movie m) => m.Actors.Contains(actor));
         }
 
-        public async ValueTask<Movie> GetMovie(string pid)
+        public async ValueTask<Movie> GetMovie(Expression<Func<Movie, bool>> exp,  bool bAll = true)
         {
-            return await Movies
+            var query = Movies
                 .Include(m => m.Maker)
                     .ThenInclude(m => m.Name)
                 .Include(m => m.Label)
@@ -189,13 +201,37 @@ namespace HappyHour.Model
                 .Include(m => m.Actors)
                     .ThenInclude(actor => actor.Names)
                         .ThenInclude(name => name.Name)
-                .Include(m => m.Cover)
-                .Include(m => m.Series)
-                .Include(m => m.Title)
-                .Include(m => m.Plot)
-                .Include(m => m.Ratings)
-                .Where(m => m.PID == pid)
-                .FirstOrDefaultAsync();
+                .Include(m => m.Cover);
+
+            IQueryable<Movie> iquery;
+            if (bAll)
+            {
+                iquery = query.Include(m => m.Series)
+                    .ThenInclude(s => s.Name)
+               .Include(m => m.Title)
+               .Include(m => m.Plot)
+               .Include(m => m.Ratings)
+               .Where(exp);
+            }
+            else
+            {
+                iquery = query.Where(exp);
+            }
+            return await iquery.FirstOrDefaultAsync();
+        }
+        public async ValueTask<Movie> GetMovie(string pid, bool bAll = true)
+        {
+            return await GetMovie((Movie m) => EF.Functions.Like(m.PID, $"%{pid}%"), bAll);
+        }
+
+        public async ValueTask<List<Movie>> GetMoviesFast(Expression<Func<Movie, bool>> exp)
+        {
+            return await Movies.Where(exp).ToListAsync();
+        }
+
+        public async ValueTask<List<Movie>> GetMoviesFast(string pid)
+        {
+            return await GetMoviesFast((Movie m) => EF.Functions.Like(m.PID, $"%{pid}%"));
         }
 
         public async ValueTask<List<Movie>> GetMovies(Expression<Func<Movie, bool>> exp, int limit = 0)
@@ -256,12 +292,16 @@ namespace HappyHour.Model
         {
             return await GetMovies((Movie m) => m.Series == series);
         }
+        public async ValueTask<List<Movie>> GetMoviesEmptyFieldOf(string name)
+        {
+            return await GetMovies((Movie m) => !m.Title.Any(t => t.Lang == "ko"));
+        }
 
         public async ValueTask<List<Genre>> GetGenres(Movie movie)
         {
             return await MovieGenres
                 .Include(g => g.Name.OrderByDescending(n => n.Lang))
-                .Include(g => g.Movies)
+                //.Include(g => g.Movies)
                 .Where(g => g.Movies.Contains(movie))
                 .ToListAsync();
         }
@@ -269,8 +309,8 @@ namespace HappyHour.Model
         public async ValueTask<List<Genre>> GetGenres(string keyword = null)
         {
             var query = MovieGenres
-                .Include(g => g.Name.OrderByDescending(n => n.Lang))
-                .Include(g => g.Movies);
+                .Include(g => g.Name.OrderByDescending(n => n.Lang));
+                //.Include(g => g.Movies);
 
             IQueryable<Genre> where = null;
             if (keyword != null)
@@ -290,7 +330,7 @@ namespace HappyHour.Model
         public async ValueTask<List<Series>> GetSeries(string keyword = null)
         {
             var query = Series
-                .Include(s => s.Movies)
+                //.Include(s => s.Movies)
                 .Include(s => s.Name);
 
             IQueryable<Series> where = null;
@@ -322,8 +362,8 @@ namespace HappyHour.Model
             var query = Makers
                 .Include(m => m.Name.OrderByDescending(n => n.Lang))
                 .Include(m => m.Logo)
-                .Include(m => m.Labels)
-                    .ThenInclude(lb => lb.Movies);
+                .Include(m => m.Labels);
+                    //.ThenInclude(lb => lb.Movies);
 
             IQueryable<Maker> where = null;
             if (!string.IsNullOrEmpty(keyword))
@@ -343,8 +383,8 @@ namespace HappyHour.Model
         {
             var query = Labels
                 .Include(l => l.Name.OrderByDescending(n => n.Lang))
-                .Include(l => l.Logo)
-                .Include(l => l.Movies);
+                .Include(l => l.Logo);
+                //.Include(l => l.Movies);
 
             IQueryable<Label> where = null;
             if (!string.IsNullOrEmpty(keyword))
@@ -367,7 +407,7 @@ namespace HappyHour.Model
                 .Include(m => m.Labels)
                     .ThenInclude(lb => lb.Name.OrderByDescending(n => n.Lang))
                 .Include(m => m.Labels)
-                    .ThenInclude(lb => lb.Movies)
+                    //.ThenInclude(lb => lb.Movies)
                 .FirstOrDefault(m => m == maker);
 
             return [.. tmp.Labels];
@@ -378,7 +418,7 @@ namespace HappyHour.Model
             return await Labels
                 .Include(l => l.Name)
                 .Include(l => l.Logo)
-                .Include(l => l.Movies)
+                //.Include(l => l.Movies)
                 .Where(l => l.Movies.Contains(movie))
                 .ToListAsync();
         }

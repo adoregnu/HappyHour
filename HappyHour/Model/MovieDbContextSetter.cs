@@ -59,12 +59,14 @@ namespace HappyHour.Model
             return target;
         }
 
-        public void MergeGenres(List<Genre> genres, Action<Genre> onDelete = null)
+        public async Task MergeGenres(List<Genre> genres, Action<Genre> onDelete = null)
         {
             var target = genres[0];
             genres.RemoveAt(0);
+            await Entry(target).Collection(g => g.Movies).LoadAsync();
             foreach (var genre in genres)
             {
+                await Entry(genre).Collection(g => g.Movies).LoadAsync();
                 foreach (var name in genre.Name)
                 {
                     target.Name.Add(name);
@@ -76,14 +78,16 @@ namespace HappyHour.Model
                 MovieGenres.Remove(genre);
                 onDelete?.Invoke(genre);
             }
-            SaveChanges();
+            await SaveChangesAsync();
         }
-        public void MergeSeries(List<Series> series, Action<Series> onDelete = null)
+        public async Task MergeSeries(List<Series> series, Action<Series> onDelete = null)
         {
             var target = series[0];
             series.RemoveAt(0);
+            await Entry(target).Collection(s => s.Movies).LoadAsync();
             foreach (var serie in series)
             {
+                await Entry(serie).Collection(s => s.Movies).LoadAsync();
                 foreach (var name in serie.Name)
                 {
                     if (!target.Name.Any(n => n.Text == name.Text))
@@ -98,7 +102,7 @@ namespace HappyHour.Model
                 Series.Remove(serie);
                 onDelete.Invoke(serie);
             }
-            SaveChanges();
+            await SaveChangesAsync();
         }
 
         public async void MergeMakers(List<Maker> makers, Action<Maker> onDelete = null)
@@ -141,6 +145,7 @@ namespace HappyHour.Model
         {
             var target = labels[0];
             labels.RemoveAt(0);
+            await Entry(target).Collection(l => l.Movies).LoadAsync();
             foreach (var label in labels)
             {
                 foreach (var name in label.Name)
@@ -413,8 +418,9 @@ namespace HappyHour.Model
                 }
                 else// if (updatefromdb)
                 {
-                    Log.Print($"hash {hash} already exists!");
-                    //return (await Images.Where(i => i.Hash == hash).FirstOrDefaultAsync(), true);
+                    var movie = Movies.Where(m => m.Cover.Hash == hash).FirstOrDefault();
+                    Log.Print($"hash {hash} already exists! pid: {movie.PID}, {movie.VideoUrl}");
+                    //return (await Images.Where(i => i.Hash == hash).FirstOrDefaultAsync(), false);
                 }
             }
             return (null, false);
@@ -533,7 +539,6 @@ namespace HappyHour.Model
             string lang = GetLang(data);
             if (tmp.Length > 1) lang = tmp[^1];
 
-            string pid = data["pid"] as string;
             var db_ser = await Series
                 .Include(s => s.Movies)
                 .Include(s => s.Name)
@@ -551,7 +556,7 @@ namespace HappyHour.Model
             }
             else
             {
-                if (!db_ser.Movies.Any(m => m.PID == pid))
+                if (!db_ser.Movies.Any(m => m.PID == movie.PID))
                 {
                     db_ser.Movies.Add(movie);
                 }
@@ -729,26 +734,38 @@ namespace HappyHour.Model
             SaveChanges();
         }
 
-        public void UpdateLabel(Movie movie, Label label)
+        public async Task UpdateLabel(Movie movie, Label label)
         {
+            await Entry(label).Collection(l => l.Movies).LoadAsync();
             movie.Label = label;
             label.Movies.Add(movie);
-            SaveChanges();
+            await SaveChangesAsync();
         }
 
-        public void UpdateActor(Movie movie, Actor actor)
+        public async Task UpdateActor(Movie movie, Actor actor)
         {
             if (actor.Movies == null)
             {
-                Entry(actor).Collection(a => a.Movies).Load();
+                await Entry(actor).Collection(a => a.Movies).LoadAsync();
             }
             if (movie.Actors == null)
             {
-                Entry(movie).Collection(m => m.Actors).Load();
+                await Entry(movie).Collection(m => m.Actors).LoadAsync();
             }
             movie.Actors.Add(actor);
             actor.Movies.Add(movie);
-            SaveChanges();
+            await SaveChangesAsync();
+        }
+
+        public async Task UpdateSeries(Movie movie, Series series)
+        {
+            if (series.Movies == null || series.Movies.Count == 0)
+            {
+                await Entry(series).Collection(s => s.Movies).LoadAsync();
+            }
+            movie.Series = series;
+            series.Movies.Add(movie);
+            await SaveChangesAsync();
         }
     }
 

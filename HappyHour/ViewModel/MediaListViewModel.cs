@@ -373,7 +373,9 @@ namespace HappyHour.ViewModel
                 return;
             }
 
+            UiServices.WaitCursor(true);
             var dialog = await AvEditorViewModel.CreateAsync(item);
+            UiServices.WaitCursor(false);
             MainView.DialogService.Show<AvEditorDialog>(this, dialog);
         }
 
@@ -510,7 +512,8 @@ namespace HappyHour.ViewModel
         private async Task OnSearchEmptyActor()
         {
             UiServices.WaitCursor(true);
-            await LoadItems(await _db.GetMovies((Movie m) => m.Actors.Count == 0));
+            await LoadItems(await _db.GetMovies((Movie m) => m.Actors.Count() == 0));
+            //await LoadItems(await _db.GetMoviesEmptyFieldOf(""));
             UiServices.WaitCursor(false);
         }
 

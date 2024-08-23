@@ -59,6 +59,7 @@ namespace HappyHour.Model
             foreach (var name in Name)
             {
                 str += $"{name.Text}({name.Lang}), ";
+                if (name.Lang == "ko") break;
             }
             return str;
         }

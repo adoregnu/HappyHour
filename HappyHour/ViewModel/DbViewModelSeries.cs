@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 
 namespace HappyHour.ViewModel
@@ -20,6 +21,25 @@ namespace HappyHour.ViewModel
             set => SetProperty(ref _selectedSeries, value);
         }
 
+        private string _searchSeries;
+        public string SearchSeries
+        {
+            get => _searchSeries;
+            set
+            {
+                SetProperty(ref _searchSeries, value);
+                Series.Clear();
+                Application.Current.Dispatcher.InvokeAsync(async () =>
+                {
+                    if (!string.IsNullOrEmpty(value))
+                    {
+                        var series = await _db.GetSeries(value);
+                        series.ForEach(Series.Add);
+                    }
+                });
+            }
+        }
+
         private string _seriesNameTranslated;
         public string SeriesNameTranslated
         {
@@ -31,7 +51,7 @@ namespace HappyHour.ViewModel
 
         public ICommand CmdAddSeriesNameTranslated { get; private set; }
         public IAsyncCommand CmdSeriesoDubleClicked { get; private set; }
-        public ICommand CmdMergeSeries { get; private set; }
+        public IAsyncCommand<object> CmdMergeSeries { get; private set; }
 
         void OnAddSeriesNameTranslated()
         {
@@ -46,10 +66,10 @@ namespace HappyHour.ViewModel
             UiServices.WaitCursor(false);
         }
 
-        void OnMergeSeries(object p)
+        async Task OnMergeSeries(object p)
         {
             var selectedSeries = (p as IList<object>).Select(o => o as Series).ToList();
-            _db.MergeSeries(selectedSeries, s => Series.Remove(s));
+            await _db.MergeSeries(selectedSeries, s => Series.Remove(s));
         }
 
         private async Task OnSelectSeries()

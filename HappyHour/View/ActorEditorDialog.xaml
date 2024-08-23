@@ -49,7 +49,7 @@
                 AncestorType={x:Type local:ActorEditorDialog}}, Path=DataContext}"/>
 
         <ControlTemplate x:Key="_nameTemplate" TargetType="ListBoxItem">
-            <Grid Margin="2,2,2,0">
+            <Grid Margin="1,2,2,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="8*"/>
                     <ColumnDefinition Width="1*"/>

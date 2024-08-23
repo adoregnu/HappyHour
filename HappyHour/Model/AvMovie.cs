@@ -227,7 +227,7 @@ namespace HappyHour.Model
         {
             LoadFiles(files);
 
-            MovieInfo = await _db.GetMovie(Pid);
+            MovieInfo = await _db.GetMovie(Pid, false);
             if (MovieInfo == null) return;
             if (MovieInfo.VideoUrl != Path)
             {

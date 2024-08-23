@@ -57,17 +57,19 @@ namespace HappyHour.ViewModel
         {
             Spiders =
             [
-                new SpiderSehuatang(this),
-                new SpiderSukebei(this),
-                new SpideDbMsin(this),
+                new SpiderAvdbs(this),
                 new SpiderJavlibrary(this),
                 new SpiderAvwiki(this),
                 new SpiderMgstage(this),
-                new SpiderDmm(this),
-                new SpiderAVE(this),
                 new SpiderJavDb(this),
                 new SpiderJavfree(this),
-                new SpiderAvdbs(this),
+                new SpiderJavBus(this),
+                new SpiderSehuatang(this),
+                new SpiderSukebei(this),
+
+                new SpiderAVE(this),
+                new SpiderDmm(this),
+                new SpideDbMsin(this),
             ];
 
             foreach (var s in Spiders)

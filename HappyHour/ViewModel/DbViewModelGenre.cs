@@ -47,7 +47,7 @@ namespace HappyHour.ViewModel
                 });
             }
         }
-        public ICommand CmdGenresMerge { get; private set; }
+        public IAsyncCommand<object> CmdGenresMerge { get; private set; }
         public ICommand CmdMoveDownSelectedGenre { get; private set; }
         public ICommand CmdMoveUpSelectedGenre { get; private set; }
         public IAsyncCommand<object> CmdGenreDoubleClicked { get; private set; }
@@ -62,10 +62,10 @@ namespace HappyHour.ViewModel
             }
         }
 
-        void OnMergeGenres(object p)
+        async Task OnMergeGenres(object p)
         {
             var selectedGenres = (p as IList<object>).Select(o => o as Genre).ToList();
-            _db.MergeGenres(selectedGenres, g => GenresToMerge.Remove(g));
+            await _db.MergeGenres(selectedGenres, g => GenresToMerge.Remove(g));
         }
 
         private async Task OnSelectGenres()

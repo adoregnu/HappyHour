@@ -89,6 +89,7 @@
     <None Remove="Resources\JsParser\Avdbs_search.js" />
     <None Remove="Resources\JsParser\Common.js" />
     <None Remove="Resources\JsParser\db.msin.js" />
+    <None Remove="Resources\JsParser\JavBus.js" />
     <None Remove="Resources\Mgstage.js" />
     <None Remove="Resources\MMD.js" />
     <None Remove="Resources\R18.js" />
@@ -106,6 +107,7 @@
     <EmbeddedResource Include="Resources\JsParser\Avdbs_search.js" />
     <EmbeddedResource Include="Resources\JsParser\Common.js" />
     <EmbeddedResource Include="Resources\JsParser\db.msin.js" />
+    <EmbeddedResource Include="Resources\JsParser\JavBus.js" />
     <EmbeddedResource Include="Resources\JsParser\Sukebei.js" />
     <EmbeddedResource Include="Resources\JsParser\Dmm.js" />
     <EmbeddedResource Include="Resources\JsParser\AvWiki.js" />

@@ -284,7 +284,7 @@
             <ComboBox ItemsSource="{Binding RatingSites}" SelectedItem="{Binding SelectedRatingSite}"
                   IsSynchronizedWithCurrentItem="True" Width="150" Margin="5"
                   Visibility="{Binding RatingSitesVisibility}"/>
-            <Label VerticalAlignment="Center">Scap Delay(ms)</Label>
+            <Label VerticalAlignment="Center">Scrap Delay(ms)</Label>
             <TextBox Text="{Binding ScrapDelay}" Width="50" Margin="0,5,5,5"/>
         </StackPanel>
         <ListBox Grid.Row="1"

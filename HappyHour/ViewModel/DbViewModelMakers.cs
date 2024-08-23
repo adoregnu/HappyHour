@@ -63,6 +63,24 @@ namespace HappyHour.ViewModel
                 }
             }
         }
+        private string _searchLabel;
+        public string SearchLabel
+        {
+            get => _searchLabel;
+            set
+            {
+                SetProperty(ref _searchLabel, value);
+                if (!string.IsNullOrEmpty(value))
+                {
+                    Application.Current.Dispatcher.InvokeAsync(async () =>
+                    {
+                        Labels.Clear();
+                        var labels = await _db.GetLabels(value);
+                        labels.ForEach(Labels.Add);
+                    });
+                }
+            }
+        }
 
         public ICommand CmdMergeMakers { get; private set; }
         public IAsyncCommand<object, object> CmdMergeLables { get; private set; }

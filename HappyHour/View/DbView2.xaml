@@ -19,6 +19,7 @@
             <ColumnDefinition/>
             <ColumnDefinition/>
             <ColumnDefinition/>
+            <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         <StackPanel Grid.Row="0" Grid.ColumnSpan="3" Orientation="Horizontal" HorizontalAlignment="Center">
             <Button Style="{DynamicResource ModernButtonStyle2}" Grid.Column="2" Margin="0,5,0,0"
@@ -34,6 +35,7 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="7*"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="4*"/>
             </Grid.RowDefinitions>
             <TextBlock Grid.Row="0" HorizontalAlignment="Center" Margin="5,5,0,5">Maker/Label</TextBlock>
@@ -58,7 +60,8 @@
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
             </ListBox>
-            <ListBox Grid.Row="3" ItemsSource="{Binding Labels}" Margin="5,0,0,5" ItemTemplate="{StaticResource _langText}"
+            <c:DelayedBindingTextBox Grid.Row="3" DelayTime="500" Margin="5,0,0,5" Text="{Binding SearchLabel}"/>
+            <ListBox Grid.Row="4" ItemsSource="{Binding Labels}" Margin="5,0,0,5" ItemTemplate="{StaticResource _langText}"
                      SelectedItem="{Binding SelectedLabel}" SelectionMode="Extended" ItemContainerStyle="{StaticResource _stretch}">
                 <ListBox.ContextMenu>
                     <ContextMenu>
@@ -160,12 +163,14 @@
         <Grid Grid.Row="1" Grid.Column="2">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="8*"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="2*"/>
             </Grid.RowDefinitions>
             <TextBlock Grid.Row="0" HorizontalAlignment="Center" Margin="5,5,0,5">Series</TextBlock>
-            <ListBox Grid.Row="1" ItemsSource="{Binding Series}" Margin="5,0,5,5"
+            <c:DelayedBindingTextBox Grid.Row="1" DelayTime="500" Margin="5,0,0,5" Text="{Binding SearchSeries}"/>
+            <ListBox Grid.Row="2" ItemsSource="{Binding Series}" Margin="5,0,5,5"
                      SelectedItem="{Binding SelectedSeries}" SelectionMode="Extended">
                 <ListBox.ContextMenu>
                     <ContextMenu>
@@ -188,14 +193,26 @@
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
             </ListBox>
-            <DockPanel Grid.Row="2" Margin="5,0,5,5">
+            <DockPanel Grid.Row="3" Margin="5,0,5,5">
                 <Button DockPanel.Dock="Right" Command="{Binding CmdAddSeriesNameTranslated}" >Add</Button>
                 <TextBox DockPanel.Dock="Left" Text="{Binding SeriesNameTranslated}"/>
             </DockPanel>
-            <ListBox Grid.Row="3" ItemsSource="{Binding SelectedSeries.Name}" Margin="5,0,5,5">
+            <ListBox Grid.Row="4" ItemsSource="{Binding SelectedSeries.Name}" Margin="5,0,5,5">
                 <i:Interaction.Behaviors>
                     <bh:ListboxBehavior AutoCopy="True"/>
                 </i:Interaction.Behaviors>
+            </ListBox>
+        </Grid>
+        <Grid Grid.Row="1" Grid.Column="3">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0" HorizontalAlignment="Center" Margin="5,5,0,5">Movies</TextBlock>
+            <c:DelayedBindingTextBox Grid.Row="1" DelayTime="500" Margin="5,0,0,5" Text="{Binding SearchPid}"/>
+            <ListBox Grid.Row="2" ItemsSource="{Binding Movies}" Margin="5,0,0,5"
+                     SelectedItem="{Binding SelectedMovie}" SelectionMode="Extended">
             </ListBox>
         </Grid>
     </Grid>

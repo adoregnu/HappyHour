@@ -12,6 +12,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Runtime.InteropServices;
+using AsyncAwaitBestPractices.MVVM;
 
 namespace HappyHour.ViewModel
 {
@@ -23,7 +25,7 @@ namespace HappyHour.ViewModel
             return ret.InitializeAsync();
         }
 
-        private readonly MovieDbContext _db = App.Current.DbContext;
+        private readonly MovieDbContext _db;// = App.Current.DbContext;
 
         private bool? _dialogResult;
 
@@ -157,31 +159,38 @@ namespace HappyHour.ViewModel
         public ICommand CmdSave { get; private set; }
 
         public ICommand CmdRemove { get; private set; }
-        public ICommand CmdAdd { get; private set; }
+        public IAsyncCommand<object> CmdAdd { get; private set; }
+        public ICommand CmdClosed { get; private set; }
+        readonly Movie _movie = null;
         private AvEditorViewModel(AvMovie movie)
         {
-            Movie = movie.MovieInfo;
+            _db = new();
+            _movie = movie.MovieInfo;
 
-            CmdAdd = new RelayCommand<object>(OnAdd);
+            CmdAdd = new AsyncCommand<object>(OnAdd);
             CmdRemove = new RelayCommand<object>(OnRemove);
+            CmdClosed = new RelayCommand(OnClose);
         }
 
         private async Task<AvEditorViewModel> InitializeAsync()
         {
+
+            Movie = await _db.GetMovie(_movie.PID, true);
+
             //(await _db.GetMakers(Movie)).ForEach(Makers.Add);
             //(await _db.GetLabels(Movie)).ForEach(Labels.Add);
             (await _db.GetGenres(Movie)).ForEach(Genres.Add);
             (await _db.GetActors(Movie)).ForEach(Actors.Add);
 
-            (await _db.GetMakers()).ForEach(AllMakers.Add);
+            //(await _db.GetMakers()).ForEach(AllMakers.Add);
             //(await _db.GetLabels()).ForEach(AllLabels.Add);
-            (await _db.GetSeries()).ForEach(AllSeries.Add);
+            //(await _db.GetSeries()).ForEach(AllSeries.Add);
             //(await _db.GetGenres()).ForEach(AllGenres.Add);
             //(await _db.GetActors()).ForEach(AllActors.Add);
             return this;
         }
 
-        private void OnAdd(object item)
+        private async Task OnAdd(object item)
         {
             if (item is Maker maker)
             {
@@ -189,7 +198,7 @@ namespace HappyHour.ViewModel
             }
             else if (item is Label label)
             {
-                _db.UpdateLabel(Movie, label);
+                await _db.UpdateLabel(Movie, label);
             }
             else if (item is Genre genre)
             {
@@ -198,7 +207,7 @@ namespace HappyHour.ViewModel
             }
             else if (item is Actor actor)
             {
-                _db.UpdateActor(Movie, actor);
+                await _db.UpdateActor(Movie, actor);
                 Actors.Clear();
                 foreach (var newActor in Movie.Actors)
                 {
@@ -207,8 +216,7 @@ namespace HappyHour.ViewModel
             }
             else if (item is Series series)
             {
-                Movie.Series = series;
-                series.Movies.Add(Movie);
+                await _db.UpdateSeries(Movie, series);
             }
             OnPropertyChanged(nameof(Movie));
         }
@@ -228,6 +236,10 @@ namespace HappyHour.ViewModel
 
         private void OnSave()
         {
+        }
+        private void OnClose()
+        {
+            _db.Dispose();
         }
     }
 }

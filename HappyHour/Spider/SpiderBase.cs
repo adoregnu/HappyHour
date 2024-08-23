@@ -394,12 +394,16 @@ namespace HappyHour.Spider
         {
             dynamic d = msg.Message;
             Log.Print($"{d.type} : {d.data}");
+
             if (d.type == "url")
             {
                 Browser.Address = d.data;
                 return true;
             }
-            else if (d.type == "items")
+
+            if (!_saveDb) return true;
+
+            if (d.type == "items")
             {
                 if (d.data == 0)
                 {

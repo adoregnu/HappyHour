@@ -16,6 +16,8 @@ using System.Windows.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using System.Threading;
 using AsyncAwaitBestPractices.MVVM;
+using System.Windows;
+using System.IO;
 
 namespace HappyHour.ViewModel
 {
@@ -25,7 +27,7 @@ namespace HappyHour.ViewModel
         string _selectedType = "Movies";
         string _searchText;
 
-        IMediaList _mediaList;
+        private IMediaList _mediaList;
         private readonly MovieDbContext _db =  App.Current.DbContext;
 
         public IMediaList MediaList
@@ -36,17 +38,13 @@ namespace HappyHour.ViewModel
                 if (_mediaList != null) return;
 
                 SetProperty(ref _mediaList, value);
-#if false
                 _mediaList.ItemSelectedHandler += (o, i) =>
                 {
-                    if (i == null) return;
-                    if (SelectedType != "Movies")
+                    if (i != null)
                     {
-                        SelectedType = "Movies";
+                        SearchPid = i.Pid;
                     }
-                    SearchText = i.Pid;
                 };
-#endif
             }
         }
 
@@ -69,31 +67,31 @@ namespace HappyHour.ViewModel
             {
                 SearchText = "";
                 SetProperty(ref _selectedType, value);
-                OnTypeChanged(value);
+                Application.Current.Dispatcher.InvokeAsync(async () => await OnTypeChanged(value));
             }
         }
         public List<string> ListType { get; set; } = [
                 nameof(Movies), nameof(Makers), nameof(Series), nameof(Genres)
         ];
 
-       public ICommand CmdReload { get; private set; }
+       public IAsyncCommand CmdReload { get; private set; }
        public ICommand CmdRemove { get; private set; }
         public IAsyncCommand CmdReloadAll { get; private set; }
         public DbViewModel(IMainView mainView) : base(mainView) 
         {
             Title = "Database";
             //ListType = [.. _typeToPropertyName.Keys];
-            CmdReload = new RelayCommand(async () => await OnTypeChanged(SelectedType));
+            CmdReload = new AsyncCommand(async () => await OnTypeChanged(SelectedType));
             CmdReloadAll = new AsyncCommand(OnReloadAll);
             CmdRemove = new RelayCommand<object>(OnRemove);
 
-            CmdGenresMerge = new RelayCommand<object>(
+            CmdGenresMerge = new AsyncCommand<object>(
                 OnMergeGenres, p => p is IList<object> list && list.Count > 1);
             CmdMergeMakers = new RelayCommand<object>(
                 OnMergeMakers, p => p is IList<object> list && list.Count > 1);
             CmdMergeLables = new AsyncCommand<object, object>(
                 OnMergeLabels, p => p is IList<object> list && list.Count > 1);
-            CmdMergeSeries = new RelayCommand<object>(
+            CmdMergeSeries = new AsyncCommand<object>(
                 OnMergeSeries, p => p is IList<object> list && list.Count > 1);
 
             CmdGenreDoubleClicked = new AsyncCommand<object>(OnGenreDoubleClicked);

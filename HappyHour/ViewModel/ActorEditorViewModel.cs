@@ -232,6 +232,7 @@ namespace HappyHour.ViewModel
 
             if (isSelected)
             {
+                UiServices.WaitCursor(true);
                 var actors = await _db.GetActors(keyword, OrderType, limit);
 
                 foreach(var actor in actors)
@@ -239,6 +240,7 @@ namespace HappyHour.ViewModel
                     await _db.LoadActorMovie(actor);
                     Actors.Add(actor);
                 }
+                UiServices.WaitCursor(false);
             }
             else if (p == "All")
             {
