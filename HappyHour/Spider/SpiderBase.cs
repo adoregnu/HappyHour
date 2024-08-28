@@ -271,6 +271,7 @@ namespace HappyHour.Spider
                     {
                         return false;
                     }
+                    _ = action(item.Key, dict);
                 }
                 else if (item.Value is List<object> list)
                 {
@@ -331,7 +332,7 @@ namespace HappyHour.Spider
                 await SearchMedia.ReloadAsync();
             }
 
-            if (!Browser.SetNextSpider(SearchMedia))
+            if (SearchMedia != null && !Browser.SetNextSpider(SearchMedia))
             {
                 //await Task.Delay(1000);
                 SearchMedia = null;
@@ -401,7 +402,7 @@ namespace HappyHour.Spider
                 return true;
             }
 
-            if (!_saveDb) return true;
+            //if (!_saveDb) return true;
 
             if (d.type == "items")
             {
@@ -432,9 +433,7 @@ namespace HappyHour.Spider
             return false;
         }
 
-        public virtual void UpdateDownload()
-        {
-        }
+        public virtual void UpdateDownload() { }
 
         protected async virtual Task UpdateDb(IDictionary<string, object> items)
         {
@@ -456,6 +455,7 @@ namespace HappyHour.Spider
                     Log.Print($"{Name}: UpdateItem", ex);
                 }
             }
+
             await OnScrapCompleted(true);
         }
 

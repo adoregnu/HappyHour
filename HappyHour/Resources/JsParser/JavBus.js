@@ -15,10 +15,23 @@
 
     function get_node(node) { return node; }
 
-    function parseCover(xpath) {
+    function _parse_cover(xpath) {
         var img = _jav_parse_single_node(xpath, get_node);
         if (img != null) {
-            return img.src;
+            var name = img.src.split('/').pop();
+            return {
+                img_url: img.src,
+                target: name,
+                func: () => {
+                    const link = document.createElement('a');
+                    document.body.appendChild(link);
+                    link.download = name;
+                    link.href = img.src;
+                    link.target = '_blank';
+                    link.click();
+                    document.body.removeChild(link);
+                }
+            };
         }
         return null;
     }
@@ -27,9 +40,51 @@
         var result = _jav_parse_multi_node(xpath, get_node);
         if (result == null) {
             console.log("no actors");
-        } else {
-            console.log(result.length + " actors");
+            return null;
         }
+        //console.log(result.length + " actors");
+        var actors = [];
+        result.forEach(img => {
+            if (!actors.some(a => a['name'] == img.title.trim())) {
+                actors.push({name: img.title.trim()})
+            }
+            /*
+            if (!img.src.includes('nowprinting')) {
+                var name = img.src.split('/').pop();
+                actor['thumb'] = {
+                    img_url: img.src,
+                    target: name,
+                    func: () => {
+                        console.log(img.src);
+                        const link = document.createElement('a');
+                        document.body.appendChild(link);
+                        link.download = name;
+                        link.href = img.src;
+                        link.target = '_blank';
+                        link.click();
+                        document.body.removeChild(link);
+                    }
+                };
+            }
+            */
+        });
+
+        return actors;
+    }
+
+    function parse_genre(xpath) {
+        var nodes = _jav_parse_multi_node(xpath, get_node);
+        if (nodes == null) {
+            return null;
+        }
+        var excludes = ['AVÒ³éÐ', '1080p', '60fps', 'õ±VIP'];
+        var result = nodes.filter(n => !excludes.some(ex => ex == n.textContent.trim()) && n.href.includes('genre'));
+
+        var genre = [];
+        result.forEach(r => {
+            genre.push(r.textContent.trim());
+        });
+        return genre;
     }
 
     if (document.location.href.includes('/search/')) {
@@ -39,12 +94,15 @@
 
     var items = {
         title: { xpath: "//div[@class='container']/h3/text()" },
-        cover: { xpath: "//a[@class='bigImage']/img", handler: parseCover },
+        cover: { xpath: "//a[@class='bigImage']/img", handler: _parse_cover },
         date: { xpath: "//span[contains(.,'Release Date:')]/following-sibling::text()" },
-        studio: { xpath: "//span[contains(.,'Studio:')]/following-sibling::a/text()" },
+        maker: { xpath: "//span[contains(.,'Studio:')]/following-sibling::a/text()" },
         series: { xpath: "//span[contains(.,'Series:')]/following-sibling::a/text()" },
-        genre: { xpath: "//p[contains(.,'Genre:')]/following-sibling::p/span//a/text()", handler: _jav_parse_multi_node },
-        actor: { xpath: "//p[@class='star-show']/following-sibling::p//a", handler: parseActor }
+        genre: {
+            xpath: "//p[contains(.,'Genre:')]/following-sibling::p/span//a",
+            handler: parse_genre
+        },
+        actor: { xpath: "//div[@id='avatar-waterfall']//img", handler: parseActor }
     };
 
     var msg = { type: 'items' }

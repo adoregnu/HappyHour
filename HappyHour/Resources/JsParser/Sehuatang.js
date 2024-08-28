@@ -45,6 +45,7 @@
                     link.target = '_blank';
                     link.click();
                     document.body.removeChild(link);
+                    console.log('download image ' + url)
                 }
             };
             array.push(imgInfo);
@@ -154,6 +155,7 @@
         num_item += 1;
     }
     msg['data'] = num_item;
+    msg['source'] = window.location.hostname
     console.log(JSON.stringify(msg));
     CefSharp.PostMessage(msg);
 }) ();

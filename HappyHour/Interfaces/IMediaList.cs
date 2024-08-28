@@ -14,6 +14,7 @@ namespace HappyHour.Interfaces
     {
         Task AddMedia(string path);
         void AddMedia(Movie movie);
+        void AddMedia(Torrent torrent);
         Task LoadItems(List<Movie> movies);
 
         IEnumerable<SpiderBase> SpiderList { get; set; }

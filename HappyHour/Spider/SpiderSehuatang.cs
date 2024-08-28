@@ -16,6 +16,7 @@ using CefSharp.Handler;
 using CommunityToolkit.Mvvm.Input;
 using System.Threading;
 using System.Threading.Tasks;
+using HappyHour.Model;
 
 namespace HappyHour.Spider
 {
@@ -24,34 +25,26 @@ namespace HappyHour.Spider
         private int _index;
         private int _pageNum = 1;
         private bool _scrapRunning;
-        private bool _dirExists;
         private int _numDuplicatedPid;
 
         private string _pid;
-        private string _outPath;
+        private string _imagePath;
         private DateTime _updateTime;
         private dynamic _currPage;
         private string _selectedBoard;
-        private string _dataPath;
 
-        private readonly Dictionary<string, string> _images = new();
+        private readonly Dictionary<string, string> _images = [];
         private ILifeSpanHandler _popupHandler;
-        private Timer _downloadTimer;
+        private readonly Timer _downloadTimer;
+        private readonly TorrentDbContext _db = new();
+        private Torrent _currentTorrent;
 
         public int NumPage { get; set; } = 1;
         public List<string> Boards { get; set; }
         public string SelectedBoard
         {
             get => _selectedBoard;
-            set
-            {
-                Set(ref _selectedBoard, value);
-                if (value != null)
-                {
-                    _dataPath = App.Current.GetConf("general", "data_path") ?? @"d:\tmp\sehuatang";
-                    _dataPath += @$"\{value}\";
-                }
-            }
+            set => Set(ref _selectedBoard, value);
         } 
         public string PidToStop { get; set; }
         public bool StopOnExistingId { get; set; }
@@ -72,6 +65,11 @@ namespace HappyHour.Spider
             ReqeustHandler = new ShtRequestHandler(this);
             _downloadTimer = new Timer(TimerCallback, null, Timeout.Infinite, Timeout.Infinite);
             ChainVisibility = System.Windows.Visibility.Collapsed;
+            _imagePath = $"{App.Current.LocalAppData}\\covers";
+            if (!Directory.Exists(_imagePath))
+            { 
+                Directory.CreateDirectory(_imagePath);
+            }
         }
 
         protected override string GetScript(string name)
@@ -83,33 +81,27 @@ namespace HappyHour.Spider
 
         private void UpdateMedia()
         {
-            Browser.MediaList.AddMedia(_outPath);
-        }
-        private void CreateDir()
-        {
-            _dirExists = false;
-            DirectoryInfo di = new(_outPath);
-            if (!di.Exists)
+            //string target = _imagePath + $"\\{img.target}";
+            bool cover = true;
+            foreach (var kv in ResourcesToBeFiltered)
             {
-                _ = Directory.CreateDirectory(_outPath);
-                return;
-            }
-            if (Directory.GetFiles(_outPath)
-                .Any(f => f.EndsWith(".torrent") || f.EndsWith(".magnet")))
-            {
-                _dirExists = true;
-                Log.Print($"{Name}: Already downloaded! {_outPath}");
-                _numDuplicatedPid++;
-                if (StopOnExistingId && _numDuplicatedPid > 3)
+                if (cover)
                 {
-                    _scrapRunning = false;
+                    _currentTorrent.CoverPath = kv.Value;
+                    cover = false;
+                }
+                else
+                {
+                    _currentTorrent.Screenshots.Add(new StringData() { Value = kv.Value });
                 }
             }
+            _db.SaveChanges();
+            Browser.MediaList.AddMedia(_currentTorrent);
         }
 
         private int _numDownloaded;
         private int _toDownload;
-        private void DownloadFiles(dynamic article)
+        private  void DownloadFiles(dynamic article)
         {
             if (_toDownload != _numDownloaded)
             {
@@ -130,7 +122,10 @@ namespace HappyHour.Spider
                 int count = 1;
                 foreach (string magnet in magnets.Cast<string>())
                 {
-                    File.WriteAllText($"{_outPath}\\{_pid}_{count}.magnet", magnet);
+                    //File.WriteAllText($"{_outPath}\\{_pid}_{count}.magnet", magnet);
+                    _currentTorrent.MagnetUrls.Add(new Magnet() {
+                        SourceUrl= article.source, MagnetUrl= magnet
+                    });
                     count++;
                 }
             }
@@ -146,17 +141,20 @@ namespace HappyHour.Spider
             {
                 foreach (dynamic img in images)
                 {
-                    string target = _outPath + $"\\{img.target}";
+                    string target = _imagePath + $"\\{img.target}";
                     ResourcesToBeFiltered.Add(img.url, target);
                 }
+
                 foreach (dynamic img in images)
                 {
-                    ((IJavascriptCallback)img.func).ExecuteAsync();
+                    ((IJavascriptCallback)img.func).ExecuteAsync().ContinueWith(resp => {
+                        Log.Print($"{resp.Result.Success}");
+                    });
                     //_numDownloaded++;
                 }
             }
             //files?.ForEach(fn => ((IJavascriptCallback)fn).ExecuteAsync());
-            _downloadTimer.Change(2 * 1000, Timeout.Infinite);
+            //_downloadTimer.Change(2 * 1000, Timeout.Infinite);
         }
 
         private bool MoveNextPage()
@@ -189,12 +187,12 @@ namespace HappyHour.Spider
                     _pid.Equals(PidToStop, StringComparison.OrdinalIgnoreCase))
                 {
                     _scrapRunning = false;
+                    _currentTorrent = null;
                 }
                 else
                 {
                     _pid = item.pid;
-                    _outPath = _dataPath + item.pid;
-                    CreateDir();
+                    _currentTorrent = await _db.GetTorrent(item.pid);
                 }
                 if (_scrapRunning)
                 {
@@ -240,15 +238,14 @@ namespace HappyHour.Spider
                 }
                 Log.Print($"{Name}: article {_pid} = {d.pid}");
                 _updateTime = DateTime.Parse(d.date);
-                if (!_dirExists || OverwritePoster)
-                {
-                    DownloadFiles(d);
-                }
+                DownloadFiles(d);
+                /*
                 else
                 {
                     UpdateMedia();
                     MoveNextItem();
                 }
+                */
             }
             return false;
         }
@@ -277,13 +274,6 @@ namespace HappyHour.Spider
             Browser.Address = URL;
         }
 
-        private void OnBeforeDownload(object sender, DownloadItem e)
-        {
-            //e.SuggestedFileName = !e.SuggestedFileName.EndsWith("torrent", StringComparison.OrdinalIgnoreCase) ?
-            //    _images[e.OriginalUrl] : $"{_outPath}\\{e.SuggestedFileName}";
-
-            e.SuggestedFileName = $"{_outPath}\\{e.SuggestedFileName}";
-        }
 
         private void TimerCallback(object state)
         {
@@ -308,6 +298,14 @@ namespace HappyHour.Spider
                     MoveNextItem();
                 }
             });
+        }
+
+        private void OnBeforeDownload(object sender, DownloadItem e)
+        {
+            //e.SuggestedFileName = !e.SuggestedFileName.EndsWith("torrent", StringComparison.OrdinalIgnoreCase) ?
+            //    _images[e.OriginalUrl] : $"{_outPath}\\{e.SuggestedFileName}";
+
+            e.SuggestedFileName = $"{_imagePath}\\{e.SuggestedFileName}";
         }
 
         private void OnDownloadUpdated(object sender, DownloadItem e)
@@ -354,6 +352,5 @@ namespace HappyHour.Spider
             dh.OnBeforeDownloadFired -= OnBeforeDownload;
             dh.OnDownloadUpdatedFired -= OnDownloadUpdated;
         }
-
     }
 }

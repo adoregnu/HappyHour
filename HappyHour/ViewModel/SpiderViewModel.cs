@@ -57,6 +57,7 @@ namespace HappyHour.ViewModel
         {
             Spiders =
             [
+                new SpiderSehuatang(this),
                 new SpiderAvdbs(this),
                 new SpiderJavlibrary(this),
                 new SpiderAvwiki(this),
@@ -64,7 +65,6 @@ namespace HappyHour.ViewModel
                 new SpiderJavDb(this),
                 new SpiderJavfree(this),
                 new SpiderJavBus(this),
-                new SpiderSehuatang(this),
                 new SpiderSukebei(this),
 
                 new SpiderAVE(this),

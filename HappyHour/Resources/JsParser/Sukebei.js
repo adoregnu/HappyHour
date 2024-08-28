@@ -47,6 +47,7 @@
         num_item += 1;
     }
     msg['data'] = num_item;
+    smg['source'] = window.location.hostname
     console.log(JSON.stringify(msg));
     CefSharp.PostMessage(msg);
 }) ();

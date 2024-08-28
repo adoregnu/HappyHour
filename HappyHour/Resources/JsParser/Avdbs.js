@@ -1,4 +1,6 @@
 ﻿(function () {
+
+    g_parse_alias = true;
     function get_node(node) { return node; }
     function parse_actor(xpath) {
         var nodes = _jav_parse_multi_node(xpath, get_node);
@@ -64,18 +66,20 @@
         addAlias(actor, alias, "//span[@class='inner_name_en']", ';en', node);
         addAlias(actor, alias, "//span[@class='inner_name_cn']", ';jp', node);
 
-        var names = _jav_parse_multi_node("//span[@class='actor_onm']");
-        if (names != null) {
-            const checkHan = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/;
-            names.forEach(name => {
-                array = name.split(/[()\/#]/).filter(n => n.trim().length > 1);
-                array.forEach((item, idx, arr) => {
-                    arr[idx] = checkHan.test(item) ? item.trim() + ';ko' : item.trim() + ';jp';
-                });
+        if (g_parse_alias) {
+            var names = _jav_parse_multi_node("//span[@class='actor_onm']");
+            if (names != null) {
+                const checkHan = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/;
+                names.forEach(name => {
+                    array = name.split(/[()\/#]/).filter(n => n.trim().length > 1);
+                    array.forEach((item, idx, arr) => {
+                        arr[idx] = checkHan.test(item) ? item.trim() + ';ko' : item.trim() + ';jp';
+                    });
 
-                alias.push(...array);
-            });
-        } 
+                    alias.push(...array);
+                });
+            }
+        }
 /*
         var names = _jav_parse_multi_node("//span[contains(., '다른이름')]/*[contains(@class, 'actor_onm')]");
         if (names != null) {

@@ -44,14 +44,8 @@
                           Command="{Binding PlacementTarget.Tag.CmdExclude,
                                 RelativeSource={RelativeSource FindAncestor, AncestorType=ContextMenu}}" 
                           CommandParameter="{Binding}"/>
-                        <MenuItem Header="Torrent Download" 
-                          Visibility="{Binding TorrentVisibility}"
-                          Command="{Binding PlacementTarget.Tag.CmdDownloadTorrent,
-                                RelativeSource={RelativeSource FindAncestor, AncestorType=ContextMenu}}" 
-                          CommandParameter="{Binding}"/>
-                        <MenuItem Header="Magnet Download" 
-                          Visibility="{Binding MagnetVisibility}"
-                          Command="{Binding PlacementTarget.Tag.CmdDownloadMagnet,
+                        <MenuItem Header="Download" 
+                          Command="{Binding PlacementTarget.Tag.CmdDownload,
                                 RelativeSource={RelativeSource FindAncestor, AncestorType=ContextMenu}}" 
                           CommandParameter="{Binding}"/>
                     </ContextMenu>

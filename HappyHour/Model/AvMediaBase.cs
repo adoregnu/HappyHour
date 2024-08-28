@@ -83,8 +83,6 @@ namespace HappyHour.Model
             var rname = actorName.Split(';')[0];
             return $@"{App.Current.LocalAppData}\db\{rname.Replace(' ', '_')}{ext}";
         }
-
-        public abstract void Reload(string[] files);
-        public abstract Task ReloadAsync(string[] files);
+        public abstract Task ReloadAsync();
     }
 }

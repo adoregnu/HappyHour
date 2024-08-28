@@ -8,12 +8,13 @@ using CefSharp;
 using HappyHour.Interfaces;
 using HappyHour.ViewModel;
 using System.Threading.Tasks;
+using HappyHour.Model;
+using System.Linq;
 
 namespace HappyHour.Spider
 {
     internal class SpiderSukebei : SpiderBase
     {
-        private readonly string _dataPath;
         private int _numDuplicatedPid;
 
         public override string SearchURL => $"{URL}{Keyword}";
@@ -21,6 +22,8 @@ namespace HappyHour.Spider
         public int NumPage { get; set; } = 1;
         public string PidToStop { get; set; }
         public bool StopOnExistingId { get; set; }
+
+        private readonly TorrentDbContext _db = new();
         public ICommand CmdStop { get; private set; }
 
         public SpiderSukebei(SpiderViewModel browser) : base(browser)
@@ -29,8 +32,6 @@ namespace HappyHour.Spider
             URL = "https://sukebei.nyaa.si/?f=2&c=2_2&q=";
             ScriptName = "Sukebei.js";
 
-            _dataPath = App.Current.GetConf("general", "data_path") ?? @"d:\tmp\sehuatang";
-            _dataPath += "\\censored";
             ChainVisibility = System.Windows.Visibility.Collapsed;
         }
         public override void Navigate2(IAvMedia media, bool resetChain)
@@ -61,14 +62,8 @@ namespace HappyHour.Spider
                     return;
                 }
 
-                string outPath = $"{_dataPath}\\{pid}";
-                string sukebeiPath = outPath + "\\sukebei";
-                if (!new DirectoryInfo(sukebeiPath).Exists)
-                {
-                    _ = Directory.CreateDirectory(sukebeiPath);
-                }
-                string fileName = $"{sukebeiPath}\\{pid}.magnet";
-                if (File.Exists(fileName))
+                var torrent = await _db.GetTorrent(pid);
+                if (torrent.MagnetUrls.Any(m => m.SourceUrl == items.source.ToString()))
                 {
                     _numDuplicatedPid++;
                 }
@@ -77,8 +72,12 @@ namespace HappyHour.Spider
                     await OnScrapCompleted(false);
                     return;
                 }
-                File.WriteAllText(fileName, item.magnet.ToString());
-                await Browser.MediaList.AddMedia(outPath);
+                //File.WriteAllText(fileName, item.magnet.ToString());
+                torrent.MagnetUrls.Add(new Magnet() {
+                    MagnetUrl = item.magnet.ToString(),
+                    SourceUrl = item.source.ToString(),
+                });
+                Browser.MediaList.AddMedia(torrent);
             }
 
             string nexPageLink = items.nextPage.ToString();

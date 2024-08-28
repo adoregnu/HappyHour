@@ -34,6 +34,7 @@ namespace HappyHour.Model
                 target = actors.First();
             }
 
+            List<ActorName> names = [];
             foreach (var actor in actors)
             {
                 if (actor == target) continue;
@@ -44,6 +45,10 @@ namespace HappyHour.Model
                     {
                         target.Names.Add(name);
                     }
+                    else
+                    {
+                        names.Add(name);
+                    }
                 }
                 foreach (var movie in actor.Movies)
                 {
@@ -52,8 +57,13 @@ namespace HappyHour.Model
                         target.Movies.Add(movie);
                     }
                 }
+
                 Actors.Remove(actor);
                 onDelete?.Invoke(actor);
+            }
+            foreach (var n in names)
+            {
+                ActorNames.Remove(n);
             }
             await SaveChangesAsync();
             return target;
@@ -329,7 +339,15 @@ namespace HappyHour.Model
                         .FirstOrDefaultAsync(an => an.Name.Text == sname.Item1);
                 if (dbName != null)
                 {
-                    dbActors.Add(dbName.Actor);
+                    if (dbName.Actor != null)
+                    {
+                        dbActors.Add(dbName.Actor);
+                    }
+                    else
+                    {
+                        Log.Print($"{dbName.Name} has no actor, Remove!");
+                        ActorNames.Remove(dbName);
+                    }
                 }
             }
 
@@ -640,7 +658,7 @@ namespace HappyHour.Model
             await SaveChangesAsync();
         }
 
-        public void RemoveMovie(Movie movie, bool realClear)
+        public async Task RemoveMovie(Movie movie, bool realClear)
         {
             void CountAndRun(Expression<Func<Movie, bool>> exp, Action run)
             {
@@ -666,7 +684,7 @@ namespace HappyHour.Model
             {
                 movie.DateDeleted = DateTime.Now;
             }
-            SaveChanges();
+            await SaveChangesAsync();
         }
 
         public void RemoveMaker(Maker maker)
@@ -722,6 +740,18 @@ namespace HappyHour.Model
             movie.Actors.Remove(actor);
             actor.Movies.Remove(movie);
             SaveChanges();
+        }
+
+        public async Task RemoveGenre(Genre genre)
+        {
+            await Entry(genre).Collection(g => g.Movies).LoadAsync();
+            foreach (var movie in genre.Movies)
+            {
+                await Entry(movie).Collection(m => m.Genres).LoadAsync();
+                movie.Genres.Remove(genre);
+            }
+            MovieGenres.Remove(genre);
+            await SaveChangesAsync();
         }
 
         public void UpdateMaker(Movie movie, Maker maker)

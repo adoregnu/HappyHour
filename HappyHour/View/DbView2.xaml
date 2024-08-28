@@ -94,6 +94,11 @@
             <c:DelayedBindingTextBox Grid.Row="1" DelayTime="500" Margin="5,0,0,5" Text="{Binding SearchGenre}"/>
             <ListBox Grid.Row="2" ItemsSource="{Binding Genres}" Margin="5,0,0,5" x:Name="_genreList"
                      SelectedItem="{Binding SelectedGenre}" SelectionMode="Extended">
+                <ListBox.InputBindings>
+                    <KeyBinding Command="{Binding CmdRemove}"
+                            CommandParameter="{Binding ElementName=_genreList, Path=SelectedItem}"
+                            Key="Delete"/>
+                </ListBox.InputBindings>
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="MouseDoubleClick">
                         <i:InvokeCommandAction
@@ -211,7 +216,7 @@
             </Grid.RowDefinitions>
             <TextBlock Grid.Row="0" HorizontalAlignment="Center" Margin="5,5,0,5">Movies</TextBlock>
             <c:DelayedBindingTextBox Grid.Row="1" DelayTime="500" Margin="5,0,0,5" Text="{Binding SearchPid}"/>
-            <ListBox Grid.Row="2" ItemsSource="{Binding Movies}" Margin="5,0,0,5"
+            <ListBox Grid.Row="2" ItemsSource="{Binding Movies.Result}" Margin="5,0,0,5"
                      SelectedItem="{Binding SelectedMovie}" SelectionMode="Extended">
             </ListBox>
         </Grid>

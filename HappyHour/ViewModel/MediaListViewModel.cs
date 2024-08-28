@@ -162,11 +162,10 @@ namespace HappyHour.ViewModel
         public ICommand CmdExternalPlayer { get; set; }
         public ICommand CmdCopyPath { get; set; }
         public ICommand CmdExclude { get; set; }
-        public ICommand CmdDownloadTorrent { get; set; }
-        public ICommand CmdDownloadMagnet { get; set; }
+        public ICommand CmdDownload { get; set; }
         public ICommand CmdMoveItemTo { get; set; }
-        public ICommand CmdDeleteItem { get; set; }
-        public ICommand CmdClearDb { get; set; }
+        public IAsyncCommand<object> CmdDeleteItem { get; set; }
+        public IAsyncCommand<object> CmdClearDb { get; set; }
         public IAsyncCommand<object> CmdEditItem { get; set; }
         public ICommand CmdDoubleClick { get; set; }
         public IAsyncCommand CmdSearchOrphanageMedia { get; set; }
@@ -188,12 +187,11 @@ namespace HappyHour.ViewModel
             CmdShowLastUpdated = new AsyncCommand(LastUpdatedMovies);
             CmdExternalPlayer = new RelayCommand<AvMovie>(PlayMedia);
             CmdExclude = new RelayCommand<AvTorrent>(ExcludeFromList);
-            CmdDownloadTorrent = new RelayCommand<AvTorrent>(p => DownloadMedia(p, "torrent"));
-            CmdDownloadMagnet = new RelayCommand<AvTorrent>(p => DownloadMedia(p,  "magnet"));
+            CmdDownload = new RelayCommand<AvTorrent>(DownloadMedia);
             CmdCopyPath = new RelayCommand<IAvMedia>(p => Clipboard.SetText(p.Path));
             CmdMoveItemTo = new RelayCommand<object>(p => MoveTo(p.ToList<AvMovie>()));
-            CmdDeleteItem = new RelayCommand<object>(p => Delete(p.ToList<AvMovie>()));
-            CmdClearDb = new RelayCommand<object>(p => ClearDb(p.ToList<AvMovie>()));
+            CmdDeleteItem = new AsyncCommand<object>(Delete);
+            CmdClearDb = new AsyncCommand<object>(ClearDb);
             CmdEditItem = new AsyncCommand<object>(EditMovieInfo);
             CmdSearchOrphanageMedia = new AsyncCommand(SearchOrphanage);
             CmdSearchEmptyActor = new AsyncCommand(OnSearchEmptyActor);
@@ -238,21 +236,26 @@ namespace HappyHour.ViewModel
             }
         }
 
-        private void DownloadMedia(AvTorrent media, string site)
+        private void DownloadMedia(AvTorrent media)
         {
             if (media != null)
             {
-                media.Download(site);
+                media.Download();
                 _ = MediaList.Remove(media);
             }
         }
 
-        private static void ClearDb(List<AvMovie> list)
+        private async Task ClearDb(object obj/*List<AvMovie> list*/)
         {
-            if (list != null)
+            var list = obj.ToList<AvMovie>();
+            if (list == null) return;
+
+            foreach (var movie in list)
             {
-                list.ForEach(m => m.ClearDb(true));
+                await movie.ClearDb();
             }
+                
+            //list.ForEach(m => m.ClearDb(true));
         }
 
         private void OnDirChanged(object sender, DirectoryInfo msg)
@@ -309,21 +312,20 @@ namespace HappyHour.ViewModel
             var item = new AvMovie(movie);
             MediaList.AddInOrder(item, i => i);
         }
+        public void AddMedia(Torrent torrent)
+        {
+            var item = new AvTorrent(torrent);
+            MediaList.AddInOrder(item,  i => i);
+        }
 
         public async Task AddMedia(string path)
         {
             var media = MediaList.FirstOrDefault(m => m.Path == path);
             if (media == null)
             {
-                var item = await AvMediaFactory.Create(path);
-                if (item != null)
-                {
-                    MediaList.AddInOrder(item, i => i);
-                }
-            }
-            else
-            {
+                media = new AvMovie(path);
                 await media.ReloadAsync();
+                MediaList.AddInOrder(media, i => i);
             }
         }
 
@@ -353,11 +355,12 @@ namespace HappyHour.ViewModel
             }
         }
 
-        private void Delete(List<AvMovie> mitems)
+        private async Task Delete(object obj/*List<AvMovie> mitems*/)
         {
+            var mitems = obj.ToList<AvMovie>();
             foreach (var item in mitems)
             {
-                if (item.Delete())
+                if (await item.Delete())
                 {
                     _ = MediaList.Remove(item);
                 }
@@ -386,14 +389,16 @@ namespace HappyHour.ViewModel
 
             try
             {
-                string[] dirs = Directory.GetDirectories(path);
-                if (dirs.Length == 0 ||
-                    dirs.Any(dir => dir.Contains("actors") || dir.Contains("sukebei")))
+                string[] files = Directory.GetFiles(path);
+                if (files.Length > 0 && files.Any(f => 
+                    AvMovie.video_exts.Any(x =>
+                        f.EndsWith(x, StringComparison.OrdinalIgnoreCase))))
                 {
                     await AddMedia(path);
                 }
                 else if (bRecursive || level < 1)
                 {
+                    string[] dirs = Directory.GetDirectories(path);
                     foreach (string dir in dirs)
                     {
                         await UpdateMediaList(dir, token, bRecursive, level + 1);
@@ -403,6 +408,7 @@ namespace HappyHour.ViewModel
             catch (Exception ex)
             {
                 Log.Print($"UpdateMediaList: {ex.Message}");
+                //_tokenSource?.Cancel();
             }
         }
 

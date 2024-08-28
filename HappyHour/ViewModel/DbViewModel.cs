@@ -75,7 +75,7 @@ namespace HappyHour.ViewModel
         ];
 
        public IAsyncCommand CmdReload { get; private set; }
-       public ICommand CmdRemove { get; private set; }
+       public IAsyncCommand<object> CmdRemove { get; private set; }
         public IAsyncCommand CmdReloadAll { get; private set; }
         public DbViewModel(IMainView mainView) : base(mainView) 
         {
@@ -83,7 +83,7 @@ namespace HappyHour.ViewModel
             //ListType = [.. _typeToPropertyName.Keys];
             CmdReload = new AsyncCommand(async () => await OnTypeChanged(SelectedType));
             CmdReloadAll = new AsyncCommand(OnReloadAll);
-            CmdRemove = new RelayCommand<object>(OnRemove);
+            CmdRemove = new AsyncCommand<object>(OnRemove);
 
             CmdGenresMerge = new AsyncCommand<object>(
                 OnMergeGenres, p => p is IList<object> list && list.Count > 1);
@@ -104,6 +104,7 @@ namespace HappyHour.ViewModel
 
             CmdAddSeriesNameTranslated = new RelayCommand(OnAddSeriesNameTranslated);
             //MainView.OnViewUpdate += ReceiveAsync;
+
         }
 
         async void ReceiveAsync(ViewEventArgs e)
@@ -143,7 +144,7 @@ namespace HappyHour.ViewModel
             mi?.Invoke(this, null);
         }
 
-        private async void OnRemove(object item)
+        private async Task OnRemove(object item)
         {
             if (item is Maker maker)
             {
@@ -159,6 +160,11 @@ namespace HappyHour.ViewModel
             {
                 _db.RemoveSeries(series);
                 Series.Remove(series);
+            }
+            else if (item is Genre genre)
+            {
+                await _db.RemoveGenre(genre);
+                Genres.Remove(genre);
             }
         }
     }

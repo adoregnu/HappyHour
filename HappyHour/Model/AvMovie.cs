@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using HappyHour.Interfaces;
 using CefSharp.DevTools.WebAudio;
 using System.Windows.Navigation;
+using HappyHour.ViewModel;
 
 namespace HappyHour.Model
 {
@@ -101,11 +102,11 @@ namespace HappyHour.Model
                 _ => base.CompareTo(media)
             };
         }
-        public void ClearDb(bool realClear = false)
+        public async Task ClearDb(bool realClear = false)
         {
             if (MovieInfo != null)
             {
-                _db.RemoveMovie(_movieInfo, realClear);
+                await _db.RemoveMovie(_movieInfo, realClear);
                 MovieInfo = null;
             }
         }
@@ -133,11 +134,11 @@ namespace HappyHour.Model
             }
         }
 
-        public bool Delete()
+        public async ValueTask<bool> Delete()
         {
             try
             {
-                ClearDb();
+                await ClearDb();
                 Directory.Delete(Path, true);
             }
             catch (Exception ex)
@@ -188,18 +189,19 @@ namespace HappyHour.Model
         private readonly string[] sub_exts = [
             ".smi", ".srt", ".sub", ".ass", ".ssa", ".sup"
         ];
-        private  readonly string[] video_exts = [
+        public readonly static string[] video_exts = [
             ".mp4", ".avi", ".mkv", ".ts", ".wmv", ".m4v"
         ];
 
-        void LoadFiles(string[] files = null)
+        void LoadFiles()
         {
             Files.Clear();
             Subtitles.Clear();
 
+            string[] files = null;
             try
             {
-                files ??= Directory.GetFiles(Path);
+                files = Directory.GetFiles(Path);
                 _dateCreated = File.GetCreationTime(Path);
             } catch { }
 
@@ -218,14 +220,9 @@ namespace HappyHour.Model
             }
         }
 
-        public override void Reload(string[] files)
+        public async override Task ReloadAsync()
         {
-            LoadFiles(files);
-        }
-
-        public async override Task ReloadAsync(string[] files)
-        {
-            LoadFiles(files);
+            LoadFiles();
 
             MovieInfo = await _db.GetMovie(Pid, false);
             if (MovieInfo == null) return;

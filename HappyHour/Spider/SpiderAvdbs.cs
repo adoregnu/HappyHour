@@ -22,6 +22,8 @@ namespace HappyHour.Spider
 
             //SpiderNamesToChain = ["Javlibrary"];
             OverwriteActorThumb = true;
+            ScrapItems.Add(new ScrapItem() { CanUpdate = true, Name = "alias" });
+
         }
 
         int _numScrap = 0;

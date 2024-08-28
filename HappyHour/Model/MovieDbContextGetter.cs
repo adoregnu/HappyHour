@@ -242,11 +242,11 @@ namespace HappyHour.Model
                 .Include(m => m.Actors)
                     .ThenInclude(actor => actor.Names)
                         .ThenInclude(name => name.Name)
-                .Include(m => m.Cover)
-                .Include(m => m.Series)
-                .Include(m => m.Plot)
-                .Include(m => m.Ratings)
-                .Include(m => m.Title.OrderByDescending(t => t.Lang));
+                .Include(m => m.Cover);
+                //.Include(m => m.Series)
+                //.Include(m => m.Plot)
+                //.Include(m => m.Ratings)
+                //.Include(m => m.Title.OrderByDescending(t => t.Lang));
 
             IQueryable<Movie> mquery = null;
             if (exp != null)

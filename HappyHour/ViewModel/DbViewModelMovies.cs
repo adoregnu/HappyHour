@@ -1,8 +1,11 @@
-﻿using HappyHour.Interfaces;
+﻿using CefSharp.DevTools.CSS;
+using HappyHour.Extension;
+using HappyHour.Interfaces;
 using HappyHour.Model;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -13,7 +16,8 @@ namespace HappyHour.ViewModel
 {
     partial class DbViewModel : Pane, IDbView
     {
-        public ObservableCollection<Movie> Movies { get; set; } = [];
+        private NotifyTask<List<Movie>> movies;
+        public NotifyTask<List<Movie>> Movies => movies;
 
         Movie _selectedMovie;
         public Movie SelectedMovie
@@ -24,13 +28,17 @@ namespace HappyHour.ViewModel
                 SetProperty(ref _selectedMovie, value);
                 if (value == null) return;
 
-                Application.Current.Dispatcher.InvokeAsync(async () =>
+                var movie = NotifyTask.Create(_db.GetMovie(value.PID, false).AsTask());
+                movie.PropertyChanged += (s, e) =>
                 {
-                    UiServices.WaitCursor(true);
-                    MediaList.AddMedia(await _db.GetMovie(value.PID, false));
-                    UiServices.WaitCursor(false);
-                });
-            }
+                    if (e.PropertyName == "Result")
+                    {
+                        UiServices.WaitCursor(true);
+                        MediaList.AddMedia(movie.Result);
+                        UiServices.WaitCursor(false);
+                    }
+                };
+             }
         }
         private string _searchPid;
         public string SearchPid
@@ -39,15 +47,16 @@ namespace HappyHour.ViewModel
             set
             {
                 SetProperty(ref _searchPid, value);
-                Movies.Clear();
-                Application.Current.Dispatcher.InvokeAsync(async () =>
+                if (string.IsNullOrEmpty(value)) return;
+
+                movies = NotifyTask.Create(_db.GetMoviesFast(value).AsTask());
+                movies.PropertyChanged += (s, e) =>
                 {
-                    if (!string.IsNullOrEmpty(value))
+                    if (e.PropertyName == "Result")
                     {
-                        var movies = await _db.GetMoviesFast(value);
-                        movies.ForEach(Movies.Add);
+                        OnPropertyChanged(nameof(Movies));
                     }
-                });
+                };
             }
         }
 

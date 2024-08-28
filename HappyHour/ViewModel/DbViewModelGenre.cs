@@ -68,6 +68,14 @@ namespace HappyHour.ViewModel
             await _db.MergeGenres(selectedGenres, g => GenresToMerge.Remove(g));
         }
 
+        async Task OnRemoveGenre(object p)
+        {
+            if (p is Genre genre)
+            {
+                await _db.RemoveGenre(genre);
+            }
+        }
+
         private async Task OnSelectGenres()
         {
             Genres.Clear();

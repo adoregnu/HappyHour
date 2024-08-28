@@ -176,9 +176,22 @@ namespace HappyHour.Spider
                 {
                     if (_item2download.Contains(key))
                     {
-                        string url = dict[key].ToString();
-                        _urls.Add(url, (key, dict));
-                        _browser.Download(url);
+                        if (dict[key] is IDictionary<string, object> popupimage)
+                        {
+                            if (popupimage.TryGetValue("func", out object callback))//.ExecuteAsync();
+                            {
+                                string url = popupimage["img_url"].ToString();
+                                _urls.Add(url, (key, dict));
+
+                                ((IJavascriptCallback)callback).ExecuteAsync();//.ContinueWith((response) => { });
+                            }
+                        }
+                        else
+                        {
+                            string url = dict[key].ToString();
+                            _urls.Add(url, (key, dict));
+                            _browser.Download(url);
+                        }
                     }
                     return false;
                 });
