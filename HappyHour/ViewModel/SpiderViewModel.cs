@@ -153,7 +153,7 @@ namespace HappyHour.ViewModel
             WebBrowser.LoadingStateChanged += (s, e) =>
                 UiServices.Invoke(() => OnStateChanged(s, e), true);
             WebBrowser.JavascriptMessageReceived += (s, e) =>
-                UiServices.Invoke(() => OnJavascriptMessageReceived(s, e));
+                UiServices.Invoke(() => OnJavascriptMessageReceived(s, e), true);
             //WebBrowser.FrameLoadEnd += OnFrameLoaded;
             SelectedSpider = Spiders[0];
             SelectedSpider.SetCookies();

@@ -145,7 +145,7 @@ namespace HappyHour.Spider
 
                 foreach (dynamic img in images)
                 {
-                    await ((IJavascriptCallback)img.func).ExecuteAsync();
+                    _ = ((IJavascriptCallback)img.func).ExecuteAsync();
                 }
             }
             //_downloadTimer.Change(2 * 1000, Timeout.Infinite);
