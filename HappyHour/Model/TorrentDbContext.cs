@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualBasic.ApplicationServices;
 
 namespace HappyHour.Model
 {
@@ -18,7 +19,9 @@ namespace HappyHour.Model
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            string connectionUrl = $@"Data Source=crawled.db";
+            //var dbpath = @"c: \Users\adore\AppData\Local\HappyHour";
+            var dbpath = @"c:\Users\adore\source\repos\HappyHour\HappyHour";
+            string connectionUrl = $@"Data Source={dbpath}\crawled.db";
             optionsBuilder.UseSqlite(connectionUrl);
         }
 

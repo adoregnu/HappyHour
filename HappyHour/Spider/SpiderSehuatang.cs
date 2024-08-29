@@ -33,7 +33,6 @@ namespace HappyHour.Spider
         private dynamic _currPage;
         private string _selectedBoard;
 
-        private readonly Dictionary<string, string> _images = [];
         private ILifeSpanHandler _popupHandler;
         private readonly Timer _downloadTimer;
         private readonly TorrentDbContext _db = new();
@@ -101,7 +100,7 @@ namespace HappyHour.Spider
 
         private int _numDownloaded;
         private int _toDownload;
-        private  void DownloadFiles(dynamic article)
+        private async Task DownloadFiles(dynamic article)
         {
             if (_toDownload != _numDownloaded)
             {
@@ -110,7 +109,6 @@ namespace HappyHour.Spider
             }
 
             //int i = 0;
-            _images.Clear();
             _numDownloaded = 0;
 
             var images = article.images as List<object>;
@@ -133,7 +131,7 @@ namespace HappyHour.Spider
             Log.Print($"{Name}: toDownload : {_toDownload }");
             if (_toDownload == 0)
             {
-                MoveNextItem();
+                await MoveNextItem();
                 return;
             }
 
@@ -147,13 +145,9 @@ namespace HappyHour.Spider
 
                 foreach (dynamic img in images)
                 {
-                    ((IJavascriptCallback)img.func).ExecuteAsync().ContinueWith(resp => {
-                        Log.Print($"{resp.Result.Success}");
-                    });
-                    //_numDownloaded++;
+                    await ((IJavascriptCallback)img.func).ExecuteAsync();
                 }
             }
-            //files?.ForEach(fn => ((IJavascriptCallback)fn).ExecuteAsync());
             //_downloadTimer.Change(2 * 1000, Timeout.Infinite);
         }
 
@@ -177,7 +171,7 @@ namespace HappyHour.Spider
             return true;
         }
 
-        private async void MoveNextItem()
+        private async Task MoveNextItem()
         {
             List<object> list = _currPage.data;
             if (list.Count > _index)
@@ -226,7 +220,7 @@ namespace HappyHour.Spider
                 Log.Print($"{Name}: current page:{d.curr_url}, miss:{d.miss}");
                 _index = 0;
                 _currPage = d;
-                MoveNextItem();
+                await MoveNextItem();
                 return true;
             }
             else if (d.type == "items")
@@ -238,7 +232,7 @@ namespace HappyHour.Spider
                 }
                 Log.Print($"{Name}: article {_pid} = {d.pid}");
                 _updateTime = DateTime.Parse(d.date);
-                DownloadFiles(d);
+                await DownloadFiles(d);
                 /*
                 else
                 {
@@ -249,7 +243,6 @@ namespace HappyHour.Spider
             }
             return false;
         }
-
         protected async override Task OnScrapCompleted(bool bUpdated)
         {
             await base.OnScrapCompleted(bUpdated);
@@ -289,13 +282,13 @@ namespace HappyHour.Spider
 
         public override void UpdateDownload()
         {
-            UiServices.Invoke(() =>
+            UiServices.Invoke(async () =>
             {
                 _numDownloaded++;
                 if (_toDownload == _numDownloaded)
                 {
                     UpdateMedia();
-                    MoveNextItem();
+                    await MoveNextItem();
                 }
             });
         }
@@ -327,10 +320,10 @@ namespace HappyHour.Spider
             }
             if (_toDownload == _numDownloaded)
             {
-                UiServices.Invoke(() =>
+                UiServices.Invoke(async () =>
                 {
                     UpdateMedia();
-                    MoveNextItem();
+                    await MoveNextItem();
                 });
             }
         }
@@ -342,6 +335,8 @@ namespace HappyHour.Spider
             var dh = Browser.DownloadHandler;
             dh.OnBeforeDownloadFired += OnBeforeDownload;
             dh.OnDownloadUpdatedFired += OnDownloadUpdated;
+
+            //(Browser.WebBrowser.LifeSpanHandler, _popupHandler) = (_popupHandler, Browser.WebBrowser.LifeSpanHandler);
         }
 
         public override void OnDeselect()
@@ -351,6 +346,8 @@ namespace HappyHour.Spider
             var dh = Browser.DownloadHandler;
             dh.OnBeforeDownloadFired -= OnBeforeDownload;
             dh.OnDownloadUpdatedFired -= OnDownloadUpdated;
+
+            //(Browser.WebBrowser.LifeSpanHandler, _popupHandler) = (_popupHandler, Browser.WebBrowser.LifeSpanHandler);
         }
     }
 }

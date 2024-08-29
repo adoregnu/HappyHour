@@ -153,7 +153,7 @@ namespace HappyHour.ViewModel
             WebBrowser.LoadingStateChanged += (s, e) =>
                 UiServices.Invoke(() => OnStateChanged(s, e), true);
             WebBrowser.JavascriptMessageReceived += (s, e) =>
-                Application.Current.Dispatcher.InvokeAsync(async () => await OnJavascriptMessageReceived(s, e));
+                UiServices.Invoke(() => OnJavascriptMessageReceived(s, e));
             //WebBrowser.FrameLoadEnd += OnFrameLoaded;
             SelectedSpider = Spiders[0];
             SelectedSpider.SetCookies();
@@ -200,7 +200,7 @@ namespace HappyHour.ViewModel
             }
         }
 
-        private async Task OnJavascriptMessageReceived(object sender, JavascriptMessageReceivedEventArgs e)
+        private async void OnJavascriptMessageReceived(object sender, JavascriptMessageReceivedEventArgs e)
         {
             try
             {

@@ -8,7 +8,6 @@
     <SupportedOSPlatformVersion>8.0</SupportedOSPlatformVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Nullable>disable</Nullable>
-    <StartWorkingDirectory>$(MSBuildProjectDirectory)</StartWorkingDirectory>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -20,9 +19,9 @@
     <PackageReference Include="AsyncAwaitBestPractices" Version="8.0.0" />
     <PackageReference Include="AsyncAwaitBestPractices.MVVM" Version="8.0.0" />
     <PackageReference Include="AvalonEdit" Version="6.3.0.90" />
-    <PackageReference Include="CefSharp.OffScreen.NETCore" Version="126.2.180" />
-    <PackageReference Include="CefSharp.Wpf.NETCore" Version="126.2.180" />
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
+    <PackageReference Include="CefSharp.OffScreen.NETCore" Version="127.3.50" />
+    <PackageReference Include="CefSharp.Wpf.NETCore" Version="127.3.50" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.0" />
     <PackageReference Include="DeepL.net" Version="1.9.0" />
     <PackageReference Include="Dirkster.AvalonDock" Version="4.72.1" />
     <PackageReference Include="Dirkster.AvalonDock.Themes.VS2013" Version="4.72.1" />
@@ -136,15 +135,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="chromiumembeddedframework.runtime.win-x64" Version="126.2.18" />
+    <PackageReference Update="chromiumembeddedframework.runtime.win-x64" Version="127.3.5" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="chromiumembeddedframework.runtime.win-x86" Version="126.2.18" />
+    <PackageReference Update="chromiumembeddedframework.runtime.win-x86" Version="127.3.5" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="chromiumembeddedframework.runtime.win-arm64" Version="126.2.18" />
+    <PackageReference Update="chromiumembeddedframework.runtime.win-arm64" Version="127.3.5" />
   </ItemGroup>
 
 </Project>

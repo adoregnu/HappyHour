@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HappyHour.Migrations.TorrentDb
 {
     [DbContext(typeof(TorrentDbContext))]
-    [Migration("20240827131734_InitialCreate")]
+    [Migration("20240829094108_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />

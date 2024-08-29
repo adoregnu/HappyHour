@@ -45,7 +45,6 @@
                     link.target = '_blank';
                     link.click();
                     document.body.removeChild(link);
-                    console.log('download image ' + url)
                 }
             };
             array.push(imgInfo);
