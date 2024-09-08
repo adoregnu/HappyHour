@@ -76,6 +76,7 @@ namespace HappyHour.ViewModel
             {
                 s.InitChain(Spiders);
             }
+            RequestHandler = new AvRequestHandler(this);
         }
 
         public void Scan(SpiderBase spider, IAvMedia media)

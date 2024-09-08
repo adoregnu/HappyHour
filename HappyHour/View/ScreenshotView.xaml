@@ -3,30 +3,33 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:control="clr-namespace:HappyHour.View.Controls"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
         <DataTemplate x:Key="ScreenshotTemplate">
-            <ScrollViewer VerticalScrollBarVisibility="Auto" >
-                <Image ToolTipService.ShowDuration="20000" Source="{Binding .}"
-                       Width="{Binding ActualWidth, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Grid}}">
-                    <Image.ToolTip>
-                        <ToolTip>
-                            <Image Source="{Binding RelativeSource= {RelativeSource AncestorType=ToolTip}, Path=PlacementTarget.Source}"/>
-                        </ToolTip>
-                    </Image.ToolTip>
-                </Image>
-            </ScrollViewer>
+            <control:AsyncImage HorizontalAlignment="Center" ToolTipService.ShowDuration="20000" ToolTipService.InitialShowDelay="0"
+            ImagePath="{Binding .}" Width="{Binding ActualWidth, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Grid}}">
+            <!--<Image ToolTipService.ShowDuration="20000" Source="{Binding .}"
+                   Width="{Binding ActualWidth, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Grid}}">
+                <Image.ToolTip>
+                    <ToolTip>
+                        <Image Source="{Binding RelativeSource= {RelativeSource AncestorType=ToolTip}, Path=PlacementTarget.Source}"/>
+                    </ToolTip>
+                </Image.ToolTip>
+            -->
+            </control:AsyncImage>
         </DataTemplate>
     </UserControl.Resources>
     <Grid>
-        <ScrollViewer VerticalScrollBarVisibility="Auto" >
-            <ListBox ItemTemplate="{DynamicResource ScreenshotTemplate}"
-                 ItemsSource="{Binding ScreenshotList}">
-                <ListBox.Background>
-                    <Brush>Black</Brush>
-                </ListBox.Background>
-            </ListBox>
-        </ScrollViewer>
+        <ListBox ItemTemplate="{DynamicResource ScreenshotTemplate}"
+            ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+            ScrollViewer.CanContentScroll="False"
+            VirtualizingPanel.ScrollUnit="Pixel"
+             ItemsSource="{Binding ScreenshotList}">
+            <ListBox.Background>
+                <Brush>Black</Brush>
+            </ListBox.Background>
+        </ListBox>
     </Grid>
 </UserControl>

@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Runtime.InteropServices;
 using AsyncAwaitBestPractices.MVVM;
+using HappyHour.Extension;
 
 namespace HappyHour.ViewModel
 {
@@ -89,7 +90,13 @@ namespace HappyHour.ViewModel
                 SetProperty(ref _searchActorName, value);
                 if (!string.IsNullOrEmpty(value))
                 {
-                    Application.Current.Dispatcher.InvokeAsync(async () => AllActors = await _db.GetActors(value));
+                    var actors = NotifyTask.Create(_db.GetActors(value).AsTask());
+                    actors.PropertyChanged += (s, e) =>
+                    {
+                        if (e.PropertyName == "Result")
+                            AllActors = actors.Result;
+                    };
+                    //Application.Current.Dispatcher.InvokeAsync(async () => AllActors = await _db.GetActors(value));
                 }
             }
         }
@@ -174,9 +181,7 @@ namespace HappyHour.ViewModel
 
         private async Task<AvEditorViewModel> InitializeAsync()
         {
-
             Movie = await _db.GetMovie(_movie.PID, true);
-
             //(await _db.GetMakers(Movie)).ForEach(Makers.Add);
             //(await _db.GetLabels(Movie)).ForEach(Labels.Add);
             (await _db.GetGenres(Movie)).ForEach(Genres.Add);

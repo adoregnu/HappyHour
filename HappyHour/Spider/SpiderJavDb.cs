@@ -37,7 +37,11 @@ namespace HappyHour.Spider
         }
         protected override void AdjustKeyword()
         {
-            Keyword = Regex.Replace(Keyword, @"^\d+", "");
+            var m = Regex.Match(Keyword, @"^\d+[a-zA-Z]+");
+            if (m.Success)
+            {
+                Keyword = Regex.Replace(Keyword, @"^\d+", "");
+            }
         }
     }
 }

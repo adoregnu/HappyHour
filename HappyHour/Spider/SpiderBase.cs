@@ -43,6 +43,7 @@ namespace HappyHour.Spider
         protected readonly Queue<IDictionary<string, object>> _itemQueue = new();
         protected virtual IDownloader Downloader => _downloader;
         protected List<string> SpiderNamesToChain = [];
+        public List<string> UrlPatternsToFilter = [];
 
         public List<ScrapItem> ScrapItems { get; set; }
         public bool IsSpiderWorking
@@ -433,7 +434,12 @@ namespace HappyHour.Spider
             return false;
         }
 
-        public virtual void UpdateDownload() { }
+        public virtual void UpdateDownload(string rpath)
+        {
+            UiServices.Invoke(async () => {
+                await Downloader?.UpdateDownload(this, rpath);
+            });
+        }
 
         protected async virtual Task UpdateDb(IDictionary<string, object> items)
         {
@@ -442,7 +448,7 @@ namespace HappyHour.Spider
             await App.Current.DbContext.SetMovie(items);
         }
 
-        public async Task UpdateItems(IDictionary<string, object> items)
+        public async Task UpdateItemsAsync(IDictionary<string, object> items)
         {
             if (_saveDb && SearchMedia is AvMovie)
             {
@@ -454,6 +460,10 @@ namespace HappyHour.Spider
                 {
                     Log.Print($"{Name}: UpdateItem", ex);
                 }
+            }
+            else if (SearchMedia is AvTorrent torrent)
+            {
+                await torrent.UpdateDb(items);
             }
 
             await OnScrapCompleted(true);

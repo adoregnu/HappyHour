@@ -34,6 +34,7 @@ namespace HappyHour.Spider
             };
             _timer.Elapsed += OnDownloadTimeout;
         }
+        public async Task UpdateDownload(SpiderBase spider,string rpath) { }
 
         public void Enable(bool bEnable)
         {
@@ -115,7 +116,7 @@ namespace HappyHour.Spider
                 Log.Print($"{_spider.SearchMedia.Pid} : Download Completed: " +
                     $"({_numDownloaded}/{_numDownload}){e.FullPath}");
 
-                Application.Current.Dispatcher.InvokeAsync(async () => await _spider.UpdateItems(_items));
+                Application.Current.Dispatcher.InvokeAsync(async () => await _spider.UpdateItemsAsync(_items));
             }
         }
 
@@ -199,7 +200,7 @@ namespace HappyHour.Spider
             }
             else
             {
-                await spider.UpdateItems(items);
+                await spider.UpdateItemsAsync(items);
             }
         }
     }

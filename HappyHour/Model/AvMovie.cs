@@ -190,7 +190,7 @@ namespace HappyHour.Model
             ".smi", ".srt", ".sub", ".ass", ".ssa", ".sup"
         ];
         public readonly static string[] video_exts = [
-            ".mp4", ".avi", ".mkv", ".ts", ".wmv", ".m4v"
+            ".mp4", ".avi", ".mkv", ".ts", ".wmv", ".m4v", ".asf", ".m2ts"
         ];
 
         void LoadFiles()

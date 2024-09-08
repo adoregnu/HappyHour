@@ -237,6 +237,16 @@
                 </Button.ToolTip>
             </Button>
             <Button Style="{StaticResource ModernButtonStyle2}"
+                    Command="{Binding CmdTorrents}">
+                <Path Stretch="Uniform"
+                      Data="{Binding Source={StaticResource magnet}, Path=Data}"
+                      Fill="{Binding Path=Foreground, RelativeSource=
+                            {RelativeSource AncestorType={x:Type Button}}}"/>
+                <Button.ToolTip>
+                    <TextBlock Text="Search Media of empty name"/>
+                </Button.ToolTip>
+            </Button>
+            <Button Style="{StaticResource ModernButtonStyle2}"
                     Command="{Binding CmdStopBatchingScrap}">
                 <Path Stretch="Uniform"
                       Data="{Binding Source={StaticResource SearchStopIcon}, Path=Data}"

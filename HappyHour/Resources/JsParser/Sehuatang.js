@@ -18,6 +18,13 @@
         return array.length > 0 ? array : null;
     }
 
+    function post_message(msg) {
+        msg['source'] = window.location.hostname
+        console.log(JSON.stringify(msg));
+        CefSharp.PostMessage(msg);
+
+    }
+
     function _parseImages(xpath) {
         var nodes = _jav_parse_multi_node(xpath);
         var array = [];
@@ -37,15 +44,6 @@
             var imgInfo = {
                 url: url,
                 target: name,
-                func: function () {
-                    const link = document.createElement('a');
-                    document.body.appendChild(link);
-                    link.download = name;
-                    link.href = url;
-                    link.target = '_blank';
-                    link.click();
-                    document.body.removeChild(link);
-                }
             };
             array.push(imgInfo);
             i++;
@@ -60,7 +58,8 @@
         };
         var node = _jav_parse_single_node(boards[_BOARD], _get_node);
         if (node != null) {
-            CefSharp.PostMessage({ type: 'url', data: node.href });
+            //CefSharp.PostMessage({ type: 'url', data: node.href });
+            post_message({ type: 'url', data: node.href });
             return "redirected";
         }
         return 'notfound';
@@ -77,7 +76,7 @@
             alist.forEach(function (anode) {
                 var m = /[a-z0-9-_]+/i.exec(anode.textContent);
                 if (m != null) {
-                    array.push({ url: anode.href, pid: m[0] });
+                    array.push({ url: anode.href, pid: m[0]});
                 } else {
                     num_miss += 1;
                 }
@@ -85,7 +84,8 @@
         }
 
         if (array.length > 0) {
-            CefSharp.PostMessage({
+            //#CefSharp.PostMessage({
+            post_message({
                 type: 'url_list', data: array, miss: num_miss,
                 curr_url: document.location.href
             });
@@ -139,6 +139,11 @@
         },
     };
 
+    var node = _jav_parse_single_node("//div[@class='blockcode']", _get_node);
+    if (node != null) {
+        window.scrollTo({ top: node.offsetTop/1.5, behavior: 'smooth' });
+    }
+
     var num_item = 0;
     for (var key in items) {
         var item = items[key];
@@ -154,7 +159,8 @@
         num_item += 1;
     }
     msg['data'] = num_item;
-    msg['source'] = window.location.hostname
-    console.log(JSON.stringify(msg));
-    CefSharp.PostMessage(msg);
+    post_message(msg);
+    //msg['source'] = window.location.hostname
+    //console.log(JSON.stringify(msg));
+    //CefSharp.PostMessage(msg);
 }) ();

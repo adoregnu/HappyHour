@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using System.Windows.Controls;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualBasic.ApplicationServices;
 
 namespace HappyHour.Model
 {
@@ -25,13 +24,23 @@ namespace HappyHour.Model
             optionsBuilder.UseSqlite(connectionUrl);
         }
 
-        public async ValueTask<Torrent> GetTorrent(string pid)
+        public List<Torrent> GetTorrents()
         {
-            var  torrent = await Torrents
+            return Torrents
+                .Include(t => t.MagnetUrls)
+                .Include(t => t.Screenshots)
+                .Where(t => t.StatusCode == 'N')
+                .ToList();
+        }
+
+        public Torrent GetTorrent(string pid)
+        {
+            pid = pid.Trim().ToLower();
+            var  torrent = Torrents
                 .Include(t => t.MagnetUrls)
                 .Include(t => t.Screenshots)
                 .Where(t => t.PID == pid)
-                .FirstOrDefaultAsync();
+                .FirstOrDefault();
             if (torrent == null)
             {
                 torrent = new Torrent()

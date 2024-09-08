@@ -28,13 +28,10 @@ namespace HappyHour.Spider
         private int _numDuplicatedPid;
 
         private string _pid;
-        private string _imagePath;
         private DateTime _updateTime;
         private dynamic _currPage;
         private string _selectedBoard;
 
-        private ILifeSpanHandler _popupHandler;
-        private readonly Timer _downloadTimer;
         private readonly TorrentDbContext _db = new();
         private Torrent _currentTorrent;
 
@@ -59,15 +56,12 @@ namespace HappyHour.Spider
             CmdStop = new RelayCommand(() => _scrapRunning = false);
             SelectedBoard = "censored";
 
-            ResourcesToBeFiltered = [];
-            _popupHandler = new OffScreenPopupHandler(Browser);
-            ReqeustHandler = new ShtRequestHandler(this);
-            _downloadTimer = new Timer(TimerCallback, null, Timeout.Infinite, Timeout.Infinite);
+            UrlPatternsToFilter = ["tupian/forum"];
             ChainVisibility = System.Windows.Visibility.Collapsed;
-            _imagePath = $"{App.Current.LocalAppData}\\covers";
-            if (!Directory.Exists(_imagePath))
+            var imagePath = $"{App.Current.LocalAppData}\\covers\\";
+            if (!Directory.Exists(imagePath))
             { 
-                Directory.CreateDirectory(_imagePath);
+                Directory.CreateDirectory(imagePath);
             }
         }
 
@@ -80,75 +74,80 @@ namespace HappyHour.Spider
 
         private void UpdateMedia()
         {
-            //string target = _imagePath + $"\\{img.target}";
-            bool cover = true;
-            foreach (var kv in ResourcesToBeFiltered)
-            {
-                if (cover)
-                {
-                    _currentTorrent.CoverPath = kv.Value;
-                    cover = false;
-                }
-                else
-                {
-                    _currentTorrent.Screenshots.Add(new StringData() { Value = kv.Value });
-                }
-            }
+            if (_currentTorrent.StatusCode == 'D' || _currentTorrent.StatusCode == 'E')
+                return;
+
             _db.SaveChanges();
             Browser.MediaList.AddMedia(_currentTorrent);
         }
 
-        private int _numDownloaded;
-        private int _toDownload;
-        private async Task DownloadFiles(dynamic article)
+        readonly List<string> _resources = [];
+        public override void UpdateDownload(string rpath)
         {
-            if (_toDownload != _numDownloaded)
+            UiServices.Invoke(()  => {
+                _resources.Add(rpath);
+                CheckDownload();
+            }); 
+        }
+
+        private void CheckDownload()
+        {
+            if (_toDownload.Count == 0) return;
+
+            _resources.ForEach(r => { _toDownload.Remove(r); });
+            Log.Print($"to download  : {_toDownload.Count}");
+            if (_toDownload.Count == 0)
             {
-                Log.Print($"{Name}: Previous downloading is not completed!");
+                UpdateMedia();
+                MoveNextItem();
+                _resources.Clear();
+                _toDownload.Clear();
+            }
+        }
+
+        readonly List<string> _toDownload = [];
+        private void DownloadFiles(dynamic article)
+        {
+            void processImages(Action<dynamic, string> action)
+            {
+                if (article.images is List<object> images)
+                {
+                    foreach (dynamic img in images)
+                    {
+                        var imgpath = AvImageFilter.GetResourcePath(img.url);
+                        action?.Invoke(img, imgpath );
+                        _toDownload.Add(imgpath);
+                    }
+                    CheckDownload();
+                }
+            }
+
+            if (_currentTorrent.MagnetUrls.Any(url => url.SourceUrl == article.source))
+            {
+                processImages(null);
                 return;
             }
 
-            //int i = 0;
-            _numDownloaded = 0;
-
-            var images = article.images as List<object>;
-            //var files = article.files as List<object>;
-            if (images != null) { _toDownload = images.Count; }
-            //if (files != null) { _toDownload += files.Count; }
             if (article.magnet is List<object> magnets)
             {
-                int count = 1;
                 foreach (string magnet in magnets.Cast<string>())
                 {
-                    //File.WriteAllText($"{_outPath}\\{_pid}_{count}.magnet", magnet);
                     _currentTorrent.MagnetUrls.Add(new Magnet() {
                         SourceUrl= article.source, MagnetUrl= magnet
                     });
-                    count++;
                 }
             }
 
-            Log.Print($"{Name}: toDownload : {_toDownload }");
-            if (_toDownload == 0)
-            {
-                await MoveNextItem();
-                return;
-            }
-
-            if (images != null)
-            {
-                foreach (dynamic img in images)
+            processImages((img, imgpath) => {
+                if (img.target.Contains("_cover"))
                 {
-                    string target = _imagePath + $"\\{img.target}";
-                    ResourcesToBeFiltered.Add(img.url, target);
+                    _currentTorrent.CoverPath = imgpath;
                 }
-
-                foreach (dynamic img in images)
+                else
                 {
-                    _ = ((IJavascriptCallback)img.func).ExecuteAsync();
+                    _currentTorrent.Screenshots.Add(new StringData() { Value = imgpath });
                 }
-            }
-            //_downloadTimer.Change(2 * 1000, Timeout.Infinite);
+            });
         }
 
         private bool MoveNextPage()
@@ -166,12 +165,11 @@ namespace HappyHour.Spider
                 return false;
             }
 
-            Browser.Address = Regex.Replace(_currPage.curr_url,
-                @"\d+\.html", $"{_pageNum}.html");
+            Browser.Address = Regex.Replace(_currPage.curr_url, @"\d+\.html", $"{_pageNum}.html");
             return true;
         }
 
-        private async Task MoveNextItem()
+        private async void MoveNextItem()
         {
             List<object> list = _currPage.data;
             if (list.Count > _index)
@@ -186,19 +184,32 @@ namespace HappyHour.Spider
                 else
                 {
                     _pid = item.pid;
-                    _currentTorrent = await _db.GetTorrent(item.pid);
+                    _currentTorrent = _db.GetTorrent(item.pid);
+                    if (_currentTorrent.Date == _updateTime)
+                    {
+                        _numDuplicatedPid++;
+                        Log.Print($"{_pid} is already crawled.");
+                    }
+                    else
+                    {
+                        _currentTorrent.Date = _updateTime;
+                        _currentTorrent.StatusCode = 'N';
+                    }
+
+                    if (StopOnExistingId && _numDuplicatedPid > 3)
+                    {
+                        _scrapRunning = false;
+                    }
                 }
                 if (_scrapRunning)
                 {
-                    Browser.MainView.StatusMessage =
-                        $"Article:{_index}/{list.Count}, Page:{_pageNum}/{NumPage}";
+                    Browser.MainView.StatusMessage = $"Article:{_index}/{list.Count}, Page:{_pageNum}/{NumPage}";
                     Browser.Address = item.url;
                 }
             }
             else
             {
                 _scrapRunning = MoveNextPage();
-                //Thread.Sleep(1000);
             }
 
             if (!_scrapRunning)
@@ -220,7 +231,7 @@ namespace HappyHour.Spider
                 Log.Print($"{Name}: current page:{d.curr_url}, miss:{d.miss}");
                 _index = 0;
                 _currPage = d;
-                await MoveNextItem();
+                MoveNextItem();
                 return true;
             }
             else if (d.type == "items")
@@ -232,22 +243,9 @@ namespace HappyHour.Spider
                 }
                 Log.Print($"{Name}: article {_pid} = {d.pid}");
                 _updateTime = DateTime.Parse(d.date);
-                await DownloadFiles(d);
-                /*
-                else
-                {
-                    UpdateMedia();
-                    MoveNextItem();
-                }
-                */
+                DownloadFiles(d);
             }
             return false;
-        }
-        protected async override Task OnScrapCompleted(bool bUpdated)
-        {
-            await base.OnScrapCompleted(bUpdated);
-            (Browser.WebBrowser.LifeSpanHandler, _popupHandler) = (_popupHandler, Browser.WebBrowser.LifeSpanHandler);
-            _downloadTimer.Change(Timeout.Infinite, Timeout.Infinite);
         }
 
         public override void Navigate2(IAvMedia media, bool resetChain)
@@ -256,98 +254,14 @@ namespace HappyHour.Spider
             _numDuplicatedPid = 0;
             _pageNum = 1;
             _scrapRunning = true;
-
-            ResourcesToBeFiltered.Clear();
-            (Browser.WebBrowser.LifeSpanHandler, _popupHandler) = (_popupHandler, Browser.WebBrowser.LifeSpanHandler);
+            _resources.Clear();
+            _toDownload.Clear();
 
             if (Browser.Address == URL)
             {
                 Browser.Address = "";
             }
             Browser.Address = URL;
-        }
-
-
-        private void TimerCallback(object state)
-        {
-            _downloadTimer.Change(Timeout.Infinite, Timeout.Infinite);
-            Log.Print("Download timed out!!");
-            UiServices.Invoke(() =>
-            {
-                _numDownloaded = _toDownload = 0;
-                UpdateMedia();
-                MoveNextItem();
-            });
-        }
-
-        public override void UpdateDownload()
-        {
-            UiServices.Invoke(async () =>
-            {
-                _numDownloaded++;
-                if (_toDownload == _numDownloaded)
-                {
-                    UpdateMedia();
-                    await MoveNextItem();
-                }
-            });
-        }
-
-        private void OnBeforeDownload(object sender, DownloadItem e)
-        {
-            //e.SuggestedFileName = !e.SuggestedFileName.EndsWith("torrent", StringComparison.OrdinalIgnoreCase) ?
-            //    _images[e.OriginalUrl] : $"{_outPath}\\{e.SuggestedFileName}";
-
-            e.SuggestedFileName = $"{_imagePath}\\{e.SuggestedFileName}";
-        }
-
-        private void OnDownloadUpdated(object sender, DownloadItem e)
-        {
-            if (!e.IsComplete)
-            {
-                return;
-            }
-
-            _numDownloaded++;
-            Log.Print($"{Name}: download completed({_numDownloaded}/{_toDownload}): {e.FullPath}");
-            try
-            {
-                File.SetLastWriteTime(e.FullPath, _updateTime);
-            }
-            catch (Exception ex)
-            {
-                Log.Print(ex.Message);
-            }
-            if (_toDownload == _numDownloaded)
-            {
-                UiServices.Invoke(async () =>
-                {
-                    UpdateMedia();
-                    await MoveNextItem();
-                });
-            }
-        }
-
-        public override void OnSelected()
-        {
-            //base.OnSelected();
-            Log.Print($"{Name} selected!");
-            var dh = Browser.DownloadHandler;
-            dh.OnBeforeDownloadFired += OnBeforeDownload;
-            dh.OnDownloadUpdatedFired += OnDownloadUpdated;
-
-            //(Browser.WebBrowser.LifeSpanHandler, _popupHandler) = (_popupHandler, Browser.WebBrowser.LifeSpanHandler);
-        }
-
-        public override void OnDeselect()
-        {
-            Log.Print($"{Name} deselected!");
-            //base.OnDeselect();
-            var dh = Browser.DownloadHandler;
-            dh.OnBeforeDownloadFired -= OnBeforeDownload;
-            dh.OnDownloadUpdatedFired -= OnDownloadUpdated;
-
-            //(Browser.WebBrowser.LifeSpanHandler, _popupHandler) = (_popupHandler, Browser.WebBrowser.LifeSpanHandler);
         }
     }
 }

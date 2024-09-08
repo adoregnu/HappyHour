@@ -23,7 +23,6 @@ namespace HappyHour.Spider
         public string PidToStop { get; set; }
         public bool StopOnExistingId { get; set; }
 
-        private readonly TorrentDbContext _db = new();
         public ICommand CmdStop { get; private set; }
 
         public SpiderSukebei(SpiderViewModel browser) : base(browser)
@@ -34,6 +33,7 @@ namespace HappyHour.Spider
 
             ChainVisibility = System.Windows.Visibility.Collapsed;
         }
+
         public override void Navigate2(IAvMedia media, bool resetChain)
         {
             _numDuplicatedPid = 0;
@@ -45,7 +45,7 @@ namespace HappyHour.Spider
             Browser.Address = URL;
         }
 
-        private async void SaveMagenetLink(dynamic items)
+        private async void SaveMagenetLink(dynamic items, TorrentDbContext _db)
         {
             var torrents = items.torrents as IList<object>;
             Match m;
@@ -62,22 +62,42 @@ namespace HappyHour.Spider
                     return;
                 }
 
-                var torrent = await _db.GetTorrent(pid);
-                if (torrent.MagnetUrls.Any(m => m.SourceUrl == items.source.ToString()))
+                var torrent = _db.GetTorrent(pid);
+                bool bexist = false;
+                if (torrent.MagnetUrls.Any(m => m.SourceUrl == items.source))
                 {
                     _numDuplicatedPid++;
+                    Log.Print($"{pid} is already exists");
+                    bexist = true;
                 }
-                if (_numDuplicatedPid > 3 && StopOnExistingId)
+                if (StopOnExistingId && _numDuplicatedPid > 3)
                 {
                     await OnScrapCompleted(false);
                     return;
                 }
-                //File.WriteAllText(fileName, item.magnet.ToString());
-                torrent.MagnetUrls.Add(new Magnet() {
-                    MagnetUrl = item.magnet.ToString(),
-                    SourceUrl = item.source.ToString(),
-                });
-                Browser.MediaList.AddMedia(torrent);
+                if (!bexist)
+                {
+                    torrent.MagnetUrls.Add(new Magnet()
+                    {
+                        MagnetUrl = item.magnet,
+                        SourceUrl = items.source,
+                    });
+                    if (string.IsNullOrEmpty(torrent.CoverPath))
+                    {
+                        if (long.TryParse(item.date, out long ts))
+                        {
+                            torrent.Date = DateTimeOffset.FromUnixTimeSeconds(ts).LocalDateTime;
+                        }
+                    }
+                    if (torrent.StatusCode == 'N')
+                    {
+                        Browser.MediaList.AddMedia(torrent);
+                    }
+                    else
+                    {
+                        Log.Print($"{pid} already crawled");
+                    }
+                }
             }
 
             string nexPageLink = items.nextPage.ToString();
@@ -106,7 +126,9 @@ namespace HappyHour.Spider
             }
             else
             {
-                SaveMagenetLink(d);
+                using TorrentDbContext _db = new();
+                SaveMagenetLink(d, _db);
+                _db.SaveChanges();
             }
             return true;
         }

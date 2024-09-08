@@ -5,23 +5,25 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Automation.Peers;
 using AvalonDock.Properties;
 using CefSharp;
 using CefSharp.Handler;
 using HappyHour.Extension;
 using HappyHour.Spider;
+using HappyHour.ViewModel;
 
 namespace HappyHour.CefHandler
 {
 
-    class ImageFilter : IResponseFilter
+    class AvImageFilter : IResponseFilter
     {
         private MemoryStream memoryStream;
         readonly SpiderBase _spider;
-        string _targetPath;
-        public ImageFilter(string targetPath, SpiderBase spider)
+        string _url;
+        public AvImageFilter(string url, SpiderBase spider)
         {
-            _targetPath = targetPath;
+            _url = url;
             _spider = spider;
         }
         bool IResponseFilter.InitFilter()
@@ -60,29 +62,29 @@ namespace HappyHour.CefHandler
 
             return FilterStatus.Done;
         }
+        public static string GetResourcePath(string url)
+        {
+            var urlcomp = url.Split('/').Skip(2).Take(url.Length - 2);
+            var name = string.Join("_", urlcomp);
+            return $"{App.Current.LocalAppData}\\covers\\{name}";
+        }
         public void Dispose()
         {
-            byte[] bytes = memoryStream.ToArray();
-            byte[] search = Encoding.ASCII.GetBytes("WEBP");
-            if (bytes.IndexOf(search, 20) > 0)
+            string imgPath = GetResourcePath(_url);
+            if (!File.Exists(imgPath))
             {
-                _targetPath = string.Concat(_targetPath.AsSpan(0, _targetPath.LastIndexOf('.')), ".webp");
-                Log.Print($"WEBP : {_targetPath}");
+                byte[] bytes = memoryStream.ToArray();
+                File.WriteAllBytes(imgPath, bytes);
             }
-            else
-            {
-                Log.Print($"JPEG : {_targetPath}");
-            }
-            File.WriteAllBytes(_targetPath, bytes);
             memoryStream.Dispose();
             memoryStream = null;
-            _spider.UpdateDownload(_targetPath);
+            _spider.UpdateDownload(imgPath);
         }
     }
-    class ShtResourceRequestHandler : ResourceRequestHandler
+    class AvResourceRequestHandler : ResourceRequestHandler
     {
-        readonly SpiderBase _spider;
-        public ShtResourceRequestHandler(SpiderBase spider)
+        readonly SpiderViewModel _spider;
+        public AvResourceRequestHandler(SpiderViewModel spider)
         {
             _spider = spider;
         }
@@ -94,29 +96,27 @@ namespace HappyHour.CefHandler
             IRequest request,
             IResponse response)
         {
-            var res = _spider.ResourcesToBeFiltered;
-            if (res != null  && res.TryGetValue(request.Url, out string value))
+            //var res = _spider.ResourcesToBeFiltered;
+            var patterns = _spider.SelectedSpider.UrlPatternsToFilter;
+            if (_spider.SelectedSpider.IsSpiderWorking)
             {
-                return new ImageFilter(value, _spider);
+                foreach (var pattern in patterns)
+                {
+                    if (request.Url.Contains(pattern))
+                    {
+                        return new AvImageFilter(request.Url, _spider.SelectedSpider);
+                    }
+                }
             }
+
             return null;
         }
-        protected override CefReturnValue OnBeforeResourceLoad(
-            IWebBrowser chromiumWebBrowser,
-            IBrowser browser,
-            IFrame frame,
-            IRequest request,
-            IRequestCallback callback)
-        {
-            request.SetReferrer(chromiumWebBrowser.Address, ReferrerPolicy.Default);
-            return CefReturnValue.Continue;
-        }
     }
-    class ShtRequestHandler : RequestHandler
+    class AvRequestHandler : RequestHandler
     {
-
-        readonly SpiderBase _spider;
-        public ShtRequestHandler(SpiderBase spider)
+        private readonly AvResourceRequestHandler _resourcehandler;
+        private readonly SpiderViewModel _spider;
+        public AvRequestHandler(SpiderViewModel spider)
         {
             _spider = spider;
         }
@@ -130,7 +130,7 @@ namespace HappyHour.CefHandler
                 string requestInitiator,
                 ref bool disableDefaultHandling)
         {
-            return new ShtResourceRequestHandler(_spider);
+            return new AvResourceRequestHandler(_spider);
         }
     }
 }

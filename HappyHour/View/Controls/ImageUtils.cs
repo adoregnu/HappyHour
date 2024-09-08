@@ -7,6 +7,8 @@ using System.Windows.Media.Imaging;
 using WebPWrapper;
 using System.Reflection;
 using HappyHour.Model;
+using System.Text;
+using HappyHour.Extension;
 
 namespace HappyHour.View.Controls
 {
@@ -34,16 +36,17 @@ namespace HappyHour.View.Controls
         {
             try
             {
-                var ext = Path.GetExtension(imagePath);
-                if (ext.Equals(".webp", StringComparison.OrdinalIgnoreCase))
+                byte[] bytes = File.ReadAllBytes(imagePath);
+                byte[] search = Encoding.ASCII.GetBytes("WEBP");
+                if (bytes.IndexOf(search, 20) > 0)
                 {
                     WebP webp = new();
-                    using var bitmap = webp.Load(imagePath);
+                    using var bitmap = webp.Decode(bytes);// Load(imagePath);
                     return ConvertBitmap(bitmap, width);
                 }
                 else
                 {
-                    using var bitmap = new Bitmap(imagePath);
+                    using var bitmap = new Bitmap(new MemoryStream(bytes));
                     return ConvertBitmap(bitmap, width);
                 }
             }

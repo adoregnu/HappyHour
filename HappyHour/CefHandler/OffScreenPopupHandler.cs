@@ -43,7 +43,7 @@ namespace HappyHour.CefHandler
             {
                 if (!bc.IsLoading)
                 {
-                    bc.RequestHandler = _spiderVm.SelectedSpider.ReqeustHandler;
+                    //bc.RequestHandler = _spiderVm.SelectedSpider.ReqeustHandler;
                     bc.LoadUrl(targetUrl);
                     return true;
                 }

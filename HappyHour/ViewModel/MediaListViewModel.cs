@@ -39,8 +39,6 @@ namespace HappyHour.ViewModel
         private readonly object _lock = new();
 
         private bool _isBrowsing;
-        private bool _sortByDateReleased = true;
-        private bool _sortByDateAdded;
         private bool _searchSubFolder;
         private bool _forceStopScrapping;
         private readonly PathComparer _pathComparer = new();
@@ -171,6 +169,7 @@ namespace HappyHour.ViewModel
         public IAsyncCommand CmdSearchOrphanageMedia { get; set; }
         public IAsyncCommand CmdSearchEmptyActor { get; set; }
         public ICommand CmdScrap { get; private set; }
+        public IAsyncCommand CmdTorrents { get; private set; }
         public ICommand CmdStopBatchingScrap { get; set; }
         public IAsyncCommand CmdShowLastUpdated { get; set; }
         public MediaListItemSelected ItemSelectedHandler { get; set; }
@@ -195,6 +194,7 @@ namespace HappyHour.ViewModel
             CmdEditItem = new AsyncCommand<object>(EditMovieInfo);
             CmdSearchOrphanageMedia = new AsyncCommand(SearchOrphanage);
             CmdSearchEmptyActor = new AsyncCommand(OnSearchEmptyActor);
+            CmdTorrents = new AsyncCommand(OnTorrents);
             CmdDoubleClick = new RelayCommand(() =>
             {
                 if (ItemDoubleClickedHandler != null)
@@ -252,7 +252,7 @@ namespace HappyHour.ViewModel
 
             foreach (var movie in list)
             {
-                await movie.ClearDb();
+                await movie.ClearDb(true);
             }
                 
             //list.ForEach(m => m.ClearDb(true));
@@ -315,7 +315,7 @@ namespace HappyHour.ViewModel
         public void AddMedia(Torrent torrent)
         {
             var item = new AvTorrent(torrent);
-            MediaList.AddInOrder(item,  i => i);
+            MediaList.AddInOrder(item,  i => i, true);
         }
 
         public async Task AddMedia(string path)
@@ -373,6 +373,11 @@ namespace HappyHour.ViewModel
         {
             if (param is not AvMovie item  || item  == null)
             {
+                return;
+            }
+            if (item.MovieInfo == null)
+            {
+                Log.Print($"{item.Path}");
                 return;
             }
 
@@ -528,6 +533,20 @@ namespace HappyHour.ViewModel
             UiServices.WaitCursor(true);
             await LoadItems(await _db.GetMovies(null, 40));
             UiServices.WaitCursor(false);
+        }
+
+        private async Task OnTorrents()
+        {
+            using var db = new TorrentDbContext();
+            var torrents = db.GetTorrents();
+            MediaList.Clear();
+            await Task.Run(() =>
+            {
+                foreach (var torrent in torrents)
+                {
+                    AddMedia(torrent);
+                }
+            });
         }
 
         private void OnScrapCompleted(SpiderBase spider, bool bSuccess)

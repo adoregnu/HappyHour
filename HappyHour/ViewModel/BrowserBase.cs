@@ -106,7 +106,7 @@ namespace HappyHour.ViewModel
             {
                 return;
             }
-#if  true
+#if true
             WebBrowser.ExecuteScriptAsync(s);
             callback?.Invoke(true); 
 #else

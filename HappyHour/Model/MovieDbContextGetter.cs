@@ -147,7 +147,7 @@ namespace HappyHour.Model
             if (!string.IsNullOrEmpty(keyword))
             {
                 where = query
-                    .Where(a => a.Names.Any(n => EF.Functions.Like(n.Name.Text, $"{keyword}%")));
+                    .Where(a => a.Names.Any(n => EF.Functions.Like(n.Name.Text, $"%{keyword}%")));
             }
 
             IOrderedQueryable<Actor> OrderBy(IQueryable<Actor> query)

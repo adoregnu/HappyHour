@@ -674,6 +674,7 @@ namespace HappyHour.Model
 
             if (realClear)
             {
+                movie = await GetMovie(movie.PID, true);
                 if (movie.Cover != null)
                 {
                     Images.Remove(movie.Cover);

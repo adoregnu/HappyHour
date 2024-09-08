@@ -1,10 +1,9 @@
 ﻿(function () {
     const _PID = '{{pid}}';
-    var actor_parsed = false;
 
     function check_header(headers, txt) {
         for (var i = 0; i < headers.length; i++) {
-            if (txt.includes(headers[i])) {
+            if (txt.trim().startsWith(headers[i])) {
                 return headers[i];
             }
         }
@@ -26,9 +25,6 @@
     }
 
     function _actor(txt, msg) {
-        if (actor_parsed) {
-            return;
-        }
         const headers = ['名前', '出演女優', '出演者', '出演' ];
         var header = check_header(headers, txt);
         if (header == null) {
@@ -50,7 +46,6 @@
         });
 
         msg['actor'] = array;
-        actor_parsed = true;
         return true;
     }
 
@@ -111,6 +106,22 @@
         return count;
     }
 
+    function get_node(node) { return node; }
+    function _parse_images(xpath, msg) {
+        var nodes = _jav_parse_multi_node(xpath, get_node)
+        if (nodes == null) return 0;
+        var screenshot = [];
+        for (var i = 0; i < nodes.length; i++) {
+            if (i == 0) {
+                msg['cover'] = nodes[i].src;
+            } else {
+                screenshot.push(nodes[i].src);
+            }
+        }
+        msg['screenshot'] = screenshot;
+        return nodes.length;
+    }
+
     function parseSearchResult() {
         var result = document.evaluate(
             "//div[contains(@class,'content-loop')]//h2[@class='entry-title']/a",
@@ -132,13 +143,10 @@
 
     var items = {
         title: { xpath: "//h1[@class='entry-title']"},
-        cover: { xpath: "//div[@class='entry-content']//img[1]/@src" },
-        screenshot: { xpath: "//div[@class='entry-content']//img[2]/@src" },
-        //studio: { xpath: "//strong[contains(.,'Tags:')]/following-sibling::a[1]"},
-        //actor: {
-        //    xpath: "//strong[contains(.,'Tags:')]/following-sibling::a",
-        //    handler: _parseActorTag
-        //},
+        images: {
+            xpath: "//div[@class='entry-content']//img",
+            handler: _parse_images
+        },
         content: {
             xpath: "//div[@class='entry-content']//p",
             handler: _parse_content
@@ -151,10 +159,9 @@
         var item = items[key];
         if (item["handler"] == null) {
             msg[key] = _jav_parse_single_node(item['xpath']);
-            if (msg[key] == null) {
-                continue;
+            if (msg[key] != null) {
+                num_item += 1;
             }
-            num_item += 1;
         } else {
             num_item += item['handler'](item['xpath'], msg);
         }
