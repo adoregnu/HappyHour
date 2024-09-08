@@ -340,3 +340,6 @@ ASALocalRun/
 healthchecksdb
 *.dll
 /net8.0-windows8.0
+/HappyHour/crawled.db
+/HappyHour/crawled.db-shm
+/HappyHour/crawled.db-wal
