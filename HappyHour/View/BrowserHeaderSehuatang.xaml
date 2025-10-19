@@ -8,7 +8,7 @@
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="45"/>
+            <ColumnDefinition Width="65"/>
         </Grid.ColumnDefinitions>
         <ComboBox Grid.Column="0" ItemsSource="{Binding Spiders}"
                   SelectedItem="{Binding SelectedSpider}"/>
@@ -20,6 +20,14 @@
                       Fill="{Binding Path=Foreground, RelativeSource=
                             {RelativeSource AncestorType={x:Type Button}}}" />
             </Button>
+            <Button Style="{DynamicResource ModernButtonStyle2}"
+                    Command="{Binding SelectedSpider.CmdSkip}">
+                <Path Stretch="Uniform"
+                    Data="{Binding Source={StaticResource skip-next}, Path=Data}"
+                    Fill="{Binding Path=Foreground, RelativeSource=
+                        {RelativeSource AncestorType={x:Type Button}}}" />
+            </Button>
+
             <Button Style="{DynamicResource ModernButtonStyle2}"
                     Command="{Binding SelectedSpider.CmdStop}">
                 <Path Stretch="Uniform"

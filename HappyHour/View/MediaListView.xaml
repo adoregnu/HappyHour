@@ -87,7 +87,8 @@
                     <local:BindingProxy x:Key="CtrlContext"
                          Data="{Binding RelativeSource={RelativeSource FindAncestor,
                             AncestorType={x:Type ListBox}}}"/>
-                    <ContextMenu x:Key="videoContextMenu">
+                    <ContextMenu x:Key="videoContextMenu"
+                                 bh:ContextMenuBehavior.UpdateCommand="{Binding Data.CmdUpdateTargetDirs, Source={StaticResource VmContext}}">
                         <MenuItem Header="Scrap"
                                   Visibility="{Binding Data.SpiderList, Source={StaticResource VmContext},
                                             Converter={StaticResource nulltoVis}}"
@@ -98,6 +99,16 @@
                                               Command="{Binding Data.CmdScrap, Source={StaticResource VmContext}}"
                                               CommandParameter="{Binding .}">
                                     </MenuItem>
+                                </DataTemplate>
+                            </MenuItem.ItemTemplate>
+                        </MenuItem>
+                        <MenuItem Header="Move"
+                                  ItemsSource="{Binding Data.TargetDirs, Source={StaticResource VmContext}}">
+                            <MenuItem.ItemTemplate>
+                                <DataTemplate>
+                                    <MenuItem Header="{Binding .}"
+                                              Command="{Binding Data.CmdMove, Source={StaticResource VmContext}}"
+                                              CommandParameter="{Binding .}"/>
                                 </DataTemplate>
                             </MenuItem.ItemTemplate>
                         </MenuItem>

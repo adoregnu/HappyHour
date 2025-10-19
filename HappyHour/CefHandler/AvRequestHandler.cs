@@ -47,7 +47,7 @@ namespace HappyHour.CefHandler
             dataOutWritten = dataInRead;
 
             var readBytes = new byte[dataInRead];
-            dataIn.Read(readBytes, 0, readBytes.Length);
+            dataIn.ReadExactly(readBytes);
             dataOut.Write(readBytes, 0, readBytes.Length);
 
             dataIn.Position = 0;
@@ -114,7 +114,6 @@ namespace HappyHour.CefHandler
     }
     class AvRequestHandler : RequestHandler
     {
-        private readonly AvResourceRequestHandler _resourcehandler;
         private readonly SpiderViewModel _spider;
         public AvRequestHandler(SpiderViewModel spider)
         {

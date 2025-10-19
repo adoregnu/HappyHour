@@ -1,15 +1,17 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using CefSharp;
+using CefSharp.DevTools.Autofill;
+using Microsoft.EntityFrameworkCore;
+using MvvmDialogs.FrameworkDialogs.SaveFile;
 using System;
 using System.Collections.Generic;
+using System.Drawing.Printing;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Security.Cryptography;
-using System.Linq.Expressions;
-using MvvmDialogs.FrameworkDialogs.SaveFile;
-using System.Drawing.Printing;
 using System.Windows.Media.Converters;
 
 namespace HappyHour.Model
@@ -29,7 +31,7 @@ namespace HappyHour.Model
             {
                 target = actors.First(a => a.Thumb != null);
             }
-            catch (InvalidOperationException ex)
+            catch (InvalidOperationException)
             {
                 target = actors.First();
             }
@@ -212,16 +214,18 @@ namespace HappyHour.Model
             }
 
             string lang = GetLang(data);
-            string text = value.ToString();
-            var org = list.FirstOrDefault(t => t.Lang == lang);
+            //string text = value.ToString();
+            var namelang = GetNameLang(value.ToString(), lang);
+            var org = list.FirstOrDefault(t => t.Lang == namelang.Item2);
             if (org != null)
             {
-                org.Text = text;
+                org.Text = namelang.Item1;
                 Log.Print($"Overwiting {field} ");
             }
             else
             {
-                list.Add(new T() { Lang = lang, Text = text });
+                Log.Print($"Append {field}");
+                list.Add(new T() { Lang = lang, Text = namelang.Item1 });
             }
         }
 
@@ -252,6 +256,8 @@ namespace HappyHour.Model
         //TODO: pop-up new genre window 
         async ValueTask<bool> SetGenre(Movie movie, IDictionary<string, object> data)
         {
+            string[] skip_genres = { "4K", "Digital Mosaic", "Hi - Def", "Featured Actress" };
+
             if (!data.TryGetValue("genre", out object value) || value == null)
             {
                 return false;
@@ -261,6 +267,8 @@ namespace HappyHour.Model
             var genres = value as IList<object>;
             foreach (string genre in genres.Cast<string>())
             {
+                if (skip_genres.Contains(genre)) continue;
+
                 var dbGenre = await MovieGenres
                     .Include(g => g.Name)
                     .FirstOrDefaultAsync(g => g.Name.Any(n => n.Text == genre));
@@ -282,6 +290,15 @@ namespace HappyHour.Model
                 }
             }
             return true;
+        }
+        static Tuple<string, string> GetNameLang(string name_lang, string lang)
+        {
+            var name = name_lang.Split(';');
+            if (name.Length > 1 && name[1].Length == 2)
+            {
+                return new Tuple<string, string>(name[0].Trim(), name[1]);
+            }
+            return new Tuple<string, string>(name_lang.Trim(), lang);
         }
 
         async ValueTask<Actor> SetActorName(string lang, IDictionary<string, object> data)
@@ -309,16 +326,6 @@ namespace HappyHour.Model
             if (data.TryGetValue("debut", out object debut) && debut != null)
             {
                 strDebut = debut.ToString().Trim();
-            }
-
-            static Tuple<string, string> GetNameLang(string name_lang, string lang)
-            {
-                var name = name_lang.Split(';');
-                if (name.Length > 1)
-                {
-                    lang = name[1].Trim();
-                }
-                return new Tuple<string, string>(name[0].Trim(), lang);
             }
 
             List<Actor> dbActors = [];
@@ -437,8 +444,15 @@ namespace HappyHour.Model
                 else// if (updatefromdb)
                 {
                     var movie = Movies.Where(m => m.Cover.Hash == hash).FirstOrDefault();
-                    Log.Print($"hash {hash} already exists! pid: {movie.PID}, {movie.VideoUrl}");
-                    //return (await Images.Where(i => i.Hash == hash).FirstOrDefaultAsync(), false);
+                    if (movie != null)
+                    {
+                        Log.Print($"hash {hash} already exists! pid: {movie.PID}, {movie.VideoUrl}");
+                    }
+                    else 
+                    {
+                        Log.Print($"hash {hash} already exists! movie null!");
+                        return (await Images.Where(i => i.Hash == hash).FirstOrDefaultAsync(), false);
+                    }
                 }
             }
             return (null, false);
@@ -553,14 +567,14 @@ namespace HappyHour.Model
             {
                 return;
             }
-            var tmp = series.ToString().Split(';');
             string lang = GetLang(data);
-            if (tmp.Length > 1) lang = tmp[^1];
+
+            var nameLang = GetNameLang(series.ToString(), lang);
 
             var db_ser = await Series
                 .Include(s => s.Movies)
                 .Include(s => s.Name)
-                .Where(s => s.Name.Any(n => n.Text == tmp[0]))
+                .Where(s => s.Name.Any(n => n.Text == nameLang.Item1))
                 .FirstOrDefaultAsync();
 
             if (db_ser == null)
@@ -568,7 +582,7 @@ namespace HappyHour.Model
                 db_ser = new Series()
                 {
                     Movies = [movie],
-                    Name = [new ShortText() { Lang = lang, Text = tmp[0] }]
+                    Name = [new ShortText() { Lang = nameLang.Item2, Text = nameLang.Item1 }]
                 };
                 Series.Add(db_ser);
             }
@@ -660,18 +674,6 @@ namespace HappyHour.Model
 
         public async Task RemoveMovie(Movie movie, bool realClear)
         {
-            void CountAndRun(Expression<Func<Movie, bool>> exp, Action run)
-            {
-                var count = Movies.Where(exp).Count();
-                if (count == 1) run();
-            }
-
-            //CountAndRun((Movie m) => m.Maker == movie.Maker, () => Makers.Remove(movie.Maker));
-            //CountAndRun((Movie m) => m.Label == movie.Label, () => Labels.Remove(movie.Label));
-            //CountAndRun((Movie m) => m.Series == movie.Series, () => Series.Remove(movie.Series));
-
-            //Ratings.Where(r => r.Movie == movie).ExecuteDelete();
-
             if (realClear)
             {
                 movie = await GetMovie(movie.PID, true);

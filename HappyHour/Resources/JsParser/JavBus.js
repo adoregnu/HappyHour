@@ -77,7 +77,7 @@
         if (nodes == null) {
             return null;
         }
-        var excludes = ['AVÒ³éÐ', '1080p', '60fps', 'õ±VIP'];
+        var excludes = ['AVÒ³éÐ', '1080p', '60fps', 'õ±VIP', 'Hi-Def', '4K'];
         var result = nodes.filter(n => !excludes.some(ex => ex == n.textContent.trim()) && n.href.includes('genre'));
 
         var genre = [];

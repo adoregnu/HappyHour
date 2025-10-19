@@ -26,21 +26,20 @@ namespace HappyHour.Model
 
         public List<Torrent> GetTorrents()
         {
-            return Torrents
+            return [.. Torrents
                 .Include(t => t.MagnetUrls)
                 .Include(t => t.Screenshots)
-                .Where(t => t.StatusCode == 'N')
-                .ToList();
+                .Where(t => t.StatusCode == 'N')];
         }
 
-        public Torrent GetTorrent(string pid)
+        public async ValueTask<Torrent> GetTorrent(string pid)
         {
             pid = pid.Trim().ToLower();
-            var  torrent = Torrents
+            var  torrent = await Torrents
                 .Include(t => t.MagnetUrls)
                 .Include(t => t.Screenshots)
                 .Where(t => t.PID == pid)
-                .FirstOrDefault();
+                .FirstOrDefaultAsync();
             if (torrent == null)
             {
                 torrent = new Torrent()

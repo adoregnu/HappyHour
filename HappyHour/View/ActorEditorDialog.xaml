@@ -48,20 +48,21 @@
             Data="{Binding RelativeSource={RelativeSource FindAncestor,
                 AncestorType={x:Type local:ActorEditorDialog}}, Path=DataContext}"/>
 
-        <ControlTemplate x:Key="_nameTemplate" TargetType="ListBoxItem">
-            <Grid Margin="1,2,2,0">
+        <DataTemplate x:Key="_nameTemplate">
+            <Grid Margin="2">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="8*"/>
                     <ColumnDefinition Width="1*"/>
                     <ColumnDefinition Width="2.5*"/>
                 </Grid.ColumnDefinitions>
+
                 <TextBox Grid.Column="0" Text="{Binding Name.Text}" Margin="0,0,2,0" IsReadOnly="True"/>
                 <nud:UIntegerUpDown Grid.Column="1" Value="{Binding Priority, Mode=TwoWay}" MinValue="0" MaxValue="10" Margin="0,0,2,0"/>
                 <ComboBox Grid.Column="2"
                           ItemsSource="{Binding Data.Languages, Source={StaticResource VmContext}}"
                           SelectedItem="{Binding Name.Lang, Mode=TwoWay}" />
             </Grid>
-        </ControlTemplate>
+        </DataTemplate>
     </Window.Resources>
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="Closed">
@@ -163,20 +164,24 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="4*"/>
             </Grid.RowDefinitions>
-            <ListBox Grid.Row="0" Margin="5,0,5,0" ItemsSource="{Binding ActorNames}" x:Name="_actorNames">
+            <ListBox Grid.Row="0" Margin="5,0,5,0" ItemsSource="{Binding ActorNames}" x:Name="_actorNames"
+                     ItemTemplate="{StaticResource _nameTemplate}">
+                <ListBox.Resources>
+                    <Style TargetType="{x:Type ListBoxItem}">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                     </Style>
+                </ListBox.Resources>
                 <ListBox.InputBindings>
                     <KeyBinding Command="{Binding CmdRemoveName}"
                             CommandParameter="{Binding ElementName=_actorNames, Path=SelectedItem}"
                             Key="Delete"/>
+                    <MouseBinding MouseAction="LeftDoubleClick"
+                                  Command="{Binding CmdDecoupleName}"
+                                  CommandParameter="{Binding ElementName=_actorNames, Path=SelectedItem}"/>
                 </ListBox.InputBindings>
                 <i:Interaction.Behaviors>
                     <bh:ListboxBehavior/>
                 </i:Interaction.Behaviors>
-                <ListBox.Resources>
-                    <Style TargetType="{x:Type ListBoxItem}">
-                        <Setter Property="Template" Value="{StaticResource _nameTemplate}"/>
-                    </Style>
-                </ListBox.Resources>
             </ListBox>
             <ctrls:DelayedBindingTextBox Grid.Row="1" DelayTime="500" DockPanel.Dock="Top" Margin="5,5,5,0"
                  Text="{Binding SearchText}"/>

@@ -128,6 +128,7 @@ namespace HappyHour.ViewModel
         public ICommand CmdClearActors { get; private set; }
         public ICommand CmdRemoveName { get; private set; }
         public ICommand CmdClosed { get; private set; }
+        public ICommand CmdDecoupleName { get; private set; }
         public IAsyncCommand CmdUpdateNames { get; set; }
         public IAsyncCommand CmdShowThumblessActors { get; set; }
         public ActorEditorViewModel(IMainView mainView)
@@ -139,6 +140,8 @@ namespace HappyHour.ViewModel
                 p => p is IList<object> list && list.Count > 1);
             CmdRemoveActor = new RelayCommand<Actor>(OnRemoveActor);
             CmdRemoveName = new RelayCommand<ActorName>(OnRemoveName);
+            CmdDecoupleName = new RelayCommand<ActorName>(OnDecoupleName);
+
             CmdClearActors = new RelayCommand(OnClearActors);
             CmdClosed = new RelayCommand(OnClose);
             CmdUpdateNames = new AsyncCommand(OnUpdateNames);
@@ -215,10 +218,15 @@ namespace HappyHour.ViewModel
                 _db.RemoveActorName(name);
             }
         }
+        private void OnDecoupleName(ActorName name)
+        {
+            if (name == null || SelectedActor == null) return;
+            SelectedActor.Names.Remove(name);
+        }
 
         public async Task OnActorAlphabet(string p, bool isSelected)
         {
-            string keyword = p;
+            string keyword = $"{p}%";
             int limit = 0;
             if (p == "All")
             {
@@ -227,7 +235,7 @@ namespace HappyHour.ViewModel
                     if (initial.Initial != "All") { initial.UnCheck(); }
                 }
                 keyword = null;
-                limit = 50;
+                limit = 100;
             }
 
             if (isSelected)

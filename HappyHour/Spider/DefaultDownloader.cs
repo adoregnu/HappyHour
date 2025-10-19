@@ -34,7 +34,10 @@ namespace HappyHour.Spider
             };
             _timer.Elapsed += OnDownloadTimeout;
         }
-        public async Task UpdateDownload(SpiderBase spider,string rpath) { }
+        public Task UpdateDownload(SpiderBase spider,string rpath)
+        {
+            return Task.CompletedTask;
+        }
 
         public void Enable(bool bEnable)
         {

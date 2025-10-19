@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using HappyHour.View.Controls;
 using SQLitePCL;
 using System;
 using System.Collections.Generic;
@@ -104,7 +105,8 @@ namespace HappyHour.Model
                 return "NotLoaded";
             }
             ActorName aname = null;
-            foreach (var name in Names)
+            var onames = Names.OrderBy(n => n.Priority).ToList();
+            foreach (var name in onames)
             {
                 aname = name;
                 if (name.Name.Lang == "ko")

@@ -45,7 +45,7 @@ namespace HappyHour.Model
         public async void Download()
         {
             var magnets = _torrent.MagnetUrls.Where(m => m.SourceUrl.Contains("sehuatang"));
-            if (magnets.Count() == 0)
+            if (!magnets.Any())
             {
                 magnets = _torrent.MagnetUrls;
             }
@@ -106,7 +106,7 @@ namespace HappyHour.Model
         {
             //await Task.Run(() => Reload(files));
             using var db = new TorrentDbContext();
-            _torrent = db.GetTorrent( Pid );
+            _torrent = await db.GetTorrent( Pid );
 
             Poster = _torrent.CoverPath;
             BriefInfo = $"{Pid}\n{Date}";

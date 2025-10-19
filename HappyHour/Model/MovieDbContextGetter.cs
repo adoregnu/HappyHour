@@ -146,8 +146,7 @@ namespace HappyHour.Model
             IQueryable<Actor> where = null;
             if (!string.IsNullOrEmpty(keyword))
             {
-                where = query
-                    .Where(a => a.Names.Any(n => EF.Functions.Like(n.Name.Text, $"%{keyword}%")));
+                where = query.Where(a => a.Names.Any(n => EF.Functions.Like(n.Name.Text, keyword)));
             }
 
             IOrderedQueryable<Actor> OrderBy(IQueryable<Actor> query)
@@ -383,8 +382,7 @@ namespace HappyHour.Model
         {
             var query = Labels
                 .Include(l => l.Name.OrderByDescending(n => n.Lang))
-                .Include(l => l.Logo);
-                //.Include(l => l.Movies);
+                .Include(l => l.Makers);
 
             IQueryable<Label> where = null;
             if (!string.IsNullOrEmpty(keyword))
@@ -421,6 +419,35 @@ namespace HappyHour.Model
                 //.Include(l => l.Movies)
                 .Where(l => l.Movies.Contains(movie))
                 .ToListAsync();
+        }
+
+        public List<string> GetFoldersStartsWithPid(string pidPrefix, string excludePath)
+        {
+            var folders = Movies
+                .Where(m => EF.Functions.Like(m.PID, $"{pidPrefix}%"))
+                .OrderBy(m => m.VideoUrl)
+                .Select(m => m.VideoUrl.Substring(0, m.VideoUrl.LastIndexOf('\\')))
+                .AsEnumerable() // EF에서 LINQ to Objects로 전환
+                .Distinct(StringComparer.OrdinalIgnoreCase) // 대소문자 무시하고 중복 제거
+                .Where(folder => string.IsNullOrEmpty(excludePath) || 
+                                !folder.Contains(excludePath, StringComparison.OrdinalIgnoreCase)) // excludePath 제외
+                .OrderBy(folder => folder) // 정렬
+                .ToList();
+            return folders;
+        }
+
+        public List<string> GetFoldersByMaker(Maker maker, string excludePath)
+        {
+            return Movies
+                .Where(m => m.Maker == maker)
+                .OrderBy(m => m.VideoUrl)
+                .Select(m => m.VideoUrl.Substring(0, m.VideoUrl.LastIndexOf('\\')))
+                .AsEnumerable() // EF에서 LINQ to Objects로 전환
+                .Distinct(StringComparer.OrdinalIgnoreCase) // 대소문자 무시하고 중복 제거
+                .Where(folder => string.IsNullOrEmpty(excludePath) || 
+                                !folder.Contains(excludePath, StringComparison.OrdinalIgnoreCase)) // excludePath 제외
+                .OrderBy(folder => folder) // 정렬
+                .ToList();
         }
     }
 }

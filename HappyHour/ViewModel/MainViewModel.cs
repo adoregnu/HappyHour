@@ -90,7 +90,7 @@ namespace HappyHour.ViewModel
         private void OnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             switch (e.Action)
-            {
+        {
                 case NotifyCollectionChangedAction.Add:
                     foreach (Pane pane in e.NewItems)
                     {

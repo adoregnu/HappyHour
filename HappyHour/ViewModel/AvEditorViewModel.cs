@@ -87,17 +87,18 @@ namespace HappyHour.ViewModel
             get => _searchActorName;
             set
             {
-                SetProperty(ref _searchActorName, value);
-                if (!string.IsNullOrEmpty(value))
+                if (!string.IsNullOrEmpty(value) && value != _searchActorName)
                 {
-                    var actors = NotifyTask.Create(_db.GetActors(value).AsTask());
-                    actors.PropertyChanged += (s, e) =>
-                    {
-                        if (e.PropertyName == "Result")
-                            AllActors = actors.Result;
-                    };
-                    //Application.Current.Dispatcher.InvokeAsync(async () => AllActors = await _db.GetActors(value));
+                    NotifyTask.Create(_db.GetActors($"%{value}%").AsTask())
+                        .PropertyChanged += (s, e) =>
+                        {
+                            if (e.PropertyName == "Result")
+                            {
+                                AllActors = ((dynamic)s).Result;
+                            }
+                        };
                 }
+                SetProperty(ref _searchActorName, value);
             }
         }
 
@@ -108,9 +109,16 @@ namespace HappyHour.ViewModel
             set
             {
                 SetProperty(ref _searchMaker, value);
-                if (!string.IsNullOrEmpty(value))
+                if (!string.IsNullOrEmpty(value) && value != _searchMaker)
                 {
-                    Application.Current.Dispatcher.InvokeAsync(async () => AllMakers = await _db.GetMakers(value));
+                    NotifyTask.Create(_db.GetMakers(value).AsTask())
+                        .PropertyChanged += (s, e) =>
+                        {
+                            if (e.PropertyName == "Result")
+                            {
+                                AllMakers = ((dynamic)s).Result;
+                            }
+                        };
                 }
             }
         }

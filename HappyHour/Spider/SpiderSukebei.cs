@@ -62,7 +62,7 @@ namespace HappyHour.Spider
                     return;
                 }
 
-                var torrent = _db.GetTorrent(pid);
+                var torrent = await _db.GetTorrent(pid);
                 bool bexist = false;
                 if (torrent.MagnetUrls.Any(m => m.SourceUrl == items.source))
                 {

@@ -28,7 +28,10 @@
                 var nameNode = children[i];
                 if (nameNode.nodeName != 'SPAN') continue;
                 if (nameNode.className.includes('icn_')) continue;
-                var name = nameNode.textContent.trim().split(' ').reverse().join(' ');
+                var name = nameNode.textContent.trim();
+                // remove '(' and ')' characters
+                name = name.replace(/[()]/g, '');
+                name = name.split(' ').reverse().join(' ');
                 if (names['name'] == null) {
                     names['name'] = name;
                 } else {

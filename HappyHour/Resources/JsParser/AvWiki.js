@@ -68,6 +68,7 @@
             var array = alias.split(/[（）、|・]/).filter(a => a.trim().length > 1);
             array.forEach(item => { 
                 if (item.startsWith('– –')) { return; }
+                if (item.startsWith('SOD')) { return; }
                 if (!alias_array.includes(item.trim())) {
                     alias_array.push(item.trim());
                 }

@@ -1,0 +1,109 @@
+﻿<Window x:Class="HappyHour.View.ProgressWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:HappyHour.View"
+        mc:Ignorable="d"
+        Title="파일 복사 진행 상황" Height="370" Width="500"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        WindowStyle="SingleBorderWindow">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- 현재 복사 중인 파일 -->
+        <StackPanel Grid.Row="0">
+            <TextBlock Text="현재 복사 중인 파일:" FontWeight="Bold" Margin="0,0,0,5"/>
+            <TextBlock x:Name="CurrentFileTextBlock" 
+                       Text="파일을 준비하는 중..." 
+                       TextWrapping="Wrap"
+                       FontSize="12"
+                       Foreground="DarkBlue"/>
+        </StackPanel>
+
+        <!-- 전체 진행률 -->
+        <StackPanel Grid.Row="2">
+            <DockPanel Margin="0,0,0,5">
+                <TextBlock Text="전체 진행률:" FontWeight="Bold"/>
+                <TextBlock x:Name="PercentageTextBlock" 
+                           Text="0%" 
+                           HorizontalAlignment="Right"
+                           FontWeight="Bold"/>
+            </DockPanel>
+            <ProgressBar x:Name="OverallProgressBar" 
+                         Height="25" 
+                         Minimum="0" 
+                         Maximum="100" 
+                         Value="0"
+                         Background="LightGray"
+                         Foreground="Green"/>
+        </StackPanel>
+
+        <!-- 파일별 진행률 -->
+        <StackPanel Grid.Row="4">
+            <DockPanel Margin="0,0,0,5">
+                <TextBlock Text="현재 파일 진행률:" FontWeight="Bold"/>
+                <TextBlock x:Name="FilePercentageTextBlock" 
+                           Text="0%" 
+                           HorizontalAlignment="Right"
+                           FontWeight="Bold"/>
+            </DockPanel>
+            <ProgressBar x:Name="FileProgressBar" 
+                         Height="20" 
+                         Minimum="0" 
+                         Maximum="100" 
+                         Value="0"
+                         Background="LightGray"
+                         Foreground="Blue"/>
+        </StackPanel>
+
+        <!-- 통계 정보 -->
+        <StackPanel Grid.Row="6">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="복사된 파일:" FontSize="11"/>
+                <TextBlock Grid.Row="0" Grid.Column="1" x:Name="CompletedFilesTextBlock" Text="0 / 0" FontSize="11" HorizontalAlignment="Right"/>
+
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="복사된 크기:" FontSize="11"/>
+                <TextBlock Grid.Row="1" Grid.Column="1" x:Name="CopiedSizeTextBlock" Text="0 MB / 0 MB" FontSize="11" HorizontalAlignment="Right"/>
+
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="복사 속도:" FontSize="11"/>
+                <TextBlock Grid.Row="2" Grid.Column="1" x:Name="SpeedTextBlock" Text="0 MB/s" FontSize="11" HorizontalAlignment="Right"/>
+
+                <TextBlock Grid.Row="3" Grid.Column="0" Text="남은 시간:" FontSize="11"/>
+                <TextBlock Grid.Row="3" Grid.Column="1" x:Name="RemainingTimeTextBlock" Text="계산 중..." FontSize="11" HorizontalAlignment="Right"/>
+            </Grid>
+        </StackPanel>
+
+        <!-- 버튼 -->
+        <StackPanel Grid.Row="8" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+            <Button x:Name="CancelButton" 
+                    Content="취소" 
+                    Width="80" 
+                    Height="30"
+                    Click="CancelButton_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

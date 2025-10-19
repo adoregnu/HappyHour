@@ -155,6 +155,8 @@ namespace HappyHour
             //The location where cache data will be stored on disk. If empty an in-memory cache will be used for some features and a temporary disk cache for others.
             //HTML5 databases such as localStorage will only persist across sessions if a cache path is specified. 
             settings.CachePath = LocalAppData + "\\CEF\\cache";
+            settings.LogSeverity = LogSeverity.Verbose;
+            settings.LogFile = LocalAppData + "\\cef_log.txt";
 
             //This must be set before Cef.Initialized is called
             CefSharpSettings.FocusedNodeChangedEnabled = true;

@@ -329,7 +329,7 @@ namespace System.Threading.Tasks
                 {
                     @delegate.DynamicInvoke(args);
                 }
-                catch (TargetParameterCountException e)
+                catch (TargetParameterCountException)
                 {
                     throw;
                 }

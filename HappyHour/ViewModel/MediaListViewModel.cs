@@ -8,20 +8,21 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Data;
+using System.Diagnostics;
 
 
 using MvvmDialogs.FrameworkDialogs.FolderBrowser;
+using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using AsyncAwaitBestPractices.MVVM;
 
 using HappyHour.Extension;
 using HappyHour.Model;
 using HappyHour.Spider;
 using HappyHour.Interfaces;
 using HappyHour.View;
-using System.Diagnostics;
-using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.Mvvm.Messaging;
-using MaterialDesignThemes.Wpf;
-using AsyncAwaitBestPractices.MVVM;
+using HappyHour.Utilities;
+using System.Drawing.Printing;
 
 namespace HappyHour.ViewModel
 {
@@ -154,14 +155,22 @@ namespace HappyHour.ViewModel
             set => SetProperty(ref _ratingSitesVisibility, value);
         }
 
+        private List<string> _targetDirs = [];
+        public List<string> TargetDirs
+        {
+            get => _targetDirs;
+            set => SetProperty(ref _targetDirs, value);
+        }
+
         public int ScrapDelay { get; set; } = 1000;
         public ISpiderManager SpiderManager { get; set; }
 
+        public ICommand CmdUpdateTargetDirs { get; set; }
         public ICommand CmdExternalPlayer { get; set; }
         public ICommand CmdCopyPath { get; set; }
         public ICommand CmdExclude { get; set; }
         public ICommand CmdDownload { get; set; }
-        public ICommand CmdMoveItemTo { get; set; }
+        public IAsyncCommand<string> CmdMove { get; set; }
         public IAsyncCommand<object> CmdDeleteItem { get; set; }
         public IAsyncCommand<object> CmdClearDb { get; set; }
         public IAsyncCommand<object> CmdEditItem { get; set; }
@@ -188,7 +197,7 @@ namespace HappyHour.ViewModel
             CmdExclude = new RelayCommand<AvTorrent>(ExcludeFromList);
             CmdDownload = new RelayCommand<AvTorrent>(DownloadMedia);
             CmdCopyPath = new RelayCommand<IAvMedia>(p => Clipboard.SetText(p.Path));
-            CmdMoveItemTo = new RelayCommand<object>(p => MoveTo(p.ToList<AvMovie>()));
+            CmdMove = new AsyncCommand<string>(Move);
             CmdDeleteItem = new AsyncCommand<object>(Delete);
             CmdClearDb = new AsyncCommand<object>(ClearDb);
             CmdEditItem = new AsyncCommand<object>(EditMovieInfo);
@@ -211,6 +220,88 @@ namespace HappyHour.ViewModel
                 p => _mediasToSearch == null);
             CmdStopBatchingScrap = new RelayCommand(
                 () => _forceStopScrapping = true);
+            CmdUpdateTargetDirs = new RelayCommand(UpdateTargetDirectories);
+        }
+
+        private List<string> GetUniquePidPrefix()
+        {
+            List<string> uniquPidPrefix = [];
+            var selectedItems = SelectedMedias?.Cast<AvMovie>().ToList();
+            foreach (var item in selectedItems)
+            {
+                //split item.Pid by '-' and get all part except last part
+                string prefix = string.Join('-', item.Pid.Split('-')[..^1]);
+                if (!uniquPidPrefix.Contains(prefix))
+                {
+                    uniquPidPrefix.Add(prefix);
+                }
+            }
+            return uniquPidPrefix;
+        }
+
+        private List<Maker> GetUniqueMaker()
+        {
+            List<Maker> uniqueMakers = [];
+            foreach (var item in SelectedMedias?.Cast<AvMovie>().ToList())
+            {
+                if (item.MovieInfo != null && item.MovieInfo.Maker != null)
+                {
+                    var maker = item.MovieInfo.Maker;
+                    if (!uniqueMakers.Contains(maker))
+                    {
+                        uniqueMakers.Add(maker);
+                        Log.Print($"{maker}");
+                    }
+                }
+            }
+            return uniqueMakers;
+        }
+
+        public void UpdateTargetDirectories()
+        {
+            TargetDirs = [];
+            try
+            {
+                var selectedItems = SelectedMedias?.Cast<AvMovie>().ToList();
+                if (selectedItems?.Any() == true)
+                {
+                    List<string> targetDirs = [];
+                    // currentDir is Path field without last path component of any selected item
+                    var current = string.Join("\\", selectedItems[0].Path.Split('\\')[..^1]);
+                    foreach (var uniq in GetUniquePidPrefix())
+                    {
+                        var folders = _db.GetFoldersStartsWithPid(uniq, current);
+                        targetDirs.AddRange(folders);
+                    }
+
+                    if (targetDirs.Count == 0)
+                    {
+                        foreach (var maker in GetUniqueMaker())
+                        {
+                            var folders = _db.GetFoldersByMaker(maker, current);
+
+                            targetDirs.AddRange(folders);
+                        }
+                    }
+
+                    TargetDirs = targetDirs;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Print($"UpdateTargetDirectories 오류: {ex.Message}");
+            }
+        }
+
+        private async Task Move(string targetDir)
+        {
+            List<string> sourceItems = [];
+            foreach (var item in SelectedMedias?.Cast<AvMovie>().ToList())
+            {
+                sourceItems.Add(item.Path);
+            }
+            await FileCopyUtility.MoveItemsWithProgressAsync(sourceItems, targetDir, true, true, null);
+            //await FileCopyUtility.MoveFolderWithRoboSharpAsync(sourceItems[0], targetDir, true, true, null);
         }
 
         private static void PlayMedia(AvMovie media)
@@ -329,32 +420,6 @@ namespace HappyHour.ViewModel
             }
         }
 
-        private void MoveTo(List<AvMovie> mitems)
-        {
-            FolderBrowserDialogSettings settings = new()
-            {
-                Description = "Select Target folder",
-                SelectedPath = mitems[0].Path
-            };
-            bool? success = MainView.DialogService.ShowFolderBrowserDialog(this, settings);
-            if (success is null or false)
-            {
-                Log.Print("Target folder is not selected!");
-                return;
-            }
-            Log.Print($"Move selected movie to {settings.SelectedPath}");
-            foreach (var item in mitems)
-            {
-                item.Move(settings.SelectedPath, m =>
-                {
-                    if (m != null)
-                    {
-                        _ = MediaList.Remove(m);
-                    }
-                });
-            }
-        }
-
         private async Task Delete(object obj/*List<AvMovie> mitems*/)
         {
             var mitems = obj.ToList<AvMovie>();
@@ -429,10 +494,11 @@ namespace HappyHour.ViewModel
                 try { dirs = Directory.GetDirectories(stackdir); }
                 catch { continue; }
 
-                if (dirs.Length == 0 || dirs[0].EndsWith(".actors", StringComparison.OrdinalIgnoreCase))
+                if ((dirs.Length == 0 || dirs.Any(d => d.EndsWith(".actors")))  && Directory.GetFiles(stackdir)
+                    .Any(f => AvMovie.video_exts.Any(ext => f.EndsWith(ext, StringComparison.OrdinalIgnoreCase))))
                 {
+
                     dirCOunt++;
-                    //if (dbDirs.BinarySearch(stackdir) < 0)
                     if (dbDirs.Find(dir => dir == stackdir) == null)
                     {
                         await AddMedia(stackdir);
@@ -494,7 +560,7 @@ namespace HappyHour.ViewModel
             MediaList.Clear();
 
             string currDir = _fileList.CurrDirInfo.FullName;
-            if (!currDir.EndsWith("\\")) currDir += "\\";
+            if (!currDir.EndsWith('\\')) currDir += "\\";
 
             var dbDirs = await _db.GetMovieUrls(currDir);
 

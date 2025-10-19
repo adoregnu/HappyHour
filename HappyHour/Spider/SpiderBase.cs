@@ -14,6 +14,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using CefSharp.DevTools.WebAuthn;
 
 namespace HappyHour.Spider
 {
@@ -57,7 +58,6 @@ namespace HappyHour.Spider
         public ObservableCollection<SpiderBase> SpiderChain { get; set; } = [];
 
         public SpiderViewModel Browser { get; private set; }
-        public IRequestHandler ReqeustHandler;
         public IAvMedia SelectedMedia
         {
             get => _selectedMedia;
@@ -79,7 +79,6 @@ namespace HappyHour.Spider
         public bool OverwritePoster { get; set; }
         public bool OverwriteActorThumb { get; set; }
         public bool OverwriteActorThumbDb { get; set; }
-        public Dictionary<string, string> ResourcesToBeFiltered;
 
         public string Keyword
         {
@@ -448,12 +447,18 @@ namespace HappyHour.Spider
             await App.Current.DbContext.SetMovie(items);
         }
 
+        protected virtual Task Translate(IDictionary<string, object> items)
+        {
+            return Task.CompletedTask;
+        }
+
         public async Task UpdateItemsAsync(IDictionary<string, object> items)
         {
             if (_saveDb && SearchMedia is AvMovie)
             {
                 try
                 {
+                    //await Translate(items);
                     await UpdateDb(items);
                 }
                 catch (Exception ex)

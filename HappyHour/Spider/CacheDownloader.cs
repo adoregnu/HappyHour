@@ -5,6 +5,7 @@ using HappyHour.Model;
 using HappyHour.ViewModel;
 using System;
 using System.Collections.Generic;
+using System.Drawing.Printing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -26,13 +27,16 @@ namespace HappyHour.Spider
             await CheckDownload(spider);
         }
 
-        private async Task CheckDownload(SpiderBase spider)
+        private async Task CheckDownload(SpiderBase spider, bool isCallerDownload = false)
         {
-            if (_toDownload.Count == 0) return;
-
-            _resources.ForEach(r => {
-                _toDownload.Remove(r);
-            });
+            if (_toDownload.Count == 0 && !isCallerDownload) return;
+            if (_toDownload.Count > 0)
+            {
+                _resources.ForEach(r =>
+                {
+                    _toDownload.Remove(r);
+                });
+            }
             Log.Print($"to download  : {_toDownload.Count}");
             if (_toDownload.Count == 0)
             {
@@ -67,7 +71,7 @@ namespace HappyHour.Spider
                     _toDownload.Add(imgpath);
                 }
             }
-            await CheckDownload(spider);
+            await CheckDownload(spider, true);
         }
     }
 }

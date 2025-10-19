@@ -74,8 +74,8 @@ namespace HappyHour.ViewModel
             }
         }
 
-        public ObservableCollection<FileSystemInfo> FileList { get; private set; }
-        public ObservableCollection<DriveInfo> Drives { get; private set; }
+        public ObservableCollection<FileSystemInfo> FileList { get; private set; } = [];
+        public ObservableCollection<DriveInfo> Drives { get; private set; } = [];
         public FileSystemInfo SelectedFile
         {
             get => _selectedFile;
@@ -112,8 +112,6 @@ namespace HappyHour.ViewModel
         public FileListViewModel(IMainView mainView) : base(mainView)
         {
             Title = "Files";
-            FileList = new ObservableCollection<FileSystemInfo>();
-            Drives = new ObservableCollection<DriveInfo>();
             CmdUpDir = new RelayCommand(() => UpDir());
             CmdRefreshDir = new RelayCommand(() =>
             {
@@ -165,7 +163,7 @@ namespace HappyHour.ViewModel
             if (CurrDirInfo.Parent != null)
             {
                 CurrDirInfo = CurrDirInfo.Parent;
-        }
+            }
         }
 
         void ChangeDir(bool bManual = false)
@@ -227,12 +225,18 @@ namespace HappyHour.ViewModel
         {
             FileList.Clear();
 
-            foreach (var fi in CurrDirInfo.EnumerateDirectories())
+            var directories = CurrDirInfo.EnumerateDirectories()
+                .OrderBy(d => d.Name, StringComparer.OrdinalIgnoreCase);
+
+            foreach (var fi in directories)
             {
                 FileList.Add(fi);
             }
 
-            foreach (var fi in CurrDirInfo.EnumerateFiles())
+            var files = CurrDirInfo.EnumerateFiles()
+                .OrderBy(f => f.Name, StringComparer.OrdinalIgnoreCase);
+
+            foreach (var fi in files)
             {
                 FileList.Add(fi);
             }

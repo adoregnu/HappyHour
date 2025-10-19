@@ -1,7 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using HappyHour.Model;
+using HappyHour.ViewModel;
 using Microsoft.EntityFrameworkCore.Query;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,15 +25,15 @@ namespace HappyHour.View.Controls
     /// </summary>
     public partial class LangComboBox : UserControl
     {
-        public IEnumerable<MText> TextSource 
+        public IEnumerable TextSource 
         {
-            get { return (IEnumerable<MText>)GetValue(TextSourceValueProperty); }
+            get { return (IEnumerable)GetValue(TextSourceValueProperty); }
             set { SetValue(TextSourceValueProperty, value); }
         }
         public static readonly DependencyProperty TextSourceValueProperty =
           DependencyProperty.Register(
               "TextSource",
-              typeof(IEnumerable<MText>),
+              typeof(IEnumerable),
               typeof(LangComboBox),
               new PropertyMetadata(null, OnTextSourceChanged));
 
@@ -40,7 +42,17 @@ namespace HappyHour.View.Controls
         {
             //var lbox = sender as LangComboBox;
         }
+        private void Translate(object sender, RoutedEventArgs e)
+        {
+            //HashSet<MText> textSources = (HashSet<MText>)TextSource;
+            var dataContext = new TranslatorViewModel(_textList.SelectedItem as MText)
+            {
+                //TextSources = TextSource
+            };
 
+            var dialog = new TranslatorDialog() { DataContext = dataContext };
+            dialog.ShowDialog();
+        }
         public LangComboBox()
         {
             InitializeComponent();

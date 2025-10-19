@@ -2,10 +2,13 @@
 #pragma warning disable CA1812 // Remove classes that are apparently never instantiated
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Windows;
 using System.Windows.Data;
+using HappyHour.Extension;
 using HappyHour.Model;
 using HappyHour.Spider;
 
@@ -23,6 +26,24 @@ namespace HappyHour.Converter
                                   object parameter, CultureInfo culture)
         {
             return value.Equals(true) ? parameter : Binding.DoNothing;
+        }
+    }
+    class CollectionToListConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType,
+                              object parameter, CultureInfo culture)
+        {
+            if (value is ICollection collection)
+            {
+                return collection.ToList<MText>();
+            }
+            return null;
+        }
+
+        public object ConvertBack(object value, Type targetType,
+                                  object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
         }
     }
 

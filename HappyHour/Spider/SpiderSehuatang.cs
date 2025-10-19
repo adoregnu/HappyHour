@@ -34,6 +34,8 @@ namespace HappyHour.Spider
 
         private readonly TorrentDbContext _db = new();
         private Torrent _currentTorrent;
+        private readonly Timer _timer;
+        private readonly Timer _timerNextItem;
 
         public int NumPage { get; set; } = 1;
         public List<string> Boards { get; set; }
@@ -46,6 +48,7 @@ namespace HappyHour.Spider
         public bool StopOnExistingId { get; set; }
 
         public ICommand CmdStop { get; private set; }
+        public ICommand CmdSkip { get; private set; }
         public SpiderSehuatang(SpiderViewModel browser) : base(browser)
         {
             Name = "sehuatang";
@@ -54,17 +57,20 @@ namespace HappyHour.Spider
             Boards = [ "censored", "uncensored", "subtitle" ];
 
             CmdStop = new RelayCommand(() => _scrapRunning = false);
+            CmdSkip = new RelayCommand(OnSkipItem);
             SelectedBoard = "censored";
 
-            UrlPatternsToFilter = ["tupian/forum"];
+            UrlPatternsToFilter = ["tupian/forum", "pid505st"];
             ChainVisibility = System.Windows.Visibility.Collapsed;
             var imagePath = $"{App.Current.LocalAppData}\\covers\\";
             if (!Directory.Exists(imagePath))
             { 
                 Directory.CreateDirectory(imagePath);
             }
+            _timer = new Timer(OnTimer);
+            //_timer.Change(0, Timeout.Infinite);
+            _timerNextItem = new Timer(OnNextItem);
         }
-
         protected override string GetScript(string name)
         {
             string common = App.ReadResource("Common.js");
@@ -90,9 +96,9 @@ namespace HappyHour.Spider
             }); 
         }
 
-        private void CheckDownload()
+        private void CheckDownload(bool isCallerDownload = false)
         {
-            if (_toDownload.Count == 0) return;
+            if (_toDownload.Count == 0 && !isCallerDownload) return;
 
             _resources.ForEach(r => { _toDownload.Remove(r); });
             Log.Print($"to download  : {_toDownload.Count}");
@@ -103,6 +109,18 @@ namespace HappyHour.Spider
                 _resources.Clear();
                 _toDownload.Clear();
             }
+        }
+        private void OnSkipItem()
+        {
+            UpdateMedia();
+            MoveNextItem();
+            _resources.Clear();
+            _toDownload.Clear();
+            //Scrap();
+        }
+        private void OnTimer(object state)
+        {
+            UiServices.Invoke( () =>  CheckDownload(true));
         }
 
         readonly List<string> _toDownload = [];
@@ -118,8 +136,9 @@ namespace HappyHour.Spider
                         action?.Invoke(img, imgpath );
                         _toDownload.Add(imgpath);
                     }
-                    CheckDownload();
                 }
+                Log.Print($"downloada {_toDownload.Count} files");
+                CheckDownload(true);
             }
 
             if (_currentTorrent.MagnetUrls.Any(url => url.SourceUrl == article.source))
@@ -137,6 +156,7 @@ namespace HappyHour.Spider
                     });
                 }
             }
+            //_timer.Change(3000, Timeout.Infinite);
 
             processImages((img, imgpath) => {
                 if (img.target.Contains("_cover"))
@@ -168,6 +188,10 @@ namespace HappyHour.Spider
             Browser.Address = Regex.Replace(_currPage.curr_url, @"\d+\.html", $"{_pageNum}.html");
             return true;
         }
+        private void OnNextItem(object state)
+        {
+            UiServices.Invoke(MoveNextItem);
+        }
 
         private async void MoveNextItem()
         {
@@ -175,6 +199,7 @@ namespace HappyHour.Spider
             if (list.Count > _index)
             {
                 dynamic item = list[_index++];
+                bool skipExisting = false;
                 if (!string.IsNullOrEmpty(PidToStop) &&
                     _pid.Equals(PidToStop, StringComparison.OrdinalIgnoreCase))
                 {
@@ -184,27 +209,36 @@ namespace HappyHour.Spider
                 else
                 {
                     _pid = item.pid;
-                    _currentTorrent = _db.GetTorrent(item.pid);
-                    if (_currentTorrent.Date == _updateTime)
+                    _currentTorrent = await _db.GetTorrent(item.pid);
+                    if (_currentTorrent.MagnetUrls.Any(m => m.SourceUrl == _currPage.source))
                     {
                         _numDuplicatedPid++;
                         Log.Print($"{_pid} is already crawled.");
+                        skipExisting = true;
                     }
-                    else
-                    {
-                        _currentTorrent.Date = _updateTime;
-                        _currentTorrent.StatusCode = 'N';
-                    }
-
+ 
                     if (StopOnExistingId && _numDuplicatedPid > 3)
                     {
                         _scrapRunning = false;
                     }
                 }
+                if (skipExisting)
+                {
+                    MoveNextItem();
+                    return;
+                }
                 if (_scrapRunning)
                 {
                     Browser.MainView.StatusMessage = $"Article:{_index}/{list.Count}, Page:{_pageNum}/{NumPage}";
-                    Browser.Address = item.url;
+
+                    if (_currentTorrent.StatusCode == 'N')
+                    {
+                        Browser.Address = item.url;
+                    }
+                    else
+                    {
+                        _timerNextItem.Change(0, Timeout.Infinite);
+                    }
                 }
             }
             else
@@ -243,6 +277,10 @@ namespace HappyHour.Spider
                 }
                 Log.Print($"{Name}: article {_pid} = {d.pid}");
                 _updateTime = DateTime.Parse(d.date);
+                if (_currentTorrent.StatusCode == 'N')
+                {
+                    _currentTorrent.Date = _updateTime;
+                }
                 DownloadFiles(d);
             }
             return false;

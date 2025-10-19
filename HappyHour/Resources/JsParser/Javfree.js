@@ -90,6 +90,7 @@
         if (p == null || p.childNodes == null) {
             return count;
         }
+        var lasNode = null;
         for (var i = 0; i < p.childNodes.length; i++) {
             var node = p.childNodes[i];
             if (node.nodeType != Node.TEXT_NODE) {
@@ -102,6 +103,12 @@
                     if  (parser.parsed) count += 1;
                 }
             }
+            lastNode = node;
+        }
+        var plot = lastNode.textContent.trim();
+        if (plot.length > 10) {
+            
+            msg['plot'] = plot.replace(/※この作品.+/, '');
         }
         return count;
     }
@@ -136,7 +143,7 @@
         }
     }
 
-    if (document.location.href.includes('/?s=' + _PID)) {
+    if (document.location.href.includes('/search/' + _PID)) {
         parseSearchResult();
         return;
     }

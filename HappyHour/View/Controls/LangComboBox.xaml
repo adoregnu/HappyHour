@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:c="clr-namespace:HappyHour.Converter"
              xmlns:local="clr-namespace:HappyHour.View.Controls"
              mc:Ignorable="d" 
              d:DesignHeight="50" d:DesignWidth="200">
@@ -12,9 +13,16 @@
             <Setter Property="BorderThickness" Value="0,0,0,1"/>
             <Setter Property="Background" Value="White"/>
         </Style>
+        <c:CollectionToListConverter x:Key="Collection2List" />
     </UserControl.Resources>
-        <ComboBox ItemsSource="{Binding TextSource, RelativeSource={RelativeSource AncestorType=local:LangComboBox}}"
-                  IsSynchronizedWithCurrentItem="True" Style="{StaticResource ComboBoxStyle}">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Button Grid.Column="0" Content="TR" Margin="0,0,2,0" Click="Translate"/>
+        <ComboBox Grid.Column="1" ItemsSource="{Binding TextSource, RelativeSource={RelativeSource AncestorType=local:LangComboBox}}"
+                  IsSynchronizedWithCurrentItem="True" Style="{StaticResource ComboBoxStyle}" x:Name="_textList">
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <Grid>
@@ -27,5 +35,6 @@
                     </Grid>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
-    </ComboBox>
+        </ComboBox>
+    </Grid>
 </UserControl>
