@@ -48,6 +48,7 @@ namespace HappyHour.Utilities
 
             var progressWindow = new ProgressWindow { Title = isMove ? "항목 이동 진행 상황" : "항목 복사 진행 상황" };
             if (owner != null) progressWindow.Owner = owner;
+            progressWindow.DestinationFolder = destinationFolder;
             progressWindow.InitializeProgress(files.Count + folders.Count, totalBytes);
             progressWindow.Show();
 
@@ -221,13 +222,7 @@ namespace HappyHour.Utilities
                     }
                 };
 
-                cmd.OnFileProcessed += (s, e) =>
-                {
-                    Log.Print($"RoboSharp: {(isMove ? "Moved" : "Copied")} '{e.ProcessedFile.Name}'");
-                };
-
                 var results = await cmd.StartAsync();
-
                 return results.Status.Successful;
             }
             catch (OperationCanceledException)
@@ -240,10 +235,6 @@ namespace HappyHour.Utilities
                 return false;
             }
         }
-        #endregion
-
-        #region P/Invoke
-        // REMOVED
         #endregion
     }
 }

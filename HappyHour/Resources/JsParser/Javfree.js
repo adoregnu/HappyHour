@@ -130,17 +130,38 @@
     }
 
     function parseSearchResult() {
+        var nodes = _jav_parse_multi_node("//div[contains(@class,'content-loop')]//h2[@class='entry-title']/a", get_node);
+        if (nodes == null || nodes.length == 0) {
+            console.log('no result!');
+            CefSharp.PostMessage({ type: 'items', data: 0 });
+            return;
+        }
+
+        for (var i = 0; i < nodes.length; i++) {
+            var node = nodes[i];
+            //check if node.href contains _PID case insensitive
+            if (node.href.toLowerCase().includes(_PID.toLowerCase())) {
+                CefSharp.PostMessage({ type: 'url', data: node.href });
+                return;
+            }
+        }
+        console.log('ambiguous result!');
+
+        /*
         var result = document.evaluate(
             "//div[contains(@class,'content-loop')]//h2[@class='entry-title']/a",
             document.body, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+
         if (result.snapshotLength == 0) {
             CefSharp.PostMessage({ type: 'items', data: 0 });
         } else if (result.snapshotLength = 1) {
             var node = result.snapshotItem(0);
+
             CefSharp.PostMessage({ type: 'url', data: node.href });
         } else {
             console.log('ambiguous result!');
         }
+        */
     }
 
     if (document.location.href.includes('/search/' + _PID)) {

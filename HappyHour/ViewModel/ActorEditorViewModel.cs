@@ -14,10 +14,8 @@ using MvvmDialogs;
 using HappyHour.Model;
 using HappyHour.Interfaces;
 using HappyHour.Spider;
-using CommunityToolkit.Mvvm.Messaging;
 using System.Threading.Tasks;
 using HappyHour.Extension;
-using System.Threading;
 using AsyncAwaitBestPractices.MVVM;
 
 namespace HappyHour.ViewModel

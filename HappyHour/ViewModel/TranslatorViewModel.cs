@@ -19,7 +19,7 @@ namespace HappyHour.ViewModel
 
     class TranslatorViewModel : ObservableObject, IModalDialogViewModel
     {
-        private const string authKey = "";
+        private const string authKey = "634b5865-fd29-3d8b-8c87-2ccbb5f48cb7:fx";
         public bool? DialogResult { get; set; }
 
         private readonly TextDocument _leftDocument = new();

@@ -25,7 +25,9 @@ namespace HappyHour.View
         public MainWindow()
         {
             InitializeComponent();
-            DataContext = Ioc.Default.GetService<MainViewModel>();
+            var viewModel = Ioc.Default.GetService<MainViewModel>();
+            viewModel.Window = this;
+            DataContext = viewModel;
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Windows;
 using System.Windows.Input;
 
 using MvvmDialogs;
@@ -17,6 +18,8 @@ namespace HappyHour.ViewModel
     {
         private string _status;
         //private bool _spiderEnabled;
+
+        public Window Window { get; set; }
 
         public ICommand CmdFileToFolder { get; private set; }
         public ICommand CmdActorEdtor { get; private set; }

@@ -1,81 +1,58 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Drawing.Imaging;
-using System.Drawing;
 using System.IO;
-using System.Windows.Media.Imaging;
-using WebPWrapper;
 using System.Reflection;
+using System.Windows.Media.Imaging;
 using HappyHour.Model;
-using System.Text;
-using HappyHour.Extension;
 
 namespace HappyHour.View.Controls
 {
     static class ImageUtils
     {
-        static BitmapImage ConvertBitmap(Bitmap bitmap, int width)
+        private static BitmapImage CreateBitmapImage(byte[] data, int width)
         {
-            using MemoryStream ms = new();
-            bitmap.SetResolution(48, 48);
-            bitmap.Save(ms, ImageFormat.Bmp);
-            BitmapImage image = new();
+            var image = new BitmapImage();
             image.BeginInit();
             if (width > 0)
             {
                 image.DecodePixelWidth = width;
             }
             image.CacheOption = BitmapCacheOption.OnLoad;
-            _ = ms.Seek(0, SeekOrigin.Begin);
-            image.StreamSource = ms;
+            image.StreamSource = new MemoryStream(data);
             image.EndInit();
             image.Freeze();
             return image;
         }
+
+        private static BitmapImage GetFallbackImage(int width)
+        {
+            using var stream = Assembly.GetEntryAssembly()!.GetManifestResourceStream(
+                "HappyHour.Resources.default-fallback-image.png");
+            using var ms = new MemoryStream();
+            stream!.CopyTo(ms);
+            return CreateBitmapImage(ms.ToArray(), width);
+        }
+
         public static BitmapImage ReadImage(string imagePath, int width)
         {
             try
             {
                 byte[] bytes = File.ReadAllBytes(imagePath);
-                byte[] search = Encoding.ASCII.GetBytes("WEBP");
-                if (bytes.IndexOf(search, 20) > 0)
-                {
-                    WebP webp = new();
-                    using var bitmap = webp.Decode(bytes);// Load(imagePath);
-                    return ConvertBitmap(bitmap, width);
-                }
-                else
-                {
-                    using var bitmap = new Bitmap(new MemoryStream(bytes));
-                    return ConvertBitmap(bitmap, width);
-                }
+                return CreateBitmapImage(bytes, width);
             }
             catch (Exception e)
             {
                 Log.Print(e.Message);
-                using var bmp = new Bitmap(Assembly.GetEntryAssembly().GetManifestResourceStream(
-                    "HappyHour.Resources.default-fallback-image.png"));
-                return ConvertBitmap(bmp, width);
+                return GetFallbackImage(width);
             }
         }
+
         public static BitmapImage LoadImage(ImageBlob blob, int width)
         {
-            if (blob != null && blob.Data !=null && blob.Data.Length > 0)
+            if (blob?.Data is { Length: > 0 })
             {
                 try
                 {
-                    if (blob.Type == 3)
-                    {
-                        WebP webp = new();
-                        using var bitmap = webp.Decode(blob.Data);
-                        return ConvertBitmap(bitmap, width);
-                    }
-                    else
-                    {
-                        using var ms = new MemoryStream(blob.Data);
-                        using var bitmap = new Bitmap(ms);
-                        return ConvertBitmap(bitmap, width);
-                    }
+                    return CreateBitmapImage(blob.Data, width);
                 }
                 catch (Exception e)
                 {
@@ -83,9 +60,7 @@ namespace HappyHour.View.Controls
                 }
             }
 
-            using var bmp = new Bitmap(Assembly.GetEntryAssembly().GetManifestResourceStream(
-                "HappyHour.Resources.default-fallback-image.png"));
-            return ConvertBitmap(bmp, width);
+            return GetFallbackImage(width);
         }
     }
 }

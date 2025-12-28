@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:HappyHour.View"
         mc:Ignorable="d"
-        Title="파일 복사 진행 상황" Height="370" Width="500"
+        Title="파일 복사 진행 상황" Height="380" Width="500"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
         WindowStyle="SingleBorderWindow">
@@ -81,6 +81,7 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
                 <TextBlock Grid.Row="0" Grid.Column="0" Text="복사된 파일:" FontSize="11"/>
@@ -94,6 +95,9 @@
 
                 <TextBlock Grid.Row="3" Grid.Column="0" Text="남은 시간:" FontSize="11"/>
                 <TextBlock Grid.Row="3" Grid.Column="1" x:Name="RemainingTimeTextBlock" Text="계산 중..." FontSize="11" HorizontalAlignment="Right"/>
+
+                <TextBlock Grid.Row="4" Grid.Column="0" Text="예상 남은 공간:" FontSize="11"/>
+                <TextBlock Grid.Row="4" Grid.Column="1" x:Name="RemainingDiskSpaceTextBlock" Text="계산 중..." FontSize="11" HorizontalAlignment="Right"/>
             </Grid>
         </StackPanel>
 

@@ -104,6 +104,16 @@
                         </MenuItem>
                         <MenuItem Header="Move"
                                   ItemsSource="{Binding Data.TargetDirs, Source={StaticResource VmContext}}">
+                            <MenuItem.Style>
+                                <Style TargetType="MenuItem">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Data.TargetDirs.Count, Source={StaticResource VmContext}}" Value="0">
+                                            <Setter Property="Command" Value="{Binding Data.CmdMoveWithDialog, Source={StaticResource VmContext}}"/>
+                                            <Setter Property="ItemsSource" Value="{x:Null}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </MenuItem.Style>
                             <MenuItem.ItemTemplate>
                                 <DataTemplate>
                                     <MenuItem Header="{Binding .}"

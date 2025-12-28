@@ -253,10 +253,11 @@ namespace HappyHour.Model
             }
         }
 
-        //TODO: pop-up new genre window 
         async ValueTask<bool> SetGenre(Movie movie, IDictionary<string, object> data)
         {
-            string[] skip_genres = { "4K", "Digital Mosaic", "Hi - Def", "Featured Actress" };
+            string[] skip_genres = {
+                "4K", "Digital Mosaic", "Hi - Def", "Featured Actress", "DMM Exclusive",
+                "配信専用", "フルハイビジョン(FHD)"};
 
             if (!data.TryGetValue("genre", out object value) || value == null)
             {

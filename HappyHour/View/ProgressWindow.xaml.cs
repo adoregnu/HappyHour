@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -13,6 +14,13 @@ namespace HappyHour.View
     /// </summary>
     public partial class ProgressWindow : Window
     {
+        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        static extern bool GetDiskFreeSpaceEx(string lpDirectoryName,
+           out ulong lpFreeBytesAvailable,
+           out ulong lpTotalNumberOfBytes,
+           out ulong lpTotalNumberOfFreeBytes);
+
         private CancellationTokenSource _cancellationTokenSource;
         private DateTime _startTime;
         private long _totalBytesToCopy;
@@ -23,6 +31,11 @@ namespace HappyHour.View
         private long _lastBytesCopied;
 
         public bool IsCancelled { get; private set; }
+
+        /// <summary>
+        /// 복사 대상 폴더 경로
+        /// </summary>
+        public string DestinationFolder { get; set; }
 
         /// <summary>
         /// 네이티브 복사에서 마지막으로 전송된 바이트 수 추적
@@ -157,6 +170,33 @@ namespace HappyHour.View
                 else
                 {
                     RemainingTimeTextBlock.Text = "계산 중...";
+                }
+
+                if (!string.IsNullOrEmpty(DestinationFolder))
+                {
+                    try
+                    {
+                        string pathToCheck = DestinationFolder;
+                        if (!pathToCheck.EndsWith(Path.DirectorySeparatorChar.ToString()))
+                        {
+                            pathToCheck += Path.DirectorySeparatorChar;
+                        }
+
+                        if (GetDiskFreeSpaceEx(pathToCheck, out ulong freeBytesAvailable, out _, out _))
+                        {
+                            long remainingBytesToCopy = _totalBytesToCopy - _totalBytesCopied;
+                            long estimatedFreeSpace = (long)freeBytesAvailable - remainingBytesToCopy;
+                            RemainingDiskSpaceTextBlock.Text = FormatBytes(estimatedFreeSpace);
+                        }
+                        else
+                        {
+                            RemainingDiskSpaceTextBlock.Text = "확인 불가";
+                        }
+                    }
+                    catch
+                    {
+                        RemainingDiskSpaceTextBlock.Text = "오류";
+                    }
                 }
                 
                 _lastUpdateTime = currentTime;

@@ -12,6 +12,7 @@ using System.Diagnostics;
 
 
 using MvvmDialogs.FrameworkDialogs.FolderBrowser;
+using MvvmDialogs.FrameworkDialogs;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using AsyncAwaitBestPractices.MVVM;
@@ -42,7 +43,6 @@ namespace HappyHour.ViewModel
         private bool _isBrowsing;
         private bool _searchSubFolder;
         private bool _forceStopScrapping;
-        private readonly PathComparer _pathComparer = new();
 
         private IFileList _fileList;
         private IAvMedia _selectedMedia;
@@ -171,6 +171,7 @@ namespace HappyHour.ViewModel
         public ICommand CmdExclude { get; set; }
         public ICommand CmdDownload { get; set; }
         public IAsyncCommand<string> CmdMove { get; set; }
+        public IAsyncCommand CmdMoveWithDialog { get; set; }
         public IAsyncCommand<object> CmdDeleteItem { get; set; }
         public IAsyncCommand<object> CmdClearDb { get; set; }
         public IAsyncCommand<object> CmdEditItem { get; set; }
@@ -198,6 +199,7 @@ namespace HappyHour.ViewModel
             CmdDownload = new RelayCommand<AvTorrent>(DownloadMedia);
             CmdCopyPath = new RelayCommand<IAvMedia>(p => Clipboard.SetText(p.Path));
             CmdMove = new AsyncCommand<string>(Move);
+            CmdMoveWithDialog = new AsyncCommand(MoveWithDialog);
             CmdDeleteItem = new AsyncCommand<object>(Delete);
             CmdClearDb = new AsyncCommand<object>(ClearDb);
             CmdEditItem = new AsyncCommand<object>(EditMovieInfo);
@@ -300,8 +302,23 @@ namespace HappyHour.ViewModel
             {
                 sourceItems.Add(item.Path);
             }
-            await FileCopyUtility.MoveItemsWithProgressAsync(sourceItems, targetDir, true, true, null);
+            await FileCopyUtility.MoveItemsWithProgressAsync(sourceItems, targetDir, true, true, MainView.Window);
             //await FileCopyUtility.MoveFolderWithRoboSharpAsync(sourceItems[0], targetDir, true, true, null);
+        }
+
+        private async Task MoveWithDialog()
+        {
+            var settings = new FolderBrowserDialogSettings
+            {
+                Description = "Select target folder to move files",
+                ShowNewFolderButton = true
+            };
+
+            var success = MainView.DialogService.ShowFolderBrowserDialog(this, settings);
+            if (success == true && !string.IsNullOrEmpty(settings.SelectedPath))
+            {
+                await Move(settings.SelectedPath);
+            }
         }
 
         private static void PlayMedia(AvMovie media)

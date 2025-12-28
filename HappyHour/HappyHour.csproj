@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net9.0-windows8.0</TargetFramework>
+    <TargetFramework>net10.0-windows8.0</TargetFramework>
     <UseWPF>true</UseWPF>
     <Platforms>AnyCPU;x64;x86</Platforms>
     <SupportedOSPlatformVersion>8.0</SupportedOSPlatformVersion>
@@ -16,13 +16,13 @@
     <WarningsAsErrors />
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="AsyncAwaitBestPractices" Version="9.0.0" />
-    <PackageReference Include="AsyncAwaitBestPractices.MVVM" Version="9.0.0" />
+    <PackageReference Include="AsyncAwaitBestPractices" Version="10.0.0" />
+    <PackageReference Include="AsyncAwaitBestPractices.MVVM" Version="10.0.0" />
     <PackageReference Include="AvalonEdit" Version="6.3.1.120" />
-    <PackageReference Include="CefSharp.OffScreen.NETCore" Version="140.1.140" />
-    <PackageReference Include="CefSharp.Wpf.NETCore" Version="140.1.140" />
+    <PackageReference Include="CefSharp.OffScreen.NETCore" Version="143.0.90" />
+    <PackageReference Include="CefSharp.Wpf.NETCore" Version="143.0.90" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-    <PackageReference Include="DeepL.net" Version="1.15.0" />
+    <PackageReference Include="DeepL.net" Version="1.19.0" />
     <PackageReference Include="Dirkster.AvalonDock" Version="4.72.1" />
     <PackageReference Include="Dirkster.AvalonDock.Themes.VS2013" Version="4.72.1" />
     <PackageReference Include="Dirkster.NumericUpDownLib" Version="3.4.0" />
@@ -40,9 +40,8 @@
     <PackageReference Include="QBittorrent.Client" Version="1.9.24285.1" />
     <PackageReference Include="RoboSharp" Version="1.6.0" />
     <PackageReference Include="RoboSharp.Extensions" Version="1.6.1" />
-    <PackageReference Include="Scriban" Version="6.4.0" />
+    <PackageReference Include="Scriban" Version="6.5.2" />
     <PackageReference Include="SimMetrics.Net" Version="1.0.5" />
-    <PackageReference Include="System.Text.Encoding.CodePages" Version="9.0.10" />
     <PackageReference Include="Ude.NET" Version="1.0.0" />
     <PackageReference Include="VirtualizingWrapPanel" Version="2.3.2" />
     <PackageReference Include="WPF.ListViewLayoutManager" Version="2.0.0" />
@@ -137,15 +136,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="chromiumembeddedframework.runtime.win-x64" Version="140.1.14" />
+    <PackageReference Update="chromiumembeddedframework.runtime.win-x64" Version="143.0.9" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="chromiumembeddedframework.runtime.win-x86" Version="140.1.14" />
+    <PackageReference Update="chromiumembeddedframework.runtime.win-x86" Version="143.0.9" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="chromiumembeddedframework.runtime.win-arm64" Version="140.1.14" />
+    <PackageReference Update="chromiumembeddedframework.runtime.win-arm64" Version="143.0.9" />
   </ItemGroup>
 
 </Project>
