@@ -9,6 +9,7 @@ using System.Drawing.Printing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace HappyHour.Spider
 {
@@ -21,15 +22,30 @@ namespace HappyHour.Spider
 
         private IDictionary<string, object> _items;
 
+        public void ClearCache()
+        {
+            Log.Print($"ClearCache :{_resources.Count}");
+            foreach (var r in _resources)
+            {
+                // delete cached file
+                try { File.Delete(r); } catch { }
+                //Log.Print($"Deleted cached file: {r}");
+            }
+            _resources.Clear();
+        }
         public async Task UpdateDownload(SpiderBase spider, string rpath)
         {
-            _resources.Add(rpath);
-            await CheckDownload(spider);
+            UiServices.Invoke(async ()  =>
+            {
+                _resources.Add(rpath);
+                await CheckDownload(spider);
+            });
         }
 
         private async Task CheckDownload(SpiderBase spider, bool isCallerDownload = false)
         {
             if (_toDownload.Count == 0 && !isCallerDownload) return;
+            Log.Print($"Cache: {_resources.Count}, Download: {_toDownload.Count}");
             if (_toDownload.Count > 0)
             {
                 _resources.ForEach(r =>
@@ -37,11 +53,9 @@ namespace HappyHour.Spider
                     _toDownload.Remove(r);
                 });
             }
-            Log.Print($"to download  : {_toDownload.Count}");
             if (_toDownload.Count == 0)
             {
                 await spider.UpdateItemsAsync(_items);
-                _resources.Clear();
             }
         }
         public async Task Download(SpiderBase spider, IDictionary<string, object> items)

@@ -108,7 +108,6 @@ namespace HappyHour.ViewModel
             get => _searchMaker;
             set
             {
-                SetProperty(ref _searchMaker, value);
                 if (!string.IsNullOrEmpty(value) && value != _searchMaker)
                 {
                     NotifyTask.Create(_db.GetMakers(value).AsTask())
@@ -120,6 +119,7 @@ namespace HappyHour.ViewModel
                             }
                         };
                 }
+                SetProperty(ref _searchMaker, value);
             }
         }
 
@@ -184,6 +184,7 @@ namespace HappyHour.ViewModel
 
             CmdAdd = new AsyncCommand<object>(OnAdd);
             CmdRemove = new RelayCommand<object>(OnRemove);
+            CmdSave = new RelayCommand(OnSave);
             CmdClosed = new RelayCommand(OnClose);
         }
 
@@ -249,6 +250,8 @@ namespace HappyHour.ViewModel
 
         private void OnSave()
         {
+            _db.SaveChanges();
+            DialogResult = true;
         }
         private void OnClose()
         {

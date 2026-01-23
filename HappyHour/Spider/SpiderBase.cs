@@ -132,6 +132,11 @@ namespace HappyHour.Spider
                 new ScrapItem() { CanUpdate = true, Name = "rating" },
             ];
         }
+
+        public void ClearCache()
+        {
+            Downloader.ClearCache();
+        }
         private void UpdateCheck(bool? check)
         {
             if (check == null) { return; }
@@ -449,6 +454,12 @@ namespace HappyHour.Spider
 
         protected virtual Task Translate(IDictionary<string, object> items)
         {
+            //translate title and plot
+            if (items.TryGetValue("title", out var title))
+            { 
+
+            }
+    
             return Task.CompletedTask;
         }
 

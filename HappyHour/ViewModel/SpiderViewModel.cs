@@ -79,6 +79,11 @@ namespace HappyHour.ViewModel
             RequestHandler = new AvRequestHandler(this);
         }
 
+        protected override void OnAddressChanged()
+        {
+            base.OnAddressChanged();
+            SelectedSpider?.ClearCache();
+        }
         public void Scan(SpiderBase spider, IAvMedia media)
         {
             AvMedia = media;

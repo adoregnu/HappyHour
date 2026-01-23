@@ -209,6 +209,7 @@ namespace HappyHour.Model
                     .ThenInclude(s => s.Name)
                .Include(m => m.Title)
                .Include(m => m.Plot)
+               .Include(m => m.Genres)
                .Include(m => m.Ratings)
                .Where(exp);
             }

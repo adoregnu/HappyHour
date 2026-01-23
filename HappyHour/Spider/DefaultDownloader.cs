@@ -25,6 +25,9 @@ namespace HappyHour.Spider
         private SpiderBase _spider;
         private IDictionary<string, object> _items;
 
+        public void ClearCache()
+        { }
+
         public DefaultDownloader(SpiderViewModel spider)
         {
             _browser = spider;
@@ -57,7 +60,7 @@ namespace HappyHour.Spider
 
         private static string GetTempFileName(string orgName)
         {
-            return $@"{Path.GetTempPath()}/{Path.GetFileName(orgName)}";
+            return $@"{Path.GetTempPath()}{Path.GetFileName(orgName)}";
         }
         private void OnBeforeDownload(object sender, DownloadItem e)
         {
@@ -105,7 +108,7 @@ namespace HappyHour.Spider
 
         private void OnDownloadUpdated(object sender, DownloadItem e)
         {
-            if (e.IsComplete)
+            if (e.IsComplete || e.PercentComplete < 0)
             {
                 lock (_timer)
                 {
@@ -116,10 +119,13 @@ namespace HappyHour.Spider
                     }
                     _timer.Stop();
                 }
-                Log.Print($"{_spider.SearchMedia.Pid} : Download Completed: " +
-                    $"({_numDownloaded}/{_numDownload}){e.FullPath}");
+                if (_spider.SearchMedia != null)
+                {
+                    Log.Print($"{_spider.SearchMedia.Pid} : Download Completed: " +
+                        $"({_numDownloaded}/{_numDownload}){e.FullPath}");
 
-                Application.Current.Dispatcher.InvokeAsync(async () => await _spider.UpdateItemsAsync(_items));
+                    Application.Current.Dispatcher.InvokeAsync(async () => await _spider.UpdateItemsAsync(_items));
+                }
             }
         }
 

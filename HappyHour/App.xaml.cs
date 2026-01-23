@@ -118,10 +118,10 @@ namespace HappyHour
             _ = general.AddKey("last_path", @"d:\tmp\");
         }
 
-        public string GetConf(string sectionName, string key)
+        public string GetConf(string sectionName, string key, string fallback="")
         {
-            return !GConf.Sections.ContainsSection(sectionName) ? null
-                : !GConf[sectionName].ContainsKey(key) ? null
+            return !GConf.Sections.ContainsSection(sectionName) ? fallback
+                : !GConf[sectionName].ContainsKey(key) ? fallback
                 : GConf[sectionName][key];
         }
 

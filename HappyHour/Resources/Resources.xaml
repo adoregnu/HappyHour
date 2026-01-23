@@ -423,7 +423,7 @@
     </Style>
 
     <DataTemplate x:Key="_langText">
-        <c:LangComboBox Grid.Column="0" TextSource="{Binding Name}" Margin="10,0,0,0"/>
+        <c:LangComboBox Grid.Column="0" TextSource="{Binding Name}" DbEntry="{Binding Name}" Margin="10,0,0,0"/>
     </DataTemplate>
     <Style x:Key="_stretch" TargetType="{x:Type ListBoxItem}">
         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>

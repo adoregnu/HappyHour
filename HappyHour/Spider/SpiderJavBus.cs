@@ -31,7 +31,7 @@ namespace HappyHour.Spider
         public SpiderJavBus(SpiderViewModel browser) : base(browser)
         {
             Name = "JavBus";
-            URL = "https://www.javbus.com/en/";
+            URL = "https://www.javbus.com/ja/";
             ScriptName = "JavBus.js";
         }
         protected override List<Cookie> CreateCookie()

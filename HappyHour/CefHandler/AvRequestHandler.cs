@@ -16,16 +16,10 @@ using HappyHour.ViewModel;
 namespace HappyHour.CefHandler
 {
 
-    class AvImageFilter : IResponseFilter
+    class AvImageFilter(string url, SpiderBase spider) : IResponseFilter
     {
         private MemoryStream memoryStream;
-        readonly SpiderBase _spider;
-        string _url;
-        public AvImageFilter(string url, SpiderBase spider)
-        {
-            _url = url;
-            _spider = spider;
-        }
+
         bool IResponseFilter.InitFilter()
         {
             memoryStream = new MemoryStream();
@@ -70,7 +64,7 @@ namespace HappyHour.CefHandler
         }
         public void Dispose()
         {
-            string imgPath = GetResourcePath(_url);
+            string imgPath = GetResourcePath(url);
             if (!File.Exists(imgPath))
             {
                 byte[] bytes = memoryStream.ToArray();
@@ -78,17 +72,12 @@ namespace HappyHour.CefHandler
             }
             memoryStream.Dispose();
             memoryStream = null;
-            _spider.UpdateDownload(imgPath);
+            spider.UpdateDownload(imgPath);
+            //Log.Print($"[Resource Filter] Downloaded resource: {url} to {imgPath}");
         }
     }
-    class AvResourceRequestHandler : ResourceRequestHandler
+    class AvResourceRequestHandler(SpiderViewModel spider) : ResourceRequestHandler
     {
-        readonly SpiderViewModel _spider;
-        public AvResourceRequestHandler(SpiderViewModel spider)
-        {
-            _spider = spider;
-        }
-
         protected override IResponseFilter GetResourceResponseFilter(
             IWebBrowser chromiumWebBrowser,
             IBrowser browser,
@@ -97,14 +86,14 @@ namespace HappyHour.CefHandler
             IResponse response)
         {
             //var res = _spider.ResourcesToBeFiltered;
-            var patterns = _spider.SelectedSpider.UrlPatternsToFilter;
-            if (_spider.SelectedSpider.IsSpiderWorking)
+            var patterns = spider.SelectedSpider.UrlPatternsToFilter;
+            //if (spider.SelectedSpider.IsSpiderWorking)
             {
                 foreach (var pattern in patterns)
                 {
                     if (request.Url.Contains(pattern))
                     {
-                        return new AvImageFilter(request.Url, _spider.SelectedSpider);
+                        return new AvImageFilter(request.Url, spider.SelectedSpider);
                     }
                 }
             }
@@ -112,13 +101,8 @@ namespace HappyHour.CefHandler
             return null;
         }
     }
-    class AvRequestHandler : RequestHandler
+    class AvRequestHandler(SpiderViewModel spider) : RequestHandler
     {
-        private readonly SpiderViewModel _spider;
-        public AvRequestHandler(SpiderViewModel spider)
-        {
-            _spider = spider;
-        }
         protected override IResourceRequestHandler GetResourceRequestHandler(
                 IWebBrowser chromiumWebBrowser,
                 IBrowser browser,
@@ -129,7 +113,7 @@ namespace HappyHour.CefHandler
                 string requestInitiator,
                 ref bool disableDefaultHandling)
         {
-            return new AvResourceRequestHandler(_spider);
+            return new AvResourceRequestHandler(spider);
         }
     }
 }

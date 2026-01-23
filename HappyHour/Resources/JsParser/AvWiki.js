@@ -36,7 +36,7 @@
             return;
         }
         var name = _jav_parse_single_node("div[@class='actress-data']//dt[contains(.,'女優名')]/following-sibling::dd", null ,node);
-        var names = name.split(/[（）()]/).filter(n => n.trim().length > 1);
+        var names = name.split(/[（）()-]/).filter(n => n.trim().length > 1);
         if (names.length < 1) {
             console.log('failed to parse actor name!');
             CefSharp.PostMessage({ type: 'items', data:0 });

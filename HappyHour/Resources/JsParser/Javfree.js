@@ -74,6 +74,13 @@
     function _series(txt, msg) {
         return _extrac_item(txt, msg, 'series', ['シリーズ']);
     }
+    function _genre(txt, msg) {
+        var ret = _extrac_item(txt, msg, 'genre', ['ジャンル']);
+        if (ret) {
+            msg['genre'] = msg['genre'].split(' ').map(s => s.trim()).filter(s => s.length > 0);
+        }
+        return ret
+    }
     function get_node(node) { return node; }
 
     function _parse_content(xpath, msg) {
@@ -82,15 +89,16 @@
             { func: _actor, parsed: false },
             { func: _maker, parsed: false },
             { func: _label, parsed: false },
-            { func: _series, parsed: false }
+            { func: _series, parsed: false },
+            { func: _genre, parsed: false }
         ];
 
         var count = 0;
-        var p = _jav_parse_single_node(xpath, get_node);
-        if (p == null || p.childNodes == null) {
+        var parray = _jav_parse_multi_node(xpath, get_node);
+        if (parray == null || parray.length == 0) {
             return count;
         }
-        var lasNode = null;
+        p = parray[0];
         for (var i = 0; i < p.childNodes.length; i++) {
             var node = p.childNodes[i];
             if (node.nodeType != Node.TEXT_NODE) {
@@ -105,7 +113,13 @@
             }
             lastNode = node;
         }
-        var plot = lastNode.textContent.trim();
+        var plot = '';
+        if (parray.length == 1) {
+            plot = lastNode.textContent.trim();
+        } else {
+            for (var i = 1; i < parray.length; i++) {
+                plot += parray[i].textContent.trim();
+            }
         if (plot.length > 10) {
             
             msg['plot'] = plot.replace(/※この作品.+/, '');

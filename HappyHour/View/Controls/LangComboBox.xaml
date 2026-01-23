@@ -21,7 +21,7 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <Button Grid.Column="0" Content="TR" Margin="0,0,2,0" Click="Translate"/>
-        <ComboBox Grid.Column="1" ItemsSource="{Binding TextSource, RelativeSource={RelativeSource AncestorType=local:LangComboBox}}"
+        <ComboBox Grid.Column="1" 
                   IsSynchronizedWithCurrentItem="True" Style="{StaticResource ComboBoxStyle}" x:Name="_textList">
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
@@ -29,9 +29,11 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="{Binding Lang}" Background="Yellow" Margin="0,0,5,0"/>
-                        <TextBlock Grid.Column="1" Text="{Binding Text}" TextWrapping="Wrap"/>
+                        <Button Grid.Column="0" Content="X" Click="OnDelete" Margin="0,0,2,0"/>
+                        <TextBlock Grid.Column="1" Text="{Binding Lang}" Background="Yellow" Margin="0,0,5,0"/>
+                        <TextBlock Grid.Column="2" Text="{Binding Text}" TextWrapping="Wrap"/>
                     </Grid>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>

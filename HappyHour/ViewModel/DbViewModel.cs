@@ -77,6 +77,7 @@ namespace HappyHour.ViewModel
        public IAsyncCommand CmdReload { get; private set; }
        public IAsyncCommand<object> CmdRemove { get; private set; }
         public IAsyncCommand CmdReloadAll { get; private set; }
+        public IAsyncCommand CmdSaveAll { get; private set; }
         public DbViewModel(IMainView mainView) : base(mainView) 
         {
             Title = "Database";
@@ -84,6 +85,7 @@ namespace HappyHour.ViewModel
             CmdReload = new AsyncCommand(async () => await OnTypeChanged(SelectedType));
             CmdReloadAll = new AsyncCommand(OnReloadAll);
             CmdRemove = new AsyncCommand<object>(OnRemove);
+            CmdSaveAll = new AsyncCommand(OnSaveAll);
 
             CmdGenresMerge = new AsyncCommand<object>(
                 OnMergeGenres, p => p is IList<object> list && list.Count > 1);
@@ -114,6 +116,11 @@ namespace HappyHour.ViewModel
                 return;
             }
             await OnReloadAll();
+        }
+
+        private async Task OnSaveAll()
+        {
+            await _db.SaveChangesAsync();
         }
 
         private async Task OnReloadAll()

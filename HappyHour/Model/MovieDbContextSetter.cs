@@ -14,6 +14,9 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media.Converters;
 
+using DeepL;
+using DeepL.Model;
+
 namespace HappyHour.Model
 {
     public partial class MovieDbContext : DbContext
@@ -205,7 +208,7 @@ namespace HappyHour.Model
             }
             return sOutput.ToString();
         }
-        static void SetMText<T>(ICollection<T> list, IDictionary<string, object> data, string field)
+        static async Task SetMText<T>(ICollection<T> list, IDictionary<string, object> data, string field)
             where T : MText, new()
         {
             if (!data.TryGetValue(field, out object value) || value == null)
@@ -220,12 +223,18 @@ namespace HappyHour.Model
             if (org != null)
             {
                 org.Text = namelang.Item1;
-                Log.Print($"Overwiting {field} ");
             }
             else
             {
-                Log.Print($"Append {field}");
                 list.Add(new T() { Lang = lang, Text = namelang.Item1 });
+            }
+            // list 에 korean가 업고 namelang.Item2 가 jp이면 korean으로 번역해서 추가
+            if (namelang.Item2 == "jp" && !list.Any(t => t.Lang == "ko"))
+            {
+                var authKey = App.Current.GetConf("api_keys", "deepl");
+                Translator deepl = new Translator(authKey);
+                var translated = await deepl.TranslateTextAsync(namelang.Item1, "JA", "KO");
+                list.Add(new T() { Lang = "ko", Text = translated.Text });
             }
         }
 
@@ -255,20 +264,21 @@ namespace HappyHour.Model
 
         async ValueTask<bool> SetGenre(Movie movie, IDictionary<string, object> data)
         {
-            string[] skip_genres = {
-                "4K", "Digital Mosaic", "Hi - Def", "Featured Actress", "DMM Exclusive",
-                "配信専用", "フルハイビジョン(FHD)"};
-
             if (!data.TryGetValue("genre", out object value) || value == null)
             {
                 return false;
             }
-
             string lang = GetLang(data);
+            var skipGenre = App.Current.GetConf("db_context", "skip_genres");
+            var skipGenreList = skipGenre.Split(',').Select(s => s.Trim()).ToList();
+
             var genres = value as IList<object>;
             foreach (string genre in genres.Cast<string>())
             {
-                if (skip_genres.Contains(genre)) continue;
+                if (skipGenreList.Any(s => genre.Contains(s, StringComparison.OrdinalIgnoreCase)))
+                {
+                    continue;
+                }
 
                 var dbGenre = await MovieGenres
                     .Include(g => g.Name)
@@ -654,8 +664,8 @@ namespace HappyHour.Model
                 Ratings = []
             };
 
-            SetMText(movie.Title, data, "title");
-            SetMText(movie.Plot, data, "plot");
+            await SetMText(movie.Title, data, "title");
+            await SetMText(movie.Plot, data, "plot");
             SetRating(movie, data);
             await SetGenre(movie, data);
             await SetActor(movie, data);

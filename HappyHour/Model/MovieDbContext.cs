@@ -8,6 +8,8 @@ using Microsoft.Extensions.Options;
 
 using HappyHour;
 using System.IO;
+using IniParser;
+using IniParser.Model;
 
 namespace HappyHour.Model
 {
@@ -39,7 +41,12 @@ namespace HappyHour.Model
         {
             //CREATE DATABASE avdb;
             //GRANT ALL privileges ON avdb.* TO 'adoregnu'@'%';
-            string connectionUrl = "server=192.168.50.26; database=avdb; user=adoregnu; password=abcd1234";
+
+            var server = App.Current.GetConf("mysql", "server");
+            var database = App.Current.GetConf("mysql", "database");
+            var user = App.Current.GetConf("mysql", "user");
+            var password = App.Current.GetConf("mysql", "password");
+            string connectionUrl = $"server={server}; database={database}; user={user}; password={password}";
             optionsBuilder.UseMySql(connectionUrl, ServerVersion.AutoDetect(connectionUrl));
         }
 

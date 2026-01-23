@@ -24,6 +24,27 @@
         return genres;
     }
 
+    function get_node(n) { return n; }
+    function _parse_intro(xpath) {
+        var nodes = _jav_parse_multi_node(xpath, get_node);
+        if (nodes == null || nodes.length < 1) {
+            return null;
+        }
+        var intro = '';
+        for (var i = 0; i < nodes.length; i++) {
+            // skip class is 'more'
+            if (nodes[i].classList.contains('more')) {
+                continue;
+            }
+            // skip empty text
+            if (nodes[i].textContent.trim().length < 1) {
+                continue;
+            }
+            intro += nodes[i].textContent.trim();
+        }
+        return intro;
+    }
+
     var items = {
         //id: { xpath: "//th[contains(., '品番：')]/following-sibling::td" },
         title: { xpath: "//div[@class='common_detail_cover']/h1[@class='tag']" },
@@ -40,6 +61,10 @@
             xpath: "//th[contains(., '評価：')]/following-sibling::td",
             handler: _parseRating
         },
+        plot: {
+            xpath: "//*[@id='introduction']/dd/p",
+            handler: _parse_intro
+        }
     };
 
     var msg = { type : 'items' }

@@ -21,12 +21,19 @@
             <ColumnDefinition/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <StackPanel Grid.Row="0" Grid.ColumnSpan="3" Orientation="Horizontal" HorizontalAlignment="Center">
-            <Button Style="{DynamicResource ModernButtonStyle2}" Grid.Column="2" Margin="0,5,0,0"
+        <StackPanel Grid.Row="0" Grid.ColumnSpan="4" Orientation="Horizontal" HorizontalAlignment="Center">
+            <Button Style="{DynamicResource ModernButtonStyle2}" Margin="0,5,0,0"
                          Command="{Binding CmdReloadAll}">
                 <Path Stretch="Uniform"
                         Data="{Binding Source={StaticResource RefreshIcon}, Path=Data}"
                         Fill="{Binding Path=Foreground, RelativeSource=
+                            {RelativeSource AncestorType={x:Type Button}}}" />
+            </Button>
+            <Button Style="{DynamicResource ModernButtonStyle2}" Margin="5,5,0,0"
+                         Command="{Binding CmdSaveAll}">
+                <Path Stretch="Uniform"
+                      Data="{Binding Source={StaticResource SaveIcon}, Path=Data}"
+                      Fill="{Binding Path=Foreground, RelativeSource=
                             {RelativeSource AncestorType={x:Type Button}}}" />
             </Button>
         </StackPanel>
@@ -111,7 +118,7 @@
                 </i:Interaction.Behaviors>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <c:LangComboBox Grid.Column="0" TextSource="{Binding Name}" Margin="10,0,0,0"/>
+                        <c:LangComboBox Grid.Column="0" TextSource="{Binding Name}" DbEntry="{Binding Name}" Margin="10,0,0,0"/>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
                 <ItemsControl.ItemContainerStyle>
@@ -136,7 +143,7 @@
                             {RelativeSource AncestorType={x:Type Button}}}" />
                 </Button>
             </StackPanel>
-            <ListBox Grid.Row="4" ItemsSource="{Binding GenresToMerge}" Margin="5,0,0,0" x:Name="_genreListToMerge"
+            <ListBox Grid.Row="4" ItemsSource="{Binding GenresToMerge}" Margin="5,0,0,5" x:Name="_genreListToMerge"
                      SelectedItem="{Binding SelectedGenreToMerge}" SelectionMode="Extended">
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="MouseDoubleClick">
@@ -175,7 +182,7 @@
             </Grid.RowDefinitions>
             <TextBlock Grid.Row="0" HorizontalAlignment="Center" Margin="5,5,0,5">Series</TextBlock>
             <c:DelayedBindingTextBox Grid.Row="1" DelayTime="500" Margin="5,0,0,5" Text="{Binding SearchSeries}"/>
-            <ListBox Grid.Row="2" ItemsSource="{Binding Series}" Margin="5,0,5,5"
+            <ListBox Grid.Row="2" ItemsSource="{Binding Series}" Margin="5,0,0,5"
                      SelectedItem="{Binding SelectedSeries}" SelectionMode="Extended">
                 <ListBox.ContextMenu>
                     <ContextMenu>
@@ -197,12 +204,22 @@
                         <i:InvokeCommandAction Command="{Binding CmdSeriesoDubleClicked}"/>
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <c:LangComboBox Grid.Column="0" TextSource="{Binding Name}" DbEntry="{Binding Name}" Margin="10,0,0,0"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+                <ItemsControl.ItemContainerStyle>
+                    <Style TargetType="{x:Type ListBoxItem}">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                    </Style>
+                </ItemsControl.ItemContainerStyle>
             </ListBox>
-            <DockPanel Grid.Row="3" Margin="5,0,5,5">
+            <DockPanel Grid.Row="3" Margin="5,0,0,5">
                 <Button DockPanel.Dock="Right" Command="{Binding CmdAddSeriesNameTranslated}" >Add</Button>
                 <TextBox DockPanel.Dock="Left" Text="{Binding SeriesNameTranslated}"/>
             </DockPanel>
-            <ListBox Grid.Row="4" ItemsSource="{Binding SelectedSeries.Name}" Margin="5,0,5,5">
+            <ListBox Grid.Row="4" ItemsSource="{Binding SelectedSeries.Name}" Margin="5,0,0,5">
                 <i:Interaction.Behaviors>
                     <bh:ListboxBehavior AutoCopy="True"/>
                 </i:Interaction.Behaviors>
@@ -215,8 +232,8 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             <TextBlock Grid.Row="0" HorizontalAlignment="Center" Margin="5,5,0,5">Movies</TextBlock>
-            <c:DelayedBindingTextBox Grid.Row="1" DelayTime="500" Margin="5,0,0,5" Text="{Binding SearchPid}"/>
-            <ListBox Grid.Row="2" ItemsSource="{Binding Movies.Result}" Margin="5,0,0,5"
+            <c:DelayedBindingTextBox Grid.Row="1" DelayTime="500" Margin="5,0,5,5" Text="{Binding SearchPid}"/>
+            <ListBox Grid.Row="2" ItemsSource="{Binding Movies.Result}" Margin="5,0,5,5"
                      SelectedItem="{Binding SelectedMovie}" SelectionMode="Extended">
             </ListBox>
         </Grid>

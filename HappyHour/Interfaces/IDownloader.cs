@@ -10,6 +10,7 @@ namespace HappyHour.Interfaces
     interface IDownloader
     {
         void Enable(bool bEnable);
+        void ClearCache();
         Task UpdateDownload(SpiderBase spider, string rpath);
         Task Download(SpiderBase spider, IDictionary<string, object> items);
     }

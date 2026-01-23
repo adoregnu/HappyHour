@@ -58,7 +58,7 @@
                       IsSynchronizedWithCurrentItem="True"/>
         </Grid>
         <c:LangComboBox Grid.Row="1" Grid.ColumnSpan="5" Margin="5,5,5,0"
-                        TextSource="{Binding Movie.Title}"/>
+                        TextSource="{Binding Movie.Title}" DbEntry="{Binding Movie.Title}"/>
         <Grid Grid.Row="2" Margin="5">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="60"/>
@@ -227,7 +227,7 @@
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
                     <TextBlock Grid.Row="0" Text="Series" TextAlignment="Center"/>
-                    <c:LangComboBox Grid.Row="1" Margin="5,0,5,5" TextSource="{Binding Movie.Series.Name}"/>
+                    <c:LangComboBox Grid.Row="1" Margin="5,0,5,5" TextSource="{Binding Movie.Series.Name}" DbEntry="{Binding Movie.Series.Name}"/>
                     <c:DelayedBindingTextBox Grid.Row="2" DelayTime="500" Margin="5,0,5,5" Text="{Binding SearchSeries}"/>
                     <ListBox Grid.Row="3" Margin="5,0,5,0" ItemsSource="{Binding AllSeries}" x:Name="_allSeries">
                         <i:Interaction.Triggers>
@@ -242,10 +242,10 @@
             </Grid>
         </Grid>
 
-        <c:LangComboBox Grid.Row="4" TextSource="{Binding Movie.Plot}" Grid.ColumnSpan="5" Height="80" Margin="5,5,5,0"/>
+        <c:LangComboBox Grid.Row="4" TextSource="{Binding Movie.Plot}" DbEntry="{Binding Movie.Plot}" Grid.ColumnSpan="5" Height="80" Margin="5,5,5,0"/>
         <StackPanel Grid.Row="5" Grid.ColumnSpan="5" Orientation="Horizontal"
                     HorizontalAlignment="Center">
-            <Button Content="Save" Margin="0,5,5,5" Command="{Binding CmdSave}" Click="Close"/>
+            <Button Content="Save" Margin="0,5,5,5" Command="{Binding CmdSave}"/>
             <Button Content="Cancel" Margin="0,5,5,5" Click="Close"/>
         </StackPanel>
     </Grid>

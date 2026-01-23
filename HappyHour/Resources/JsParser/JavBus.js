@@ -1,4 +1,4 @@
-(function () {
+﻿(function () {
     const _PID = '{{pid}}';
     function parseSearchResult() {
         var urls = _jav_parse_multi_node("//a[@class='movie-box']/@href");
@@ -77,7 +77,7 @@
         if (nodes == null) {
             return null;
         }
-        var excludes = ['AVҳ��', '1080p', '60fps', '��VIP', 'Hi-Def', '4K'];
+        var excludes = ['AV女優', '1080p', '60fps', '超VIP', 'Hi-Def', '4K', 'ハイビジョン', '独占配信'];
         var result = nodes.filter(n => !excludes.some(ex => ex == n.textContent.trim()) && n.href.includes('genre'));
 
         var genre = [];
@@ -95,11 +95,12 @@
     var items = {
         title: { xpath: "//div[@class='container']/h3/text()" },
         cover: { xpath: "//a[@class='bigImage']/img", handler: _parse_cover },
-        date: { xpath: "//span[contains(.,'Release Date:')]/following-sibling::text()" },
-        maker: { xpath: "//span[contains(.,'Studio:')]/following-sibling::a/text()" },
-        series: { xpath: "//span[contains(.,'Series:')]/following-sibling::a/text()" },
+        date: { xpath: "//span[contains(.,'発売日:')]/following-sibling::text()" },
+        maker: { xpath: "//span[contains(.,'メーカー:')]/following-sibling::a/text()" },
+        label: { xpath: "//span[contains(.,'レーベル:')]/following-sibling::a/text()" },
+        series: { xpath: "//span[contains(.,'シリーズ:')]/following-sibling::a/text()" },
         genre: {
-            xpath: "//p[contains(.,'Genre:')]/following-sibling::p/span//a",
+            xpath: "//p[contains(.,'ジャンル:')]/following-sibling::p/span//a",
             handler: parse_genre
         },
         actor: { xpath: "//div[@id='avatar-waterfall']//img", handler: parseActor }

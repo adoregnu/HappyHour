@@ -7,7 +7,9 @@
             return _getter(node);
         } else {
             var txt = node.textContent.trim();
-            return txt.length < 2 ? null : txt;
+            if (!txt.startsWith('--') && txt.length >= 2) {
+                return txt;
+            }
         }
     }
     return null;
@@ -29,6 +31,17 @@ function _jav_parse_multi_node(xpath, _getter = null) {
     }
     return null;
 }
+
+function _polish_single_node(xpath, remove_patterns) {
+    var str = _jav_parse_single_node(xpath);
+    if (str != null) {
+        for (var i = 0; i < remove_patterns.length; i++) {
+            str = str.replace(remove_patterns[i], '').trim();
+        }
+    }
+    return str;
+}
+
 function _post_message(msg, lang) {
     msg['url'] = window.location.hostname;
     msg['lang'] = lang;

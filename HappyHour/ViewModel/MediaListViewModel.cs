@@ -466,7 +466,7 @@ namespace HappyHour.ViewModel
             UiServices.WaitCursor(true);
             var dialog = await AvEditorViewModel.CreateAsync(item);
             UiServices.WaitCursor(false);
-            MainView.DialogService.Show<AvEditorDialog>(this, dialog);
+            MainView.DialogService.ShowDialog<AvEditorDialog>(this, dialog);
         }
 
         private async Task UpdateMediaList(string path, CancellationToken token,
