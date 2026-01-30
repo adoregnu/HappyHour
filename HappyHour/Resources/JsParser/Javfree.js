@@ -120,8 +120,8 @@
             for (var i = 1; i < parray.length; i++) {
                 plot += parray[i].textContent.trim();
             }
+        }
         if (plot.length > 10) {
-            
             msg['plot'] = plot.replace(/※この作品.+/, '');
         }
         return count;
@@ -211,4 +211,4 @@
     }
     msg['data'] = num_item;
     _post_message(msg, 'jp');
-}) ();
+})();

@@ -1,4 +1,5 @@
 ﻿using AsyncAwaitBestPractices.MVVM;
+using CommunityToolkit.Mvvm.Input;
 using HappyHour.Interfaces;
 using HappyHour.Model;
 using System;
@@ -38,19 +39,22 @@ namespace HappyHour.ViewModel
             set
             {
                 SetProperty(ref _searchGenre, value);
-                Genres.Clear();
-                Application.Current.Dispatcher.InvokeAsync(async () =>
-                {
-                    var keyword = string.IsNullOrEmpty(value) ? null : value;
-                    var genres = await _db.GetGenres(keyword);
-                    genres.ForEach(Genres.Add);
-                });
+                RefreshItems(_db.GetGenres(value), Genres);
             }
         }
         public IAsyncCommand<object> CmdGenresMerge { get; private set; }
         public ICommand CmdMoveDownSelectedGenre { get; private set; }
         public ICommand CmdMoveUpSelectedGenre { get; private set; }
         public IAsyncCommand<object> CmdGenreDoubleClicked { get; private set; }
+
+        void InitGenres()
+        {
+            CmdGenresMerge = new AsyncCommand<object>(
+                OnMergeGenres, p => p is IList<object> list && list.Count > 1);
+            CmdGenreDoubleClicked = new AsyncCommand<object>(OnGenreDoubleClicked);
+            CmdMoveDownSelectedGenre = new RelayCommand(OnMoveDownGenre);
+            CmdMoveUpSelectedGenre = new RelayCommand(OnMoveUpGenre);
+        }
 
         private async Task OnGenreDoubleClicked(object obj)
         {

@@ -168,7 +168,9 @@ namespace HappyHour.ViewModel
 
         private void OnStateChanged(object sender, LoadingStateChangedEventArgs e)
         {
-            if (e.IsLoading) { return; }
+            if (e.IsLoading) {
+                return;
+            }
 
             Log.Print($"Loading Done. rames:{e.Browser.GetFrameCount()}, " +
                 $"url:{e.Browser.MainFrame.Url}");

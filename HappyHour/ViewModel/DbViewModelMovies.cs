@@ -1,7 +1,9 @@
-﻿using CefSharp.DevTools.CSS;
+﻿using AsyncAwaitBestPractices.MVVM;
+using CefSharp.DevTools.CSS;
 using HappyHour.Extension;
 using HappyHour.Interfaces;
 using HappyHour.Model;
+using HappyHour.View;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -18,6 +20,14 @@ namespace HappyHour.ViewModel
     {
         private NotifyTask<List<Movie>> movies;
         public NotifyTask<List<Movie>> Movies => movies;
+
+        public List<string> SearchMovieTypes => ["PID" ,"Title", "Plot"];
+        public string _selectedSearchMovieType = "PID";
+        public string SelectedSearchMovieType
+        {
+            get => _selectedSearchMovieType;
+            set => SetProperty(ref _selectedSearchMovieType, value);
+        }
 
         Movie _selectedMovie;
         public Movie SelectedMovie
@@ -40,16 +50,16 @@ namespace HappyHour.ViewModel
                 };
              }
         }
-        private string _searchPid;
-        public string SearchPid
+        private string _searchMovieText;
+        public string SearchMovieText
         {
-            get => _searchPid;
+            get => _searchMovieText;
             set
             {
-                SetProperty(ref _searchPid, value);
+                SetProperty(ref _searchMovieText, value);
                 if (string.IsNullOrEmpty(value)) return;
 
-                movies = NotifyTask.Create(_db.GetMoviesFast(value).AsTask());
+                movies = NotifyTask.Create(_db.GetMoviesFast(value, SelectedSearchMovieType).AsTask());
                 movies.PropertyChanged += (s, e) =>
                 {
                     if (e.PropertyName == "Result")
@@ -57,6 +67,23 @@ namespace HappyHour.ViewModel
                         OnPropertyChanged(nameof(Movies));
                     }
                 };
+            }
+        }
+        public IAsyncCommand<object> CmdEditMovie { get; private set; }
+
+        private void InitMovie()
+        {
+            CmdEditMovie = new AsyncCommand<object>(OnEditMovie);
+        }
+
+        async Task OnEditMovie(object obj)
+        {
+            if (obj is Movie movie)
+            {
+                UiServices.WaitCursor(true);
+                var dialog = await AvEditorViewModel.CreateAsync(movie);
+                UiServices.WaitCursor(false);
+                MainView.DialogService.ShowDialog<AvEditorDialog>(this, dialog);
             }
         }
 

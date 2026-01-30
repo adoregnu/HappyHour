@@ -28,15 +28,7 @@ namespace HappyHour.ViewModel
             set
             {
                 SetProperty(ref _searchSeries, value);
-                Series.Clear();
-                Application.Current.Dispatcher.InvokeAsync(async () =>
-                {
-                    if (!string.IsNullOrEmpty(value))
-                    {
-                        var series = await _db.GetSeries(value);
-                        series.ForEach(Series.Add);
-                    }
-                });
+                RefreshItems(_db.GetSeries(value), Series);
             }
         }
 

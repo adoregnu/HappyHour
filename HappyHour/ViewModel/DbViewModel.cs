@@ -24,7 +24,6 @@ namespace HappyHour.ViewModel
 
     partial class DbViewModel : Pane, IDbView
     {
-        string _selectedType = "Movies";
         string _searchText;
 
         private IMediaList _mediaList;
@@ -42,7 +41,8 @@ namespace HappyHour.ViewModel
                 {
                     if (i != null)
                     {
-                        SearchPid = i.Pid;
+                        SelectedSearchMovieType = "PID";
+                        SearchMovieText = i.Pid;
                     }
                 };
             }
@@ -51,58 +51,40 @@ namespace HappyHour.ViewModel
         public string SearchText
         {
             get => _searchText;
-            set
-            {
-                SetProperty(ref _searchText, value);
-                if (ListType.Any(type => type == SelectedType))
-                {
-                    //OnSearchTextUpdated(type);
-                }
-            }
+            set => SetProperty(ref _searchText, value);
         }
-        public string SelectedType
+        private static void RefreshItems<T>(ValueTask<List<T>> task, ObservableCollection<T> target)
         {
-            get => _selectedType;
-            set
-            {
-                SearchText = "";
-                SetProperty(ref _selectedType, value);
-                Application.Current.Dispatcher.InvokeAsync(async () => await OnTypeChanged(value));
-            }
+            NotifyTask.Create(task.AsTask())
+                .PropertyChanged += (s, e) =>
+                {
+                    if (e.PropertyName == "Result")
+                    {
+                        target.Clear();
+                        List<T> items = ((dynamic)s).Result;
+                        items.ForEach(target.Add);
+                        }
+                };
         }
-        public List<string> ListType { get; set; } = [
-                nameof(Movies), nameof(Makers), nameof(Series), nameof(Genres)
-        ];
 
-       public IAsyncCommand CmdReload { get; private set; }
        public IAsyncCommand<object> CmdRemove { get; private set; }
         public IAsyncCommand CmdReloadAll { get; private set; }
         public IAsyncCommand CmdSaveAll { get; private set; }
         public DbViewModel(IMainView mainView) : base(mainView) 
         {
             Title = "Database";
-            //ListType = [.. _typeToPropertyName.Keys];
-            CmdReload = new AsyncCommand(async () => await OnTypeChanged(SelectedType));
             CmdReloadAll = new AsyncCommand(OnReloadAll);
             CmdRemove = new AsyncCommand<object>(OnRemove);
             CmdSaveAll = new AsyncCommand(OnSaveAll);
 
-            CmdGenresMerge = new AsyncCommand<object>(
-                OnMergeGenres, p => p is IList<object> list && list.Count > 1);
-            CmdMergeMakers = new RelayCommand<object>(
-                OnMergeMakers, p => p is IList<object> list && list.Count > 1);
-            CmdMergeLables = new AsyncCommand<object, object>(
-                OnMergeLabels, p => p is IList<object> list && list.Count > 1);
+            InitMakers();
+            InitMovie();
+            InitGenres();
+
             CmdMergeSeries = new AsyncCommand<object>(
                 OnMergeSeries, p => p is IList<object> list && list.Count > 1);
 
-            CmdGenreDoubleClicked = new AsyncCommand<object>(OnGenreDoubleClicked);
-            CmdLabelDoubleClicked = new AsyncCommand(OnLabelDoubleClicked);
-            CmdMakerDoubleClicked = new AsyncCommand(OnMakerDoubleClicked);
             CmdSeriesoDubleClicked = new AsyncCommand(OnSeriesoDubleClicked);
-
-            CmdMoveDownSelectedGenre = new RelayCommand(OnMoveDownGenre);
-            CmdMoveUpSelectedGenre = new RelayCommand(OnMoveUpGenre);
 
             CmdAddSeriesNameTranslated = new RelayCommand(OnAddSeriesNameTranslated);
             //MainView.OnViewUpdate += ReceiveAsync;
@@ -121,10 +103,17 @@ namespace HappyHour.ViewModel
         private async Task OnSaveAll()
         {
             await _db.SaveChangesAsync();
+            //await _db.RemoveTextFromLongText();
         }
 
         private async Task OnReloadAll()
         {
+            List<string> ListType = [
+                nameof(Movies),
+                nameof(Makers),
+                nameof(Series),
+                nameof(Genres)
+            ];
             foreach (var type in ListType)
             {
                 await OnTypeChanged(type);
@@ -141,14 +130,6 @@ namespace HappyHour.ViewModel
             {
                 await task;
             }
-        }
-
-        private void OnSearchTextUpdated(string type)
-        {
-            string searchFunction = $"OnSearch{SelectedType}";
-            MethodInfo mi = GetType().GetMethod(searchFunction,
-                BindingFlags.NonPublic | BindingFlags.Instance);
-            mi?.Invoke(this, null);
         }
 
         private async Task OnRemove(object item)

@@ -16,6 +16,7 @@ using System.Windows.Media.Converters;
 
 using DeepL;
 using DeepL.Model;
+using System.Text.RegularExpressions;
 
 namespace HappyHour.Model
 {
@@ -811,6 +812,28 @@ namespace HappyHour.Model
             series.Movies.Add(movie);
             await SaveChangesAsync();
         }
-    }
 
+        public async Task RemoveTextFromLongText()
+        {
+            UiServices.WaitCursor(true);
+            var longTexts = await LongTexts
+                .Where(lt =>  lt.Lang == "ko" && EF.Functions.Like(lt.Text, $"%특전%"))
+                .ToListAsync();
+            Log.Print($"Found {longTexts.Count} LongTexts containing the pattern.");
+
+            //string pattern = @"※ 해당 .+합니다\.$";
+            //string pattern = @"^특전.+상품에 대해 ";
+            //string pattern = @"혜택 .+부탁드립니다\.";
+            //string pattern = @"특전,.+이미지$";
+            string pattern = @"^특전.+대한";
+            //string pattern = @"혜택.+바랍니다\.$";
+            //string pattern = @"혜택.+있습니다\.$";
+            foreach (var longText in longTexts)
+            {
+                longText.Text = Regex.Replace(longText.Text, pattern, string.Empty);
+            }
+            await SaveChangesAsync();
+            UiServices.WaitCursor(false);
+        }
+    }
 }

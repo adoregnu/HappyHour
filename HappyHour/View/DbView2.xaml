@@ -2,26 +2,22 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:md="https://github.com/fantasticfiasco/mvvm-dialogs"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:HappyHour.View"
              xmlns:vm="clr-namespace:HappyHour.ViewModel"
              xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
-            xmlns:c="clr-namespace:HappyHour.View.Controls"
+             xmlns:c="clr-namespace:HappyHour.View.Controls"
              xmlns:bh="clr-namespace:HappyHour.View.Behavior"
              mc:Ignorable="d" 
+             md:DialogServiceViews.IsRegistered="True"
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition />
         </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition/>
-            <ColumnDefinition/>
-            <ColumnDefinition/>
-            <ColumnDefinition/>
-        </Grid.ColumnDefinitions>
-        <StackPanel Grid.Row="0" Grid.ColumnSpan="4" Orientation="Horizontal" HorizontalAlignment="Center">
+        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center">
             <Button Style="{DynamicResource ModernButtonStyle2}" Margin="0,5,0,0"
                          Command="{Binding CmdReloadAll}">
                 <Path Stretch="Uniform"
@@ -37,205 +33,260 @@
                             {RelativeSource AncestorType={x:Type Button}}}" />
             </Button>
         </StackPanel>
-        <Grid Grid.Row="1" Grid.Column="0">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="7*"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="4*"/>
-            </Grid.RowDefinitions>
-            <TextBlock Grid.Row="0" HorizontalAlignment="Center" Margin="5,5,0,5">Maker/Label</TextBlock>
-            <c:DelayedBindingTextBox Grid.Row="1" DelayTime="500" Margin="5,0,0,5" Text="{Binding SearchMaker}"/>
-            <ListBox Grid.Row="2" ItemsSource="{Binding Makers}" Margin="5,0,0,5" ItemTemplate="{StaticResource _langText}"
-                     SelectedItem="{Binding SelectedMaker}" SelectionMode="Extended" ItemContainerStyle="{StaticResource _stretch}">
-                <ListBox.ContextMenu>
-                    <ContextMenu>
-                        <MenuItem Header="Merge Makers"
+        <TabControl Grid.Row="1">
+            <TabItem Header="Maker/Label">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="7*"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="4*"/>
+                    </Grid.RowDefinitions>
+                    <c:DelayedBindingTextBox Grid.Row="1" DelayTime="500" Margin="2,5,0,5" Text="{Binding SearchMaker}"/>
+                    <ListBox Grid.Row="2" ItemsSource="{Binding Makers}" Margin="2,0,0,5" ItemTemplate="{StaticResource _langText}"
+                             SelectedItem="{Binding SelectedMaker}" SelectionMode="Extended" ItemContainerStyle="{StaticResource _stretch}">
+                        <ListBox.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Remove"
+                                         Command="{Binding CmdRemove}"
+                                         CommandParameter="{Binding RelativeSource={RelativeSource
+                                   AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.SelectedItem}"/>
+                            </ContextMenu>
+                        </ListBox.ContextMenu>
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="MouseDoubleClick">
+                                <i:InvokeCommandAction Command="{Binding CmdMakerDoubleClicked}"/>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                    </ListBox>
+                    <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Vertical" VerticalAlignment="Center">
+                        <Button Style="{DynamicResource ModernButtonStyle2}"
+                                Command="{Binding CmdMoveMakerRight}" Margin="2" ToolTip="Move down select maker to merge">
+                            <Path Stretch="Uniform"
+                              Data="{Binding Source={StaticResource ArrowRightIcon}, Path=Data}"
+                              Fill="{Binding Path=Foreground, RelativeSource=
+                                    {RelativeSource AncestorType={x:Type Button}}}" />
+                        </Button>
+                        <Button Style="{DynamicResource ModernButtonStyle2}" Margin="2"
+                                Command="{Binding CmdMoveMakerLeft}" ToolTip="Move up select maker">
+                            <Path Stretch="Uniform"
+                              Data="{Binding Source={StaticResource ArrowLeftIcon}, Path=Data}"
+                              Fill="{Binding Path=Foreground, RelativeSource=
+                                    {RelativeSource AncestorType={x:Type Button}}}" />
+                        </Button>
+                    </StackPanel>
+                    <ListBox Grid.Row="2" Grid.Column="2" ItemsSource="{Binding MakersToMerge}" Margin="0,0,2,5" ItemTemplate="{StaticResource _langText}"
+                             SelectedItem="{Binding SelectedMakerToMerge}" SelectionMode="Extended" ItemContainerStyle="{StaticResource _stretch}">
+                        <ListBox.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Merge Makers"
                                   Command="{Binding CmdMergeMakers}"
                                   CommandParameter="{Binding RelativeSource={RelativeSource
                             AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.SelectedItems}"/>
-                        <MenuItem Header="Remove"
-                                 Command="{Binding CmdRemove}"
-                                 CommandParameter="{Binding RelativeSource={RelativeSource
-                           AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.SelectedItem}"/>
-                    </ContextMenu>
-                </ListBox.ContextMenu>
-                <i:Interaction.Triggers>
-                    <i:EventTrigger EventName="MouseDoubleClick">
-                        <i:InvokeCommandAction Command="{Binding CmdMakerDoubleClicked}"/>
-                    </i:EventTrigger>
-                </i:Interaction.Triggers>
-            </ListBox>
-            <c:DelayedBindingTextBox Grid.Row="3" DelayTime="500" Margin="5,0,0,5" Text="{Binding SearchLabel}"/>
-            <ListBox Grid.Row="4" ItemsSource="{Binding Labels}" Margin="5,0,0,5" ItemTemplate="{StaticResource _langText}"
-                     SelectedItem="{Binding SelectedLabel}" SelectionMode="Extended" ItemContainerStyle="{StaticResource _stretch}">
-                <ListBox.ContextMenu>
-                    <ContextMenu>
-                        <MenuItem Header="Merge Labels"
-                          Command="{Binding CmdMergeLables}"
-                          CommandParameter="{Binding RelativeSource={RelativeSource
-                    AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.SelectedItems}"/>
-                        <MenuItem Header="Remove"
-                                 Command="{Binding CmdRemove}"
-                                 CommandParameter="{Binding RelativeSource={RelativeSource
-                           AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.SelectedItem}"/>
-                    </ContextMenu>
-                </ListBox.ContextMenu>
-                <i:Interaction.Triggers>
-                    <i:EventTrigger EventName="MouseDoubleClick">
-                        <i:InvokeCommandAction Command="{Binding CmdLabelDoubleClicked}"/>
-                    </i:EventTrigger>
-                </i:Interaction.Triggers>
-            </ListBox>
-        </Grid>
-        <Grid Grid.Row="1" Grid.Column="1">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="8*"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="2*"/>
-            </Grid.RowDefinitions>
-            <TextBlock Grid.Row="0" HorizontalAlignment="Center" Margin="5,5,0,5">Genre</TextBlock>
-            <c:DelayedBindingTextBox Grid.Row="1" DelayTime="500" Margin="5,0,0,5" Text="{Binding SearchGenre}"/>
-            <ListBox Grid.Row="2" ItemsSource="{Binding Genres}" Margin="5,0,0,5" x:Name="_genreList"
-                     SelectedItem="{Binding SelectedGenre}" SelectionMode="Extended">
-                <ListBox.InputBindings>
-                    <KeyBinding Command="{Binding CmdRemove}"
-                            CommandParameter="{Binding ElementName=_genreList, Path=SelectedItem}"
-                            Key="Delete"/>
-                </ListBox.InputBindings>
-                <i:Interaction.Triggers>
-                    <i:EventTrigger EventName="MouseDoubleClick">
-                        <i:InvokeCommandAction
-                            Command="{Binding CmdGenreDoubleClicked}"
-                            CommandParameter="{Binding SelectedItem, ElementName=_genreList}"/>
-                    </i:EventTrigger>
-                </i:Interaction.Triggers>
-                <i:Interaction.Behaviors>
-                    <bh:ListboxBehavior/>
-                </i:Interaction.Behaviors>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <c:LangComboBox Grid.Column="0" TextSource="{Binding Name}" DbEntry="{Binding Name}" Margin="10,0,0,0"/>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-                <ItemsControl.ItemContainerStyle>
-                    <Style TargetType="{x:Type ListBoxItem}">
-                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                    </Style>
-                </ItemsControl.ItemContainerStyle>
-            </ListBox>
-            <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center">
-                <Button Style="{DynamicResource ModernButtonStyle2}"
-                        Command="{Binding CmdMoveDownSelectedGenre}" Margin="5,0,5,5" ToolTip="Move down select genre to merge">
-                    <Path Stretch="Uniform"
-                      Data="{Binding Source={StaticResource arrow-down}, Path=Data}"
-                      Fill="{Binding Path=Foreground, RelativeSource=
-                            {RelativeSource AncestorType={x:Type Button}}}" />
-                </Button>
-                <Button Style="{DynamicResource ModernButtonStyle2}"
-                        Command="{Binding CmdMoveUpSelectedGenre}" Margin="5,0,5,5" ToolTip="Move up select genre">
-                    <Path Stretch="Uniform"
-                      Data="{Binding Source={StaticResource arrow-up}, Path=Data}"
-                      Fill="{Binding Path=Foreground, RelativeSource=
-                            {RelativeSource AncestorType={x:Type Button}}}" />
-                </Button>
-            </StackPanel>
-            <ListBox Grid.Row="4" ItemsSource="{Binding GenresToMerge}" Margin="5,0,0,5" x:Name="_genreListToMerge"
-                     SelectedItem="{Binding SelectedGenreToMerge}" SelectionMode="Extended">
-                <i:Interaction.Triggers>
-                    <i:EventTrigger EventName="MouseDoubleClick">
-                        <i:InvokeCommandAction
-                            Command="{Binding CmdGenreDoubleClicked}"
-                            CommandParameter="{Binding SelectedItem, ElementName=_genreListToMerge}"/>
-                    </i:EventTrigger>
-                </i:Interaction.Triggers>
-                <ListBox.ContextMenu>
-                    <ContextMenu>
-                        <MenuItem Header="Merge Genres"
-                          Command="{Binding CmdGenresMerge}"
-                          CommandParameter="{Binding RelativeSource={RelativeSource
-                    AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.SelectedItems}"/>
-                    </ContextMenu>
-                </ListBox.ContextMenu>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <c:LangComboBox Grid.Column="0" TextSource="{Binding Name}" Margin="10,0,0,0"/>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-                <ItemsControl.ItemContainerStyle>
-                    <Style TargetType="{x:Type ListBoxItem}">
-                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                    </Style>
-                </ItemsControl.ItemContainerStyle>
-            </ListBox>
-        </Grid>
-        <Grid Grid.Row="1" Grid.Column="2">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="8*"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="2*"/>
-            </Grid.RowDefinitions>
-            <TextBlock Grid.Row="0" HorizontalAlignment="Center" Margin="5,5,0,5">Series</TextBlock>
-            <c:DelayedBindingTextBox Grid.Row="1" DelayTime="500" Margin="5,0,0,5" Text="{Binding SearchSeries}"/>
-            <ListBox Grid.Row="2" ItemsSource="{Binding Series}" Margin="5,0,0,5"
-                     SelectedItem="{Binding SelectedSeries}" SelectionMode="Extended">
-                <ListBox.ContextMenu>
-                    <ContextMenu>
-                        <MenuItem Header="Merge Series"
-                                  Command="{Binding CmdMergeSeries}"
+                            </ContextMenu>
+                        </ListBox.ContextMenu>
+                    </ListBox>
+                    <c:DelayedBindingTextBox Grid.Row="3" DelayTime="500" Margin="2,0,0,5" Text="{Binding SearchLabel}"/>
+                    <ListBox Grid.Row="4" ItemsSource="{Binding Labels}" Margin="2,0,0,2" ItemTemplate="{StaticResource _langText}"
+                             SelectedItem="{Binding SelectedLabel}" SelectionMode="Extended" ItemContainerStyle="{StaticResource _stretch}">
+                        <ListBox.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Merge Labels"
+                                  Command="{Binding CmdMergeLables}"
                                   CommandParameter="{Binding RelativeSource={RelativeSource
                             AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.SelectedItems}"/>
-                        <MenuItem Header="Delete"
-                                  Command="{Binding CmdRemove}"
+                                <MenuItem Header="Remove"
+                                         Command="{Binding CmdRemove}"
+                                         CommandParameter="{Binding RelativeSource={RelativeSource
+                                   AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.SelectedItem}"/>
+                            </ContextMenu>
+                        </ListBox.ContextMenu>
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="MouseDoubleClick">
+                                <i:InvokeCommandAction Command="{Binding CmdLabelDoubleClicked}"/>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                    </ListBox>
+                    <ListBox Grid.Row="4" Grid.Column="2" ItemsSource="{Binding SelectedLabel.Name}" Margin="2,0,2,2">
+                        <i:Interaction.Behaviors>
+                            <bh:ListboxBehavior AutoCopy="True"/>
+                        </i:Interaction.Behaviors>
+                    </ListBox>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Genre">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="8*"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="3*"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <c:DelayedBindingTextBox Grid.Row="0" DelayTime="500" Margin="2,5,0,5" Text="{Binding SearchGenre}"/>
+                    <ListBox Grid.Row="1" ItemsSource="{Binding Genres}" Margin="2,0,0,0" x:Name="_genreList"
+                             SelectedItem="{Binding SelectedGenre}" SelectionMode="Extended">
+                        <ListBox.InputBindings>
+                            <KeyBinding Command="{Binding CmdRemove}"
+                                    CommandParameter="{Binding ElementName=_genreList, Path=SelectedItem}"
+                                    Key="Delete"/>
+                        </ListBox.InputBindings>
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="MouseDoubleClick">
+                                <i:InvokeCommandAction
+                                    Command="{Binding CmdGenreDoubleClicked}"
+                                    CommandParameter="{Binding SelectedItem, ElementName=_genreList}"/>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                        <i:Interaction.Behaviors>
+                            <bh:ListboxBehavior/>
+                        </i:Interaction.Behaviors>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <c:LangComboBox Grid.Column="0" TextSource="{Binding Name}" DbEntry="{Binding Name}" Margin="10,0,0,0"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                        <ItemsControl.ItemContainerStyle>
+                            <Style TargetType="{x:Type ListBoxItem}">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                            </Style>
+                        </ItemsControl.ItemContainerStyle>
+                    </ListBox>
+                    <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Vertical" VerticalAlignment="Center">
+                        <Button Style="{DynamicResource ModernButtonStyle2}"
+                                Command="{Binding CmdMoveDownSelectedGenre}" Margin="2" ToolTip="Move down select genre to merge">
+                            <Path Stretch="Uniform"
+                              Data="{Binding Source={StaticResource ArrowRightIcon}, Path=Data}"
+                              Fill="{Binding Path=Foreground, RelativeSource=
+                                    {RelativeSource AncestorType={x:Type Button}}}" />
+                        </Button>
+                        <Button Style="{DynamicResource ModernButtonStyle2}" Margin="2"
+                                Command="{Binding CmdMoveUpSelectedGenre}" ToolTip="Move up select genre">
+                            <Path Stretch="Uniform"
+                              Data="{Binding Source={StaticResource ArrowLeftIcon}, Path=Data}"
+                              Fill="{Binding Path=Foreground, RelativeSource=
+                                    {RelativeSource AncestorType={x:Type Button}}}" />
+                        </Button>
+                    </StackPanel>
+                    <ListBox Grid.Row="1" Grid.Column="2"  ItemsSource="{Binding GenresToMerge}" Margin="2,0,2,0" x:Name="_genreListToMerge"
+                             SelectedItem="{Binding SelectedGenreToMerge}" SelectionMode="Extended">
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="MouseDoubleClick">
+                                <i:InvokeCommandAction
+                                    Command="{Binding CmdGenreDoubleClicked}"
+                                    CommandParameter="{Binding SelectedItem, ElementName=_genreListToMerge}"/>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                        <ListBox.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Merge Genres"
+                                  Command="{Binding CmdGenresMerge}"
                                   CommandParameter="{Binding RelativeSource={RelativeSource
-                            AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.SelectedItem}"/>
-                    </ContextMenu>
-                </ListBox.ContextMenu>
-                <i:Interaction.Behaviors>
-                    <bh:ListboxBehavior AutoCopy="True"/>
-                </i:Interaction.Behaviors>
-                <i:Interaction.Triggers>
-                    <i:EventTrigger EventName="MouseDoubleClick">
-                        <i:InvokeCommandAction Command="{Binding CmdSeriesoDubleClicked}"/>
-                    </i:EventTrigger>
-                </i:Interaction.Triggers>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <c:LangComboBox Grid.Column="0" TextSource="{Binding Name}" DbEntry="{Binding Name}" Margin="10,0,0,0"/>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-                <ItemsControl.ItemContainerStyle>
-                    <Style TargetType="{x:Type ListBoxItem}">
-                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                    </Style>
-                </ItemsControl.ItemContainerStyle>
-            </ListBox>
-            <DockPanel Grid.Row="3" Margin="5,0,0,5">
-                <Button DockPanel.Dock="Right" Command="{Binding CmdAddSeriesNameTranslated}" >Add</Button>
-                <TextBox DockPanel.Dock="Left" Text="{Binding SeriesNameTranslated}"/>
-            </DockPanel>
-            <ListBox Grid.Row="4" ItemsSource="{Binding SelectedSeries.Name}" Margin="5,0,0,5">
-                <i:Interaction.Behaviors>
-                    <bh:ListboxBehavior AutoCopy="True"/>
-                </i:Interaction.Behaviors>
-            </ListBox>
-        </Grid>
-        <Grid Grid.Row="1" Grid.Column="3">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-            <TextBlock Grid.Row="0" HorizontalAlignment="Center" Margin="5,5,0,5">Movies</TextBlock>
-            <c:DelayedBindingTextBox Grid.Row="1" DelayTime="500" Margin="5,0,5,5" Text="{Binding SearchPid}"/>
-            <ListBox Grid.Row="2" ItemsSource="{Binding Movies.Result}" Margin="5,0,5,5"
-                     SelectedItem="{Binding SelectedMovie}" SelectionMode="Extended">
-            </ListBox>
-        </Grid>
+                            AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.SelectedItems}"/>
+                            </ContextMenu>
+                        </ListBox.ContextMenu>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <c:LangComboBox Grid.Column="0" TextSource="{Binding Name}" Margin="10,0,0,0"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                        <ItemsControl.ItemContainerStyle>
+                            <Style TargetType="{x:Type ListBoxItem}">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                            </Style>
+                        </ItemsControl.ItemContainerStyle>
+                    </ListBox>
+                    <ListBox Grid.Row="3" ItemsSource="{Binding SelectedGenre.Name}" Margin="2,5,0,2">
+                        <i:Interaction.Behaviors>
+                            <bh:ListboxBehavior AutoCopy="True"/>
+                        </i:Interaction.Behaviors>
+                    </ListBox>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Series">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="8*"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="2*"/>
+                    </Grid.RowDefinitions>
+                    <c:DelayedBindingTextBox Grid.Row="1" DelayTime="500" Margin="2,5,2,5" Text="{Binding SearchSeries}"/>
+                    <ListBox Grid.Row="2" ItemsSource="{Binding Series}" Margin="2,0,2,5"
+                             SelectedItem="{Binding SelectedSeries}" SelectionMode="Extended">
+                        <ListBox.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Merge Series"
+                                          Command="{Binding CmdMergeSeries}"
+                                          CommandParameter="{Binding RelativeSource={RelativeSource
+                                AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.SelectedItems}"/>
+                                <MenuItem Header="Delete"
+                                          Command="{Binding CmdRemove}"
+                                          CommandParameter="{Binding RelativeSource={RelativeSource
+                                AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.SelectedItem}"/>
+                            </ContextMenu>
+                        </ListBox.ContextMenu>
+                        <i:Interaction.Behaviors>
+                            <bh:ListboxBehavior AutoCopy="True"/>
+                        </i:Interaction.Behaviors>
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="MouseDoubleClick">
+                                <i:InvokeCommandAction Command="{Binding CmdSeriesoDubleClicked}"/>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <c:LangComboBox Grid.Column="0" TextSource="{Binding Name}" DbEntry="{Binding Name}" Margin="10,0,0,0"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                        <ItemsControl.ItemContainerStyle>
+                            <Style TargetType="{x:Type ListBoxItem}">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                            </Style>
+                        </ItemsControl.ItemContainerStyle>
+                    </ListBox>
+                    <ListBox Grid.Row="4" ItemsSource="{Binding SelectedSeries.Name}" Margin="2,0,2,2">
+                        <i:Interaction.Behaviors>
+                            <bh:ListboxBehavior AutoCopy="True"/>
+                        </i:Interaction.Behaviors>
+                    </ListBox>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Movies">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <DockPanel Grid.Row="0" LastChildFill="True">
+                        <ComboBox Width="120" Margin="2,5,0,5" ItemsSource="{Binding SearchMovieTypes}" 
+                                 SelectedItem="{Binding SelectedSearchMovieType}"/>
+                        <c:DelayedBindingTextBox Grid.Row="0" DelayTime="500" Margin="2,5,2,5" Text="{Binding SearchMovieText}"/>
+                    </DockPanel>
+                    <ListBox Grid.Row="1" ItemsSource="{Binding Movies.Result}" Margin="2,0,2,2"
+                             SelectedItem="{Binding SelectedMovie}" SelectionMode="Extended" x:Name="_movieList">
+                        <!-- run cmd when double click -->
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="MouseDoubleClick">
+                                <i:InvokeCommandAction
+                                    Command="{Binding CmdEditMovie}"
+                                    CommandParameter="{Binding ElementName=_movieList, Path=SelectedItem}"/>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                    </ListBox>
+                </Grid>
+            </TabItem>
+        </TabControl>
     </Grid>
 </UserControl>

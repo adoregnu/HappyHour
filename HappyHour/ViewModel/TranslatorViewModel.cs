@@ -69,6 +69,7 @@ namespace HappyHour.ViewModel
         }
         private readonly Translator _translator;
         private readonly ChatClient _chatClient;
+        private readonly List<ChatMessage> _chatHistory = [];
 
         private string _selectedTranslator = "DeepL";
         public string SelectedTranslator {
@@ -128,12 +129,12 @@ namespace HappyHour.ViewModel
             if (string.IsNullOrEmpty(ChatText)) return;
 
             UiServices.WaitCursor(true);
-            RightDocument.Text += "\n> " + ChatText;
+            RightDocument.Text += "\n> " + ChatText  + "\n";
 
-            NotifyTask.Create(_chatClient.CompleteChatAsync(
-            [
-                new UserChatMessage(ChatText)
-            ])).PropertyChanged += OnTranslationCompleted;
+            _chatHistory.Add(new UserChatMessage(ChatText));
+            NotifyTask.Create(_chatClient.CompleteChatAsync(_chatHistory))
+                .PropertyChanged += OnTranslationCompleted;
+
             ChatText = string.Empty;
         }
 
@@ -153,18 +154,21 @@ namespace HappyHour.ViewModel
             }
             else if (SelectedTranslator == "OpenAI")
             {
-                // 번역 프롬프트 구성 (System 메시지로 역할 부여)
-                NotifyTask.Create(_chatClient.CompleteChatAsync(
-                [
-                    new SystemChatMessage($"Translate the following {SelectedLeftLang} text into {SelectedRightLang}."),
-                    new UserChatMessage(LeftDocument.Text)
-                ])).PropertyChanged += OnTranslationCompleted;
+                _chatHistory.Add(new UserChatMessage(
+                    $"Translate the following text from {SelectedLeftLang} to {SelectedRightLang}:\n{LeftDocument.Text}"));
+
+                NotifyTask.Create(_chatClient.CompleteChatAsync(_chatHistory))
+                    .PropertyChanged += OnTranslationCompleted;
             }
         }
 
         void OnUpdateSource()
         {
-            UpdateItem?.Invoke(LeftDocument.Text, SelectedLeftLang);
+            if (!string.IsNullOrEmpty(LeftDocument.Text))
+            {
+                UpdateItem?.Invoke(LeftDocument.Text, SelectedLeftLang);
+                DialogResult = false;
+            }
         }
         void OnUpdateTarget()
         {
@@ -187,6 +191,7 @@ namespace HappyHour.ViewModel
                 {
                     ChatCompletion completion = ((dynamic)s).Result;
                     RightDocument.Text += completion.Content[0].Text;
+                    _chatHistory.Add(new AssistantChatMessage(completion.Content[0].Text));
                 }
             }
            UiServices.WaitCursor(false);

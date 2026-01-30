@@ -464,7 +464,7 @@ namespace HappyHour.ViewModel
             }
 
             UiServices.WaitCursor(true);
-            var dialog = await AvEditorViewModel.CreateAsync(item);
+            var dialog = await AvEditorViewModel.CreateAsync(item.MovieInfo);
             UiServices.WaitCursor(false);
             MainView.DialogService.ShowDialog<AvEditorDialog>(this, dialog);
         }

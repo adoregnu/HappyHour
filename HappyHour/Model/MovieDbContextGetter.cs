@@ -25,28 +25,14 @@ namespace HappyHour.Model
                 .Where(n => EF.Functions.Like(n.Name.Text, $"%{keyword}%"))];
         }
 
-        public static string GetLable(Movie movie, string lang = null)
+        public static string GetLable(Movie movie, string prefered_lang = "ko")
         {
             if (movie.Label == null) return null;
 
             var label = movie.Label;
-            string lbl_name = null;
-            foreach (var name in label.Name)
-            {
-                if (lang != null && name.Lang == lang)
-                {
-                    lbl_name = name.Text;
-                    break;
-                }
-                else if (lang == null)
-                {
-                    lbl_name = name.Text;
-                    break;
-                }
-            }
-            return lbl_name;
+            return label.Name.OrderByDescending(n => n.Lang == prefered_lang).First().Text;
         }
-        public static string GetActorName(Actor actor, string lang = null)
+        public static string GetActorName(Actor actor, string lang = "ko")
         {
             string name = null;
             int priority = -1;
@@ -183,11 +169,11 @@ namespace HappyHour.Model
         }
         public async ValueTask<List<string>> GetMovieUrls(string ppath)
         {
-            return await GetMovieUrls((Movie m) => EF.Functions.Like(m.VideoUrl, $"{ppath}%", "|"));
+            return await GetMovieUrls(m => EF.Functions.Like(m.VideoUrl, $"{ppath}%", "|"));
         }
         public async ValueTask<List<string>> GetMovieUrls(Actor actor)
         {
-            return await GetMovieUrls((Movie m) => m.Actors.Contains(actor));
+            return await GetMovieUrls(m => m.Actors.Contains(actor));
         }
 
         public async ValueTask<Movie> GetMovie(Expression<Func<Movie, bool>> exp,  bool bAll = true)
@@ -221,7 +207,7 @@ namespace HappyHour.Model
         }
         public async ValueTask<Movie> GetMovie(string pid, bool bAll = true)
         {
-            return await GetMovie((Movie m) => EF.Functions.Like(m.PID, $"%{pid}%"), bAll);
+            return await GetMovie(m => EF.Functions.Like(m.PID, $"%{pid}%"), bAll);
         }
 
         public async ValueTask<List<Movie>> GetMoviesFast(Expression<Func<Movie, bool>> exp)
@@ -229,9 +215,16 @@ namespace HappyHour.Model
             return await Movies.Where(exp).ToListAsync();
         }
 
-        public async ValueTask<List<Movie>> GetMoviesFast(string pid)
+        public async ValueTask<List<Movie>> GetMoviesFast(string text, string searchType = "PID")
         {
-            return await GetMoviesFast((Movie m) => EF.Functions.Like(m.PID, $"%{pid}%"));
+            Expression<Func<Movie, bool>> exp = searchType switch
+            {
+                "PID" => m => EF.Functions.Like(m.PID, $"%{text}%"),
+                "Title" => m => m.Title.Any(t => EF.Functions.Like(t.Text, $"%{text}%")),
+                "Plot" => m => m.Plot.Any(p => EF.Functions.Like(p.Text, $"%{text}%")),
+                _ => null,
+            };
+            return await GetMoviesFast(exp);
         }
 
         public async ValueTask<List<Movie>> GetMovies(Expression<Func<Movie, bool>> exp, int limit = 0)
@@ -270,31 +263,31 @@ namespace HappyHour.Model
 
         public async ValueTask<List<Movie>> GetMovies(string pid)
         {
-            return await GetMovies((Movie m) => EF.Functions.Like(m.PID, $"%{pid}%"));
+            return await GetMovies(m => EF.Functions.Like(m.PID, $"%{pid}%"));
         }
         public async ValueTask<List<Movie>> GetMovies(Actor actor)
         {
-            return await GetMovies((Movie m) => m.Actors.Contains(actor));
+            return await GetMovies(m => m.Actors.Contains(actor));
         }
         public async ValueTask<List<Movie>> GetMovies(Genre genre)
         {
-            return await GetMovies((Movie m) => m.Genres.Contains(genre));
+            return await GetMovies(m => m.Genres.Contains(genre));
         }
         public async ValueTask<List<Movie>> GetMovies(Maker maker)
         {
-            return await GetMovies((Movie m) => m.Maker == maker);
+            return await GetMovies(m => m.Maker == maker);
         }
         public async ValueTask<List<Movie>> GetMovies(Label label)
         {
-            return await GetMovies((Movie m) => m.Label == label);
+            return await GetMovies(m => m.Label == label);
         }
         public async ValueTask<List<Movie>> GetMovies(Series series)
         {
-            return await GetMovies((Movie m) => m.Series == series);
+            return await GetMovies(m => m.Series == series);
         }
         public async ValueTask<List<Movie>> GetMoviesEmptyFieldOf(string name)
         {
-            return await GetMovies((Movie m) => !m.Title.Any(t => t.Lang == "ko"));
+            return await GetMovies(m => !m.Title.Any(t => t.Lang == "ko"));
         }
 
         public async ValueTask<List<Genre>> GetGenres(Movie movie)

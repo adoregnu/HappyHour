@@ -10,9 +10,13 @@
         }
 
         var filters = ['/dvd/', '/content/']
+        // replace last occurrence of '-' in _PID with ''
+        var pid = _PID.replace(/-([^ -]*)$/, '$1').toLowerCase();
+
         // filter nodes by filters
         nodes = nodes.filter(n => {
             var href = n.href.toLowerCase();
+            if (!href.includes(pid)) return false;
             return filters.some(f => href.includes(f));
         });
         if (nodes.length == 0) {

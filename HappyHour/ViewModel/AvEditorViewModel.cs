@@ -20,10 +20,10 @@ namespace HappyHour.ViewModel
 {
     internal class AvEditorViewModel : ObservableObject, IModalDialogViewModel
     {
-        public static Task<AvEditorViewModel> CreateAsync(AvMovie am)
+        public static async Task<AvEditorViewModel> CreateAsync(Movie m)
         {
-            var ret = new AvEditorViewModel(am);
-            return ret.InitializeAsync();
+            var ret = new AvEditorViewModel(m);
+            return await ret.InitializeAsync();
         }
 
         private readonly MovieDbContext _db;// = App.Current.DbContext;
@@ -177,15 +177,17 @@ namespace HappyHour.ViewModel
         public IAsyncCommand<object> CmdAdd { get; private set; }
         public ICommand CmdClosed { get; private set; }
         readonly Movie _movie = null;
-        private AvEditorViewModel(AvMovie movie)
+
+        private AvEditorViewModel(Movie movie)
         {
             _db = new();
-            _movie = movie.MovieInfo;
+            _movie = movie;
 
             CmdAdd = new AsyncCommand<object>(OnAdd);
             CmdRemove = new RelayCommand<object>(OnRemove);
             CmdSave = new RelayCommand(OnSave);
             CmdClosed = new RelayCommand(OnClose);
+
         }
 
         private async Task<AvEditorViewModel> InitializeAsync()
