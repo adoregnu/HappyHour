@@ -21,12 +21,20 @@ namespace HappyHour.ViewModel
         private NotifyTask<List<Movie>> movies;
         public NotifyTask<List<Movie>> Movies => movies;
 
-        public List<string> SearchMovieTypes => ["PID" ,"Title", "Plot"];
+        public List<string> SearchMovieTypes => [
+            "PID" ,"Title", "Plot",
+            "Empty Rating", "Empty Genre", "Empty Actor",
+            "Empty Label", "Empty Maker", "Empty Plot"
+        ];
         public string _selectedSearchMovieType = "PID";
         public string SelectedSearchMovieType
         {
             get => _selectedSearchMovieType;
-            set => SetProperty(ref _selectedSearchMovieType, value);
+            set
+            {
+                SetProperty(ref _selectedSearchMovieType, value);
+                SearchMovieText = "";
+            }
         }
 
         Movie _selectedMovie;
@@ -57,13 +65,14 @@ namespace HappyHour.ViewModel
             set
             {
                 SetProperty(ref _searchMovieText, value);
-                if (string.IsNullOrEmpty(value)) return;
+                //if (string.IsNullOrEmpty(value)) return;
 
                 movies = NotifyTask.Create(_db.GetMoviesFast(value, SelectedSearchMovieType).AsTask());
                 movies.PropertyChanged += (s, e) =>
                 {
                     if (e.PropertyName == "Result")
                     {
+                        //Movies.Result.Sort();
                         OnPropertyChanged(nameof(Movies));
                     }
                 };

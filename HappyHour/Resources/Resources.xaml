@@ -368,6 +368,45 @@
                         Background="{TemplateBinding Background}"
                         BorderThickness="0"
                         Padding="{TemplateBinding Padding}">
+                        <Viewbox Width="25" Height="25" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <ContentPresenter
+                                x:Name="contentPresenter"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"/>
+                        </Viewbox>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style x:Key="ModernSmallButton" TargetType="{x:Type Button}">
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Foreground" Value="DimGray" />
+            </Trigger>
+            <Trigger Property="IsPressed" Value="True">
+                <Setter Property="Foreground" Value="Gray" />
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Foreground" Value="Gray" />
+            </Trigger>
+        </Style.Triggers>
+        <Setter Property="Background" Value="Transparent" />
+
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Width" Value="20"/>
+        <Setter Property="Height" Value="20"/>
+<!--
+        <Setter Property="Background" Value="Black" />
+        <Setter Property="Foreground" Value="{StaticResource CustomSliderHighlightBrush}" />
+-->
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Border
+                        Background="{TemplateBinding Background}"
+                        BorderThickness="0"
+                        Padding="{TemplateBinding Padding}">
                         <ContentPresenter
                             x:Name="contentPresenter"
                             HorizontalAlignment="Center"
@@ -377,6 +416,7 @@
             </Setter.Value>
         </Setter>
     </Style>
+
     <Style TargetType="Border" x:Key="SidePanelContainerBorderStyle">
         <Setter Property="Margin" Value="0,16,20,-106" />
         <Setter Property="Padding" Value="16,10,6,16" />

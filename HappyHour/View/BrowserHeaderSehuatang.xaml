@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
              d:DesignHeight="20" d:DesignWidth="550">
     <Grid>
@@ -15,25 +16,16 @@
         <StackPanel Grid.Column="1" Orientation="Horizontal">
             <Button Margin="5,0,0,0" Command="{Binding SelectedSpider.CmdSearch}"
                     Style="{DynamicResource ModernButtonStyle2}">
-                <Path Stretch="Uniform"
-                      Data="{Binding Source={StaticResource search-web}, Path=Data}"
-                      Fill="{Binding Path=Foreground, RelativeSource=
-                            {RelativeSource AncestorType={x:Type Button}}}" />
+                <materialDesign:PackIcon Kind="SearchWeb" />
             </Button>
             <Button Style="{DynamicResource ModernButtonStyle2}"
                     Command="{Binding SelectedSpider.CmdSkip}">
-                <Path Stretch="Uniform"
-                    Data="{Binding Source={StaticResource skip-next}, Path=Data}"
-                    Fill="{Binding Path=Foreground, RelativeSource=
-                        {RelativeSource AncestorType={x:Type Button}}}" />
+                <materialDesign:PackIcon Kind="SkipNext" />
             </Button>
 
             <Button Style="{DynamicResource ModernButtonStyle2}"
                     Command="{Binding SelectedSpider.CmdStop}">
-                <Path Stretch="Uniform"
-                    Data="{Binding Source={StaticResource web-cancel}, Path=Data}"
-                    Fill="{Binding Path=Foreground, RelativeSource=
-                        {RelativeSource AncestorType={x:Type Button}}}" />
+                <materialDesign:PackIcon Kind="WebCancel" />
             </Button>
         </StackPanel>
     </Grid>

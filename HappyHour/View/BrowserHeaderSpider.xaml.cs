@@ -24,5 +24,30 @@ namespace HappyHour.View
         {
             InitializeComponent();
         }
+
+        private void OnRegexPatternKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key != Key.Enter)
+            {
+                return;
+            }
+
+            if (sender is ComboBox comboBox)
+            {
+                comboBox.GetBindingExpression(ComboBox.TextProperty)?.UpdateSource();
+            }
+        }
+
+        private void OnRegexPatternSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (sender is ComboBox comboBox)
+            {
+                if (comboBox.SelectedItem is string selectedPattern)
+                {
+                    comboBox.Text = selectedPattern;
+                }
+                comboBox.GetBindingExpression(ComboBox.TextProperty)?.UpdateSource();
+            }
+        }
     }
 }

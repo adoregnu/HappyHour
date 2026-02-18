@@ -38,7 +38,7 @@ namespace HappyHour.ViewModel
         private Maker _selectedMaker;
 
         public Movie Movie { get; private set; }
-        public List<Genre> Genres { get; private set; } = [];
+        public ObservableCollection<Genre> Genres { get; private set; } = [];
         public ObservableCollection<Actor> Actors { get; set; } = [];
 
         public List<Maker> AllMakers
@@ -192,7 +192,7 @@ namespace HappyHour.ViewModel
 
         private async Task<AvEditorViewModel> InitializeAsync()
         {
-            Movie = await _db.GetMovie(_movie.PID, true);
+            Movie = await _db.GetMovie(_movie.PID, true, true);
             //(await _db.GetMakers(Movie)).ForEach(Makers.Add);
             //(await _db.GetLabels(Movie)).ForEach(Labels.Add);
             (await _db.GetGenres(Movie)).ForEach(Genres.Add);
@@ -218,8 +218,8 @@ namespace HappyHour.ViewModel
             }
             else if (item is Genre genre)
             {
-                Movie.Genres.Add(genre);
-                genre.Movies.Add(Movie);
+                await _db.UpdateGenre(Movie, genre);
+                Genres.Add(genre);
             }
             else if (item is Actor actor)
             {

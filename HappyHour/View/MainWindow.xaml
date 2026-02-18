@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:md="https://github.com/fantasticfiasco/mvvm-dialogs"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:view="clr-namespace:HappyHour.View"
         mc:Ignorable="d"
         md:DialogServiceViews.IsRegistered="True"
@@ -17,10 +18,7 @@
         <ToolBar>
             <Button Style="{DynamicResource ModernButtonStyle3}"
                     Command="{Binding CmdFileToFolder}">
-                <Path Stretch="Uniform"
-                    Data="{Binding Source={StaticResource FileMoveIcon}, Path=Data}"
-                    Fill="{Binding Path=Foreground, RelativeSource=
-                        {RelativeSource AncestorType={x:Type Button}}}" />
+                <materialDesign:PackIcon Kind="FileMoveOutline"/>
                 <Button.ToolTip>
                     <TextBlock Text="Move Media files to folder of it's name"/>
                 </Button.ToolTip>
@@ -28,10 +26,7 @@
 
             <Button Style="{DynamicResource ModernButtonStyle3}"
                     Command="{Binding CmdActorEdtor}" Margin="2,0,0,0">
-                <Path Stretch="Uniform"
-                    Data="{Binding Source={StaticResource PeopleSearchIcon}, Path=Data}"
-                    Fill="{Binding Path=Foreground, RelativeSource=
-                        {RelativeSource AncestorType={x:Type Button}}}" />
+                <materialDesign:PackIcon Kind="PersonSearchOutline" />
                 <Button.ToolTip>
                     <TextBlock Text="View Actors by order of alphabet"/>
                 </Button.ToolTip>
@@ -50,10 +45,7 @@
             <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" />
             <Button Style="{DynamicResource ModernButtonStyle3}"
                     Command="{Binding CmdSpiderSetting}">
-                <Path Stretch="Uniform"
-                    Data="{Binding Source={StaticResource cog-outline}, Path=Data}"
-                    Fill="{Binding Path=Foreground, RelativeSource=
-                        {RelativeSource AncestorType={x:Type Button}}}" />
+                <materialDesign:PackIcon Kind="CogOutline" />
                 <Button.ToolTip>
                     <TextBlock Text="Settings for items to be scraped."/>
                 </Button.ToolTip>

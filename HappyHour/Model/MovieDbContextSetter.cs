@@ -229,6 +229,8 @@ namespace HappyHour.Model
             {
                 list.Add(new T() { Lang = lang, Text = namelang.Item1 });
             }
+
+            if (string.IsNullOrEmpty(namelang.Item1)) return;
             // list 에 korean가 업고 namelang.Item2 가 jp이면 korean으로 번역해서 추가
             if (namelang.Item2 == "jp" && !list.Any(t => t.Lang == "ko"))
             {
@@ -781,9 +783,27 @@ namespace HappyHour.Model
 
         public async Task UpdateLabel(Movie movie, Label label)
         {
-            await Entry(label).Collection(l => l.Movies).LoadAsync();
+            if (label.Movies == null)
+            {
+                await Entry(label).Collection(l => l.Movies).LoadAsync();
+            } 
             movie.Label = label;
             label.Movies.Add(movie);
+            await SaveChangesAsync();
+        }
+
+        public async Task UpdateGenre(Movie movie, Genre genre)
+        {
+            if (genre.Movies == null)
+            {
+                await Entry(genre).Collection(g => g.Movies).LoadAsync();
+            }
+            if (movie.Genres == null)
+            {
+                await Entry(movie).Collection(m => m.Genres).LoadAsync();
+            }
+            movie.Genres.Add(genre);
+            genre.Movies.Add(movie);
             await SaveChangesAsync();
         }
 

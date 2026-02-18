@@ -8,6 +8,7 @@
              xmlns:conv="clr-namespace:HappyHour.Converter"
              xmlns:local="clr-namespace:HappyHour.View"
              xmlns:ctrls="clr-namespace:HappyHour.View.Controls"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="400">
     <UserControl.Resources>
@@ -41,18 +42,12 @@
                 <Button Style="{StaticResource ModernButtonStyle2}"
                         Margin="0,2,0,2"
                         Command="{Binding CmdRefreshDir}" >
-                    <Path Stretch="Uniform"
-                          Data="{Binding Source={StaticResource RefreshIcon}, Path=Data}"
-                          Fill="{Binding Path=Foreground, RelativeSource=
-                            {RelativeSource AncestorType={x:Type Button}}}"/>
+                    <materialDesign:PackIcon Kind="Refresh"/>
                 </Button>
                 <Button Style="{StaticResource ModernButtonStyle2}"
                         Margin="0,2,0,2"
                         Command="{Binding CmdUpDir}" >
-                    <Path Stretch="Uniform"
-                          Data="{Binding Source={StaticResource ArrowUpIcon}, Path=Data}"
-                          Fill="{Binding Path=Foreground, RelativeSource=
-                            {RelativeSource AncestorType={x:Type Button}}}"/>
+                    <materialDesign:PackIcon Kind="ArrowUp"/>
                 </Button>
             </StackPanel>
         </Grid>

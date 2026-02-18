@@ -176,7 +176,7 @@ namespace HappyHour.Model
             return await GetMovieUrls(m => m.Actors.Contains(actor));
         }
 
-        public async ValueTask<Movie> GetMovie(Expression<Func<Movie, bool>> exp,  bool bAll = true)
+        public async ValueTask<Movie> GetMovie(Expression<Func<Movie, bool>> exp,  bool bAll = true, bool excludeCover = false)
         {
             var query = Movies
                 .Include(m => m.Maker)
@@ -185,8 +185,7 @@ namespace HappyHour.Model
                     .ThenInclude(l => l.Name)
                 .Include(m => m.Actors)
                     .ThenInclude(actor => actor.Names)
-                        .ThenInclude(name => name.Name)
-                .Include(m => m.Cover);
+                        .ThenInclude(name => name.Name);
 
             IQueryable<Movie> iquery;
             if (bAll)
@@ -196,18 +195,30 @@ namespace HappyHour.Model
                .Include(m => m.Title)
                .Include(m => m.Plot)
                .Include(m => m.Genres)
-               .Include(m => m.Ratings)
-               .Where(exp);
+               .Include(m => m.Ratings);
+
+               if (!excludeCover)
+               {
+                   iquery = iquery.Include(m => m.Cover);
+               }
+               iquery = iquery.Where(exp);
             }
             else
             {
-                iquery = query.Where(exp);
+                if (!excludeCover)
+                {
+                    iquery = query.Include(m => m.Cover).Where(exp);
+                }
+                else
+                {
+                    iquery = query.Where(exp);
+                }
             }
             return await iquery.FirstOrDefaultAsync();
         }
-        public async ValueTask<Movie> GetMovie(string pid, bool bAll = true)
+        public async ValueTask<Movie> GetMovie(string pid, bool bAll = true, bool excludeCover = false)
         {
-            return await GetMovie(m => EF.Functions.Like(m.PID, $"%{pid}%"), bAll);
+            return await GetMovie(m => EF.Functions.Like(m.PID, $"%{pid}%"), bAll, excludeCover);
         }
 
         public async ValueTask<List<Movie>> GetMoviesFast(Expression<Func<Movie, bool>> exp)
@@ -219,9 +230,16 @@ namespace HappyHour.Model
         {
             Expression<Func<Movie, bool>> exp = searchType switch
             {
-                "PID" => m => EF.Functions.Like(m.PID, $"%{text}%"),
-                "Title" => m => m.Title.Any(t => EF.Functions.Like(t.Text, $"%{text}%")),
-                "Plot" => m => m.Plot.Any(p => EF.Functions.Like(p.Text, $"%{text}%")),
+                "PID" => m => !string.IsNullOrEmpty(text) && EF.Functions.Like(m.PID, $"%{text}%"),
+                "Title" => m => !string.IsNullOrEmpty(text) && m.Title.Any(t => EF.Functions.Like(t.Text, $"%{text}%")),
+                "Plot" => m => !string.IsNullOrEmpty(text) && m.Plot.Any(p => EF.Functions.Like(p.Text, $"%{text}%")),
+                // text가 비어있으면 항목이 비어 있는 영화를 찾음, 비어있지 않으면 PID로 검색한 영화중에서 항목이 비었는 영화 찾음
+                "Empty Rating" => m => string.IsNullOrEmpty(text) ? !m.Ratings.Any() : (EF.Functions.Like(m.PID, $"%{text}%") && !m.Ratings.Any()),
+                "Empty Genre" => m => string.IsNullOrEmpty(text) ? !m.Genres.Any() : (EF.Functions.Like(m.PID, $"%{text}%") && !m.Genres.Any()),
+                "Empty Actor" => m => string.IsNullOrEmpty(text) ? !m.Actors.Any() : (EF.Functions.Like(m.PID, $"%{text}%") && !m.Actors.Any()),
+                "Empty Label" => m => string.IsNullOrEmpty(text) ? m.Label == null : (EF.Functions.Like(m.PID, $"%{text}%") && m.Label == null),
+                "Empty Maker" => m => string.IsNullOrEmpty(text) ? m.Maker == null : (EF.Functions.Like(m.PID, $"%{text}%") && m.Maker == null),
+                "Empty Plot" => m => string.IsNullOrEmpty(text) ? !m.Plot.Any() : (EF.Functions.Like(m.PID, $"%{text}%") && !m.Plot.Any()),
                 _ => null,
             };
             return await GetMoviesFast(exp);
@@ -303,7 +321,6 @@ namespace HappyHour.Model
         {
             var query = MovieGenres
                 .Include(g => g.Name.OrderByDescending(n => n.Lang));
-                //.Include(g => g.Movies);
 
             IQueryable<Genre> where = null;
             if (keyword != null)

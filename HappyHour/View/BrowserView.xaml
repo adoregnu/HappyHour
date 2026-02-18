@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:md="https://github.com/fantasticfiasco/mvvm-dialogs"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:cefSharp="clr-namespace:CefSharp.Wpf;assembly=CefSharp.Wpf"
              xmlns:local="clr-namespace:HappyHour.View"
              xmlns:conv="clr-namespace:HappyHour.Converter"
@@ -57,24 +58,15 @@
             <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="2">
                 <Button Style="{DynamicResource ModernButtonStyle2}"
                         Command="{Binding WebBrowser.BackCommand}">
-                    <Path Stretch="Uniform"
-                        Data="{Binding Source={StaticResource ArrowLeftIcon}, Path=Data}"
-                        Fill="{Binding Path=Foreground, RelativeSource=
-                            {RelativeSource AncestorType={x:Type Button}}}" />
+                    <materialDesign:PackIcon Kind="ArrowLeft" />
                 </Button>
                  <Button Style="{DynamicResource ModernButtonStyle2}"
                         Command="{Binding WebBrowser.ForwardCommand}">
-                    <Path Stretch="Uniform"
-                        Data="{Binding Source={StaticResource ArrowRightIcon}, Path=Data}"
-                        Fill="{Binding Path=Foreground, RelativeSource=
-                            {RelativeSource AncestorType={x:Type Button}}}" />
+                    <materialDesign:PackIcon Kind="ArrowRight" />
                 </Button>
                  <Button Style="{DynamicResource ModernButtonStyle2}"
                          Command="{Binding WebBrowser.ReloadCommand}">
-                    <Path Stretch="Uniform"
-                        Data="{Binding Source={StaticResource RefreshIcon}, Path=Data}"
-                        Fill="{Binding Path=Foreground, RelativeSource=
-                            {RelativeSource AncestorType={x:Type Button}}}" />
+                     <materialDesign:PackIcon Kind="Refresh" />
                 </Button>
             </StackPanel>
 <!--

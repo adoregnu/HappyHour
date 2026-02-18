@@ -12,6 +12,7 @@
              xmlns:local="clr-namespace:HappyHour.View"
              xmlns:converter="clr-namespace:HappyHour.Converter"
              xmlns:vwp="clr-namespace:WpfToolkit.Controls;assembly=VirtualizingWrapPanel"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
              md:DialogServiceViews.IsRegistered="True"
              d:DataContext="{d:DesignInstance Type=viewmodel:MediaListViewModel}"
@@ -229,50 +230,35 @@
         <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center">
               <Button Style="{StaticResource ModernButtonStyle2}"
                     Command="{Binding CmdShowLastUpdated}">
-                <Path Stretch="Uniform"
-                      Data="{Binding Source={StaticResource new-box}, Path=Data}"
-                      Fill="{Binding Path=Foreground, RelativeSource=
-                            {RelativeSource AncestorType={x:Type Button}}}"/>
+                <materialDesign:PackIcon Kind="MovieStarOutline" />
                 <Button.ToolTip>
                     <TextBlock Text="Newly added movie"/>
                 </Button.ToolTip>
             </Button>
             <Button Style="{StaticResource ModernButtonStyle2}"
                     Command="{Binding CmdSearchOrphanageMedia}">
-                <Path Stretch="Uniform"
-                      Data="{Binding Source={StaticResource MediaSearchIcon}, Path=Data}"
-                      Fill="{Binding Path=Foreground, RelativeSource=
-                            {RelativeSource AncestorType={x:Type Button}}}"/>
+                <materialDesign:PackIcon Kind="MovieSearchOutline" />
                 <Button.ToolTip>
                     <TextBlock Text="Search Orphanage Media"/>
                 </Button.ToolTip>
             </Button>
             <Button Style="{StaticResource ModernButtonStyle2}"
                     Command="{Binding CmdSearchEmptyActor}">
-                <Path Stretch="Uniform"
-                      Data="{Binding Source={StaticResource ActorNullIcon}, Path=Data}"
-                      Fill="{Binding Path=Foreground, RelativeSource=
-                            {RelativeSource AncestorType={x:Type Button}}}"/>
+                <materialDesign:PackIcon Kind="PersonSearchOutline" />
                 <Button.ToolTip>
                     <TextBlock Text="Search Media of empty name"/>
                 </Button.ToolTip>
             </Button>
             <Button Style="{StaticResource ModernButtonStyle2}"
                     Command="{Binding CmdTorrents}">
-                <Path Stretch="Uniform"
-                      Data="{Binding Source={StaticResource magnet}, Path=Data}"
-                      Fill="{Binding Path=Foreground, RelativeSource=
-                            {RelativeSource AncestorType={x:Type Button}}}"/>
+                <materialDesign:PackIcon Kind="Magnet" />
                 <Button.ToolTip>
-                    <TextBlock Text="Search Media of empty name"/>
+                    <TextBlock Text="Torrents "/>
                 </Button.ToolTip>
             </Button>
             <Button Style="{StaticResource ModernButtonStyle2}"
                     Command="{Binding CmdStopBatchingScrap}">
-                <Path Stretch="Uniform"
-                      Data="{Binding Source={StaticResource SearchStopIcon}, Path=Data}"
-                      Fill="{Binding Path=Foreground, RelativeSource=
-                            {RelativeSource AncestorType={x:Type Button}}}"/>
+                <materialDesign:PackIcon Kind="StopCircleOutline" />
                 <Button.ToolTip>
                     <TextBlock Text="Stop Batching scrap"/>
                 </Button.ToolTip>
@@ -280,10 +266,7 @@
             <ToggleButton Style="{DynamicResource ModernToggleButtonStyle2}"
                           IsChecked="{Binding SearchSubFolder, Mode=TwoWay}"
                           ToolTip="Search sub folders">
-                <Path Stretch="Uniform"
-                      Data="{Binding Source={StaticResource FolderDownIcon}, Path=Data}"
-                      Fill="{Binding Path=Foreground, RelativeSource=
-                            {RelativeSource AncestorType={x:Type ToggleButton}}}"/>
+                <materialDesign:PackIcon Kind="FileTree" />
             </ToggleButton>
 <!--
             <ToggleButton Style="{DynamicResource ModernToggleButtonStyle2}"

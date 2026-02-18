@@ -63,7 +63,7 @@ namespace HappyHour.ViewModel
                         target.Clear();
                         List<T> items = ((dynamic)s).Result;
                         items.ForEach(target.Add);
-                        }
+                    }
                 };
         }
 

@@ -10,13 +10,18 @@
         }
 
         var filters = ['/dvd/', '/content/']
-        // replace last occurrence of '-' in _PID with ''
-        var pid = _PID.replace(/-([^ -]*)$/, '$1').toLowerCase();
+        var pids2search = [
+            _PID.toLowerCase(),
+            _PID.replace(/-([^ -]*)$/, '$1').toLowerCase(), //replace last occurrence of '-' in _PID with ''
+            _PID.replace('-', '00').toLowerCase()
+        ];
 
         // filter nodes by filters
         nodes = nodes.filter(n => {
             var href = n.href.toLowerCase();
-            if (!href.includes(pid)) return false;
+            if (!pids2search.some(p => href.includes(p))) {
+                return false;
+            }
             return filters.some(f => href.includes(f));
         });
         if (nodes.length == 0) {
@@ -30,11 +35,23 @@
             https://video.dmm.co.jp/av/content/?id=hsoda00100&i3_ref=search&i3_ord=1
         */
         nodes.sort((a, b) => {
+            // extract cid or id from href
+            var a_match = a.href.match(/cid=([_a-z0-9]+)|id=([_a-z0-9]+)/);
+            var b_match = b.href.match(/cid=([_a-z0-9]+)|id=([_a-z0-9]+)/);
+            // 길이가 짧은 것이 우선
+            if (a_match && b_match) {
+                if (a_match[1] && b_match[1]) {
+                    if (a_match[1].length < b_match[1].length) return -1;
+                    if (a_match[1].length > b_match[1].length) return 1;
+                }
+            }
+
             var ahref = a.href.split('/')[4];
             var bhref = b.href.split('/')[4];
             if (ahref < bhref) return 1;
             if (ahref > bhref) return -1;
             return 0;
+            
         });
         nodes[0].click();
     }
@@ -75,7 +92,12 @@
     }
 
     function _polish_title(xpath) {
-        var remove_patterns = [/^【.+】/, '（ブルーレイディスク）']
+        var remove_patterns = [/^【.+】/, '（ブルーレイディスク）','配信限定']
+        return _polish_single_node(xpath, remove_patterns);
+    }
+
+    function _polish_plot(xpath) {
+        var remove_patterns = [/※本作品は.+/, /※こちらは.+/]
         return _polish_single_node(xpath, remove_patterns);
     }
 
@@ -87,7 +109,7 @@
     if (document.location.href.includes('/content/')) {
         items = {
             title: {
-                xpath: "/html/body/div[3]/main/div[3]/div[2]/div/div[1]/h1/span",
+                xpath: "//h1[contains(@class, 'font-bold text-2xl')]/span",
                 handler: _polish_title
             },
             cover: { xpath: "//*[@data-e2eid='sample-image-gallery']/div[2]/a/@href" },
@@ -101,7 +123,10 @@
                 handler: _jav_parse_multi_node
             },
             actor: { xpath: "//th[contains(.,'出演者')]/following-sibling::td//a", handler: _multi_actor },
-            plot: { xpath: "/html/body/div[3]/main/div[3]/div[2]/div/div[2]/div[1]/div[2]/div/div" }
+            plot: {
+                xpath: "//div[contains(@class, 'text-xs leading-[16.8px]')]/div[1]",
+                handler: _polish_plot
+            }
         };
     }
     else if (document.location.href.includes('/dvd/')) {
@@ -119,10 +144,7 @@
             },
             plot: {
                 xpath: "//*[@id='mu']/div/table/tbody/tr/td[1]/div[3]/p",
-                handler: function (xpath) {
-                    var remove_patterns = [/※こちらは.+/]
-                    return _polish_single_node(xpath, remove_patterns);
-                }
+                handler: _polish_plot
             },
             //actor: { xpath: "//*[@class='tmb-actress-large']", handler: _parse_actor }
             actor: { xpath: "//*[@id='performer']/a", handler: _multi_actor },

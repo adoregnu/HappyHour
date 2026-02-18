@@ -9,6 +9,7 @@
              xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:c="clr-namespace:HappyHour.View.Controls"
              xmlns:bh="clr-namespace:HappyHour.View.Behavior"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
              md:DialogServiceViews.IsRegistered="True"
              d:DesignHeight="450" d:DesignWidth="800">
@@ -20,17 +21,11 @@
         <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center">
             <Button Style="{DynamicResource ModernButtonStyle2}" Margin="0,5,0,0"
                          Command="{Binding CmdReloadAll}">
-                <Path Stretch="Uniform"
-                        Data="{Binding Source={StaticResource RefreshIcon}, Path=Data}"
-                        Fill="{Binding Path=Foreground, RelativeSource=
-                            {RelativeSource AncestorType={x:Type Button}}}" />
+                <materialDesign:PackIcon Kind="Reload" />
             </Button>
             <Button Style="{DynamicResource ModernButtonStyle2}" Margin="5,5,0,0"
                          Command="{Binding CmdSaveAll}">
-                <Path Stretch="Uniform"
-                      Data="{Binding Source={StaticResource SaveIcon}, Path=Data}"
-                      Fill="{Binding Path=Foreground, RelativeSource=
-                            {RelativeSource AncestorType={x:Type Button}}}" />
+                <materialDesign:PackIcon Kind="ContentSaveOutline" />
             </Button>
         </StackPanel>
         <TabControl Grid.Row="1">
@@ -68,17 +63,11 @@
                     <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Vertical" VerticalAlignment="Center">
                         <Button Style="{DynamicResource ModernButtonStyle2}"
                                 Command="{Binding CmdMoveMakerRight}" Margin="2" ToolTip="Move down select maker to merge">
-                            <Path Stretch="Uniform"
-                              Data="{Binding Source={StaticResource ArrowRightIcon}, Path=Data}"
-                              Fill="{Binding Path=Foreground, RelativeSource=
-                                    {RelativeSource AncestorType={x:Type Button}}}" />
+                            <materialDesign:PackIcon Kind="ArrowRight" />
                         </Button>
                         <Button Style="{DynamicResource ModernButtonStyle2}" Margin="2"
                                 Command="{Binding CmdMoveMakerLeft}" ToolTip="Move up select maker">
-                            <Path Stretch="Uniform"
-                              Data="{Binding Source={StaticResource ArrowLeftIcon}, Path=Data}"
-                              Fill="{Binding Path=Foreground, RelativeSource=
-                                    {RelativeSource AncestorType={x:Type Button}}}" />
+                            <materialDesign:PackIcon Kind="ArrowLeft" />
                         </Button>
                     </StackPanel>
                     <ListBox Grid.Row="2" Grid.Column="2" ItemsSource="{Binding MakersToMerge}" Margin="0,0,2,5" ItemTemplate="{StaticResource _langText}"
@@ -165,17 +154,11 @@
                     <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Vertical" VerticalAlignment="Center">
                         <Button Style="{DynamicResource ModernButtonStyle2}"
                                 Command="{Binding CmdMoveDownSelectedGenre}" Margin="2" ToolTip="Move down select genre to merge">
-                            <Path Stretch="Uniform"
-                              Data="{Binding Source={StaticResource ArrowRightIcon}, Path=Data}"
-                              Fill="{Binding Path=Foreground, RelativeSource=
-                                    {RelativeSource AncestorType={x:Type Button}}}" />
+                            <materialDesign:PackIcon Kind="ArrowRight" />
                         </Button>
                         <Button Style="{DynamicResource ModernButtonStyle2}" Margin="2"
                                 Command="{Binding CmdMoveUpSelectedGenre}" ToolTip="Move up select genre">
-                            <Path Stretch="Uniform"
-                              Data="{Binding Source={StaticResource ArrowLeftIcon}, Path=Data}"
-                              Fill="{Binding Path=Foreground, RelativeSource=
-                                    {RelativeSource AncestorType={x:Type Button}}}" />
+                            <materialDesign:PackIcon Kind="ArrowLeft" />
                         </Button>
                     </StackPanel>
                     <ListBox Grid.Row="1" Grid.Column="2"  ItemsSource="{Binding GenresToMerge}" Margin="2,0,2,0" x:Name="_genreListToMerge"
@@ -272,7 +255,7 @@
                     <DockPanel Grid.Row="0" LastChildFill="True">
                         <ComboBox Width="120" Margin="2,5,0,5" ItemsSource="{Binding SearchMovieTypes}" 
                                  SelectedItem="{Binding SelectedSearchMovieType}"/>
-                        <c:DelayedBindingTextBox Grid.Row="0" DelayTime="500" Margin="2,5,2,5" Text="{Binding SearchMovieText}"/>
+                        <c:DelayedBindingTextBox DelayTime="500" Margin="2,5,2,5" Text="{Binding SearchMovieText}"/>
                     </DockPanel>
                     <ListBox Grid.Row="1" ItemsSource="{Binding Movies.Result}" Margin="2,0,2,2"
                              SelectedItem="{Binding SelectedMovie}" SelectionMode="Extended" x:Name="_movieList">

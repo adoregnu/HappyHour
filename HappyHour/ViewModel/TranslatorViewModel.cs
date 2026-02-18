@@ -61,7 +61,7 @@ namespace HappyHour.ViewModel
             get => _selectedLeftLang;
             set => SetProperty(ref _selectedLeftLang, value);
         }
-        private string _selectedRightLang;
+        private string _selectedRightLang = "ko";
         public string SelectedRightLang
         {
             get => _selectedRightLang;
@@ -71,7 +71,7 @@ namespace HappyHour.ViewModel
         private readonly ChatClient _chatClient;
         private readonly List<ChatMessage> _chatHistory = [];
 
-        private string _selectedTranslator = "DeepL";
+        private string _selectedTranslator = "OpenAI";
         public string SelectedTranslator {
             get => _selectedTranslator;
             set
@@ -155,7 +155,8 @@ namespace HappyHour.ViewModel
             else if (SelectedTranslator == "OpenAI")
             {
                 _chatHistory.Add(new UserChatMessage(
-                    $"Translate the following text from {SelectedLeftLang} to {SelectedRightLang}:\n{LeftDocument.Text}"));
+                    $"아래 문장을 {SelectedLeftLang}에서 {SelectedRightLang}으로 번역, 최대한 그대로 번역."+
+                    $" 지나치게 성적인 표현은 최소한으로 순화:\n{LeftDocument.Text}"));
 
                 NotifyTask.Create(_chatClient.CompleteChatAsync(_chatHistory))
                     .PropertyChanged += OnTranslationCompleted;

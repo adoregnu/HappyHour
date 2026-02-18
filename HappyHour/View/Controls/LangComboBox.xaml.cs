@@ -1,23 +1,12 @@
 ﻿using System.ComponentModel;
-using CommunityToolkit.Mvvm.ComponentModel;
 using HappyHour.Model;
 using HappyHour.ViewModel;
-using Microsoft.EntityFrameworkCore.Query;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace HappyHour.View.Controls
 {
@@ -72,7 +61,7 @@ namespace HappyHour.View.Controls
 
         public void OnDelete(object sender, RoutedEventArgs e)
         {
-            if (_textList.SelectedItem is not MText itemToDelete) return;
+            if ((sender as FrameworkElement)?.DataContext is not MText itemToDelete) return;
             //get type of DbEntry
             var dbEntryType = DbEntry?.GetType();
             bool removed;

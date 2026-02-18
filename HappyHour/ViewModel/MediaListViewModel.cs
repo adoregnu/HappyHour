@@ -265,29 +265,30 @@ namespace HappyHour.ViewModel
             try
             {
                 var selectedItems = SelectedMedias?.Cast<AvMovie>().ToList();
-                if (selectedItems?.Any() == true)
+                if (selectedItems.Count == 0)
                 {
-                    List<string> targetDirs = [];
-                    // currentDir is Path field without last path component of any selected item
-                    var current = string.Join("\\", selectedItems[0].Path.Split('\\')[..^1]);
-                    foreach (var uniq in GetUniquePidPrefix())
+                    return;
+                }
+                List<string> targetDirs = [];
+                // currentDir is Path field without last path component of any selected item
+                var current = string.Join("\\", selectedItems[0].Path.Split('\\')[..^1]);
+                foreach (var uniq in GetUniquePidPrefix())
+                {
+                    var folders = _db.GetFoldersStartsWithPid(uniq, current);
+                    targetDirs.AddRange(folders);
+                }
+
+                if (targetDirs.Count == 0)
+                {
+                    foreach (var maker in GetUniqueMaker())
                     {
-                        var folders = _db.GetFoldersStartsWithPid(uniq, current);
+                        var folders = _db.GetFoldersByMaker(maker, current);
+
                         targetDirs.AddRange(folders);
                     }
-
-                    if (targetDirs.Count == 0)
-                    {
-                        foreach (var maker in GetUniqueMaker())
-                        {
-                            var folders = _db.GetFoldersByMaker(maker, current);
-
-                            targetDirs.AddRange(folders);
-                        }
-                    }
-
-                    TargetDirs = targetDirs;
                 }
+
+                TargetDirs = targetDirs;
             }
             catch (Exception ex)
             {

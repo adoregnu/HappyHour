@@ -14,6 +14,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Text.RegularExpressions;
 using CefSharp.DevTools.WebAuthn;
 
 namespace HappyHour.Spider
@@ -40,6 +41,7 @@ namespace HappyHour.Spider
         private bool _isSpiderWorking;
         private bool? _checkAll;
         private IAvMedia _selectedMedia;
+        private string _regexPattern;
 
         protected readonly Queue<IDictionary<string, object>> _itemQueue = new();
         protected virtual IDownloader Downloader => _downloader;
@@ -82,8 +84,54 @@ namespace HappyHour.Spider
 
         public string Keyword
         {
-            get => _keyword;
+            get
+            {
+                if (string.IsNullOrWhiteSpace(_keyword) || string.IsNullOrWhiteSpace(_regexPattern))
+                {
+                    return _keyword;
+                }
+
+                var match = Regex.Match(_keyword, _regexPattern);
+                if (!match.Success)
+                {
+                    return _keyword;
+                }
+
+                if (match.Groups.Count == 2)
+                {
+                    return match.Groups[1].Value;
+                }
+                else if (match.Groups.Count == 3)
+                {
+                    int zeroPadLength = 5 - match.Groups[2].Value.Length;
+                    return $"{match.Groups[1].Value}{new string('0', zeroPadLength)}{match.Groups[2].Value}";
+                }
+                else
+                {
+                    return _keyword;
+                }
+            }
             set => Set(ref _keyword, value);
+        }
+
+        public ObservableCollection<string> RegexPatterns { get; set; } = [];
+
+        public string RegexPattern
+        {
+            get => _regexPattern;
+            set
+            {
+                if (_regexPattern == value)
+                {
+                    return;
+                }
+
+                Set(ref _regexPattern, value);
+                if (!string.IsNullOrWhiteSpace(_regexPattern) && !RegexPatterns.Contains(_regexPattern))
+                {
+                    RegexPatterns.Add(_regexPattern);
+                }
+            }
         }
         public bool? CheckAll
         {

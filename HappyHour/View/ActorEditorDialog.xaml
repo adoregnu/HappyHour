@@ -9,6 +9,7 @@
         xmlns:local="clr-namespace:HappyHour.View"
         xmlns:model="clr-namespace:HappyHour.Model"
         xmlns:ctrls="clr-namespace:HappyHour.View.Controls"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:nud="clr-namespace:NumericUpDownLib;assembly=NumericUpDownLib"
         xmlns:converter="clr-namespace:HappyHour.Converter"
         mc:Ignorable="d"
@@ -113,10 +114,7 @@
                     ConverterParameter={x:Static model:ActorOrderType.NumNames}}"/>
                 <Button Style="{DynamicResource ModernButtonStyle2}"
                         Command="{Binding CmdShowThumblessActors}" Margin="5,0,0,0" ToolTip="Show actors not having thubmail">
-                    <Path Stretch="Uniform"
-                      Data="{Binding Source={StaticResource no-image}, Path=Data}"
-                      Fill="{Binding Path=Foreground, RelativeSource=
-                            {RelativeSource AncestorType={x:Type Button}}}" />
+                    <materialDesign:PackIcon Kind="FileImageRemoveOutline" />
                 </Button>
             </StackPanel>
         </StackPanel>
